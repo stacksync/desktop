@@ -1,0 +1,4 @@
+desktop
+=======
+
+StackSync desktop client.
