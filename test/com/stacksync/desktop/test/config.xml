@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<stacksync>
+	<username>gguerrero</username> <!-- optional -->
+	<machinename>pc_gguerr201302191026</machinename> <!-- optional -->
+	<userimage>system</userimage> <!-- optional --> 
+	<service-enabled>true</service-enabled> <!-- optional -->
+	<autostart>true</autostart> <!-- optional -->
+	<notifications>true</notifications> <!-- optional -->
+
+
+    <rabbitMQ>
+        <host>10.30.239.228</host>
+        
+        <!--Default non-authenticated-->
+        <port>5672</port>
+        <enableSSL>false</enableSSL>
+                    
+        <!--Default authenticated-->
+        <!--
+        <port>5673</port>
+        <enableSSL>true</enableSSL>
+        -->
+        
+        <username>guest</username>
+        <password>guest</password>
+    </rabbitMQ>
+
+    <apiLogUrl>http://localhost/stack/apiput</apiLogUrl>
+    <language>es_ES</language>
+    
+	<database> 
+		<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/syncany"/>
+		<property name="javax.persistence.jdbc.password" value="syncany"/>
+		<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+		<property name="javax.persistence.jdbc.user" value="syncany"/>
+		<property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+	</database>
+      			
+	<cache> <!-- optional -->
+		<size>1024</size> <!-- optional -->
+    </cache>	
+	
+	<profiles>        
+    <profile id="1">
+            <enabled>true</enabled>
+            <name>Nuevo perfil</name>
+            <repository>
+                <chunksize>512</chunksize>
+                <connection type="rackspace">
+                    <username>tester20:tester20</username>
+                    <apikey>testpass</apikey>
+                    <container>stacksync</container>
+                    <authurl>http://10.30.239.228:5000/v2.0/tokens</authurl>                    
+                </connection>
+                <encryption>
+                    <password/>
+                    <cipher>None</cipher>
+                    <keylength>128</keylength>
+                </encryption>
+            </repository>
+            <folders>
+                <folder>
+                    <active>true</active>
+                    <remote>stacksync</remote>
+                    <local>/home/gguerrero/stacksync_folder</local>
+                    <!--<local>C:\Users\fox\stacksync_folder</local>-->
+                </folder>
+            </folders>
+            <permissions/>
+            <remote-permissions/>
+        </profile>
+    </profiles>
+</stacksync>

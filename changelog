@@ -1,0 +1,23 @@
+1.6.2 - 30-10-2013 (340)
+----------------------------
+One click tray: open sync folder.
+Fixed the problem that causes not to create tray folder shortcut during the
+first execution.
+Fixed the problem that StackSync always creates the stacksync_folder.
+Mac watcher working.
+Native windows notifications.
+Preferences panel from tray removed.
+Linux install and uninstall scripts.
+Wizard next button focus.
+Windows notification click -> Open sync folder.
+
+1.6.1 (248-274 svn versions)
+----------------------------
+Quota implemented.
+Fixed bug that fires file events before folder events.
+Minor bugs. (See SVN for more details)
+
+1.6
+---
+Overlays working fine with installer.
+Minor bugs.

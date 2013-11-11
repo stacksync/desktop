@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="Stacksync" default="release" basedir=".">
+    <description>Builds, tests, and runs Stacksync.</description>
+    <property file="version.properties"/>
+    <import file="nbproject/build-impl.xml"/>
+
+	<!-- Determine OS -->
+	<condition property="isLinux"><os family="unix" /></condition>
+	<condition property="isWindows"><os family="windows" /></condition>
+	<condition property="isMac"><os family="mac" /></condition>
+	
+	<!-- Architecture; http://lopica.sourceforge.net/os.html -->
+	<condition property="arch" value="amd64">
+		<or>
+			<os arch="x86_64" />
+			<os arch="amd64" />
+		</or>
+	</condition>
+	
+	<condition property="arch" value="i386">
+		<or>
+			<os arch="x86" />
+			<os arch="i386" />
+			<os arch="i686" />			
+		</or>
+	</condition>
+    
+    <target name="get_svn_linux" description="building number" if="isLinux">
+        <echo>Get svn linux</echo>       
+        <exec outputproperty="svna.version" executable="svnversion" failifexecutionfails="false">
+            <arg value="-c" />
+            <redirector>
+                <outputfilterchain>
+                    <tokenfilter>
+                        <replaceregex pattern="^[0-9]*:?" replace="" flags="g"/>
+                        <replaceregex pattern="M" replace="" flags="g"/>
+                    </tokenfilter>
+                </outputfilterchain>
+            </redirector>
+        </exec>        
+    </target>         
+               
+    <target name="get_svn_win" description="building number" if="isWindows">    
+        <echo>Get svn windows</echo>     
+        <exec outputproperty="svna.version" executable="subwcrev" failifexecutionfails="false">
+            <arg value="${basedir}" />
+            <arg value="-f" />
+            <redirector>
+                <outputfilterchain>
+                    <tokenfilter>
+                        <containsstring contains="Last committed at revision "/>
+                        <replaceregex pattern="Last committed at revision " replace="" flags="g"/>                        
+                    </tokenfilter>
+                </outputfilterchain>
+            </redirector>
+        </exec>                
+    </target>        
+    
+    <target name="-pre-init" depends="get_svn_win, get_svn_linux" description="Sets the buildversion for the current build">                
+        <echo>Revision found from SVN: ${svna.version} </echo>       
+        
+        <property name="project.name" value="Stacksync" />
+        <property name="project.website" value="http://ast-deim.urv.cat/stacksync" />
+        <property name="version.num" value="${svna.version}" />
+        <property name="dev-version.num" value="${svna.version}" />                        
+
+        <manifest file="manifest.mf">
+           <attribute name="Project" value="${project.name}" />
+           <attribute name="Version" value="${version.num}" />
+           <attribute name="Dev-Version" value="${dev-version.num}" />
+           <attribute name="URL" value="@{project.website}" />
+        </manifest>
+    </target>
+   
+    <target name="release" depends="linux,windows"></target>
+     
+	<!-- Linux only stuff -->
+	<target name="linux" depends="-release-common" if="isLinux">        
+		<echo level="info" message="Linux only: Adjust file permissions ..." />
+		<exec executable="chmod" output="/dev/null" os="Linux">
+			<arg value="+x"/>
+            <arg value="${dist.dir}/bin/native.py"/>
+		</exec>
+		        
+        <echo level="info" message="Linux only: creating tar.gz archive ..." />
+        <move file="${dist.dir}" tofile="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}" />
+        
+		<exec executable="tar" output="/dev/null">
+			<arg value="-czf"/>
+            <arg value="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}.tar.gz"/>
+			<arg value="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}"/>
+		</exec>
+        
+        <move file="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}" tofile="${dist.dir}" />        
+        <move file="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}.tar.gz" todir="${dist.dir}" />
+	</target>
+
+	<!-- Windows only stuff -->
+	<target name="windows" depends="-release-common" if="isWindows">
+		<echo level="info" message="Doing Windows only stuff ..." />
+	</target>
+    
+    <!-- javac -cp ../syncany/build/classes:shared/jets3t-0.8.1.jar $(find -name '*.java') -->
+    <target name="plugin-rest" depends="compile">
+    	<mkdir dir="${dist.dir}/plugins" />
+		<mkdir dir="${dist.dir}/plugins/rest" />
+		<mkdir dir="${dist.dir}/plugins/rest/lib" />		
+		
+        <jar destfile="${dist.dir}/plugins/rest/plugin-rest.jar">                 
+            <fileset dir="${build.classes.dir}" includes="org/stacksync/connection/plugins/rest/**" />
+            <fileset dir="${build.classes.dir}" includes="org/stacksync/connection/plugins/s3/**" />
+            <fileset dir="${build.classes.dir}" includes="org/stacksync/connection/plugins/gs/**" />                        
+            <!-- TODO PLUGIN README FILES -->
+        </jar>
+        
+        <copy file="lib/plugins/shared/jets3t-0.8.1.jar" todir="${dist.dir}/plugins/rest/lib" />        
+		<zip destfile="${dist.dir}/plugins/plugin-rest.zip" basedir="${dist.dir}/plugins/rest" />
+    </target>
+
+
+	<!-- Post JAR Hook -->
+    <target name="-release-common" depends="clean,jar">
+		<echo level="info" message="Copying required files ..." />
+		<copy todir="${dist.dir}">
+			<fileset dir=".">
+				<include name="bin/**" />
+				<include name="conf/**" />
+				<include name="res/**" />
+
+				<!-- Only core libraries; no subdirectories -->
+				<include name="lib/*" />	
+				
+				<include name="README" />
+				<include name="LICENSE" />				
+                <include name="INSTALL" />
+                <include name="DEVELOPMENT" />
+                <include name="logging.properties" />
+			</fileset>
+		</copy>
+			
+		<echo level="info" message="Copying plugin files ..." />
+		<copy todir="${dist.dir}/lib/plugins">
+			<fileset dir=".">
+				<include name="lib/plugins/**" />				
+			</fileset>
+		</copy>
+
+		<echo level="info" message="Deleting unnecessary README.txt ..." />
+		<delete file="${dist.dir}/README.TXT" />		
+    </target>
+
+
+    <target name="-post-jar">
+		
+        <copy todir="${dist.dir}/bin">
+			<fileset dir="bin" />
+		</copy>
+        
+        <!-- Copy updater -->
+        <copy file="bin/UpdaterClient.jar" todir="${dist.dir}"/>
+        <delete file="${dist.dir}/bin/UpdaterClient.jar"/>
+        
+        <copy file="installers/install.sh" todir="${dist.dir}" />
+        <chmod perm="+x" dir="${dist.dir}/install.sh" />
+        
+        <copy file="installers/uninstall.sh" todir="${dist.dir}" />
+        <chmod perm="+x" dir="${dist.dir}/uninstall.sh" />
+        
+        <copy file="installers/scripts/linux_install_overlay.sh" todir="${dist.dir}/scripts" />
+        <chmod perm="+x" dir="${dist.dir}/scripts/linux_install_overlay.sh" />
+        
+        <copy file="installers/scripts/linux_uninstall_overlay.sh" todir="${dist.dir}/scripts" />
+        <chmod perm="+x" dir="${dist.dir}/scripts/linux_uninstall_overlay.sh" />
+        
+		<chmod perm="+x" dir="${dist.dir}/Stacksync.jar" />
+        
+        <copy file="INSTALL" todir="${dist.dir}" />
+		
+		<copy todir="${dist.dir}/res">
+			<fileset dir="res" />
+		</copy>
+		<copy todir="${dist.dir}/conf">
+			<fileset dir="conf" />
+		</copy>
+		
+		<copy todir="${dist.dir}">
+			<fileset dir=".">				
+                <include name="logging.properties" />
+			</fileset>
+		</copy>
+    
+        <copy todir="${dist.dir}/dlls">
+            <fileset dir="dlls" />
+        </copy>
+              
+        <antcall target="nsisTask" />
+        
+        <echo level="info" message="Deleting unnecessary README.txt ..." />
+		<delete file="${dist.dir}/README.TXT" />	
+    </target>
+    
+    <target name="-check-use-file" unless="file.exists">
+        <available property="file.exists" file="C:\Program Files\TortoiseSVN\bin\subwcrev.exe"/>
+    </target>     
+    
+    <target name="nsisTask" description="building the windows installer" if="isWindows">
+        <exec executable="C:\Program Files (x86)\NSIS\makensis.exe" failifexecutionfails="false" >
+            <!-- providing some nsis definitions -->
+            <arg value="/DPROJECT_NAME=${ant.project.name}"/>
+            <!-- passing the script -->
+            <arg value="${basedir}/installers/StackSyncInstallScript.nsi"/>
+        </exec> 
+    </target>
+             
+    
+    <!--
+    There exist several targets which are by default empty and which can be 
+    used for execution of your tasks. These targets are usually executed 
+    before and after some main targets. They are: 
+
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
+
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar-with-manifest:    JAR building (if you are using a manifest)
+      -do-jar-without-manifest: JAR building (if you are not using a manifest)
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="Syncany-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
+    -->
+</project>

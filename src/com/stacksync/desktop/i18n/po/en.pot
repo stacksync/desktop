@@ -1,0 +1,966 @@
+#. extracted from eng.properties
+msgid ""
+msgstr ""
+"Project-Id-Version: Syncany 0.1-alpha\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-06-14 11:20+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Marius Voila <marius.voila@gmail.com>\n"
+"Language-Team: English <marius.voila@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Translate Toolkit 1.9.0\n"
+
+#. ## CONNECTION PANEL
+#: connpanel_plugin_chooser_message
+msgid "(Please choose)"
+msgstr ""
+
+#. ## CONNECTION PANEL
+#: cp_new_profile_name
+msgid "New Profile"
+msgstr ""
+
+#: cp_storage_type
+msgid "Use this storage type:"
+msgstr ""
+
+#: cp_where_to_store
+msgid "Where do you want to store your files?"
+msgstr ""
+
+#: cp_location_to_store_part1
+msgid "You can use all kinds of remote storage. Please select a"
+msgstr ""
+
+#: cp_location_to_store_part2
+msgid "supported plugin from below and enter the connection data."
+msgstr ""
+
+#: cp_connection_details_temp
+msgid "(xyz) Connection Details"
+msgstr ""
+
+#: cp_connection_details
+msgctxt "cp_connection_details"
+msgid "Connection Details"
+msgstr ""
+
+#. ## ENCRYPTION PANEL
+#: encryp_password
+msgctxt "encryp_password"
+msgid "Password:"
+msgstr ""
+
+#: encryp_advanced_encryption_settings
+msgid "Advanced Encryption Settings"
+msgstr ""
+
+#: encryp_chipher
+msgid "Cipher:"
+msgstr ""
+
+#: encryp_key_length
+msgid "Keylength:"
+msgstr ""
+
+#: encryp_chunk_size
+msgid "Chunksize (KB):"
+msgstr ""
+
+#: encryp_confirm_message_part1
+msgid "Confirm:"
+msgstr ""
+
+#: encryp_confirm_message_part2
+msgid "on the remote storage."
+msgstr ""
+
+#: encryp_choose_password
+msgid "Choose a password to encrypt your data"
+msgstr ""
+
+#: encryp_info
+msgid "Syncany encrypts your data on your computer before storing it"
+msgstr ""
+
+#. ## NEW OR EXISTING PANEL
+#: newp_setup_new_storage
+msgid "Setup a new remote storage"
+msgstr ""
+
+#: newp_connect_to_existing_storage
+msgid "Connect to an existing remote storage"
+msgstr ""
+
+#: newp_create_or_connect
+msgid "Create or connect?"
+msgstr ""
+
+#: newp_panel_wizard_message_part1
+msgid "Use this wizard to create a new remote storage or connect to an"
+msgstr ""
+
+#: newp_panel_wizard_message_part2
+msgid "existing one. Follow the instructions and click 'Next'."
+msgstr ""
+
+#: newp_initialize_new_remote_option
+msgid "Choose this option if you want to initialize a new remote storage."
+msgstr ""
+
+#: newp_storage_details
+msgid "You can use any type of storage, e.g. FTP, Amazon S3 or IMAP."
+msgstr ""
+
+#: newp_sync_files_message_part1
+msgid "Choose this option if you want to sync your files  with an"
+msgstr ""
+
+#: newp_sync_files_message_part2
+msgid "existing remote storage."
+msgstr ""
+
+#. ## REPOSITORY TEST PANEL
+#: reptest_create_remote_storage
+msgid "Creating remote storage ..."
+msgstr ""
+
+#: reptest_testing_storage
+msgid "Testing storage ..."
+msgstr ""
+
+#: reptest_created_status_ok
+msgid "Repository successfully created."
+msgstr ""
+
+#: reptest_connection_status_fail
+msgid "Connecting to repository failed: "
+msgstr ""
+
+#: reptest_is_initialised
+msgid "Connection successful, but repository already initialised."
+msgstr ""
+
+#: reptest_connection_to_cloud_storage
+msgid "Connecting to cloud storage ..."
+msgstr ""
+
+#: reptest_found
+msgid "Repository found."
+msgstr ""
+
+#: reptest_nothing_found
+msgid "Connection successful, but no repository found:"
+msgstr ""
+
+#: reptest_progress
+msgid "<<progress>>"
+msgstr ""
+
+#: reptest_init_remote_storage
+msgid "Initializing Remote Storage"
+msgstr ""
+
+#: reptest_message_part1
+msgid "Syncany now connect to the remote storage and create a new"
+msgstr ""
+
+#: reptest_message_part2
+msgid ""
+"repository for your files. This should normally take only a few seconds."
+msgstr ""
+
+#: reptest_details
+msgid "Details"
+msgstr ""
+
+#. ## WIZARD DIALOG
+#: wizard_image
+msgctxt "wizard_image"
+msgid "(image)"
+msgstr ""
+
+#: wizard_cancel
+msgctxt "wizard_cancel"
+msgid "Cancel"
+msgstr ""
+
+#: wizard_next
+msgid "Next >"
+msgstr ""
+
+#: wizard_back
+msgid "< Back"
+msgstr ""
+
+#: wizard_create_profile
+msgid "Create Profile"
+msgstr ""
+
+#: wizard_activate_profile
+msgctxt "wizard_activate_profile"
+msgid "Activate Profile"
+msgstr ""
+
+#. ## FOLDER DIALOG
+#: fd_sync_folder
+msgctxt "fd_sync_folder"
+msgid "Sync Folder"
+msgstr ""
+
+#: fd_local_folder
+msgid "Local Folder:"
+msgstr ""
+
+#: fd_remote_identifier
+msgid "Remote Folder Identifier:"
+msgstr ""
+
+#: fd_one_time_identifier
+msgid "Once set, this identifier cannot be changed!"
+msgstr ""
+
+#: fd_browse
+msgctxt "fd_browse"
+msgid "Browse"
+msgstr ""
+
+#: fd_ok
+msgctxt "fd_ok"
+msgid "OK"
+msgstr ""
+
+#: fd_cancel
+msgctxt "fd_cancel"
+msgid "Cancel"
+msgstr ""
+
+#: fd_note
+msgid "Note:"
+msgstr ""
+
+#. ## FOLDERS PANEL - SETTINGS
+#: fps_sync_folders
+msgctxt "fps_sync_folders"
+msgid "Sync Folders"
+msgstr ""
+
+#: fps_remote_storage_folders
+msgid "The sync folders listed below are available in the remote storage."
+msgstr ""
+
+#: fps_successfully_sync
+msgid "Local folders are synced to their corresponding sync folder."
+msgstr ""
+
+#. ## FOLDERS PANEL - WIZARD
+#: fpw_what_to_sync
+msgid "Which folders would you like to sync?"
+msgstr ""
+
+#: fpw_folder_message_part1
+msgid "Syncany can synchronize any folder on your computer. Please choose"
+msgstr ""
+
+#: fpw_folder_message_part2
+msgid "the folders by clicking 'Add Sync Folder'."
+msgstr ""
+
+#. ## LOCAL CONNECTION
+#: local_folder
+msgid "Folder"
+msgstr ""
+
+#. ## FOLDERS TABLE PANEL
+#: ftp_sync_folder
+msgctxt "ftp_sync_folder"
+msgid "Sync Folder"
+msgstr ""
+
+#: ftp_local_folder
+msgctxt "ftp_local_folder"
+msgid "Local Folder"
+msgstr ""
+
+#: ftp_add_sync_folder
+msgid "Add Sync Folder"
+msgstr ""
+
+#: ftp_edit_sync_folder
+msgid "Edit Sync Folder"
+msgstr ""
+
+#: ftp_loading
+msgid "Loading..."
+msgstr ""
+
+#: ftp_active_index
+msgctxt "ftp_active_index"
+msgid "Active"
+msgstr ""
+
+#: ftp_remote_folder_index
+msgid "Remote Folder"
+msgstr ""
+
+#: ftp_local_folder_index
+msgctxt "ftp_local_folder_index"
+msgid "Local Folder"
+msgstr ""
+
+#: ftp_err_outofbound_message_part1
+msgid "Table only has  "
+msgstr ""
+
+#: ftp_err_outofbound_message_part2_rows
+msgid "rows. Index"
+msgstr ""
+
+#: ftp_err_outofbound_message_part2_cols
+msgid "columns. Index  "
+msgstr ""
+
+#: ftp_err_outofbound_message_part3
+msgid "is out of bounds.  "
+msgstr ""
+
+#: ftp_err_loading_repository_folders
+msgid "Could not load repository folders"
+msgstr ""
+
+#. ## PLUGINS PANEL
+#: pp_not_supported
+msgctxt "pp_not_supported"
+msgid "Not supported yet"
+msgstr ""
+
+#: pp_add_plugin
+msgid "Add Plugin"
+msgstr ""
+
+#: pp_delete_plugin
+msgid "Delete Plugin"
+msgstr ""
+
+#: pp_active_index
+msgctxt "pp_active_index"
+msgid "Active"
+msgstr ""
+
+#: pp_plugin_index
+msgid "Plugin Name"
+msgstr ""
+
+#: pp_version_index
+msgctxt "pp_version_index"
+msgid "Version"
+msgstr ""
+
+#. ## PROFILE PANEL
+#: profp_name
+msgid "Profile Name:"
+msgstr ""
+
+#: profp_activate
+msgctxt "profp_activate"
+msgid "Activate Profile"
+msgstr ""
+
+#: profp_settings
+msgid "Profile Settings "
+msgstr ""
+
+#. ## REPOSITORY PANEL
+#: reposp_version
+msgctxt "reposp_version"
+msgid "Version"
+msgstr ""
+
+#: reposp_connection_details
+msgctxt "reposp_connection_details"
+msgid "Connection Details"
+msgstr ""
+
+#: reposp_remote_storage
+msgctxt "reposp_remote_storage"
+msgid "Remote Storage"
+msgstr ""
+
+#: reposp_connection
+msgid "(xyz) Connection"
+msgstr ""
+
+#: reposp_connection_type
+msgid "Connection Type:"
+msgstr ""
+
+#: reposp_encryption
+msgid "Encryption:"
+msgstr ""
+
+#: reposp_temp_type
+msgid "(type)"
+msgstr ""
+
+#: reposp_temp_encryption
+msgid "(encryption)"
+msgstr ""
+
+#: reposp_temp_description
+msgid "(description)"
+msgstr ""
+
+#. ## SETTINGS DIALOG
+#: sd_app_settings
+msgctxt "sd_app_settings"
+msgid "Application Settings"
+msgstr ""
+
+#: sd_plugins
+msgid "Plugins"
+msgstr ""
+
+#: sd_create_new_profile
+msgid "Create new profile ..."
+msgstr ""
+
+#: sd_remote_storage
+msgctxt "sd_remote_storage"
+msgid "Remote Storage"
+msgstr ""
+
+#: sd_sync_folders
+msgctxt "sd_sync_folders"
+msgid "Sync Folders"
+msgstr ""
+
+#: sd_settings
+msgid "Settings"
+msgstr ""
+
+#: sd_cancel
+msgctxt "sd_cancel"
+msgid "Cancel"
+msgstr ""
+
+#: sd_ok
+msgctxt "sd_ok"
+msgid "OK"
+msgstr ""
+
+#: sd_donate
+msgid "(donate)"
+msgstr ""
+
+#: sd_top_image
+msgctxt "sd_top_image"
+msgid "(image)"
+msgstr ""
+
+#: sd_form_title
+msgid "Form"
+msgstr ""
+
+#. ## LINUX NATIVE CLIENT
+#: lnc_downloading_files
+msgid "Downloading files"
+msgstr ""
+
+#. ## LINUX NATIVE SERVICE
+#: lns_menu_preferences_item
+msgid "Preferences ..."
+msgstr ""
+
+#: lns_menu_donate_item
+msgid "Donate ..."
+msgstr ""
+
+#: lns_menu_website_item
+msgid "Website ..."
+msgstr ""
+
+#: lns_menu_quit_item
+msgid "Quit"
+msgstr ""
+
+#: lns_file_chooser
+msgid "Select Local Repository Folder"
+msgstr ""
+
+#: lns_up_to_date
+msgid "Everything is up to date"
+msgstr ""
+
+#. ## ERROR DIALOG
+#: errd_restart_syncany
+msgid "Restart Syncany"
+msgstr ""
+
+#: errd_report_crash
+msgid "Report Crash"
+msgstr ""
+
+#: errd_quit_syncany
+msgid "Quit Syncany"
+msgstr ""
+
+#: errd_report_bug
+msgid ""
+"You can help fixing this bug by sending us the error messge below. Just "
+"click 'Report Bug'."
+msgstr ""
+
+#: errd_syncany_crashed
+msgid ""
+"We are very sorry, but it seems that Syncany crashed. Find details below."
+msgstr ""
+
+#: errd_message
+msgid "An Error occurred."
+msgstr ""
+
+#: errd_comments
+msgid "Your Comments:"
+msgstr ""
+
+#: errd_report_was_sent
+msgid "Your report has been sent."
+msgstr ""
+
+#: errd_sending
+msgid "Sending ..."
+msgstr ""
+
+#: errd_thank_you
+msgid "Thank you!"
+msgstr ""
+
+#: errd_email_bug_report
+msgid ""
+"Could not send bug report. Please copy the details from the text box and "
+"send it to bug@syncany.org"
+msgstr ""
+
+#. ## APPLICATION PANEL
+#: app_launch
+msgid "Launch at system startup"
+msgstr ""
+
+#: app_show_notifications
+msgid "Show notifications"
+msgstr ""
+
+#: app_computer_name
+msgid "Computer Name:"
+msgstr ""
+
+#: app_username
+msgctxt "app_username"
+msgid "Username:"
+msgstr ""
+
+#: app_settings
+msgctxt "app_settings"
+msgid "Application Settings"
+msgstr ""
+
+#: app_user_image
+msgctxt "app_user_image"
+msgid "(image)"
+msgstr ""
+
+#: app_user_settings
+msgid "User Settings"
+msgstr ""
+
+#: app_image
+msgid "Image:"
+msgstr ""
+
+#: app_user_other_image
+msgid "Use other image:"
+msgstr ""
+
+#: app_use_system_profile_image
+msgid "Use system profile image"
+msgstr ""
+
+#: app_no_image
+msgid "No image"
+msgstr ""
+
+#: app_browse
+msgid "Browse ..."
+msgstr ""
+
+#: app_err_upload
+msgid "Unable to load image file. Only PNG, JPG and GIF images are allowed. "
+msgstr ""
+
+#. ## FTP CONFIG PANEL
+#: ftpc_server_name
+msgid "Server Name"
+msgstr ""
+
+#: ftpc_username
+msgctxt "ftpc_username"
+msgid "Username"
+msgstr ""
+
+#: ftpc_password
+msgid "Password"
+msgstr ""
+
+#: ftpc_port
+msgctxt "ftpc_port"
+msgid "Port"
+msgstr ""
+
+#: ftpc_path
+msgctxt "ftpc_path"
+msgid "Path"
+msgstr ""
+
+#. ## BOX PLUGIN
+#: box_not_supported
+msgctxt "box_not_supported"
+msgid "Not supported yet"
+msgstr ""
+
+#: box_api_key
+msgctxt "box_api_key"
+msgid "API Key"
+msgstr ""
+
+#: box_login
+msgid "Login"
+msgstr ""
+
+#: box_token
+msgid "Token:"
+msgstr ""
+
+#: box_no_auth_token
+msgid "Leave empty if you have no auth token yet."
+msgstr ""
+
+#: box_ticket
+msgid "Ticket:"
+msgstr ""
+
+#: box_folder_id
+msgid "Folder ID:"
+msgstr ""
+
+#: box_apiKey
+msgctxt "box_apiKey"
+msgid "API Key"
+msgstr ""
+
+#: box_folderId
+msgid "folderId"
+msgstr ""
+
+#. ## FTP PLUGIN
+#. ## FTP PLUGIN INFO
+#: use_ftp_folder
+msgid "Uses an FTP folder as data repository."
+msgstr ""
+
+#. ## GS PLUGIN INFO
+#: gs_bucket_name
+msgctxt "gs_bucket_name"
+msgid "Bucket Name:"
+msgstr ""
+
+#: gs_access_key
+msgctxt "gs_access_key"
+msgid "Access Key:"
+msgstr ""
+
+#: gs_secret_key
+msgctxt "gs_secret_key"
+msgid "Secret Key:"
+msgstr ""
+
+#: gs_name
+msgid "Google Storage"
+msgstr ""
+
+#: gs_description
+msgid "Uses a Google Storage bucket as data repository."
+msgstr ""
+
+#. ## GS CONNECTION
+#: gs_bucket
+msgid "bucket"
+msgstr ""
+
+#. ## IMAP PLUGIN
+#. ## IMAP CONFIG PANEL
+#: imap_server_name
+msgctxt "imap_server_name"
+msgid "Server Name:"
+msgstr ""
+
+#: imap_username
+msgctxt "imap_username"
+msgid "Username:"
+msgstr ""
+
+#: imap_password
+msgctxt "imap_password"
+msgid "Password:"
+msgstr ""
+
+#: imap_port
+msgctxt "imap_port"
+msgid "Port:"
+msgstr ""
+
+#: imap_host
+msgctxt "imap_host"
+msgid "Host:"
+msgstr ""
+
+#: imap_security_settings
+msgid "Security Settings:"
+msgstr ""
+
+#: imap_connection_security
+msgid "Connection Security:"
+msgstr ""
+
+#: imap_folder
+msgid "IMAP Folder:"
+msgstr ""
+
+#. ## IMAP PLUGIN INFO
+#: use_imap_folder
+msgid "Uses an IMAP folder as data repository."
+msgstr ""
+
+#. ## LOCAL PLUGIN
+#. ## LOCAL CONFIG PANEL
+#: lcp_browse
+msgctxt "lcp_browse"
+msgid "Browse"
+msgstr ""
+
+#: lcp_repository_folder
+msgid "Local Repository Folder:"
+msgstr ""
+
+#. ## LOCAL PLUGIN INFO
+#: local_folder_as_repository
+msgid "Uses a local folder as repository"
+msgstr ""
+
+#. ## PICASA PLUGIN
+#. ## PICASA Config Panel
+#: picasa_username
+msgctxt "picasa_username"
+msgid "Username:"
+msgstr ""
+
+#: picasa_password
+msgctxt "picasa_password"
+msgid "Password:"
+msgstr ""
+
+#: picasa_album_id
+msgid "Album ID:"
+msgstr ""
+
+#: picasa_album
+msgid "album"
+msgstr ""
+
+#. ## PICASA PLUGIN INFO
+#: picasa_plugin_description
+msgid "Stores files within images in a Picasa album."
+msgstr ""
+
+#. ## RACKSPACE PLUGIN
+#. ## RACKSPACE CONFIG PANEL
+#: rackspace_container_name
+msgid "Container Name:"
+msgstr ""
+
+#: rackspace_username
+msgctxt "rackspace_username"
+msgid "Username: "
+msgstr ""
+
+#: rackspace_apiKey
+msgid "API Key:"
+msgstr ""
+
+#: rackspace_container
+msgid "container"
+msgstr ""
+
+#. ## RACKSPACE PLUGIN INFO
+#: rackspace_plugin_name
+msgid "Rackspace Cloud Files"
+msgstr ""
+
+#: rackspace_plugin_description
+msgid "Uses a Rackspace Cloud Files container as data repository."
+msgstr ""
+
+#. ## S3 PLUGIN
+#. ## S3 CONFIG PANEL
+#: s3_location_name
+msgid "Location:"
+msgstr ""
+
+#: s3_location
+msgid "location"
+msgstr ""
+
+#: s3_bucket_name
+msgctxt "s3_bucket_name"
+msgid "Bucket Name:"
+msgstr ""
+
+#: s3_access_key
+msgctxt "s3_access_key"
+msgid "Access Key:"
+msgstr ""
+
+#: s3_secret_key
+msgctxt "s3_secret_key"
+msgid "Secret Key:"
+msgstr ""
+
+#. ## S3 PLUGIN INFO
+#: s3_plugin_name
+msgid "Amazon S3"
+msgstr ""
+
+#: s3_plugin_description
+msgid "Uses an Amazon S3 bucket as data repository."
+msgstr ""
+
+#. ## SAMBA PLUGIN
+#. ## SAMBA CONFIG PANEL
+#: samba_root
+msgid "Samba Root:"
+msgstr ""
+
+#: samba_examples
+msgid "Examples:"
+msgstr ""
+
+#. ## SAMBA PLUGIN INFO
+#: samba_plugin_name
+msgid "Windows Share (Samba/NetBIOS/CIFS)"
+msgstr ""
+
+#: samba_plugin_description
+msgid "Uses a NetBios share or a directory within a share as repository."
+msgstr ""
+
+#. ## SFTP PLUGIN
+#. ## SFTP CONFIG PANEL
+#: sftp_server_name
+msgctxt "sftp_server_name"
+msgid "Server Name:"
+msgstr ""
+
+#: sftp_username
+msgctxt "sftp_username"
+msgid "Username: "
+msgstr ""
+
+#: sftp_password
+msgctxt "sftp_password"
+msgid "Password:"
+msgstr ""
+
+#: sftp_port
+msgctxt "sftp_port"
+msgid "Port"
+msgstr ""
+
+#: sftp_path
+msgctxt "sftp_path"
+msgid "Path"
+msgstr ""
+
+#: sftp_key_auth
+msgid "Private/Public Key Authentification"
+msgstr ""
+
+#: sftp_private_key_path
+msgid "Private Key Path"
+msgstr ""
+
+#: sftp_key_auth_name
+msgid "keyAuth"
+msgstr ""
+
+#: sftp_key_path_name
+msgid "keyPath"
+msgstr ""
+
+#. ## SFTP PLUGIN INFO
+#: sftp_name
+msgid "SFTP"
+msgstr ""
+
+#: sftp_description
+msgid "Uses SFTP connection."
+msgstr ""
+
+#. ## SFTP CONNECTION
+#: sftp_host
+msgid "Host"
+msgstr ""
+
+#: sftp_username
+msgctxt "sftp_username"
+msgid "Username"
+msgstr ""
+
+#. ## WEBDAV PLUGIN
+#. ## WEBDAV PLUGIN INFO
+#: webdav_server_name
+msgctxt "webdav_server_name"
+msgid "Server Name:"
+msgstr ""
+
+#: webdav_host
+msgctxt "webdav_host"
+msgid "Host:"
+msgstr ""
+
+#: webdav_username
+msgctxt "webdav_username"
+msgid "Username:"
+msgstr ""
+
+#: webdav_password
+msgctxt "webdav_password"
+msgid "Password:"
+msgstr ""
+
+#: webdav_port
+msgctxt "webdav_port"
+msgid "Port:"
+msgstr ""
+
+#: webdav_path
+msgid "Path:"
+msgstr ""
+
+#: webdav_name
+msgid "WebDAV"
+msgstr ""
+
+#: webdav_plugin_description
+msgid "Uses a WebDAV folder as data repository."
+msgstr ""

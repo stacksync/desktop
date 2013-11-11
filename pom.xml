@@ -1,0 +1,282 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.stacksync</groupId>
+    <artifactId>desktop</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <name>desktop</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
+    <repositories>
+        <repository>
+            <id>Sonatype repository</id>
+            <name>Sonatype's Maven repository</name>
+            <url>http://oss.sonatype.org/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>Sonatype RSO</id>
+            <name>Sonatype's Forge repository</name>
+            <url>https://repository.sonatype.org/content/groups/forge</url>
+        </repository>
+        
+        <repository>
+            <id>mvn-public</id>
+            <name>MVNRepository</name>
+            <url>http://mvnrepository.com</url>
+        </repository>        
+        <repository>
+            <id>ast-server2</id>
+            <name>ast-server2-releases</name>
+            <url>http://ast2-deim.urv.cat/artifactory/ast-internal-repository</url>
+        </repository>
+    </repositories>
+	
+    <dependencies>
+        <!-- Internal dependencies -->
+        <dependency>
+            <groupId>syncservice-common</groupId>
+            <artifactId>syncservice-common</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>objectmq</groupId>
+            <artifactId>objectmq</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>mime-identifier</groupId>
+            <artifactId>mime-identifier</artifactId>
+            <version>0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>java-cloudfiles</groupId>
+            <artifactId>java-cloudfiles</artifactId>
+            <version>LATEST</version>
+        </dependency>
+                                        
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        
+        <!-- Apache log4j -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>apache-log4j-extras</artifactId>
+            <version>1.1</version>
+        </dependency>
+                                
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        
+        <!-- Apache commons -->
+        <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.5</version>
+        </dependency>          
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2.4</version>
+        </dependency>
+        
+        <!-- Others -->
+        <dependency>
+            <groupId>net.sf.jpathwatch</groupId>
+            <artifactId>jpathwatch</artifactId>
+            <version>0.95</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ostermiller</groupId>
+            <artifactId>utils</artifactId>
+            <version>1.07.00</version>
+        </dependency>         
+        <dependency>
+            <groupId>AbsoluteLayout</groupId>
+            <artifactId>AbsoluteLayout</artifactId>
+            <version>1.0</version>
+        </dependency>       
+        
+        
+        
+        <!-- Internal Database -->
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.10.1.1</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>javax.persistence</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.25</version>
+        </dependency>
+                
+        <!-- Storage plugins -->                             
+        
+        <!--++++ Ftp -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+        <!--++++ Imap -->
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+                    
+        <!--++++ Amazon S3 -->
+        <dependency>
+            <groupId>net.java.dev.jets3t</groupId>
+            <artifactId>jets3t</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+                           
+        <!--++++ Samba -->        
+        <dependency>
+            <groupId>jcifs</groupId>
+            <artifactId>jcifs</artifactId>
+            <version>1.3.17</version>
+        </dependency>
+                                
+        <!--++++ Sftp -->
+        <dependency>
+            <groupId>sshtools</groupId>
+            <artifactId>j2ssh-ant</artifactId>
+            <version>0.2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>sshtools</groupId>
+            <artifactId>j2ssh-common</artifactId>
+            <version>0.2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>sshtools</groupId>
+            <artifactId>j2ssh-daemon</artifactId>
+            <version>0.2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>sshtools</groupId>
+            <artifactId>j2ssh-core</artifactId>
+            <version>0.2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.50</version>
+        </dependency>
+                            
+        
+        <!--++++ WebDav -->
+        <dependency>
+            <groupId>com.googlecode.sardine</groupId>
+            <artifactId>sardine</artifactId>
+            <version>146</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attached</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>com.stacksync.syncservice.SyncService</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.14.1</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

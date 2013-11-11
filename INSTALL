@@ -1,0 +1,37 @@
+STACKSYNC INSTALLATION INSTRUCTIONS
+---------------------------------
+
+1. REQUIREMENTS
+---------------
+StackSync has the following requirements. Note that the instructions below 
+show how to install these libraries.
+
+* Java 6 JRE, e.g. OpenJDK JRE or Oracle JRE
+
+
+2. INSTALLATION
+---------------
+
+Go to the directory where you have extracted StackStack and run:
+$ sudo ./install.sh
+
+To execute StackSync you can do it from the Desktop or Menu shorcuts or just running the launcher:
+$ ./launch_stacksync.sh
+
+To uninstall StackSync you can run the uninstall script:
+$ sudo ./uninstall.sh
+
+Then you are free to remove the StackSync directory manually.
+
+
+3. CONFIGURATION
+----------------
+All important configuration can be done using the StackSync preferences window.
+However, for debug/development purposes, manual configuration might be
+necessary.
+
+By default, StackSync stores all user data at ~/.stacksync. 
+
+Extracted and extended from Syncany -> http://www.syncany.com
+
+

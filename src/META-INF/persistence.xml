@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="Stacksync" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>com.stacksync.desktop.db.models.CloneClient</class>
+    <class>com.stacksync.desktop.db.models.CloneChunk</class>
+    <class>com.stacksync.desktop.db.models.Workspace</class>
+    <class>com.stacksync.desktop.db.models.CloneFile</class>
+    <shared-cache-mode>NONE</shared-cache-mode>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="REPLACED_BY_APPLICATION"/>
+      <property name="javax.persistence.jdbc.user" value=""/>
+      <property name="javax.persistence.jdbc.password" value=""/>
+      <property name="javax.persistence.jdbc.driver" value="REPLACED_BY_APPLICATION"/>
+      <!-- EclipseLink specific -->
+      <property name="eclipselink.ddl-generation" value="REPLACED_BY_APPLICATION"/>
+      <property name="eclipselink.cache.shared.default" value="false"/>
+      <property name="eclipselink.cache.size.default" value="0"/>
+      <property name="eclipselink.cache.type.default" value="None"/>
+      <property name="eclipselink.query-results-cache" value="false"/>
+      <!--<property name="eclipselink.logging.logger" value="JavaLogger"/>-->
+      <property name="eclipselink.logging.logger" value="com.stacksync.desktop.db.CustomSessionLogger"/>
+      <property name="eclipselink.logging.level" value="WARNING"/>
+      <property name="eclipselink.logging.parameters" value="true"/>
+      <!--
+                #
+                # Logging level :
+                #        OFF \u2013 disables logging
+                #        SEVERE \u2013 logs exceptions indicating EclipseLink cannot continue, as well as any exceptions generated during login. This includes a stack trace.
+                #        WARNING \u2013 logs exceptions that do not force EclipseLink to stop, including all exceptions not logged with severe level. This does not include a stack trace.
+                #        INFO \u2013 logs the login/logout per sever session, including the user name. After acquiring the session, detailed information is logged.
+                #        CONFIG \u2013 logs only login, JDBC connection, and database information.
+                #        FINE \u2013 logs SQL.
+                #        FINER \u2013 similar to warning. Includes stack trace.
+                #        FINEST \u2013 includes additional low level information.
+                #
+                #
+            -->
+    </properties>
+  </persistence-unit>
+</persistence>

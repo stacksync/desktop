@@ -1,0 +1,104 @@
+DEVELOPMENT
+-----------
+
+1. SOURCE CODE
+--------------
+Source code is hosted in the AST Research Group SVN server.
+If you need more information contact the authors.
+
+2. STACKSYNC
+----------
+StackSync is almost entirely based on Java.
+The development IDE is NetBeans 7.
+
+
+2.1. BUILD REQUIREMENTS
+-----------------------
+* JDK 6, or higher
+* Apache Ant
+
+
+2.2. BUILDING & RUNNING
+-----------------------
+StackSync can be built and run from within the NetBeans IDE 7.
+Import the project to NetBeans and once imported change the run parameters:
+- Right click on the project.
+- In the properties windows, click on the Run category.
+- Change VM Options with the correct parameters (-Dstacksync.home=PATH_TO_PROJECT)
+
+
+3. CONFIGURATION
+----------------
+All important configuration can be done using the StackSync preferences window.
+However, for debug/development purposes, manual configuration might be 
+necessary.
+
+By default, StackSync stores all user data at ~/.stacksync (this can be changed
+using the --config/-c parameter). Relative to the config directory, the 
+following files and directories can be found:
+
+- config.xml  Main configuration file. 
+
+- cache/      Local cache that temporarily stores file chunks and metadata.
+              If StackSync is not running, it can be safely deleted.
+          
+- db/         Derby database directory. The database is created when StackSync
+              first persists any file versions. Deleting this directory
+              resets the local version history. If anything doesn't work as
+              expected, delete this folder and restart StackSync.
+            
+- profiles/   Stores the profile pictures of other users.
+ 
+Every time that the folder ~/.stacksync is deleted, StackSync will show the wizard to get the user data again.
+
+4. STORAGE BACK-END
+-------------------
+In order to let the user choose the storage back-end (FTP, Swift...) StackSync has to be executed with the parameter -ep (enable plugins), otherwise the storage back-end will be Swift.
+
+
+5. MANUAL
+-------------------
+
+Some important classes and packages.
+
+Localwatcher (com.stacksync.desktop.watch.local): 
+This thread watches the synchronized folder, when an event occurs in the folder (new/delete/modify file or folder) the thread launches an event to the indexer.
+
+Periodic (com.stacksync.desktop.periodic): 
+This thread helps to Localwatcher, when the event is missed by Localwatcher, the periodic thread launches the event to the indexer.
+
+Indexer (com.stacksync.desktop.index): 
+This thread processes all the previous events. Folder events only create metadata; File events create chunks and queue the files for the Uploader thread to process.
+
+Uploader (com.stacksync.desktop.repository): 
+This thread has a queue of files, for each file the thread uploads the chunks to the storage.
+
+Client Middleware (com.stacksync.desktop.syncserver): 
+This package contains all the communication to the sync service. The desktop client calls Synchronous/Asynchronous methods to send/receive metadata to/from the server.
+
+Server Middleware (com.stacksync.syncservice.middleware): 
+Here there are metadata classes shared with the server and the server frontend.
+
+RemoteWatcher (com.stacksync.desktop.watch.remote): 
+Is a periodic task, this task sends the metadata to the sync service when all chunks are already uploaded to the storage.
+
+Cache (com.stacksync.desktop.periodic): 
+This thread monitors the chunks in the cache folder and removes the old/unused chunks.
+
+Connection Plugins (com.stacksync.desktop.connection.plugins): 
+In this package there are the classes related to storage plugins. These classes have to be inherited to add new plugin.
+
+    Connection.java
+    This class contains the connection information such as Host, Port, User or Password.
+
+    PluginInfo.java
+    This class contains the name and version of the plugin.
+
+    TransferManager.java
+    This class has all the methods to interact with the storage (Connect, Upload, Download...).
+
+Chunker (com.stacksync.desktop.index):
+This package contains the Chunker, the Chunker splits the files and generate hashes. The Chunker supports two algorithms (Adler32 and Sha1). 
+
+    The Chunker.java has the abstract method createChecksum. The classes ChunkerAdler32 and ChunkerSha1 inherit from Chunker implementing the method 
+    createChecksum with the corresponding algorithm.

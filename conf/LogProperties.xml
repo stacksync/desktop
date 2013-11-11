@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+    <appender class="org.apache.log4j.rolling.RollingFileAppender" name="A2">
+        <param value="true" name="append"/>
+        <param value="REPLACED_BY_APPLICATION/TempLog.log" name="File"/>
+
+        <rollingPolicy class="org.apache.log4j.rolling.FixedWindowRollingPolicy">
+            <param name="fileNamePattern" value="REPLACED_BY_APPLICATION/InfoLog%i.log" />
+            <param name="MinIndex" value="0"/> 
+            <param name="MaxIndex" value="0"/> 
+        </rollingPolicy>
+        
+        <triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy"> 
+            <param name="MaxFileSize" value="1000000"/> 
+        </triggeringPolicy> 
+        
+        <layout class="org.apache.log4j.PatternLayout">
+            <param value="%d{[yyyy-MM-dd HH:mm:ss]} %p %t %c{1}.%M:%L - %m%n" name="ConversionPattern"/>
+        </layout>        
+    </appender>
+
+    <appender name="consoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <param name="Threshold" value="info" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{[yyyy-MM-dd HH:mm:ss]} %p %t %c{1}.%M:%L - %m%n" />
+        </layout>
+    </appender>
+    
+    <root>
+		<level value="info"/>
+        <appender-ref ref="A2"/>
+        <appender-ref ref="consoleAppender" />
+    </root>    
+</log4j:configuration>

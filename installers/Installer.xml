@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+
+<installation version="1.0">
+    <!-- Ant properties in this file can be referenced with @{}, otherwise use 
+    variables below in installer files with ${} -->
+		
+    <info>
+        <appname>@{project.name}</appname>
+        <appversion>@{version.num}</appversion>
+        <url>@{project.website}</url>
+		
+        <javaversion>1.6</javaversion>
+        <requiresjdk>no</requiresjdk>
+        <writeinstallationinformation>no</writeinstallationinformation>
+        <run-privileged condition="izpack.windowsinstall|izpack.linuxinstall|izpack.macinstall" />
+        
+        <uninstaller name="Uninstaller.jar" write="yes" />        
+    </info>
+	
+    <guiprefs width="800" height="600" resizable="no">
+        <laf name="kunststoff">
+            <os family="windows" />
+            <os family="unix" />
+            <os family="mac" />
+        </laf>
+        <modifier key="useHeadingPanel" value="yes"/>
+        <modifier key="useHeadingForSummary" value="yes"/>
+        <modifier key="headingImageOnLeft" value="yes"/>
+        <modifier key="headingLineCount" value="2"/>
+        <modifier key="headingFontSize" value="1.5"/>
+        <modifier key="headingBackgroundColor" value="0x00ffffff"/>
+        <modifier key="headingPanelCounter" value="text"/>
+        <modifier key="headingPanelCounterPos" value="inHeading"/>
+    </guiprefs>
+
+    <locale>
+        <!--<langpack iso3="spa" />-->
+        <langpack iso3="eng" />
+    </locale>
+
+    <resources>
+        <res id="Heading.image" src="res/logo48Installer.png" />
+        <res src="shortcutSpec.xml" id="shortcutSpec.xml"/>
+    </resources>   
+    
+    <variables>
+        <variable name="TargetPanel.dir.unix" value="/usr/local/@{project.name}"/>
+        <variable name="DesktopShortcutCheckboxEnabled" value="true"/>
+    </variables>
+
+    <panels>
+        <panel classname="CheckedHelloPanel" />        
+        <panel classname="TargetPanel" />
+        <panel classname="PacksPanel"/>        
+        <panel classname="InstallPanel" />
+        <panel classname="ShortcutPanel"/>
+        <panel classname="SimpleFinishPanel" />
+    </panels>   
+
+    <packs>
+        <pack name="InstallationFiles" preselected="yes" required="yes">
+            <description>All the application path</description>
+            <file override="update" src="../dist/bin" targetdir="$INSTALL_PATH/" />
+            <file override="update" src="../dist/conf" targetdir="$INSTALL_PATH/" />
+            <file override="update" src="../dist/dlls" targetdir="$INSTALL_PATH/" />
+            <file override="update" src="../dist/lib" targetdir="$INSTALL_PATH/" />
+            <file override="update" src="../dist/res" targetdir="$INSTALL_PATH/" />                      
+        </pack>        
+        
+        <pack name="StacksyncApp" preselected="yes" required="yes">
+            <description>Application core</description>
+            <file override="update" src="../dist/Stacksync.jar" targetdir="$INSTALL_PATH/" />                      
+            <file override="update" src="../dist/run.bat" targetdir="$INSTALL_PATH/" />
+        </pack>
+                
+        <pack name="Overlays" preselected="@{project.overlays_preselected}" required="no" hidden="@{project.overlays_hidden}">
+            <description>Application overlays</description>
+                    
+            <!-- Install -->
+            <!--<file override="update" src="scripts/linux_install_overlay.sh" targetdir="$INSTALL_PATH/dlls" />-->
+            <!--<file override="update" src="scripts/windows_install_overlay.bat" targetdir="$INSTALL_PATH/dlls"/>-->    
+            <executable keep="true" failure="ask" targetfile="$INSTALL_PATH/Stacksync.jar" type="jar" 
+                        class="com.stacksync.desktop.RegisterOverlays" stage="postinstall">
+                <args>
+                    <arg value="--install" />
+                    <arg value="--path" />
+                    <arg value="$INSTALL_PATH" />
+                </args>                 
+            </executable>            
+            
+            
+            <!-- Uninstall -->
+            <file override="update" src="scripts/linux_uninstall_overlay.sh" targetdir="$INSTALL_PATH/dlls" />			
+            <file override="update" src="scripts/windows_uninstall_overlay.bat" targetdir="$INSTALL_PATH/dlls"/>
+            <!--                        
+            Not work
+            <executable keep="true" failure="ask" stage="uninstall" targetfile="$INSTALL_PATH/Stacksync.jar" type="jar" class="com.stacksync.desktop.RegisterOverlays">
+                <args>
+                    <arg value="-uninstall" />
+                    <arg value="-path" />
+                    <arg value="$INSTALL_PATH" />
+                </args>                                                               
+            </executable>             
+            -->
+            
+            <executable keep="true" failure="ask" stage="uninstall" targetfile="$INSTALL_PATH/dlls/linux_uninstall_overlay.sh">
+                <os family="unix"/>
+            </executable>
+            
+            <executable keep="true" failure="ask" stage="uninstall" targetfile="$INSTALL_PATH/dlls/windows_uninstall_overlay.bat">
+                <os family="windows"/>
+                <args>
+                    <arg value="c:\windows\system32\regsvr32.exe" />
+                    <arg value="$INSTALL_PATH/dlls/StackSyncShared.dll" />
+                    <arg value="$INSTALL_PATH/dlls/StackSyncSyncing.dll" />
+                    <arg value="$INSTALL_PATH/dlls/StackSyncUnsync.dll" />
+                    <arg value="$INSTALL_PATH/dlls/StackSyncUptodate.dll" />
+                </args>                  
+            </executable>            
+        </pack>             
+    </packs>
+
+    <native name="ShellLink.dll" type="izpack" />
+    <native name="ShellLink_x64.dll" type="izpack" />
+</installation>

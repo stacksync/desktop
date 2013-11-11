@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+
+<shortcuts>
+    <skipIfNotSupported/>
+    <programGroup defaultName="Stacksync" location="applications"/>
+    <shortcut
+        name="Stacksync"
+        target="$INSTALL_PATH/run.bat"
+        commandLine=""
+        workingDirectory="$INSTALL_PATH"
+        description="This starts Stacksync"
+        iconFile="$INSTALL_PATH/res/logo48.ico"
+        iconIndex="0"
+        initialState="normal"
+        programGroup="yes"
+        desktop="yes"
+        applications="yes"
+        startMenu="yes"
+        startup="yes"
+        encoding="UTF-8">
+
+        <os family="windows"/>
+        <createForPack name="StacksyncApp"/>
+    </shortcut>
+    
+    <shortcut 
+        applications="no" 
+        desktop="no" 
+        iconFile="$INSTALL_PATH/res/logo48.ico" 
+        iconIndex="0" 
+        initialState="noShow" 
+        name="Uninstall" 
+        programGroup="yes" 
+        startMenu="no" 
+        startup="no" 
+        target="$INSTALL_PATH/Uninstaller/Uninstaller.jar" 
+        workingDirectory="$INSTALL_PATH/"
+        encoding="UTF-8">
+        
+        <createForPack name="StacksyncApp"/>
+    </shortcut>
+</shortcuts>
