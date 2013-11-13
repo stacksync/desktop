@@ -119,7 +119,7 @@ for other reasons we haven't got enough time to change it...
 If you create in Swift the user (testuser:testuser) the field username in the
 rackspace panel must be testuser only.
 
-IMAGE WITH EXAMPLE
+<img width="500" src="https://raw.github.com/stacksync/desktop/master/res/wizard_credentials.png">
     
 **IMPORTANT: The container must be allways stacksync.**
     
