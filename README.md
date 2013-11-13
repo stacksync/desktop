@@ -27,7 +27,7 @@ In general terms, StackSync can be divided into three main blocks: clients,
 synchronization service and storage service. An overview of the architecture
 with the main components and their interaction is shown in the following figure.
 
-LINK BIG PICTURE
+<img width="500" src="https://raw.github.com/stacksync/desktop/master/res/stacksync-architecture.png">
 
 The StackSync client and the SyncService interact through the communication
 middleware called ObjectMQ. The sync service interacts with the metadata
@@ -68,7 +68,7 @@ We have simplified the sync algorithm removing the merged files logic.
 We have implemented some dll's to create windows overlays (link a nuestro repo). For this project we
 used Liferay nativity library (link liferay repo).
 
-IMAGE WITH WINDOWS
+<img width="500" src="https://raw.github.com/stacksync/desktop/master/res/win_integration.png">
 
 # Requirements
 StackSync is developed using NetBeans and Java 1.7.
