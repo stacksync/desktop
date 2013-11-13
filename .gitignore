@@ -5,3 +5,4 @@
 *.ear
 /build/
 /dist/
+/logs/

@@ -39,6 +39,7 @@ public class Server {
     private Broker broker;
     private Map<String, WorkspaceInfo> rWorkspaces;
     private Properties env;
+    private int i;
 
     public ISyncService getSyncServer() {
         return syncServer;
@@ -50,6 +51,7 @@ public class Server {
         this.broker = broker;
         this.syncServer = this.broker.lookup(ISyncService.class.getSimpleName(), ISyncService.class);
         this.rWorkspaces = new HashMap<String, WorkspaceInfo>();
+        this.i = 0;
     }
 
     public String getRequestId() {
@@ -109,10 +111,9 @@ public class Server {
     }
 
     private void saveLog(List<ObjectMetadata> commitObjects) {
-        String debugPath = "debug_file.txt";
+        String debugPath = "test";
         if (debugPath.length() > 0) {
             try {
-                long timeNow = (new Date()).getTime();
 
                 File outputFolder = new File(debugPath + File.separator + "Client");
                 outputFolder.mkdirs();
@@ -120,10 +121,11 @@ public class Server {
                 JavaImp serializer = new JavaImp();
                 byte[] bytes = serializer.serialize(commitObjects);
 
-                File outputFileContent = new File(outputFolder.getAbsoluteFile() + File.separator + "client-files-" + timeNow);
+                File outputFileContent = new File(outputFolder.getAbsoluteFile() + File.separator + "client-files-" + i);
                 FileOutputStream outputStream = new FileOutputStream(outputFileContent);
                 IOUtils.write(bytes, outputStream);
                 outputStream.close();
+                this.i++;
             } catch (Exception ex) {
                 java.util.logging.Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
