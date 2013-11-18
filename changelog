@@ -1,3 +1,10 @@
+1.6.3 - ??????? (???)
+---------------------
+config.xml encryption.
+Removed torrent and sharing legacy code.
+Removed all profile, repository and update file logic.
+Changed log properties.
+
 1.6.2 - 30-10-2013 (340)
 ----------------------------
 One click tray: open sync folder.

@@ -33,7 +33,7 @@ public abstract class Constants {
 
     public static final int COMMANDSERVER_PORT = 32586;
     
-    public static final int PERIODIC_SEARCH_INTERVAL = 60000;//one minute
+    public static final int PERIODIC_SEARCH_INTERVAL = 120000;//two minutes
     public static final int PERIODIC_CACHE_INTERVAL = 300000;//five minutes
     
     /**

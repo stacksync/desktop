@@ -17,7 +17,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import org.apache.commons.io.FileUtils;

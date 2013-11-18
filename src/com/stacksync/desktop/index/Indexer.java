@@ -104,7 +104,7 @@ public class Indexer {
             if (!folder.isActive() || folder.getLocalFile() == null) {
                 continue;
             }
-            logger.info(config.getMachineName()+"#- Folder "+folder.getLocalFile()+" ...");
+            logger.debug(config.getMachineName()+"#- Folder "+folder.getLocalFile()+" ...");
             
             // Check for files that do NOT exist anymore
             List<CloneFile> dbFiles = db.getFiles(folder);
@@ -171,7 +171,7 @@ public class Indexer {
                 while (null != (req = queue.take())) {
                     tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "Indexing " + (queue.size() + 1) +  " files...");
                     
-                    logger.info("Processing request "+req+".");      
+                    logger.debug("Processing request "+req+".");      
                     req.process();
                     
                     if(queue.isEmpty()){

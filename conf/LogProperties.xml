@@ -12,7 +12,7 @@
         </rollingPolicy>
         
         <triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy"> 
-            <param name="MaxFileSize" value="1000000"/> 
+            <param name="MaxFileSize" value="250000"/> 
         </triggeringPolicy> 
         
         <layout class="org.apache.log4j.PatternLayout">

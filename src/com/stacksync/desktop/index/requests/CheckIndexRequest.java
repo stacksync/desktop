@@ -71,11 +71,10 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
 
         // Matching DB entry found
         if (dbFile != null) {
-            logger.info("Folder " + dbFile.getFile().toString() + " FOUND in DB. Nothing to do.");
+            logger.debug("Folder " + dbFile.getFile().toString() + " FOUND in DB. Nothing to do.");
         } else {           
             // Add as new
             logger.info("Folder " + file.toString() + " NOT found in DB. Adding as new file.");
-            //new NewIndexRequest(root, file, null).process();
             Indexer.getInstance().queueNewIndex(root, file, null, -1);
         }
     }
@@ -101,7 +100,7 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
         if (dbFile != null) {
             
             if(dbFile.getChecksum() == 0 && dbFile.getSyncStatus() == SyncStatus.LOCAL){
-                logger.info("File " + dbFile.getFile().toString() + " is indexing now. Nothing to do!");    
+                logger.debug("File " + dbFile.getFile().toString() + " is indexing now. Nothing to do!");    
                 return;
             }
             
@@ -109,7 +108,7 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
                 && file.length() == dbFile.getFileSize();            
             
             if (isSameFile || fileCheckSum == dbFile.getChecksum()) {
-                logger.info("File " + dbFile.getFile().toString() + " found in DB. Same modified date, same size. Nothing to do!");    
+                logger.debug("File " + dbFile.getFile().toString() + " found in DB. Same modified date, same size. Nothing to do!");    
                 return;
             }
             
@@ -126,12 +125,10 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
             CloneFile guessedPreviousVersion = db.getNearestFile(root, file, fileCheckSum);
 
             if (guessedPreviousVersion != null) {
-                logger.info("Previous version GUESSED by checksum and name: "+guessedPreviousVersion.getAbsolutePath()+"; Updating DB ...");                
-                //new MoveIndexRequest(guessedPreviousVersion, root, file).process();     
+                logger.info("Previous version GUESSED by checksum and name: "+guessedPreviousVersion.getAbsolutePath()+"; Updating DB ...");                 
                 Indexer.getInstance().queueMoved(guessedPreviousVersion, root, file);
             } else {                
                 logger.info("No previous version found. Adding new file ...");
-                //new NewIndexRequest(root, file, null).process();
                 Indexer.getInstance().queueNewIndex(root, file, null, fileCheckSum);
             }
         }  

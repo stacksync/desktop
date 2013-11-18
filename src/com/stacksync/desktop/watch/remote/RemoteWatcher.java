@@ -157,12 +157,13 @@ public class RemoteWatcher {
         // Check if new update file needs to be created/uploaded
         Long fileVersionCount = db.getFileVersionCount(profile);
         if (fileVersionCount == 0) {
-            logger.info("4. No local changes. Skipping step upload.");
+            logger.debug("No local changes. Skipping step upload.");
             return;
         }
 
         try {
-            // Make temp. update file
+            logger.info("Commit new changes.");
+            
             Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate(profile);
 
             // Upload

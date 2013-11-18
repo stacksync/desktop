@@ -72,14 +72,14 @@ public class CacheCleaner {
     
     
     private void doPeriodicCheck(){
-        logger.info(config.getMachineName()+"#Started periodic cache search ...");
+        logger.debug(config.getMachineName()+"#Started periodic cache search ...");
             
         Calendar cal = Calendar.getInstance();  
         cal.set(Calendar.HOUR, cal.get(Calendar.HOUR) - 1); 
         Date dateNow = cal.getTime();        
         
         for (CloneChunk chunk: db.getChunkCached()) {
-            logger.info(config.getMachineName()+"#Trying to clean -> " + chunk + " ...");
+            logger.debug(config.getMachineName()+"#Trying to clean -> " + chunk + " ...");
             File chunkCacheFile = config.getCache().getCacheChunk(chunk);
             
             boolean canDelete = true;
@@ -87,7 +87,7 @@ public class CacheCleaner {
             long lastModified = chunkCacheFile.lastModified();            
             if(lastModified > dateNow.getTime()){
                 canDelete = false;
-                logger.info(config.getMachineName()+"#Chunk is newest lastmodified:" + lastModified + " > " + "dateNow:" + dateNow.getTime() + " ...");
+                logger.debug(config.getMachineName()+"#Chunk is newest lastmodified:" + lastModified + " > " + "dateNow:" + dateNow.getTime() + " ...");
             }
 
             if(canDelete){
@@ -96,7 +96,7 @@ public class CacheCleaner {
                 for(CloneFile cf: cloneFiles){
                     if(cf.getSyncStatus() != SyncStatus.UPTODATE){
                         canDelete = false;
-                        logger.info(config.getMachineName()+"#Chunk is used by " + cf + " ...");
+                        logger.debug(config.getMachineName()+"#Chunk is used by " + cf + " ...");
                         break;
                     }
                 }
@@ -106,10 +106,10 @@ public class CacheCleaner {
                 chunkCacheFile.delete();
                 chunk.setCacheStatus(CacheStatus.REMOTE);
                 chunk.merge();
-                logger.info(config.getMachineName()+"#Deleting the chunk -> " + chunk + " ...");
+                logger.debug(config.getMachineName()+"#Deleting the chunk -> " + chunk + " ...");
             }            
         }
-        logger.info(config.getMachineName()+"#Finished periodic cache search. Now sleeping "+Constants.PERIODIC_CACHE_INTERVAL+" seconds.");
+        logger.debug(config.getMachineName()+"#Finished periodic cache search. Now sleeping "+Constants.PERIODIC_CACHE_INTERVAL+" seconds.");
     }
     
 }
