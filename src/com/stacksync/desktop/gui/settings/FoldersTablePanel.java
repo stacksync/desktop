@@ -43,7 +43,7 @@ import com.stacksync.desktop.Environment.OperatingSystem;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.gui.error.ErrorMessage;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 
 /**
@@ -160,7 +160,7 @@ public class FoldersTablePanel extends SettingsPanel {
                         }
                     } catch (Exception ex) {
                         logger.error("Could not load repository infos: ", ex);
-                        LogConfig.sendErrorLogs();
+                        RemoteLogs.getInstance().sendLog(ex);
                         lblLoading.setText(resourceBundle.getString("ftp_err_loading_repository_folders"));
                     } 
                 }

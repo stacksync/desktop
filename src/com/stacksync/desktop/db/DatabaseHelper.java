@@ -38,7 +38,7 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import com.stacksync.desktop.db.models.Workspace;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.desktop.util.StringUtil;
@@ -503,7 +503,7 @@ public class DatabaseHelper {
         }
         
         logger.error("Adding client " + machineName + " FAILED completely. Retrying FAILED.");
-        LogConfig.sendErrorLogs();
+        //RemoteLogs.getInstance().sendLog(new Exception());
         return null;
     }
 

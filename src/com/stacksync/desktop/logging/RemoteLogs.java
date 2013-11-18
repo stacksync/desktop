@@ -21,16 +21,48 @@ import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import org.apache.commons.io.FileUtils;
 
-public class LogConfig {
+public class RemoteLogs {
     
     private static final Config config = Config.getInstance();
     private static final Environment env = Environment.getInstance();
     
-    private static String logFolder = env.getDefaultUserConfigDir().getAbsolutePath() + "/logs";
-    private static String logFilePath = env.getDefaultUserConfigDir().getAbsolutePath() + "/logs/TempLog.log";
-    private static String failedLogsPath = env.getDefaultUserConfigDir().getAbsolutePath() + "/logs/failedLogs";
+    private String logFolder;
+    private String logFilePath;
+    private String failedLogsPath;
     
-    private static void sendLogs() throws FileNotFoundException, IOException, IllegalStateException{
+    private static RemoteLogs instance;
+    
+    private boolean active;
+    
+    private RemoteLogs() {
+        
+        String configDir = env.getDefaultUserConfigDir().getAbsolutePath();
+        this.logFolder = configDir + File.separator + "logs";
+        this.logFilePath = this.logFolder + File.separator + "TempLog.log";
+        this.failedLogsPath = this.logFolder + File.separator + "failedLogs";
+    }
+    
+    public synchronized static RemoteLogs getInstance() {
+        
+        if (instance == null) {
+            instance = new RemoteLogs();
+        }
+        
+        return instance;
+        
+    }
+    
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+    
+    
+    
+    /*private void sendLogs() throws FileNotFoundException, IOException, IllegalStateException{
         String serverUrl = config.getLogApiRestUrl();
 
         DefaultHttpClient client = new DefaultHttpClient();
@@ -53,7 +85,7 @@ public class LogConfig {
         } else {
             saveFailedLogs();
         }
-    }
+    }*/
 
     private static void setRequest(HttpPut request, File logFile) throws IOException {
         
@@ -72,7 +104,7 @@ public class LogConfig {
         
     }
 
-    private static void saveFailedLogs() {
+    private void saveFailedLogs() {
         
         File logFile = new File(logFilePath);
         File failedFilesDir = new File(failedLogsPath);
@@ -98,9 +130,13 @@ public class LogConfig {
         }
     }
     
-    public synchronized static void sendErrorLogs() {
+    public synchronized void sendLog(Exception ex) {
 
-        try {
+        if (!active) {
+            return;
+        }
+        
+        /*try {
             sendLogs();
         } catch (FileNotFoundException ex) {
             //Can't save failed logs cause logfile does not exist
@@ -110,10 +146,10 @@ public class LogConfig {
         }catch(IllegalStateException exception){
             System.out.println("Error parsing server url");
             saveFailedLogs();
-        }
+        }*/
     }
 
-    public static void sendFailedLogs() {
+    public void sendFailedLogs() {
         String serverUrl = config.getLogApiRestUrl();
 
         DefaultHttpClient client = new DefaultHttpClient();

@@ -21,7 +21,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  *
@@ -98,7 +98,7 @@ public class TouchServer extends AbstractServer
                     }
                 } catch (InterruptedException ex) {
                     logger.error("TouchWorker got interrupted. TERMINATING.", ex);
-                    LogConfig.sendErrorLogs();
+                    RemoteLogs.getInstance().sendLog(ex);
                     return;
                 }
 

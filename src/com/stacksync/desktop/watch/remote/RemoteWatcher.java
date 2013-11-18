@@ -29,7 +29,7 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.Workspace;
 import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
 import com.stacksync.desktop.exceptions.StorageException;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.desktop.util.StringUtil;
 
@@ -145,7 +145,7 @@ public class RemoteWatcher {
                 transfer.disconnect();
             } catch (StorageException ex) {
                 logger.error("Can't disconnect the remote storage", ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
                 /* Fressen! */
             }
         }
@@ -188,7 +188,7 @@ public class RemoteWatcher {
             server.commit(cloudId, workspace, commitObjects);
         } catch (IOException ex) {
             logger.error("Failed to write file.", ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
         }
     }
 

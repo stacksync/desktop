@@ -44,12 +44,11 @@ import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.Chunker;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
-import com.stacksync.desktop.connection.plugins.rackspace.RackspaceTransferManager;
 import static com.stacksync.desktop.db.models.CloneFile.Status.CHANGED;
 import static com.stacksync.desktop.db.models.CloneFile.Status.DELETED;
 import static com.stacksync.desktop.db.models.CloneFile.Status.NEW;
 import static com.stacksync.desktop.db.models.CloneFile.Status.RENAMED;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.repository.files.RemoteFile;
@@ -183,7 +182,8 @@ public class ChangeManager {
                             resolveConflict(existingVersion, update);
                         } catch (CouldNotApplyUpdateException ex) {
                             logger.error("Unable to download/assemble winning file!", ex);
-                            LogConfig.sendErrorLogs();
+                            RemoteLogs.getInstance().sendLog(ex);
+                            // TODO Inifinite loop??
                             queue.add(update);
                         }
                     }
@@ -234,8 +234,9 @@ public class ChangeManager {
                                 try{
                                     resolveConflict(localVersionByFilename, update);
                                 } catch (CouldNotApplyUpdateException ex) {
+                                    // TODO Inifinite loop??
                                     logger.error("Unable to download/assemble winning file!", ex);
-                                    LogConfig.sendErrorLogs();
+                                    RemoteLogs.getInstance().sendLog(ex);
                                     queue.add(update);
                                 }
                             }                            
@@ -278,8 +279,9 @@ public class ChangeManager {
             //return;
 
         } catch (CouldNotApplyUpdateException ex) {
+            // TODO Inifinite loop??
             logger.error("Warning: could not download/assemble " + newFileUpdate, ex);
-            LogConfig.sendErrorLogs();            
+            RemoteLogs.getInstance().sendLog(ex);            
             queue.add(newFileUpdate);
         }
     }
@@ -853,13 +855,9 @@ public class ChangeManager {
         if (clientName != null) {
             CloneClient client = db.getClient(profile, clientName, true);
 
-            File imageFile = client.getUserImageFile();
+            File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
             String summary = (client.getUserName() != null) ? client.getUserName() : client.getMachineName();
             String body;
-
-            if (!imageFile.exists()) {
-                imageFile = new File(config.getResDir() + File.separator + "logo48.png");
-            }
 
             Long[] fileIds = appliedUpdates.keySet().toArray(new Long[0]);
 

@@ -29,7 +29,7 @@ import name.pachler.nio.file.ext.ExtendedWatchEventKind;
 import name.pachler.nio.file.impl.PathWatchEvent;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  *
@@ -68,10 +68,10 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
                 keyRootMap.put(rootKey, folder);
             } catch (IOException ex) {
                 logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
             } catch (UnsupportedOperationException ex) {
                 logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
             }
         }
     }

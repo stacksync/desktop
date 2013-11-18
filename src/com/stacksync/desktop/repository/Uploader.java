@@ -32,14 +32,12 @@ import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
-import com.stacksync.desktop.exceptions.LocalFileNotFoundException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
 import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.tray.Tray;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.files.RemoteFile;
-import java.util.logging.Level;
 
 /**
  * Represents the remote storage. Processes upload and download requests
@@ -174,7 +172,7 @@ public class Uploader {
                         }
                     } catch (StorageException ex) {
                         logger.error("Could not process the file: ", ex);
-                        LogConfig.sendErrorLogs();
+                        RemoteLogs.getInstance().sendLog(ex);
                         
                         workingFile.setSyncStatus(CloneFile.SyncStatus.SYNCING);
                         workingFile.merge();
@@ -216,7 +214,7 @@ public class Uploader {
                     fileList = transfer.list();
                 } catch (StorageException ex) {
                     logger.error("UploadManager: List FAILED!!", ex);
-                    LogConfig.sendErrorLogs();
+                    RemoteLogs.getInstance().sendLog(ex);
                 }
             }
 
@@ -247,7 +245,7 @@ public class Uploader {
                     transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName));
                 } catch (StorageException ex) {
                     logger.error("UploadManager: Uploading chunk ("+chunk.getOrder()+File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
-                    //LogConfig.sendErrorLogs();              
+                    //LogConfig.sendLog();              
                     throw ex;
                 } catch (StorageQuotaExcedeedException ex) {
                     logger.error("UploaderManager: Quota excedeed.", ex);

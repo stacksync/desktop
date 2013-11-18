@@ -4,7 +4,7 @@ import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.exceptions.ConfigException;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import java.io.IOException;
@@ -82,14 +82,9 @@ public class LogsTests {
             throw new Exception("This is an exception");
         } catch (Exception e){
             logger.error("There has been an exception: ", e);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(e);
         }
         
-    }
-    
-    //@Test
-    public void sendFailedLog() {
-        LogConfig.sendFailedLogs();
     }
     
 }

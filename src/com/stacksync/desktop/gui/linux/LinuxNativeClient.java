@@ -37,7 +37,7 @@ import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.gui.error.ErrorDialog;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.Tray.StatusIcon;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.StringUtil;
 
 /**
@@ -154,7 +154,7 @@ public class LinuxNativeClient {
 
         // FAILED.
         logger.error("Could not send request "+request+" to native server. RETRAYING FAILED!");
-        //LogConfig.sendErrorLogs();        
+        //LogConfig.sendLog();        
         return null;
     }
 
@@ -182,8 +182,9 @@ public class LinuxNativeClient {
 
         // FAILED.
         logger.error("Cannot connect to native server. Retrying failed!");
-        LogConfig.sendErrorLogs();
-        throw new IOException("Unable to connect to service on port " + servicePort);
+        IOException ex = new IOException("Unable to connect to service on port " + servicePort);
+        RemoteLogs.getInstance().sendLog(ex);
+        throw ex;
     }
 
     public static void main(String[] args) throws ConfigException, InitializationException, InterruptedException {
@@ -224,13 +225,17 @@ public class LinuxNativeClient {
             while (true) {
                 Thread.sleep(1000);
 
-                tray.setStatusText(getInstance().getClass().getSimpleName(), resourceBundle.getString("lnc_downloading_files") + " 1/20 ...");
+                tray.setStatusText(getInstance().getClass().getSimpleName(), 
+                        resourceBundle.getString("lnc_downloading_files") + " 1/20 ...");
                 Thread.sleep(1000);
-                tray.setStatusText(getInstance().getClass().getSimpleName(), resourceBundle.getString("lnc_downloading_files") + " 2/20 ...");
+                tray.setStatusText(getInstance().getClass().getSimpleName(),
+                        resourceBundle.getString("lnc_downloading_files") + " 2/20 ...");
                 Thread.sleep(1000);
-                tray.setStatusText(getInstance().getClass().getSimpleName(), resourceBundle.getString("lnc_downloading_files") + " 3/20 ...");
+                tray.setStatusText(getInstance().getClass().getSimpleName(),
+                        resourceBundle.getString("lnc_downloading_files") + " 3/20 ...");
                 Thread.sleep(1000);
-                tray.setStatusText(getInstance().getClass().getSimpleName(), resourceBundle.getString("lnc_downloading_files") + " 4/20 ...");
+                tray.setStatusText(getInstance().getClass().getSimpleName(),
+                        resourceBundle.getString("lnc_downloading_files") + " 4/20 ...");
 
                 Thread.sleep(1000);
 
@@ -295,7 +300,6 @@ public class LinuxNativeClient {
             // Print errors and warnings
             for (String errline : errors) {
                 logger.error("Python script error/warning: " + errline);
-                LogConfig.sendErrorLogs();
             }
 
             if (servicePort == 0) {
@@ -321,7 +325,6 @@ public class LinuxNativeClient {
                             logger.debug(config.getMachineName() + "#" + line);
                         }
                     } catch (IOException ex) {
-                        //LogConfig.sendErrorLogs(serviceLogger,config.getMachineName() + "#TRAY SERVICE TERMINATED.", e);
                         logger.warn("TRAY SERVICE TERMINATED.", ex);
                     }
                 }
@@ -342,8 +345,8 @@ public class LinuxNativeClient {
                     try {
                         Thread.sleep(NOP_INTERVAL);
                     } catch (InterruptedException ex) {
-                        logger.error("TRAY SERVICE TERMINATED.", ex);
-                        LogConfig.sendErrorLogs();
+                        logger.warn("TRAY SERVICE TERMINATED.", ex);
+                        //RemoteLogs.getInstance().sendLog(ex);
                     }
 
                     send(new NopRequest());

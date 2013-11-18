@@ -26,7 +26,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.exceptions.ConfigException;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import org.w3c.dom.*;
 
 /**
@@ -197,7 +197,7 @@ public class ConfigNode {
 
         } catch (XPathExpressionException ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
             return null;
         }
     }

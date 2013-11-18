@@ -32,7 +32,7 @@ import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.wizard.WizardDialog;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 
 public class SettingsDialog extends javax.swing.JFrame {
@@ -479,7 +479,7 @@ public class SettingsDialog extends javax.swing.JFrame {
             config.save();
         } catch (ConfigException ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
         }
         
         // Update settings dialog

@@ -30,7 +30,7 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.PersistentObject;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 
 /**
@@ -611,7 +611,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             return clone;
         } catch (Exception ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
 
             throw new RuntimeException(ex);
         }

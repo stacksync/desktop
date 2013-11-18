@@ -32,7 +32,7 @@ import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
 import com.stacksync.desktop.exceptions.StorageUnauthorizeException;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.files.RemoteFile;
 import com.stacksync.desktop.util.FileUtil;
 import java.net.MalformedURLException;
@@ -83,7 +83,7 @@ public class RackspaceTransferManager extends AbstractTransferManager {
             throw new StorageConnectException(ex);
         } catch (IOException ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
             throw new StorageConnectException(ex);
         } catch (UnauthorizeException ex) {
             logger.error(ex);
@@ -114,12 +114,11 @@ public class RackspaceTransferManager extends AbstractTransferManager {
             tempFile = config.getCache().createTempFile(remoteFile.getName());
             FileUtil.writeFile(is, tempFile);
 
-            /// GGIPART ///
             FileUtil.copy(tempFile, localFile);
-            /// ENDGGIPART ///
+
         } catch (Exception ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
             throw new StorageException("Unable to download file '" + remoteFile.getName(), ex);
         } finally {
             try {
@@ -128,7 +127,7 @@ public class RackspaceTransferManager extends AbstractTransferManager {
                 }
             } catch (IOException ex) {
                 logger.error("I/O Excdeption: ", ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
             } 
             
             if (tempFile != null && tempFile.exists()) {
@@ -169,7 +168,7 @@ public class RackspaceTransferManager extends AbstractTransferManager {
             client.deleteObject(getConnection().getContainer(), remoteFile.getName());
         } catch (Exception ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
             throw new StorageException(ex);
         }
     }
@@ -199,7 +198,7 @@ public class RackspaceTransferManager extends AbstractTransferManager {
 
         } catch (Exception ex) {
             logger.error(ex);
-            //LogConfig.sendErrorLogs();
+            //LogConfig.sendLog();
             throw new StorageException(ex);
         }
     }
@@ -255,7 +254,7 @@ public class RackspaceTransferManager extends AbstractTransferManager {
             }
         } catch (StorageConnectException ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
         }
         
         return user;
@@ -272,7 +271,7 @@ public class RackspaceTransferManager extends AbstractTransferManager {
             
         } catch (StorageConnectException ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
         }
         
         return storageIp;

@@ -35,7 +35,7 @@ import com.stacksync.desktop.chunker.TTTD.RollingChecksum;
 import com.stacksync.desktop.config.ConnectionController;
 import com.stacksync.desktop.config.ConnectionTester;
 import com.stacksync.desktop.exceptions.StorageConnectException;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.periodic.CacheCleaner;
 import com.stacksync.desktop.periodic.TreeSearch;
 import com.stacksync.desktop.repository.Uploader;
@@ -205,7 +205,7 @@ public class Application implements ConnectionController {
         } catch (Exception ex) {
             //checkthis
             logger.error("Unable to init SettingsDialog: ", ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
             throw new InitializationException(ex);
         }
 
@@ -262,7 +262,7 @@ public class Application implements ConnectionController {
                 profile.setActive(true);
             } catch (InitializationException ex) {
                 logger.error("Can't load the profile.", ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
                 throw ex;
             }           
         }
@@ -284,16 +284,16 @@ public class Application implements ConnectionController {
                 profile.setActive(true);
             } catch (ConfigException ex) {
                 logger.error("Could not save profile from first-start wizard. EXITING.", ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
                 throw new RuntimeException("Could not save profile from first-start wizard. EXITING.", ex);
             } catch (InitializationException ex) {
                 logger.error("Could not save profile from first-start wizard. EXITING.", ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
                 throw new RuntimeException("Could not save profile from first-start wizard. EXITING.", ex);
             } catch (StorageConnectException ex) {
                 // TODO is this possible???
                 logger.error("Could not save profile from first-start wizard. EXITING.", ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
                 throw new RuntimeException("Could not save profile from first-start wizard. EXITING.", ex);
             }
         }

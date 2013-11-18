@@ -30,7 +30,7 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.index.Indexer;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 
 /**
@@ -223,7 +223,7 @@ public class MoveIndexRequest extends IndexRequest {
             
         } catch (Exception ex) {
             logger.error("Could not index new file. IGNORING.", ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
         } 
     }        
     /// GGIPART ///

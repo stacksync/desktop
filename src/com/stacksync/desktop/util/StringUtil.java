@@ -231,7 +231,7 @@ public class StringUtil {
         update.setStatus(CloneFile.Status.valueOf(objMetadata.getStatus()));
         update.setChecksum(objMetadata.getChecksum());
         update.setMimeType(objMetadata.getMimetype());
-        //update.setClientName(objMetadata.get("clientName").getAsString());
+        update.setClientName(objMetadata.getClientName());
         update.setFileSize(objMetadata.getFileSize());
         update.setFolder(objMetadata.isFolder());
 

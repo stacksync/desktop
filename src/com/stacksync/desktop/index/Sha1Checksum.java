@@ -10,7 +10,7 @@ import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
 import javax.xml.bind.DatatypeConverter;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  * @author Guillermo Guerrero

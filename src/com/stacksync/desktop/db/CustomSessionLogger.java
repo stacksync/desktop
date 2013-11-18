@@ -9,7 +9,7 @@ import org.eclipse.persistence.logging.AbstractSessionLog;
 import org.eclipse.persistence.logging.SessionLog;
 import org.eclipse.persistence.logging.SessionLogEntry;
 import com.stacksync.desktop.Environment;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  *

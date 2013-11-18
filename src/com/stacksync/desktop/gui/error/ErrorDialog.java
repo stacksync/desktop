@@ -22,7 +22,7 @@ import javax.swing.JFrame;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.Stacksync;
 import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.StringUtil;
 
 /**
@@ -214,7 +214,7 @@ public class ErrorDialog extends javax.swing.JDialog {
             @Override
             public void run() {
                 logger.error("User message: "+txtComments.getText(), getException());
-                LogConfig.sendErrorLogs();                      
+                RemoteLogs.getInstance().sendLog(getException());                      
             }
         }, "SendCrashRep").start();
     }//GEN-LAST:event_btnReportActionPerformed

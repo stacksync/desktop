@@ -127,10 +127,6 @@ public class CloneClient extends PersistentObject implements Serializable {
         this.userName = userName;
     }
     
-    public File getUserImageFile() {
-        return new File(config.getConfDir()+File.separator+Constants.PROFILE_IMAGE_DIRNAME+File.separator+getProfileId()+"-"+getMachineName()+".png");	
-    }
-    
     @Override
     public int hashCode() {
         int hash = 0;

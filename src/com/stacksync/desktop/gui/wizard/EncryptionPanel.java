@@ -24,7 +24,7 @@ import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  *
@@ -325,7 +325,7 @@ public class EncryptionPanel extends SettingsPanel {
             encryption.init(); // TODO do this differently
         } catch (ConfigException ex) {
             logger.error(ex);
-            LogConfig.sendErrorLogs();
+            RemoteLogs.getInstance().sendLog(ex);
         }
 
         // Repo

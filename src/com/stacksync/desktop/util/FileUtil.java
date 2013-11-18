@@ -48,7 +48,7 @@ import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.gui.linux.BrowseFileRequest;
 import com.stacksync.desktop.gui.linux.BrowseFileRequest.BrowseType;
 import com.stacksync.desktop.gui.linux.LinuxNativeClient;
-import com.stacksync.desktop.logging.LogConfig;
+import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  *
@@ -519,6 +519,7 @@ public class FileUtil {
         
     
     public static void createWindowsLink(String link, String target){
+        // TODO Is it always working fine???
         File FileLink = new File(link);
         if (!FileLink.exists()) {
             String script = "Set sh = CreateObject(\"WScript.Shell\")"
@@ -536,7 +537,7 @@ public class FileUtil {
                 Runtime.getRuntime().exec("wscript.exe \"" + file.getAbsolutePath() + "\"");
             } catch (IOException ex) {
                 logger.error(ex);
-                LogConfig.sendErrorLogs();
+                RemoteLogs.getInstance().sendLog(ex);
             }
         }
     }
