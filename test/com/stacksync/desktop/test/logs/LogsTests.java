@@ -48,9 +48,13 @@ public class LogsTests {
             File file = new File(env.getDefaultUserConfigDir() + File.separator + Constants.LOGGING_DEFAULT_FILENAME);
             DOMConfigurator.configure(file.toURI().toURL());
         } catch(NullPointerException e){
-            System.out.println("No log4j config file was found no logs will be saved for this stacksync instance please make sure LogProperties.xml file is correctly placed " + e.toString());
+            System.out.println("No log4j config file was found no logs will be "
+                    + "saved for this stacksync instance please make sure "
+                    + "LogProperties.xml file is correctly placed " + e.toString());
         } catch (MalformedURLException ex) {
-            System.out.println("No log4j config file was found no logs will be saved for this stacksync instance please make sure LogProperties.xml file is correctly placed " + ex.toString());
+            System.out.println("No log4j config file was found no logs will be "
+                    + "saved for this stacksync instance please make sure "
+                    + "LogProperties.xml file is correctly placed " + ex.toString());
         }
     }
     
@@ -79,12 +83,17 @@ public class LogsTests {
         logger.info("This test has to save a compressed file in the failedLogs folder");
         
         try {
-            throw new Exception("This is an exception");
-        } catch (Exception e){
+            throw new IOException("This is an exception");
+        } catch (IOException e){
             logger.error("There has been an exception: ", e);
             RemoteLogs.getInstance().sendLog(e);
         }
         
+    }
+    
+    @Test
+    public void sendFailedLog() {
+        RemoteLogs.getInstance().retrySendLogs();
     }
     
 }
