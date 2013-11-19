@@ -85,13 +85,19 @@ public class LogsTests {
         try {
             throw new IOException("This is an exception");
         } catch (IOException e){
-            logger.error("There has been an exception: ", e);
+            logger.error("There has been an exception1: ", e);
+            RemoteLogs.getInstance().sendLog(e);
+            logger.error("There has been an exception2: ", e);
+            RemoteLogs.getInstance().sendLog(e);
+            logger.error("There has been an exception3: ", e);
+            RemoteLogs.getInstance().sendLog(e);
+            logger.error("There has been an exception4: ", e);
             RemoteLogs.getInstance().sendLog(e);
         }
         
     }
     
-    @Test
+    //@Test
     public void sendFailedLog() {
         RemoteLogs.getInstance().retrySendLogs();
     }

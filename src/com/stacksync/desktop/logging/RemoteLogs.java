@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import com.stacksync.desktop.Environment;
 import java.io.FileOutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.FileUtils;
 
@@ -24,6 +22,7 @@ public class RemoteLogs {
     private boolean active;
     
     private LogSender sender;
+    private LogController controller;
     
     private RemoteLogs() {
         
@@ -32,7 +31,8 @@ public class RemoteLogs {
         this.logFilePath = this.logFolder + File.separator + "TempLog.log";
         this.failedLogsPath = this.logFolder + File.separator + "failedLogs";
         this.sender = new LogSender();
-        this.active = true;
+        this.controller = LogController.getInstance();
+        this.active = true; // Active by default!!! Change from config.xml...
     }
     
     public synchronized static RemoteLogs getInstance() {
@@ -46,7 +46,7 @@ public class RemoteLogs {
     
     public synchronized void sendLog(Exception generatedException) {
 
-        if (!active) {
+        if (!active || !controller.canBeSent(generatedException)) {
             return;
         }
         
@@ -63,6 +63,7 @@ public class RemoteLogs {
             if (success) {
                 this.cleanLog();
                 compressedLog.delete();
+                this.controller.addLogSent(generatedException);
             }
             
         } catch (IOException ex) {        
@@ -127,7 +128,7 @@ public class RemoteLogs {
             failedFilesDir.mkdir();
         }
         
-        // TODO check if this gz already exist
+        // TODO check if this gz already exist to add a number
         String fileName = generatedException.getClass().getName();
         File failedLogFile = new File(failedLogsPath + File.separator + fileName + ".gz");
         try {
