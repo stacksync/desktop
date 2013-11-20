@@ -2,11 +2,12 @@ package com.stacksync.desktop.logging;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import com.stacksync.desktop.Environment;
-import java.io.FileOutputStream;
 import java.util.zip.GZIPOutputStream;
+import com.stacksync.desktop.Environment;
+import java.util.HashMap;
 import org.apache.commons.io.FileUtils;
 
 public class RemoteLogs {
@@ -47,12 +48,14 @@ public class RemoteLogs {
     public synchronized void sendLog(Exception generatedException) {
 
         if (!active || !controller.canBeSent(generatedException)) {
+            this.cleanLog();
             return;
         }
         
         boolean success;
         File compressedLog = null;
         try {
+            
             // Compress log file and save to temp.gz file
             File logFile = new File(logFilePath);
             compressedLog = new File(logFolder + "/temp.gz");
@@ -72,6 +75,7 @@ public class RemoteLogs {
         
         if (!success && compressedLog != null) {
             this.saveFailedLogs(compressedLog, generatedException);
+            this.cleanLog();
         }
     }
     
@@ -92,6 +96,10 @@ public class RemoteLogs {
         }
     }
     
+    
+    /*
+     * This function does not work as expected.
+     */
     public void retrySendLogs() {
         
         if (!active) { 
@@ -103,21 +111,49 @@ public class RemoteLogs {
             return;
         }
         
+        HashMap<String, Exception> failedList;
+        try {
+            failedList = this.controller.getFailedLogs(logFolder);
+        } catch (Exception ex) {
+            this.controller.removeFailedFile(logFolder);
+            failedDir.delete();
+            return;
+        }
+        
         String[] fileList = failedDir.list();
         for (String log : fileList) {
                 
             File logFile = new File(failedLogsPath + "/" + log);
             try {
-                //logFile is already compressed
-                boolean success = this.sender.send(logFile);
-                if (success) {
-                    logFile.delete();
+                Exception exception = failedList.get(log);
+                
+                if (exception == null) {
+                    // This means that this exception is not in the failed
+                    // log serializd file.
+                    continue;
                 }
+                
+                if (this.controller.canBeSent(exception)) {
+                    //logFile is already compressed
+                    boolean success = this.sender.send(logFile);
+                    if (success) {
+                        this.controller.addLogSent(exception);
+                        //Thread.sleep(1000); // Logs sent in the same secon will ve overwritten
+                    }
+                }
+                
             } catch (IOException ex) {
-                // TODO
+                // If I try to add again the file to the failed list
+                // it will be an infinite loop...
+            } finally {
+                // Sent or not, the log is removed... (Is this correct?)
+                logFile.delete();
+                failedList.remove(log);
             }
             
         }
+        
+        this.controller.removeFailedFile(logFolder);
         
     }
     
@@ -128,15 +164,21 @@ public class RemoteLogs {
             failedFilesDir.mkdir();
         }
         
-        // TODO check if this gz already exist to add a number
-        String fileName = generatedException.getClass().getName();
-        File failedLogFile = new File(failedLogsPath + File.separator + fileName + ".gz");
+        /*String exceptionName = generatedException.getClass().getName();
+        ExceptionsFilenameFilter filter = new ExceptionsFilenameFilter(exceptionName);
+        int fileNum = failedFilesDir.list(filter).length  + 1;
+        String fileName = exceptionName + "_" + fileNum + ".gz";*/
+        int fileNum = failedFilesDir.list().length;
+        
+        String fileName = "log_" + fileNum + ".gz";
+        
+        File failedLogFile = new File(failedLogsPath + File.separator + fileName);
         try {
             FileUtils.moveFile(compressedLog, failedLogFile);
-        } catch (IOException ex) {
+            this.controller.addFailLog(generatedException, logFolder, fileName);
+        } catch (Exception ex) {
             // TODO remove?? try again??
         }
-        
     }
     
     private void compressAndSaveFile(File from, File to) throws IOException {
