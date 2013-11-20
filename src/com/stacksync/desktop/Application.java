@@ -171,6 +171,7 @@ public class Application implements ConnectionController {
         localWatcher.start();
         periodic.start();
         cache.start();
+        RemoteLogs.getInstance().setActive(config.isRemoteLogs());
     }
 
     private void doShutdown() {

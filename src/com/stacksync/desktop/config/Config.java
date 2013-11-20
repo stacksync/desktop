@@ -69,6 +69,7 @@ public class Config {
     private boolean autostart;
     private boolean notificationsEnabled;
     private ResourceBundle resourceBundle;
+    private boolean remoteLogs;
 
     private File resDir;
 
@@ -235,6 +236,14 @@ public class Config {
     
     public void setExtendedMode(boolean extendedMode) {
         this.extendedMode = extendedMode;
+    }
+    
+    public boolean isRemoteLogs() {
+        return remoteLogs;
+    }
+    
+    public void setRemoteLogs(boolean remoteLogs) {
+        this.remoteLogs = remoteLogs;
     }
     
     public void load() throws ConfigException {
@@ -425,7 +434,8 @@ public class Config {
         autostart = node.getBoolean("autostart", Constants.DEFAULT_AUTOSTART_ENABLED);
         notificationsEnabled = node.getBoolean("notifications", Constants.DEFAULT_NOTIFICATIONS_ENABLED);
                 
-        logApiRestUrl = node.getProperty("apiLogUrl", "http://ast2-deim.urv.cat/stack/apiput");
+        logApiRestUrl = node.getProperty("apiLogUrl", "URL_LOG_SERVER_API");
+        remoteLogs = node.getBoolean("remoteLogs", false);
         
         if (userName.isEmpty()) {
             userName = env.getUserName();
@@ -474,6 +484,7 @@ public class Config {
         node.setProperty("autostart", autostart);
         node.setProperty("notifications", notificationsEnabled);
         node.setProperty("apiLogUrl", logApiRestUrl);
+        node.setProperty("remoteLogs", remoteLogs);
 
         // Complex
         // DO NOT SAVE "database"

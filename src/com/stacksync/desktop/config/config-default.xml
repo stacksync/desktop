@@ -8,6 +8,7 @@
 	<notifications>true</notifications> <!-- optional -->
 	    
     <apiLogUrl>URL_LOG_SERVER_API</apiLogUrl>   
+    <remoteLogs>false</remoteLogs>
 
     <rabbitMQ>
         <host />
