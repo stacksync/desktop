@@ -269,13 +269,6 @@ public class FileUtil {
     }
 
     public static byte[] readFileToByteArray(File file) throws IOException {
-        /*byte[] contents = new byte[(int) file.length()]; // TODO WARNING!!! load file in buffer compeltely!!
-
-        FileInputStream fis = new FileInputStream(file);
-        fis.read(contents);
-        fis.close();
-
-        return contents;*/
         return FileUtils.readFileToByteArray(file);
     }
     
@@ -455,8 +448,12 @@ public class FileUtil {
             nativeClient.init("Everything is up to date.");
             Object responseObj = nativeClient.send(new BrowseFileRequest(type));
 
+            // If responseObj returns null means that there is a problem
+            // trying to connect with native linux socket.
             if (responseObj == null) {
-                return null;
+                //return null;
+                // Throw the exception to show the java native browser.
+                throw new Exception();
             }
 
             return (File) responseObj;

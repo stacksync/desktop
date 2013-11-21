@@ -18,7 +18,6 @@
 package com.stacksync.desktop.gui.wizard;
 
 import com.stacksync.desktop.config.profile.Profile;
-import com.stacksync.desktop.gui.settings.FoldersTablePanel;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
 import com.stacksync.desktop.gui.settings.SimpleFolderSelectionPanel;
 

@@ -14,7 +14,6 @@ import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import javax.swing.JFileChooser;
 import org.apache.log4j.Logger;
 
 public class SimpleFolderSelectionPanel extends SettingsPanel {
@@ -84,23 +83,15 @@ public class SimpleFolderSelectionPanel extends SettingsPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnBrowseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBrowseActionPerformed
-        // TODO add your handling code here:
-        JFileChooser fc = new JFileChooser(new File("."));
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int value = fc.showOpenDialog(this);
-        File file = null;
-        if (value == JFileChooser.APPROVE_OPTION) {
-            file = fc.getSelectedFile();
-            
-            this.txtFolderPath.setText(file.getAbsolutePath());
-
-        } else {
-            return;
-        }
         
-        Folder folder = profile.getFolders().get("stacksync");
-        folder.setLocalFile(file);
-        profile.getFolders().update(folder);
+        File file = FileUtil.showBrowseDirectoryDialog();
+        if (file != null && !file.getPath().equals("")) {
+            this.txtFolderPath.setText(file.getAbsolutePath());
+            
+            Folder folder = profile.getFolders().get("stacksync");
+            folder.setLocalFile(file);
+            profile.getFolders().update(folder);
+        }
     }//GEN-LAST:event_btnBrowseActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -153,8 +153,7 @@ public class LinuxNativeClient {
         }
 
         // FAILED.
-        logger.error("Could not send request "+request+" to native server. RETRAYING FAILED!");
-        //LogConfig.sendLog();        
+        logger.error("Could not send request "+request+" to native server. RETRAYING FAILED!");     
         return null;
     }
 
