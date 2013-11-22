@@ -26,6 +26,7 @@ import com.stacksync.desktop.gui.linux.UpdateMenuRequest;
 import java.io.File;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
+import com.stacksync.desktop.exceptions.TrayException;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
 import com.stacksync.desktop.gui.tray.TrayEventListener;
@@ -69,8 +70,9 @@ public class LinuxTray extends Tray {
             logger.debug(config.getMachineName()+"#Cannot change icon. Tray not initialized yet.");                
             return;
         }
-                
-        nativeClient.send(new UpdateStatusIconRequest(status));
+        try {
+            nativeClient.send(new UpdateStatusIconRequest(status));
+        } catch (TrayException ex) { }
     }    
 
     @Override
@@ -79,8 +81,9 @@ public class LinuxTray extends Tray {
             logger.warn(config.getMachineName()+"#Cannot send notification. Tray not initialized yet.");                
             return;
         }
-	
-        nativeClient.send(new NotifyRequest(summary, body, imageFile));
+        try {
+            nativeClient.send(new NotifyRequest(summary, body, imageFile));
+        } catch (TrayException ex) { }
     }
     
     @Override
@@ -91,18 +94,22 @@ public class LinuxTray extends Tray {
         }
 
         UpdateMenuRequest menu = new UpdateMenuRequest(config.getProfiles().list());       
-        nativeClient.send(menu);
+        try {
+            nativeClient.send(menu);
+        } catch (TrayException ex) { }
     }
     
     @Override
     public void updateStatusText() {
-        if (!initialized) {
-            logger.warn(config.getUserName()+"#Cannot update status. Tray not initialized yet.");                
-            return;
-        }
-        
-        UpdateStatusTextRequest menu = new UpdateStatusTextRequest(processesText);
-        nativeClient.send(menu);
+        try {
+            if (!initialized) {
+                logger.warn(config.getUserName()+"#Cannot update status. Tray not initialized yet.");
+                return;
+            }
+            
+            UpdateStatusTextRequest menu = new UpdateStatusTextRequest(processesText);
+            nativeClient.send(menu);
+        } catch (TrayException ex) { }
     }
     
     
@@ -145,11 +152,32 @@ public class LinuxTray extends Tray {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                boolean nativeActive = true;
                 while (true) {
-                    Object event = nativeClient.send(new ListenForTrayEventRequest());
+                    if (!nativeActive) {
+                        try {
+                            // This can be replaced by an observer!
+                            Thread.sleep(5000);
+                        } catch (InterruptedException ex1) { }
+                        
+                        if (!nativeClient.isActive()) {
+                            continue;
+                        }
+                    }
+                    
+                    
+                    try {
+                        Object event = nativeClient.send(new ListenForTrayEventRequest());
 
-                    if (event != null) {
-                        fireTrayEvent((TrayEvent) event);
+                        if (event != null) {
+                            nativeActive = true;
+                            fireTrayEvent((TrayEvent) event);
+                        }
+
+                    } catch (TrayException ex) {
+                        if (!nativeClient.isActive()) {
+                            nativeActive = false;
+                        }
                     }
                 }
             }

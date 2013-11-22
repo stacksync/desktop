@@ -34,6 +34,7 @@ import com.stacksync.desktop.config.Folders;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
+import com.stacksync.desktop.exceptions.TrayException;
 import com.stacksync.desktop.gui.error.ErrorDialog;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.Tray.StatusIcon;
@@ -61,6 +62,7 @@ public class LinuxNativeClient {
     private static final int RETRY_SLEEP = 50;
     private boolean initialized;
     private boolean terminated;
+    private boolean active;
     private Process serviceProcess;
     private int servicePort;
     private BufferedReader serviceIn;
@@ -81,12 +83,14 @@ public class LinuxNativeClient {
             return;
         }
 
+        active = true;
         startService(initialMessage);
         startNopThread();
         initialized = true;
-
-        // Set first icon
-        send(new UpdateStatusIconRequest(StatusIcon.DISCONNECTED));
+        try {
+            // Set first icon
+            send(new UpdateStatusIconRequest(StatusIcon.DISCONNECTED));
+        } catch (TrayException ex) { }
     }
 
     public synchronized void destroy() {
@@ -96,8 +100,12 @@ public class LinuxNativeClient {
             serviceProcess.destroy();
         }
     }
+    
+    public boolean isActive() {
+        return this.active;
+    }
 
-    public Object send(Request request) {
+    public Object send(Request request) throws TrayException {
         for (int i = 1; i <= RETRY_COUNT; i++) {
             
             PrintWriter out = null;
@@ -132,6 +140,8 @@ public class LinuxNativeClient {
                         Thread.sleep(RETRY_SLEEP);
                     } catch (InterruptedException e2) { }
                     continue;
+                } else {
+                    throw new TrayException("Tray error send exception: ", ex);
                 }
             } finally {
                 try {
@@ -340,15 +350,31 @@ public class LinuxNativeClient {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                int attempts = 0;
                 while (!terminated) {
+                    
+                    try {
+                        send(new NopRequest());
+                        attempts = 0;
+                        active = true;
+                    } catch (TrayException ex) {
+                        if (active) {
+                            logger.warn(ex);
+                            attempts++;
+                            if (attempts >= RETRY_COUNT) {
+                                active = false;
+                            }
+                        }
+
+                    }
+                    
                     try {
                         Thread.sleep(NOP_INTERVAL);
                     } catch (InterruptedException ex) {
                         logger.warn("TRAY SERVICE TERMINATED.", ex);
-                        //RemoteLogs.getInstance().sendLog(ex);
                     }
 
-                    send(new NopRequest());
                 }
             }
         }, "NativeNOPThread").start();

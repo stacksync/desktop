@@ -29,6 +29,6 @@ public class NopRequest implements Request {
 
     @Override
     public Object parseResponse(String responseLine) {
-        return null;
+        return responseLine;
     }
 }
