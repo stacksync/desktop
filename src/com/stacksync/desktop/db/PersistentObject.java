@@ -21,7 +21,7 @@ package com.stacksync.desktop.db;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public abstract class PersistentObject {   
+public abstract class PersistentObject {
     public void merge() {
         DatabaseHelper.getInstance().merge(this);
     }

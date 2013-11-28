@@ -123,7 +123,14 @@ public class MoveIndexRequest extends IndexRequest {
         dbToFile.setVersion(dbToFile.getVersion()+1);
         dbToFile.setUpdated(new Date());
         dbToFile.setStatus(Status.RENAMED);
-        dbToFile.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+        dbToFile.setSyncStatus(CloneFile.SyncStatus.LOCAL);
+        /*if (dbFromFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC
+                || FileUtil.checkIllegalName(dbToFile.getName())) {
+            dbToFile.setSyncStatus(CloneFile.SyncStatus.LOCAL);
+        } else {
+            dbToFile.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+        }*/
+        
         dbToFile.setClientName(config.getMachineName());
 
         dbToFile.setParent(cToParentFolder);
@@ -133,11 +140,9 @@ public class MoveIndexRequest extends IndexRequest {
         // Notify file manager
         desktop.touch(dbToFile.getFile());
 	    
-        /// GGIPART ///
         if (!dbToFile.isFolder()) {
             processFile(dbToFile);
-        }
-        /// GGIPART ///        
+        }     
         
         // Update children (if directory) -- RECURSIVELY !!
         if (dbToFile.isFolder()) {
@@ -157,7 +162,6 @@ public class MoveIndexRequest extends IndexRequest {
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
     
-    /// GGIPART ///
     private void processFile(CloneFile cf) {
         try {
             File file = cf.getFile();
@@ -165,20 +169,10 @@ public class MoveIndexRequest extends IndexRequest {
             
             // 1. Chunk it!
             FileChunk chunkInfo = null;
-                        
-            /// GGIPART ///
+            
             Folder folderProfile = cf.getProfile().getFolders().get(cf.getRootId()); 
             String path = file.getParent().replace(folderProfile.getLocalFile().getPath(), "");
-            //CCG: Change '\' to '/' in windows
             path = path.replace('\\', '/');
-
-            /*
-            File cacheDirectory = new File(config.getCache().getFolder().getPath() + path);
-            
-            if(!cacheDirectory.exists()){
-                cacheDirectory.mkdirs();
-            }*/
-            /// GGIENDPART ///
 
             //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
@@ -217,14 +211,42 @@ public class MoveIndexRequest extends IndexRequest {
             chunks.closeStream();            
             cf.merge();
             
-            // 3. Upload it
-            logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");                       
-            root.getProfile().getUploader().queue(cf);
+            // 3. CHECKS SECTION
+            // 3a. Check if file name contains specials Windows characters (:"\{...)
+            if (FileUtil.checkIllegalName(cf.getName())) {
+                logger.info("This filename contains illegal characters.");
+                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+                cf.merge();
+                return;
+            }
             
+            // 3b. TODO Check storage free space
+            
+            // 4. If previous version was UNSYNC
+            if (dbFromFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC){
+                
+                // Search for the last synced version to create the next version
+                CloneFile lastSyncedVersion = cf.getLastSyncedVersion();
+                if (lastSyncedVersion == null) {
+                    cf.setVersion(1);
+                    cf.setStatus(Status.NEW);
+                } else {
+                    cf.setVersion(lastSyncedVersion.getVersion()+1);
+                }
+                
+                cf.merge();
+                
+                // Clean unsynced versions from DB
+                cf.deleteHigherVersion();
+            }
+            
+            // 5. Upload it
+            logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
+            root.getProfile().getUploader().queue(cf);
+
         } catch (Exception ex) {
             logger.error("Could not index new file. IGNORING.", ex);
             RemoteLogs.getInstance().sendLog(ex);
-        } 
-    }        
-    /// GGIPART ///
+        }
+    }
 }

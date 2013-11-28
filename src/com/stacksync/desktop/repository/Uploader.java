@@ -208,6 +208,7 @@ public class Uploader {
 
             touch(file, SyncStatus.SYNCING);
 
+            // TODO IMPORTANT What about the DB to check the cunks!!!??
             // Get file list (to check if chunks already exist)
             if (cacheLastUpdate == null || fileList == null || System.currentTimeMillis()-cacheLastUpdate.getTime() > CACHE_FILE_LIST) {                
                 try {

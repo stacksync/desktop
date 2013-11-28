@@ -49,6 +49,8 @@ import com.stacksync.desktop.gui.linux.BrowseFileRequest;
 import com.stacksync.desktop.gui.linux.BrowseFileRequest.BrowseType;
 import com.stacksync.desktop.gui.linux.LinuxNativeClient;
 import com.stacksync.desktop.logging.RemoteLogs;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -606,5 +608,11 @@ public class FileUtil {
             logger.debug(config.getMachineName() + "#Exception: ", ex);
             return null;
         }
-    }    
+    }
+    
+    public static boolean checkIllegalName(String filename) {
+        Pattern pattern = Pattern.compile("[\\\\/:*<>|\"?]");
+        Matcher matcher = pattern.matcher(filename);
+        return matcher.find();
+    }
 }

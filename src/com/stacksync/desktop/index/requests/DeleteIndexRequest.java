@@ -79,19 +79,29 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         CloneFile deletedVersion = (CloneFile) dbFile.clone();
         
         if (deletedVersion.getSyncStatus() == CloneFile.SyncStatus.UNSYNC) {
-            if (deletedVersion.getVersion() == 1) {
-                dbFile.remove();
+
+            CloneFile lastSynced = deletedVersion.getLastSyncedVersion();
+
+            if (lastSynced == null) {
+                // No exist a legal version synchronized -> Delete all!!
+                deletedVersion.setVersion(0);
             } else {
-                dbFile.remove();
+                // Use next version and forget about the UNSYNC versions.
+                deletedVersion = (CloneFile) lastSynced.clone();
+                deletedVersion.setVersion(lastSynced.getVersion()+1);
+
                 // Updated changes
                 deletedVersion.setUpdated(new Date());
                 deletedVersion.setStatus(Status.DELETED);
-                //deletedVersion.setSyncStatus(CloneFile.SyncStatus.LOCAL);
                 deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
                 deletedVersion.setClientName(config.getMachineName());
 
                 deletedVersion.merge();
+                
             }
+            
+            deletedVersion.deleteHigherVersion();
+                
         } else {
 
             // Updated changes

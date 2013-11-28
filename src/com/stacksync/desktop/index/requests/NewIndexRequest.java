@@ -134,19 +134,20 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     private CloneFile addChangedVersion() {        
         CloneFile newVersion = (CloneFile) previousVersion.clone();
         
-        if (newVersion.getSyncStatus() == SyncStatus.UNSYNC) {
+        if (newVersion.getSyncStatus() == SyncStatus.UNSYNC
+                && previousVersion.getStatus() != Status.RENAMED) {
             if (previousVersion.getVersion() == 1) {
                 previousVersion.remove();
                 newVersion = this.addNewVersion();
             } else {
-                newVersion.setStatus(Status.CHANGED);                
+                newVersion.setStatus(Status.CHANGED);
                 newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
                 newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
                 previousVersion.remove();
             }
         } else {
             newVersion.setVersion(previousVersion.getVersion()+1);
-            newVersion.setStatus(Status.CHANGED);                
+            newVersion.setStatus(Status.CHANGED);
             newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
             newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
         }
@@ -180,17 +181,9 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
                         
-            /// GGIPART ///
             Folder folderProfile = cf.getProfile().getFolders().get(cf.getRootId()); 
             String path = file.getParent().replace(folderProfile.getLocalFile().getPath(), "");
-            //CCG: Change '\' to '/' in windows
             path = path.replace('\\', '/');
-
-            /*File cacheDirectory = new File(config.getCache().getFolder().getPath() + path);            
-            if(!cacheDirectory.exists()){
-                cacheDirectory.mkdirs();
-            }*/
-            /// GGIENDPART ///
 
             //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
@@ -230,9 +223,15 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             chunks.closeStream();
             
             // 3. Upload it
-            logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
-            root.getProfile().getUploader().queue(cf);
-                        
+            if (FileUtil.checkIllegalName(cf.getName())) {
+                logger.info("This filename contains illegal characters.");
+                cf.setSyncStatus(SyncStatus.UNSYNC);
+                cf.merge();
+            } else {
+                logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
+                root.getProfile().getUploader().queue(cf);
+            }
+            
         } catch (Exception ex) {
             logger.error("Could not index new file "+file+". IGNORING.", ex);
             RemoteLogs.getInstance().sendLog(ex);

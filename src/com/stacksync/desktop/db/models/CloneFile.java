@@ -402,7 +402,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         List<CloneFile> list = query.getResultList();
         return list;
     }
-
+    
     public List<CloneFile> getNextVersions() {
         String queryStr = "select c from CloneFile c where "
                 + "     c.profileId = :profileId and "
@@ -417,7 +417,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         query.setParameter("profileId", getProfileId());
         query.setParameter("fileId", getFileId());
         query.setParameter("version", getVersion());
-
+        
         List<CloneFile> list = query.getResultList();
         return list;
     }
@@ -454,7 +454,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             return null;
         }
     }
-    
     
     public List<CloneFile> getChildren() {
         
@@ -494,6 +493,51 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             logger.info(env.getMachineName() + "# No result -> " + ex.getMessage());
             return null;
         }
+    }
+    
+    public CloneFile getLastSyncedVersion() {
+
+        String queryStr = "select c from CloneFile c where "
+                + "     c.profileId = :profileId and "
+                + "     c.fileId = :fileId and "
+                + "     c.version < :version and "
+                + "     c.syncStatus = :syncStatus "
+                + "     order by c.version desc";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");    
+        query.setMaxResults(1);
+        
+        query.setParameter("profileId", getProfileId());
+        query.setParameter("fileId", getFileId());
+        query.setParameter("version", getVersion());
+        query.setParameter("syncStatus", SyncStatus.UPTODATE);
+
+        try {
+            return (CloneFile) query.getSingleResult();
+        } catch (NoResultException ex) {
+            logger.info(env.getMachineName() + "# No result -> " + ex.getMessage());
+            return null;
+        }
+    }
+    
+    public void deleteHigherVersion() {
+
+        String queryStr = "DELETE from CloneFile c where "
+                + "     c.profileId = :profileId and "
+                + "     c.fileId = :fileId and "
+                + "     c.version > :version";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
+        
+        query.setParameter("profileId", getProfileId());
+        query.setParameter("fileId", getFileId());
+        query.setParameter("version", getVersion());
+
+        config.getDatabase().getEntityManager().getTransaction().begin();
+        query.executeUpdate();
+        config.getDatabase().getEntityManager().getTransaction().commit();
     }
 
     public Status getStatus() {
