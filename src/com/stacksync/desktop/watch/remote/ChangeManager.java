@@ -398,8 +398,10 @@ public class ChangeManager {
         logger.info(config.getMachineName() + "#resolveConflict: B. Renaming local file " + oldConflictingLocalFile + " to " + newConflictingLocalFile + "");
         FileUtil.renameVia(oldConflictingLocalFile, newConflictingLocalFile.getFile());
 
-        // Q upload
-        uploader.queue(newConflictingLocalFile);   
+        // Q upload if name is legal
+        if (!FileUtil.checkIllegalName(newConflictingLocalFile.getName())) {
+            uploader.queue(newConflictingLocalFile);
+        }
 
         ///// C. Add updates to DB	
         logger.info(config.getMachineName() + "#resolveConflict: C. Adding updates to DB: " + conflictUpdate);
