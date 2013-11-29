@@ -455,6 +455,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         }
     }
     
+    // TODO optimize this!!! It returns a list with ALL the entries where the
+    // parent is this file. This is incorrect since could be files moved to
+    // other folders in further versions.
     public List<CloneFile> getChildren() {
         
         String queryStr = "select c from CloneFile c where "

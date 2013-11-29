@@ -255,16 +255,33 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             out.print("done\n");
             out.flush();
         }
-
+        
         private SyncStatus getSyncStatusChildren(CloneFile cf) {
             SyncStatus status = cf.getSyncStatus();
 
             if (cf.isFolder() && status == SyncStatus.UPTODATE) {
                 for (CloneFile cf2 : cf.getChildren()) {
+                    SyncStatus oldStatus = status;
                     status = getSyncStatusChildren(cf2);
-                    if (status != SyncStatus.UPTODATE) {
-                        break;
+                    
+                    // If file UPTODATE check next
+                    if (status == SyncStatus.UPTODATE) {
+                        continue;
                     }
+                    
+                    // If file is UNSYNC may be this is not the last version!
+                    if (status == SyncStatus.UNSYNC){
+                        /* Get last version and compare paths:
+                         *  Same path: folder is UNSYNC
+                         *  Different path: UNSYNC file is not in this folder
+                         */
+                        CloneFile lastVersion = cf2.getLastVersion();
+                        if (!lastVersion.getPath().equals(cf2.getPath())){
+                            status = oldStatus;
+                            continue;
+                        }
+                    }
+                    break;
                 }
             }
 
