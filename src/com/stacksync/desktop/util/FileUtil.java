@@ -544,8 +544,7 @@ public class FileUtil {
     public static boolean checkIgnoreFile(Folder root, File file){    
         String fileNameLower = file.getName().toLowerCase();
         
-        // .ignore file
-        if (fileNameLower.startsWith(Constants.FILE_IGNORE_PREFIX)) {
+        if(checkStackSyncTemporalFile(root, file)) {
             return true;
         }
         
@@ -573,6 +572,17 @@ public class FileUtil {
         if(parent != null && parent.getAbsolutePath().compareTo(root.getLocalFile().getAbsolutePath()) != 0 &&
                              parent.getAbsolutePath().length() > root.getLocalFile().getAbsolutePath().length()){            
             return checkIgnoreFile(root, parent);
+        }
+        
+        return false;
+    }
+    
+    public static boolean checkStackSyncTemporalFile(Folder root, File file) {
+        String fileNameLower = file.getName().toLowerCase();
+        
+        // .ignore file
+        if (fileNameLower.startsWith(Constants.FILE_IGNORE_PREFIX)) {
+            return true;
         }
         
         return false;

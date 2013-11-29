@@ -52,7 +52,7 @@ public class FileListerListenerImpl implements FileListerListener {
     @Override
     public boolean directoryFilter(File directory) {
         if (FileUtil.checkIgnoreFile(root, directory)) {
-            if (deleteIgnoreFiles) {
+            if (deleteIgnoreFiles && FileUtil.checkStackSyncTemporalFile(root, directory)) {
                 FileUtil.deleteRecursively(directory);
             }
 
@@ -65,7 +65,7 @@ public class FileListerListenerImpl implements FileListerListener {
     @Override
     public boolean fileFilter(File file) {
         if (FileUtil.checkIgnoreFile(root, file)) {
-            if (deleteIgnoreFiles) {
+            if (deleteIgnoreFiles && FileUtil.checkStackSyncTemporalFile(root, file)) {
                 FileUtil.deleteRecursively(file);
             }
 
