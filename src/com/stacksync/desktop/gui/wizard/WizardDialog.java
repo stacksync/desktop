@@ -384,7 +384,7 @@ public class WizardDialog extends JDialog {
         btnBack.setEnabled(true);
         btnNext.setEnabled(enableNext);
         
-        if (enableNext && getFocusOwner() == null) {
+        if (enableNext) {
             btnNext.requestFocus();
         }
 
