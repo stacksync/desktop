@@ -39,25 +39,24 @@ import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.util.FileUtil;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import org.apache.commons.io.IOUtils;
+import java.io.FileNotFoundException;
+import java.io.OutputStreamWriter;
+import java.util.logging.Level;
 import org.w3c.dom.Document;
 
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class Config {   
+public class Config {
     // Note: Do NOT add a logger here, as the logger needs the Config instance.
+
     private final Logger logger = Logger.getLogger(Config.class.getName());
-    private final Environment env = Environment.getInstance();   
+    private final Environment env = Environment.getInstance();
     private static final Config instance = new Config();
-    
     private File configDir;
     private File configFile;
-
     private Encryption encryption;
     private Document doc;
     private ConfigNode self;
@@ -70,18 +69,14 @@ public class Config {
     private boolean notificationsEnabled;
     private ResourceBundle resourceBundle;
     private boolean remoteLogs;
-
     private File resDir;
-
     private Database database;
     private Cache cache;
     private Profiles profiles;
-    
-    private BrokerProperties brokerProps;    
-    
+    private BrokerProperties brokerProps;
     private boolean extendedMode;
 
-    private Config() {    
+    private Config() {
         // Note: Do NOT add a logger here, as the logger needs the Config instance.        
         configDir = null;
         configFile = null;
@@ -90,29 +85,29 @@ public class Config {
         machineName = null;
         serviceEnabled = true;
         extendedMode = false;
-        
-        Locale locale = new Locale("en", "US");        
+
+        Locale locale = new Locale("en", "US");
         Locale defaultLocale = Locale.getDefault();
-        if(defaultLocale.getLanguage().toLowerCase().compareTo("es") == 0){
+        if (defaultLocale.getLanguage().toLowerCase().compareTo("es") == 0) {
             locale = new Locale("es", "ES");
-        } else if(defaultLocale.getLanguage().toLowerCase().compareTo("fr") == 0){
+        } else if (defaultLocale.getLanguage().toLowerCase().compareTo("fr") == 0) {
             locale = new Locale("fr", "FR");
-        } else if(defaultLocale.getLanguage().toLowerCase().compareTo("ca") == 0){
+        } else if (defaultLocale.getLanguage().toLowerCase().compareTo("ca") == 0) {
             locale = new Locale("ca", "ES");
         }
 
         resourceBundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, locale);
-        
+
         /*
          * WARNING: Do NOT add 'Config' as a static final if the class  
          *          is created in the Config constructor, Config.getInstance()
          *          will return NULL. 	
-         */	
+         */
         brokerProps = new BrokerProperties();
         database = new Database();
         cache = new Cache();
-        profiles = new Profiles(); 
-        
+        profiles = new Profiles();
+
         encryption = getEncryption();
     }
 
@@ -128,7 +123,7 @@ public class Config {
 
         return instance;
     }
-    
+
     private Encryption getEncryption() {
         Encryption encrypt = null;
         try {
@@ -141,17 +136,17 @@ public class Config {
         } catch (ConfigException ex) {
             logger.error("Error creating config file encrypter.", ex);
         }
-        
+
         return encrypt;
     }
-    
+
     public String getUserName() {
         return (userName != null) ? userName : env.getUserName();
     }
 
     public void setUserName(String userName) {
         this.userName = userName;
-    } 
+    }
 
     public String getMachineName() {
         return (machineName != null) ? machineName : env.getMachineName();
@@ -170,13 +165,13 @@ public class Config {
     }
 
     public boolean isAutostart() {
-        
+
         return autostart;
     }
-    public String getLogApiRestUrl(){
+
+    public String getLogApiRestUrl() {
         return logApiRestUrl;
-    } 
-            
+    }
 
     public void setAutostart(boolean autostart) {
         this.autostart = autostart;
@@ -197,7 +192,7 @@ public class Config {
 
         return configDir;
     }
-    
+
     public void setConfigDir(File configDir) {
         this.configDir = configDir;
     }
@@ -205,10 +200,10 @@ public class Config {
     public File getResDir() {
         return (resDir != null) ? resDir : env.getAppResDir();
     }
-    
+
     public File getResImage(String imageFilename) {
-        return new File(getResDir().getAbsoluteFile()+File.separator+imageFilename);
-    }    
+        return new File(getResDir().getAbsoluteFile() + File.separator + imageFilename);
+    }
 
     public void setResDir(File resDir) {
         this.resDir = resDir;
@@ -225,7 +220,7 @@ public class Config {
     public Profiles getProfiles() {
         return profiles;
     }
-    
+
     public ResourceBundle getResourceBundle() {
         return resourceBundle;
     }
@@ -233,80 +228,80 @@ public class Config {
     public boolean isExtendedMode() {
         return extendedMode;
     }
-    
+
     public void setExtendedMode(boolean extendedMode) {
         this.extendedMode = extendedMode;
     }
-    
+
     public boolean isRemoteLogs() {
         return remoteLogs;
     }
-    
+
     public void setRemoteLogs(boolean remoteLogs) {
         this.remoteLogs = remoteLogs;
     }
-    
+
     public void load() throws ConfigException {
         load(env.getDefaultUserConfigDir());
     }
-    
-    public void load(File configFolder) throws ConfigException{        
-        logger.info(env.getMachineName()+"#Loading configuration from "+configFolder);
-        
+
+    public void load(File configFolder) throws ConfigException {
+        logger.info(env.getMachineName() + "#Loading configuration from " + configFolder);
+
         configDir = configFolder;
-        configFile = new File(configDir.getAbsoluteFile()+File.separator+Constants.CONFIG_FILENAME);
-                
+        configFile = new File(configDir.getAbsoluteFile() + File.separator + Constants.CONFIG_FILENAME);
+
         // Default config dir
         if (!configDir.equals(env.getDefaultUserConfigDir())) {
             // Create if it does not exist
             createDirectory(configDir);
-        }
-        
-        // Not default config folder: Must exist!
+        } // Not default config folder: Must exist!
         else if (!configDir.equals(env.getDefaultUserConfigDir())) {
             if (!configDir.exists()) {
-                throw new ConfigException("Config folder "+configDir+" does not exist!");
+                throw new ConfigException("Config folder " + configDir + " does not exist!");
             }
         }
 
-        createDirectory(new File(configDir+File.separator+Constants.CONFIG_DATABASE_DIRNAME));
-        createDirectory(new File(configDir+File.separator+Constants.PROFILE_IMAGE_DIRNAME));
+        createDirectory(new File(configDir + File.separator + Constants.CONFIG_DATABASE_DIRNAME));
+        createDirectory(new File(configDir + File.separator + Constants.PROFILE_IMAGE_DIRNAME));
 
         // Config file: copy from res-dir, if non-existant
-        if (!configFile.exists()) {           
+        if (!configFile.exists()) {
             InputStream is = null;
-            
+
             try {
                 is = Environment.class.getResourceAsStream(Constants.CONFIG_DEFAULT_FILENAME);
-                
-                //FileUtil.writeFile(is, configFile);
-                byte[] packed = encryptConfigFile(IOUtils.toByteArray(is));
-                FileUtil.writeFile(packed, configFile);
+
+                FileUtil.writeFile(is, configFile);
+                //byte[] packed = encryptConfigFile(IOUtils.toByteArray(is));
+                //FileUtil.writeFile(packed, configFile);
             } catch (IOException e) {
-                throw new ConfigException("Could not copy default config file from "+Constants.CONFIG_DEFAULT_FILENAME+" to "+configFile, e);
+                throw new ConfigException("Could not copy default config file from " + Constants.CONFIG_DEFAULT_FILENAME + " to " + configFile, e);
             } finally {
                 try {
-                    if(is != null){
+                    if (is != null) {
                         is.close();
                     }
                 } catch (IOException ex) {
                     logger.error(getMachineName() + "#Exception: ", ex);
                 }
-            }                
+            }
         }
-        
+
         InputStream stream = null;
-        
+
         try {
-            
-            byte[] byteStream = decrytpConfigFile();
-            
-            stream = new ByteArrayInputStream(byteStream);
-            //stream = new FileInputStream(configFile);
+
+            //byte[] byteStream = decrytpConfigFile();
+            //stream = new ByteArrayInputStream(byteStream);
+
+            stream = new FileInputStream(configFile);
             load(stream);
+        } catch (FileNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                if(stream != null){
+                if (stream != null) {
                     stream.close();
                 }
             } catch (IOException ex) {
@@ -314,10 +309,9 @@ public class Config {
             }
         }
     }
-    
 
     public synchronized void load(InputStream configStream) throws ConfigException {
-        
+
         // Parse and load!
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -327,11 +321,11 @@ public class Config {
             self = new ConfigNode(doc.getDocumentElement());
 
             loadDOM(self);
-                               
+
         } catch (Exception e) {
             throw new ConfigException(e);
         }
-             
+
     }
 
     /**
@@ -339,13 +333,15 @@ public class Config {
      * config file if it has not been loaded at all.
      *
      * <p>Note: This does not save the config to the default config file. To do
-     * that, call <code>save(env.getDefaultConfigFile());</code>
+     * that, call
+     * <code>save(env.getDefaultConfigFile());</code>
+     *
      * @throws ConfigException
      */
     public void save() throws ConfigException {
         FileOutputStream out = null;
-        ByteArrayOutputStream outputStream = null;
-                
+        OutputStreamWriter outputStream = null;
+
         saveDOM(self);
 
         // Save file
@@ -354,21 +350,21 @@ public class Config {
         try {
             out = new FileOutputStream(configFile);
             DOMSource ds = new DOMSource(doc);
-            outputStream = new ByteArrayOutputStream();
+            outputStream = new OutputStreamWriter(out, "utf-8");
             StreamResult sr = new StreamResult(outputStream);
 
             TransformerFactory tf = TransformerFactory.newInstance();
             tf.setAttribute("indent-number", 4);
 
             Transformer trans = tf.newTransformer();
-            trans.setOutputProperty(OutputKeys.INDENT,"yes");
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
             trans.transform(ds, sr);
-            
-            byte[] packed = encryptConfigFile(outputStream.toByteArray());
-            FileUtil.writeFile(packed, configFile);
-            
+
+            //byte[] packed = encryptConfigFile(outputStream.toByteArray());
+            //FileUtil.writeFile(packed, configFile);
+
             outputStream.close();
-                      
+
         } catch (Exception e) {
             throw new ConfigException(e);
         } finally {
@@ -381,10 +377,10 @@ public class Config {
                 }
             } catch (IOException ex) {
                 logger.error(getMachineName() + "#I/O Exception.", ex);
-            }            
+            }
         }
     }
-    
+
     private byte[] decrytpConfigFile() throws ConfigException {
         byte[] packed = null;
         try {
@@ -398,10 +394,10 @@ public class Config {
             logger.error(e);
             throw new ConfigException(e);
         }
-        
+
         return packed;
     }
-    
+
     private byte[] encryptConfigFile(byte[] fileData) throws ConfigException {
         byte[] packed = null;
         try {
@@ -410,63 +406,63 @@ public class Config {
             logger.error(e);
             throw new ConfigException(e);
         }
-        
+
         return packed;
     }
 
     public void createDirectory(File directory) throws ConfigException {
         if (!directory.exists() && !directory.mkdirs()) {
-            throw new ConfigException("Directory '"+directory+"' does not exist and could not be created.");
+            throw new ConfigException("Directory '" + directory + "' does not exist and could not be created.");
         } else if (!directory.isDirectory() || !directory.canRead() || !directory.canWrite()) {
-            throw new ConfigException("Path '"+directory+"' is not a directory or is not read/writable.");
+            throw new ConfigException("Path '" + directory + "' is not a directory or is not read/writable.");
         }
     }
 
-    public BrokerProperties getBrokerProps(){
+    public BrokerProperties getBrokerProps() {
         return brokerProps;
-    }        
-    
+    }
+
     private void loadDOM(ConfigNode node) throws ConfigException {
         // Flat values
-        userName = node.getProperty("username", env.getUserName());	
+        userName = node.getProperty("username", env.getUserName());
         machineName = node.getProperty("machinename", env.getMachineName()).replace("-", "_");
         serviceEnabled = node.getBoolean("service-enabled", true);
         autostart = node.getBoolean("autostart", Constants.DEFAULT_AUTOSTART_ENABLED);
         notificationsEnabled = node.getBoolean("notifications", Constants.DEFAULT_NOTIFICATIONS_ENABLED);
-                
+
         logApiRestUrl = node.getProperty("apiLogUrl", "URL_LOG_SERVER_API");
         remoteLogs = node.getBoolean("remoteLogs", false);
-        
+
         if (userName.isEmpty()) {
             userName = env.getUserName();
         }
-	
+
         if (machineName.isEmpty()) {
             machineName = env.getMachineName();
         }
-	
+
         // Resource bundle
         String language = node.getProperty("language", null);
-        
+
         if (language != null) {
             try {
-                
-                String[] languageSplit = language.split("_");                
-                if(languageSplit.length == 2){
-                    resourceBundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, new Locale(languageSplit[0].toLowerCase(), languageSplit[1].toUpperCase()));                    
+
+                String[] languageSplit = language.split("_");
+                if (languageSplit.length == 2) {
+                    resourceBundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, new Locale(languageSplit[0].toLowerCase(), languageSplit[1].toUpperCase()));
                 }
             } catch (MissingResourceException e) {
-                logger.warn(getMachineName() + "#COULD NOT LOAD resource bundle for "+language, e);
+                logger.warn(getMachineName() + "#COULD NOT LOAD resource bundle for " + language, e);
                 /* Use default; Loaded in constructor */
             }
         }
-	
+
         // Directories	
         resDir = node.getFile("resdir", env.getAppResDir());
 
         // Tests
         if (!resDir.exists() || !resDir.isDirectory() || !resDir.canRead()) {
-            throw new ConfigException("Cannot read resource directory '"+resDir+"'.");
+            throw new ConfigException("Cannot read resource directory '" + resDir + "'.");
         }
 
         // Complex subvalues    
@@ -492,5 +488,4 @@ public class Config {
         cache.save(node.findOrCreateChildByXpath("cache", "cache"));
         profiles.save(node.findOrCreateChildByXpath("profiles", "profiles"));
     }
-    
 }
