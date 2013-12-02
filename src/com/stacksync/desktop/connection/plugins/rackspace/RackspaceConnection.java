@@ -28,6 +28,8 @@ import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.connection.plugins.rackspace_comercial.RackspaceComercialPluginInfo;
 import com.stacksync.desktop.connection.plugins.rackspace_dev.RackspaceDevPluginInfo;
 import com.stacksync.desktop.exceptions.ConfigException;
+import com.stacksync.desktop.config.cipher.PasswordCipher;
+import com.stacksync.desktop.config.cipher.PasswordCipherFactory;
 
 /**
  *
@@ -35,13 +37,16 @@ import com.stacksync.desktop.exceptions.ConfigException;
  */
 public class RackspaceConnection implements Connection {
     private final Config config = Config.getInstance();
+    // By default we use the DUMMY cipher to avoid problems with
+    // old versions.
+    private final PasswordCipherFactory.EncryptType encrypType = PasswordCipherFactory.EncryptType.DUMMY;
     
     private String username;
     private String apiKey;
     private String container;
     private String authUrl;
     private ResourceBundle resourceBundle;
-
+    
     public RackspaceConnection() {
         resourceBundle = config.getResourceBundle();
     }
@@ -65,7 +70,6 @@ public class RackspaceConnection implements Connection {
 
     @Override
     public ConfigPanel createConfigPanel() {
-        //return new RackspaceConfigPanel(this);
         ConfigPanel panel;
         
         if (config.isExtendedMode()) {
@@ -114,9 +118,11 @@ public class RackspaceConnection implements Connection {
     public void load(ConfigNode node) throws ConfigException {
         // Mandatory
         username = node.getProperty("username");
-        apiKey = node.getProperty("apikey");
+        
+        PasswordCipher cipher = PasswordCipherFactory.getPasswordEncrypter(encrypType);
+        apiKey = cipher.decrypt(node.getProperty("apikey"));
+        
         container = node.getProperty("container");
-        // CCG
         authUrl = node.getProperty("authurl");
 
         if (username == null || apiKey == null || container == null) {
@@ -128,9 +134,11 @@ public class RackspaceConnection implements Connection {
     public void save(ConfigNode node) {
         node.setAttribute("type", getPluginInfo().getId());
         node.setProperty("username", username);
-        node.setProperty("apikey", apiKey);
+        
+        PasswordCipher cipher = PasswordCipherFactory.getPasswordEncrypter(encrypType);
+        String encryptedApiKey = cipher.encrypt(apiKey);
+        node.setProperty("apikey", encryptedApiKey);
         node.setProperty("container", container);
-        // CCG
         node.setProperty("authurl", authUrl);
     }
     
