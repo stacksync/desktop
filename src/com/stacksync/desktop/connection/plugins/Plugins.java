@@ -83,11 +83,10 @@ public class Plugins {
         plugins.add("sftp");
         plugins.add("webdav");        
         
-        /// GGIPART /// Only load the needed plugins        
+        // Only load the needed plugins        
         for(String pl: plugins){
             loadPlugin(pl);
         }        
-        /// GGIENDPART ///
     }
 
     public static Collection<PluginInfo> list() {
