@@ -112,11 +112,9 @@ public class MoveIndexRequest extends IndexRequest {
         // Updated changes
         dbToFile.setRoot(toRoot);
         dbToFile.setLastModified(new Date(toFile.lastModified()));
-        
-        /// GGIPART ///                
+                      
         String path = FileUtil.getFilePathCleaned(relToParentFolder);        
         dbToFile.setPath(path);   
-        /// GGIENDPART ///
         
         dbToFile.setName(toFile.getName());
         dbToFile.setFileSize((toFile.isDirectory()) ? 0 : toFile.length());
@@ -124,12 +122,6 @@ public class MoveIndexRequest extends IndexRequest {
         dbToFile.setUpdated(new Date());
         dbToFile.setStatus(Status.RENAMED);
         dbToFile.setSyncStatus(CloneFile.SyncStatus.LOCAL);
-        /*if (dbFromFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC
-                || FileUtil.checkIllegalName(dbToFile.getName())) {
-            dbToFile.setSyncStatus(CloneFile.SyncStatus.LOCAL);
-        } else {
-            dbToFile.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-        }*/
         
         dbToFile.setClientName(config.getMachineName());
 
@@ -142,22 +134,9 @@ public class MoveIndexRequest extends IndexRequest {
 	    
         if (!dbToFile.isFolder()) {
             processFile(dbToFile);
-        }     
-        
-        // Update children (if directory) -- RECURSIVELY !!
-        if (dbToFile.isFolder()) {
-            logger.info("Indexer: Updating CHILDREN of "+toFile+" ...");   
-            List<CloneFile> children = db.getChildren(dbFromFile);
-
-            for (CloneFile child : children) {
-                File childFromFile = child.getFile();
-                File childToFile = new File(absToParentFolder+File.separator+toFile.getName()+File.separator+child.getName());
-                logger.info("Indexer: Updating children of moved file "+childFromFile.getAbsolutePath()+" TO "+childToFile.getAbsolutePath()+"");
-                
-                // Do it!
-                new MoveIndexRequest(fromRoot, childFromFile, toRoot, childToFile).process();
-            }
-        }
+        } else {
+            processFolder(dbToFile);
+        }  
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
@@ -213,7 +192,8 @@ public class MoveIndexRequest extends IndexRequest {
             
             // 3. CHECKS SECTION
             // 3a. Check if file name contains specials Windows characters (:"\{...)
-            if (FileUtil.checkIllegalName(cf.getName())) {
+            if (FileUtil.checkIllegalName(cf.getName())
+                    || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
                 logger.info("This filename contains illegal characters.");
                 cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
                 cf.merge();
@@ -248,5 +228,54 @@ public class MoveIndexRequest extends IndexRequest {
             logger.error("Could not index new file. IGNORING.", ex);
             RemoteLogs.getInstance().sendLog(ex);
         }
+    }
+    
+    private void processFolder(CloneFile cf) {
+        
+        // 4. If previous version was UNSYNC
+        if (dbFromFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC){
+
+            // Search for the last synced version to create the next version
+            CloneFile lastSyncedVersion = cf.getLastSyncedVersion();
+            if (lastSyncedVersion == null) {
+                cf.setVersion(1);
+                cf.setStatus(Status.NEW);
+            } else {
+                cf.setVersion(lastSyncedVersion.getVersion()+1);
+            }
+
+            cf.merge();
+
+            // Clean unsynced versions from DB
+            cf.deleteHigherVersion();
+        }
+        
+        
+        String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
+        
+        // Update children (if directory) -- RECURSIVELY !!
+        logger.info("Indexer: Updating CHILDREN of "+toFile+" ...");   
+        List<CloneFile> children = db.getChildren(dbFromFile);
+
+        for (CloneFile child : children) {
+            File childFromFile = child.getFile();
+            File childToFile = new File(absToParentFolder+File.separator+toFile.getName()+File.separator+child.getName());
+            logger.info("Indexer: Updating children of moved file "+childFromFile.getAbsolutePath()+" TO "+childToFile.getAbsolutePath()+"");
+
+            // Do it!
+            new MoveIndexRequest(fromRoot, childFromFile, toRoot, childToFile).process();
+        }
+        
+        if (FileUtil.checkIllegalName(cf.getName())
+                || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
+            logger.info("This folder contains illegal characters.");
+            cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+            cf.merge();
+            return;
+        }
+        
+        cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+        cf.merge();
+        
     }
 }

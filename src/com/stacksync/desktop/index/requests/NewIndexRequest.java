@@ -158,7 +158,13 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     private void processFolder(CloneFile cf) {        
         // Add rest of the DB stuff 
         cf.setChecksum(0);
-        cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+        
+        if (FileUtil.checkIllegalName(cf.getName())
+                || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
+            cf.setSyncStatus(SyncStatus.UNSYNC);
+        } else {
+            cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+        }
         cf.merge();
         
         // Analyze file tree (if directory) -- RECURSIVELY!!
@@ -223,7 +229,8 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             chunks.closeStream();
             
             // 3. Upload it
-            if (FileUtil.checkIllegalName(cf.getName())) {
+            if (FileUtil.checkIllegalName(cf.getName())
+                    || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
                 logger.info("This filename contains illegal characters.");
                 cf.setSyncStatus(SyncStatus.UNSYNC);
                 cf.merge();
