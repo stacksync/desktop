@@ -160,7 +160,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         cf.setChecksum(0);
         
         if (FileUtil.checkIllegalName(cf.getName())
-                || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
+                || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
             cf.setSyncStatus(SyncStatus.UNSYNC);
         } else {
             cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
@@ -230,7 +230,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             
             // 3. Upload it
             if (FileUtil.checkIllegalName(cf.getName())
-                    || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
+                    || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
                 cf.setSyncStatus(SyncStatus.UNSYNC);
                 cf.merge();

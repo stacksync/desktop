@@ -193,7 +193,7 @@ public class MoveIndexRequest extends IndexRequest {
             // 3. CHECKS SECTION
             // 3a. Check if file name contains specials Windows characters (:"\{...)
             if (FileUtil.checkIllegalName(cf.getName())
-                    || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
+                    || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
                 cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
                 cf.merge();
@@ -267,7 +267,7 @@ public class MoveIndexRequest extends IndexRequest {
         }
         
         if (FileUtil.checkIllegalName(cf.getName())
-                || FileUtil.checkIllegalName(cf.getPath().replace(File.separator, ""))){
+                || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
             logger.info("This folder contains illegal characters.");
             cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
             cf.merge();
