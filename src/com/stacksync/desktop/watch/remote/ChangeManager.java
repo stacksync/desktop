@@ -593,31 +593,31 @@ public class ChangeManager {
         FileUtil.deleteRecursively(tempNewFile); // just in case!
         FileUtil.deleteRecursively(tempDeleteFile); // just in case!
 
-
+        
         ///// B. Make folder
         if (newestVersion.isFolder()) {
-            tempNewFile.mkdirs();
-        } else { ///// C+D. Download and assemble file
-
-            /// GGIPART ///
-            /// if path don't exist create!
-            File filePath = newestVersion.getFile().getParentFile();
-            if (!filePath.exists()) {
-                filePath.mkdirs();
-            }
-
-
-            downloadChunks(newestVersion);
-            assembleFile(newestVersion, tempNewFile);            
+            File newFolder = new File(newestVersion.getAbsoluteParentDirectory() + File.separator + newestVersion.getName());
+            newFolder.mkdir();
+            return;
+        } 
+        
+        /// if path don't exist create!
+        File filePath = newestVersion.getFile().getParentFile();
+        if (!filePath.exists()) {
+            filePath.mkdirs();
         }
-
+        
+        ///// C+D. Download and assemble file
+        downloadChunks(newestVersion);
+        assembleFile(newestVersion, tempNewFile);            
+        
         ///// E. delete local version (if there is one)
         if (lastMatchingVersion != null && lastMatchingVersion.getFile().exists()) {
             lastMatchingVersion.getFile().renameTo(tempDeleteFile);
             FileUtil.deleteRecursively(tempDeleteFile);
         }
 
-        ///// F. Move temp file tonew file
+        ///// F. Move temp file to new file
         tempNewFile.setLastModified(newestVersion.getLastModified().getTime());
         tempNewFile.renameTo(newestVersion.getFile());
         FileUtil.deleteRecursively(tempNewFile);
