@@ -63,6 +63,7 @@ public class SftpConnection implements Connection {
         return new SftpConfigPanel(this);
     }
   
+    @Override
     public String getHost() {
         return host;
     }

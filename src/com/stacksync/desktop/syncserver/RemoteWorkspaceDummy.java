@@ -32,7 +32,7 @@ public class RemoteWorkspaceDummy extends RemoteObject implements RemoteWorkspac
     @Override
     public void notifyCommit(CommitResult cr) {
         List<CommitInfo> listObjects = cr.getObjects();
-        logger.info(config.getMachineName() + "# [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
+        logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
         try {
             Stacksync_dummy.saveTimeSendRequestLog("Client-time-commit", cr.getRequestID(), "commit-end");

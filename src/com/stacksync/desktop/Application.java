@@ -120,7 +120,7 @@ public class Application implements ConnectionController {
         initDependencies();
         boolean deamonMode = config.isDaemonMode();
         if (!deamonMode) {
-            logger.info(env.getMachineName() + "#Init UI...");
+            logger.info("Init UI...");
             initUI();
         }
 
@@ -145,7 +145,7 @@ public class Application implements ConnectionController {
     }
 
     private void initDependencies() {
-        logger.info(env.getMachineName() + "#Instantiating dependencies ...");
+        logger.info("Instantiating dependencies ...");
         config = Config.getInstance();
 
         new Thread(new Runnable() {
@@ -174,7 +174,7 @@ public class Application implements ConnectionController {
     }
 
     private void doShutdown() {
-        logger.info(env.getMachineName() + "#Shutting down ...");
+        logger.info("Shutting down ...");
 
         tray.destroy();
         indexer.stop();
@@ -231,7 +231,7 @@ public class Application implements ConnectionController {
             if (!config.isDaemonMode()) {
                 profile = initFirstTimeWizard();
             } else {
-                logger.error(env.getMachineName() + "#Daemon needs config.xml have minimum one profile to start the application...");
+                logger.error("Daemon needs config.xml have minimum one profile to start the application.");
             }
 
             if (profile == null) {
@@ -301,7 +301,7 @@ public class Application implements ConnectionController {
         return profile;
     }
 
-    private void WriteWindowsRegistry(Profile profile) throws Exception {
+    private void writeWindowsRegistry(Profile profile) throws Exception {
 
         String localPath = profile.getFolders().get("stacksync").getLocalFile().getPath();
 
@@ -321,7 +321,7 @@ public class Application implements ConnectionController {
     private void savePathToRegistry(Profile profile){
         if (env.getOperatingSystem() == Environment.OperatingSystem.Windows) {
             try {
-                WriteWindowsRegistry(profile);
+                writeWindowsRegistry(profile);
             } catch (Exception ex) {
                 logger.error("Could not write Windows registry", ex);
             }
@@ -381,7 +381,7 @@ public class Application implements ConnectionController {
 
                 default:
                     //checkthis
-                    logger.warn(env.getMachineName() + "#Unknown tray event type: " + event);
+                    logger.warn("Unknown tray event type: " + event);
                 // Fressen.
             }
         }

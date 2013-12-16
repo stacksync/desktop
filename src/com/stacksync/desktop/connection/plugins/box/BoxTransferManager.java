@@ -41,7 +41,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.codec.binary.Base64;
 import com.stacksync.desktop.connection.plugins.AbstractTransferManager;
-import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.repository.files.RemoteFile;

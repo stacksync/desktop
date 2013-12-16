@@ -51,7 +51,7 @@ public abstract class Tray {
     private boolean startDemonOnly;    
 
     protected Tray() {
-        logger.info(config.getMachineName()+"#Creating tray ...");        
+        logger.info("Creating tray ...");        
         
         cachedStatus = StatusIcon.DISCONNECTED;
         listeners = new ArrayList<TrayEventListener>();

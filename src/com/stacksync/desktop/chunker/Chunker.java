@@ -2,8 +2,6 @@ package com.stacksync.desktop.chunker;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import org.apache.log4j.Logger;
-import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.index.AdlerChecksum;
 import com.stacksync.desktop.index.ChecksumCreator;
 import com.stacksync.desktop.chunker.Static.StaticChunker;
@@ -17,9 +15,6 @@ import com.stacksync.desktop.chunker.TTTD.TTTDChunker;
  *
  */
 public class Chunker {
-
-    private final Logger logger = Logger.getLogger(AdlerChecksum.class.getName());
-    protected final Config config = Config.getInstance();
     
     private ChecksumCreator fileChecksum;
 

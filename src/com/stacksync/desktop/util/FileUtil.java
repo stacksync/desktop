@@ -615,7 +615,7 @@ public class FileUtil {
             
             return attr.getValue(property);            
         } catch (IOException ex) {
-            logger.debug(config.getMachineName() + "#Exception: ", ex);
+            logger.debug("Exception: ", ex);
             return null;
         }
     }

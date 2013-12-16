@@ -28,7 +28,7 @@ import com.stacksync.desktop.exceptions.ConfigException;
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class Folders implements Configurable {
-    public final String TAG_NAME = "folders";
+    public static final String TAG_NAME = "folders";
 
     private Profile profile;
     private TreeMap<String, Folder> folders;

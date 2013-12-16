@@ -143,7 +143,7 @@ public class BufferedWatcher {
                     fireDelayedEvents();
                 } catch (Exception e) {
                     //checkthis
-                    logger.warn(config.getMachineName()+"#Error while processing delayed events. IGNORING.",e);
+                    logger.warn("Error while processing delayed events. IGNORING.",e);
                 }
             }
         }, 0, delay);        
@@ -185,7 +185,7 @@ public class BufferedWatcher {
                     
                     // File might not exist anymore
                     if (file == null) {  
-                        logger.warn(config.getMachineName()+"#Purging delayed event. Watch key invalid. File vanished? Event = "+e.getEvent()+", Key ="+e.getParentKey());
+                        logger.warn("Purging delayed event. Watch key invalid. File vanished? Event = "+e.getEvent()+", Key ="+e.getParentKey());
                     }
                     
                     // Check if changed; re-add if it did change!
@@ -288,7 +288,7 @@ public class BufferedWatcher {
      */
     private synchronized void removeWatch(WatchNode node) {     
         if (node == null) {
-            logger.warn(config.getMachineName()+"#Cannot remove watch. Node is null.");
+            logger.warn("Cannot remove watch. Node is null.");
             return;
         }
         
@@ -329,7 +329,7 @@ public class BufferedWatcher {
         WatchEvent event = xe.getEvent();        
         
         if (parentNode == null || parentKey == null || event == null) {
-            logger.warn(config.getMachineName()+"#Cannot process event"+xe+". Invalid values: parentNode = "+parentNode+", parentKey = "+parentKey+", event = "+event );
+            logger.warn("Cannot process event"+xe+". Invalid values: parentNode = "+parentNode+", parentKey = "+parentKey+", event = "+event );
             return;
         }
         
@@ -337,7 +337,7 @@ public class BufferedWatcher {
             || event.kind() == ExtendedWatchEventKind.ENTRY_RENAME_TO) {
             
             File file = getEventFile(event, xe.getParentKey()); 
-            logger.info(config.getMachineName()+"#"+event.kind().name()+" "+file);
+            logger.info(""+event.kind().name()+" "+file);
             
             if (file.isDirectory() && parentNode.isRecursive() && 
                 env.getOperatingSystem() != OperatingSystem.Windows) {
@@ -346,14 +346,14 @@ public class BufferedWatcher {
                     addWatch(file, parentNode.isRecursive(), parentNode.getListener());
                 } catch (IOException ex) {
                     //checkthis
-                    logger.warn(config.getMachineName()+"#Could not add log to "+file+". IGNORING.", ex);
+                    logger.warn("Could not add log to "+file+". IGNORING.", ex);
                 }
             }
         } else if (event.kind() == StandardWatchEventKind.ENTRY_DELETE
             || event.kind() == ExtendedWatchEventKind.ENTRY_RENAME_FROM) {
             
             File file = getEventFile(event, parentKey);
-            logger.info(config.getMachineName()+"#"+event.kind().name()+" "+file);
+            logger.info(""+event.kind().name()+" "+file);
             
             if (fileNodeMap.containsKey(file)) {
                 removeWatch(file);
@@ -367,7 +367,7 @@ public class BufferedWatcher {
             
             File fromFile = getEventFile(fromEvent.getEvent(), fromEvent.getParentKey());
             File toFile = getEventFile(toEvent.getEvent(), toEvent.getParentKey());
-            logger.info(config.getMachineName()+"#"+event.kind().name()+" "+fromFile+" -> "+toFile);
+            logger.info(""+event.kind().name()+" "+fromFile+" -> "+toFile);
             
             if (fileNodeMap.containsKey(fromFile)) {
                 updateMoveFileMaps(fromFile, toEvent.getParentKey(), toFile);                
@@ -381,12 +381,12 @@ public class BufferedWatcher {
     }
     
     private synchronized void updateMoveFileMaps(File fromFile, WatchKey toParentKey, File toFile) { 
-        logger.debug(config.getMachineName()+"#updating file maps : from "+fromFile +" to "+toFile);
+        logger.debug("updating file maps : from "+fromFile +" to "+toFile);
         
         // Update given key
         WatchNode moveNode = fileNodeMap.get(fromFile);
         if (moveNode == null) {
-            logger.warn(config.getMachineName()+"#WatchKey for file "+fromFile+" not found. IGNORING.");
+            logger.warn("WatchKey for file "+fromFile+" not found. IGNORING.");
             return;
         }
         
@@ -460,11 +460,11 @@ public class BufferedWatcher {
                 try {
                     parentKey = watchService.take();
                 } catch (InterruptedException ix) {
-                    logger.warn(config.getMachineName() + "#watch service closed, terminating.", ix);
+                    logger.warn("watch service closed, terminating.", ix);
                     break;
                 } catch (ClosedWatchServiceException cwse) {
                     // other thread closed watch service
-                    logger.warn(config.getMachineName() + "#watch service closed, terminating.", cwse);
+                    logger.warn("watch service closed, terminating.", cwse);
                     break;
                 }
 

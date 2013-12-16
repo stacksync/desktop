@@ -49,7 +49,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     @Override
     public void notifyCommit(CommitResult cr) {
         List<CommitInfo> listObjects = cr.getObjects();
-        logger.info(config.getMachineName() + "# [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
+        logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
         String requestIdStr = cr.getRequestID();
         String[] requestId = requestIdStr.split("-");
@@ -69,7 +69,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
                         if (existingVersion != null) {
                             markAsUpdated(existingVersion, update);
                         } else {
-                            logger.info(config.getMachineName() + "#Exception: existing version is null");
+                            logger.info("Exception: existing version is null");
                         }
                     } else { //other client
                         ul.add(update);
@@ -88,11 +88,11 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
                 }
 
             } catch (NullPointerException ex) {
-                logger.info(config.getMachineName() + "#Error parsing: " + obj, ex);
+                logger.info("Error parsing: " + obj, ex);
             }
         }
 
-        logger.info(config.getMachineName() + "#Queuing updates(" + ul.size() + ")");
+        logger.info("Queuing updates(" + ul.size() + ")");
         if (ul.size() > 0) {
             changeManager.queueUpdates(ul);
         }

@@ -65,7 +65,7 @@ public class TreeSearch {
     
     
     private void doPeriodicCheck(){
-        logger.debug(config.getMachineName()+"#Started periodic tree search ...");
+        logger.debug("Started periodic tree search ...");
 
         try {
             for (Profile profile: config.getProfiles().list()) {
@@ -77,12 +77,12 @@ public class TreeSearch {
                     Thread.sleep(1000);
                 }                        
                 
-                logger.debug(config.getMachineName()+"#Checking profile "+profile.getName()+" ...");                        
+                logger.debug("Checking profile "+profile.getName()+" ...");                        
                 Indexer.getInstance().index(profile);
             }
-            logger.debug(config.getMachineName()+"#Finished periodic tree search. Now sleeping "+Constants.PERIODIC_SEARCH_INTERVAL+" seconds.");
+            logger.debug("Finished periodic tree search. Now sleeping "+Constants.PERIODIC_SEARCH_INTERVAL+" seconds.");
         } catch (InterruptedException ex) {
-            logger.error(config.getMachineName() + "#PeriodicTreeSearch catches exception", ex);
+            logger.error("PeriodicTreeSearch catches exception", ex);
         }
     }
 }

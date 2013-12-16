@@ -256,7 +256,7 @@ public class Config {
     }
 
     public void load(File configFolder) throws ConfigException {
-        logger.info(env.getMachineName() + "#Loading configuration from " + configFolder);
+        logger.info("Loading configuration from " + configFolder);
 
         configDir = configFolder;
         configFile = new File(configDir.getAbsoluteFile() + File.separator + Constants.CONFIG_FILENAME);

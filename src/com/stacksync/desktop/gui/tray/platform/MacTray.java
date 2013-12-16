@@ -295,7 +295,7 @@ public class MacTray extends Tray {
 
         config.load();
         Tray tray = Tray.getInstance();
-        tray.registerProcess(tray.getInstance().getClass().getSimpleName());
+        tray.registerProcess(tray.getClass().getSimpleName());
         tray.init("Everything is up to date.");
 
         //File imageFile = null;
@@ -309,7 +309,7 @@ public class MacTray extends Tray {
                 System.out.println(event);
             }
         });
-        tray.setStatusIcon(tray.getInstance().getClass().getSimpleName(), StatusIcon.UPDATING);
+        tray.setStatusIcon(tray.getClass().getSimpleName(), StatusIcon.UPDATING);
         //System.out.println(FileUtil.showBrowseDirectoryDialog());
         
         Thread.sleep(5000);

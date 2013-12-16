@@ -66,12 +66,12 @@ public abstract class AbstractServer implements Runnable {
 
     @Override
     public void run() {
-        logger.debug(config.getMachineName() + "#AbstractServer: Listening at localhost:" + port + " ...");
+        logger.debug("AbstractServer: Listening at localhost:" + port + " ...");
 
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException ex) {
-            logger.debug(config.getMachineName() + "#AbstractServer: Unable to bind server to port " + port + ". Address already in use?");
+            logger.debug("AbstractServer: Unable to bind server to port " + port + ". Address already in use?");
             return;
         }
 
@@ -86,7 +86,7 @@ public abstract class AbstractServer implements Runnable {
 
                 new Thread(worker, "AbstractWorker").start();
             } catch (IOException ex) {
-                logger.debug(config.getMachineName() + "#Client disconnected", ex);
+                logger.debug("Client disconnected", ex);
             }
         }
 
@@ -100,7 +100,7 @@ public abstract class AbstractServer implements Runnable {
         // Read everything! The client must talk until 'done'!
         while (true) {
             String line = in.readLine();
-            logger.debug(config.getMachineName() + "#AbstractServer: Parameter: > " + line);
+            logger.debug("AbstractServer: Parameter: > " + line);
 
             if (line == null || line.startsWith("done")) {
                 break;

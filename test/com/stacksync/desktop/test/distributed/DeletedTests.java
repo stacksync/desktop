@@ -97,7 +97,7 @@ public class DeletedTests extends TestCase{
 			Thread.sleep(testUtils.getSleepTime());
 		} catch (InterruptedException e) {
 		}
-		boolean ok = false;
+		boolean ok;
 		for (Computer comp : testUtils.getComputerList()) {
 			ok = testUtils.checkRemoteFileDelete(testFolderName+"level0/file1.txt", comp.getIp(), comp.getUsername(),comp.getPassword());
 			logg.warn("CORRECT sync for 5 levels deleted Folder:" + ok	+ " for computer:" + comp.getIp());

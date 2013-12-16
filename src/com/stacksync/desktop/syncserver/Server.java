@@ -98,7 +98,7 @@ public class Server {
 
         syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);
 //        saveLog(commitObjects);
-        logger.info(config.getMachineName() + "# [x] Sent '" + commitObjects + "'");
+        logger.info(" [x] Sent '" + commitObjects + "'");
     }
     
     public void commit(String cloudId, String requestId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
@@ -107,7 +107,7 @@ public class Server {
 
         syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);
         saveLog(commitObjects);
-        logger.info(config.getMachineName() + "# [x] Sent '" + commitObjects + "'");
+        logger.info(" [x] Sent '" + commitObjects + "'");
     }
 
     private void saveLog(List<ObjectMetadata> commitObjects) {

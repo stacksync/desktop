@@ -125,9 +125,9 @@ public class SettingsDialog extends javax.swing.JFrame {
                 try {
                     profile.setActive(true);
                 } catch (InitializationException ex) {
-                    logger.warn(config.getMachineName()+"#Exception: ", ex);
+                    logger.warn("Exception: ", ex);
                 } catch (StorageConnectException ex) {
-                    logger.warn(config.getMachineName()+"#Exception: ", ex);
+                    logger.warn("Exception: ", ex);
                 }
             }
         });
@@ -490,9 +490,9 @@ public class SettingsDialog extends javax.swing.JFrame {
                    try {
                        p.setActive(p.isEnabled());
                    } catch (InitializationException ex) {
-                       logger.warn(config.getMachineName()+"#Exception: ", ex);
+                       logger.warn("Exception: ", ex);
                    } catch (StorageConnectException ex) {
-                       logger.warn(config.getMachineName()+"#Exception: ", ex);
+                       logger.warn("Exception: ", ex);
                    }
                 }
             }
