@@ -253,6 +253,21 @@ public class WinRegistry {
     }
   }
 
+    public static void writeWindowsRegistry(String localPath) throws Exception {
+
+        WinRegistry.writeStringValue(
+                WinRegistry.HKEY_CURRENT_USER,
+                "SOFTWARE\\StackSync",
+                "FilterFolder",
+                localPath);
+
+        WinRegistry.writeStringValue(
+                WinRegistry.HKEY_CURRENT_USER,
+                "SOFTWARE\\StackSync",
+                "EnableOverlay",
+                "1");
+    }
+
   // =====================
 
   private static int deleteValue

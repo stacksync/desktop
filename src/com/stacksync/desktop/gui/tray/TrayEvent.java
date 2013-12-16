@@ -38,7 +38,9 @@ public class TrayEvent implements Serializable {
         QUIT,
         DONATE,
         WEBSITE,
-        WEBSITE2
+        WEBSITE2,
+        PAUSE_SYNC,
+        ACTIVE_SYNC
     };
     
     private EventType type;

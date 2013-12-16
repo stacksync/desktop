@@ -17,6 +17,7 @@
  */
 package com.stacksync.desktop.config.profile;
 
+import com.stacksync.desktop.Environment;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.syncserver.RemoteWorkspaceImpl;
 import com.stacksync.desktop.syncserver.Server;
+import com.stacksync.desktop.util.WinRegistry;
 import com.stacksync.desktop.watch.local.LocalWatcher;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import com.stacksync.desktop.watch.remote.RemoteWatcher;
@@ -286,6 +288,18 @@ public class Profile implements Configurable {
             broker.stopBroker();
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
+        }
+    }
+    
+    public void savePathToRegistry(){
+        
+        Environment env = Environment.getInstance();
+        if (env.getOperatingSystem() == Environment.OperatingSystem.Windows) {
+            try {
+                WinRegistry.writeWindowsRegistry(this.getFolders().get("stacksync").getLocalFile().getPath());
+            } catch (Exception ex) {
+                logger.error("Could not write Windows registry", ex);
+            }
         }
     }
 
