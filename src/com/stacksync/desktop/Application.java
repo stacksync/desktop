@@ -97,7 +97,6 @@ public class Application implements ConnectionController {
     private final Logger logger = Logger.getLogger(Application.class.getName());
     private final ResourceBundle resourceBundle = Config.getInstance().getResourceBundle();
     private final Environment env = Environment.getInstance();
-    private Boolean startDemonOnly;
     private Config config;
     private Desktop desktop;
     private Indexer indexer;
@@ -108,27 +107,27 @@ public class Application implements ConnectionController {
     private SettingsDialog settingsDialog;
     private ConnectionTester connectionTester;
 
-    public Application(Boolean startDemonOnly) {
-        this.startDemonOnly = startDemonOnly;
+    public Application() {
         this.connectionTester = new ConnectionTester(this);
     }
 
     public void start() throws InitializationException {  
-        logger.info(env.getMachineName() + "#Starting Application daemon: " + startDemonOnly + " ...");
-
+        
+        logger.info("Starting Application.");
         
         // Do NOT change the order of these method calls!
         // They strongly depend on each other.        
         initDependencies();
-        if (!startDemonOnly) {
+        boolean deamonMode = config.isDaemonMode();
+        if (!deamonMode) {
             logger.info(env.getMachineName() + "#Init UI...");
             initUI();
         }
 
-        tray.setStartDemonOnly(startDemonOnly);
+        tray.setStartDemonOnly(deamonMode);
         // Desktop integration
         if (config.isServiceEnabled()) {
-            desktop.start(startDemonOnly); // must be started before indexer!
+            desktop.start(deamonMode); // must be started before indexer!
         }
         
         boolean success = loadProfiles();
@@ -229,7 +228,7 @@ public class Application implements ConnectionController {
         if (config.getProfiles().list().isEmpty()) {
 
             Profile profile = null;
-            if (!startDemonOnly) {
+            if (!config.isDaemonMode()) {
                 profile = initFirstTimeWizard();
             } else {
                 logger.error(env.getMachineName() + "#Daemon needs config.xml have minimum one profile to start the application...");

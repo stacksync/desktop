@@ -64,7 +64,7 @@ public class Stacksync {
     }
     
     public static void start() {
-        Boolean startDemonOnly = false;
+        Boolean deamonMode = false;
         Boolean extendedMode;
         
         try {            
@@ -86,7 +86,8 @@ public class Stacksync {
                 showHelp(options);
             }
             
-            startDemonOnly = line.hasOption("daemon");
+            deamonMode = line.hasOption("daemon");
+            config.setDaemonMode(deamonMode);
             extendedMode = line.hasOption("extended");
             config.setExtendedMode(extendedMode);
 
@@ -140,10 +141,10 @@ public class Stacksync {
         try {
             // TODO fixit
             //RemoteLogs.sendFailedLogs();
-            Application appStacksync = new Application(startDemonOnly);
+            Application appStacksync = new Application();
             appStacksync.start();
         } catch (Exception e) {
-            if(!startDemonOnly){
+            if(!deamonMode){
                 ErrorDialog.showDialog(e);
             }
         }
