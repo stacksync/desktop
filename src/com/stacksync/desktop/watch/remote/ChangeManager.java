@@ -151,7 +151,7 @@ public class ChangeManager {
             boolean isLocalConflict = isLocalConflict(existingVersion, update) | update.getConflicted();
             ///Existing version equals update -> skip: file is up-to-date!
             if (existingVersion != null && !isLocalConflict && (existingVersion.getSyncStatus()== SyncStatus.UPTODATE)) {
-                logger.info("- File " + update.getPath() + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
+                logger.info("File " + update.getPath() + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
                 
                 if(!existingVersion.getServerUploadedAck()){
                     existingVersion.setServerUploadedAck(true);
@@ -161,7 +161,7 @@ public class ChangeManager {
                 continue;
             }
             
-            logger.info("- Processing update: " + update);
+            logger.info("Processing update: " + update);
             if (!newUpdatesMap.containsKey(update.getFileId())) {
                 newUpdatesMap.put(update.getFileId(), new ArrayList<Update>());
             }
