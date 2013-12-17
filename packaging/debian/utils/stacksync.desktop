@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=StackSync
+GenericName=Personal Cloud
+Comment=Keep your files securely synced between all your devices
+Exec=stacksync
+Terminal=false
+Type=Application
+Icon=/usr/lib/stacksync/res/logo48.ico
+Categories=Network;Application;FileTransfer;

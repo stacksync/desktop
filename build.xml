@@ -32,51 +32,18 @@
 			<os arch="i686" />			
 		</or>
 	</condition>
-    
-    <target name="get_svn_linux" description="building number" if="isLinux">
-        <echo>Get svn linux</echo>       
-        <exec outputproperty="svna.version" executable="svnversion" failifexecutionfails="false">
-            <arg value="-c" />
-            <redirector>
-                <outputfilterchain>
-                    <tokenfilter>
-                        <replaceregex pattern="^[0-9]*:?" replace="" flags="g"/>
-                        <replaceregex pattern="M" replace="" flags="g"/>
-                    </tokenfilter>
-                </outputfilterchain>
-            </redirector>
-        </exec>        
-    </target>         
-               
-    <target name="get_svn_win" description="building number" if="isWindows">    
-        <echo>Get svn windows</echo>     
-        <exec outputproperty="svna.version" executable="subwcrev" failifexecutionfails="false">
-            <arg value="${basedir}" />
-            <arg value="-f" />
-            <redirector>
-                <outputfilterchain>
-                    <tokenfilter>
-                        <containsstring contains="Last committed at revision "/>
-                        <replaceregex pattern="Last committed at revision " replace="" flags="g"/>                        
-                    </tokenfilter>
-                </outputfilterchain>
-            </redirector>
-        </exec>                
-    </target>        
-    
-    <target name="-pre-init" depends="get_svn_win, get_svn_linux" description="Sets the buildversion for the current build">                
-        <echo>Revision found from SVN: ${svna.version} </echo>       
+
+    <target name="-pre-init" description="Sets the buildversion for the current build">                
+        <echo>Version: ${VERSION}</echo>       
         
         <property name="project.name" value="Stacksync" />
         <property name="project.website" value="http://ast-deim.urv.cat/stacksync" />
-        <property name="version.num" value="${svna.version}" />
-        <property name="dev-version.num" value="${svna.version}" />                        
+        <property name="version.num" value="${VERSION}" />
 
         <manifest file="manifest.mf">
            <attribute name="Project" value="${project.name}" />
            <attribute name="Version" value="${version.num}" />
-           <attribute name="Dev-Version" value="${dev-version.num}" />
-           <attribute name="URL" value="@{project.website}" />
+           <attribute name="URL" value="${project.website}" />
         </manifest>
     </target>
    
@@ -89,18 +56,21 @@
 			<arg value="+x"/>
             <arg value="${dist.dir}/bin/native.py"/>
 		</exec>
-		        
+		
+        <!--   
         <echo level="info" message="Linux only: creating tar.gz archive ..." />
-        <move file="${dist.dir}" tofile="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}" />
+        <move file="${dist.dir}" tofile="stacksync-${VERSION}" />
+        
         
 		<exec executable="tar" output="/dev/null">
 			<arg value="-czf"/>
-            <arg value="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}.tar.gz"/>
-			<arg value="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}"/>
+            <arg value="stacksync-${VERSION}.tar.gz"/>
+			<arg value="stacksync-${VERSION}"/>
 		</exec>
         
-        <move file="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}" tofile="${dist.dir}" />        
-        <move file="stacksync-${VERSION_MAJOR}.${VERSION_MINOR}.tar.gz" todir="${dist.dir}" />
+        <move file="stacksync-${VERSION}" tofile="${dist.dir}" />        
+        <move file="stacksync-${VERSION}.tar.gz" todir="${dist.dir}" />
+        -->
 	</target>
 
 	<!-- Windows only stuff -->
@@ -137,11 +107,7 @@
 
 				<!-- Only core libraries; no subdirectories -->
 				<include name="lib/*" />	
-				
-				<include name="README" />
 				<include name="LICENSE" />				
-                <include name="INSTALL" />
-                <include name="DEVELOPMENT" />
                 <include name="logging.properties" />
 			</fileset>
 		</copy>
@@ -168,21 +134,7 @@
         <copy file="bin/UpdaterClient.jar" todir="${dist.dir}"/>
         <delete file="${dist.dir}/bin/UpdaterClient.jar"/>
         
-        <copy file="installers/install.sh" todir="${dist.dir}" />
-        <chmod perm="+x" dir="${dist.dir}/install.sh" />
-        
-        <copy file="installers/uninstall.sh" todir="${dist.dir}" />
-        <chmod perm="+x" dir="${dist.dir}/uninstall.sh" />
-        
-        <copy file="installers/scripts/linux_install_overlay.sh" todir="${dist.dir}/scripts" />
-        <chmod perm="+x" dir="${dist.dir}/scripts/linux_install_overlay.sh" />
-        
-        <copy file="installers/scripts/linux_uninstall_overlay.sh" todir="${dist.dir}/scripts" />
-        <chmod perm="+x" dir="${dist.dir}/scripts/linux_uninstall_overlay.sh" />
-        
 		<chmod perm="+x" dir="${dist.dir}/Stacksync.jar" />
-        
-        <copy file="INSTALL" todir="${dist.dir}" />
 		
 		<copy todir="${dist.dir}/res">
 			<fileset dir="res" />
@@ -196,20 +148,13 @@
                 <include name="logging.properties" />
 			</fileset>
 		</copy>
-    
-        <copy todir="${dist.dir}/dlls">
-            <fileset dir="dlls" />
-        </copy>
-              
+
         <antcall target="nsisTask" />
         
         <echo level="info" message="Deleting unnecessary README.txt ..." />
 		<delete file="${dist.dir}/README.TXT" />	
+        
     </target>
-    
-    <target name="-check-use-file" unless="file.exists">
-        <available property="file.exists" file="C:\Program Files\TortoiseSVN\bin\subwcrev.exe"/>
-    </target>     
     
     <target name="nsisTask" description="building the windows installer" if="isWindows">
         <exec executable="C:\Program Files (x86)\NSIS\makensis.exe" failifexecutionfails="false" >
@@ -219,7 +164,6 @@
             <arg value="${basedir}/installers/StackSyncInstallScript.nsi"/>
         </exec> 
     </target>
-             
     
     <!--
     There exist several targets which are by default empty and which can be 
