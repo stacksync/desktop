@@ -77,6 +77,14 @@ public class Desktop {
 
         touchServ.touch(file);
     }
+    
+    public void stop(boolean startDemonOnly) {
+        
+        if (!startDemonOnly) {
+            touchServ.setRunning(false);
+        }
+        commandServ.setRunning(false);
+    }
 
     public static void main(String[] a) throws InterruptedException, ConfigException {
         config.load();

@@ -40,6 +40,7 @@ public abstract class AbstractServer implements Runnable {
     
     protected ServerSocket serverSocket;
     protected final List<AbstractWorker> workers;
+    private List<Thread> workersThreads;
     protected final int port;
     protected boolean running;
 
@@ -47,6 +48,7 @@ public abstract class AbstractServer implements Runnable {
 
 
         this.workers = new ArrayList<AbstractWorker>();
+        this.workersThreads = new ArrayList<Thread>();
         this.serverSocket = null;
         this.port = port;
         this.running = false;
@@ -62,6 +64,20 @@ public abstract class AbstractServer implements Runnable {
 
     public synchronized void setRunning(boolean running) {
         this.running = running;
+        if (running == false) {
+            for (int i=0; i<workersThreads.size(); i++) {
+                Thread worker = workersThreads.get(i);
+                worker.interrupt();
+            }
+            
+            this.workersThreads = new ArrayList<Thread>();
+            
+            try {
+                serverSocket.close();
+            } catch (IOException ex) {
+                
+            }
+        }
     }
 
     @Override
@@ -84,7 +100,9 @@ public abstract class AbstractServer implements Runnable {
                 AbstractWorker worker = createWorker(clientSocket);
                 workers.add(worker);
 
-                new Thread(worker, "AbstractWorker").start();
+                Thread workerThread = new Thread(worker, "AbstractWorker");
+                workerThread.start();
+                workersThreads.add(workerThread);
             } catch (IOException ex) {
                 logger.debug("Client disconnected", ex);
             }
@@ -134,5 +152,22 @@ public abstract class AbstractServer implements Runnable {
         return result;
     }
 
+    /*public void stop() {
+        
+        /*Iterator<Thread> it = workersThreads.iterator();
+        while (it.hasNext()) {
+            Thread worker = it.next();
+            worker.interrupt();
+        }*
+        
+        Thread worker = workersThreads.get(0);
+        worker.interrupt();
+        /*for (Thread worker : workersThreads) {
+            worker.interrupt();
+        }*
+        this.workersThreads = new ArrayList<Thread>();
+        
+    }*/
+    
     protected abstract AbstractWorker createWorker(Socket clientSocket);
 }

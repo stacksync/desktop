@@ -319,6 +319,7 @@ public class BufferedWatcher {
             // Note: Don't do a for-loop here [concurrent modification]
             while (childNodes.size() > 0) {
                 removeWatch(childNodes.get(0));
+                childNodes.remove(0);
             }
         }
     }

@@ -237,7 +237,7 @@ public class Application implements ConnectionController, ApplicationController 
             try {
                 initProfiles();
             } catch (StorageConnectException ex) {
-                logger.error(desktop);
+                logger.error(ex);
                 success = false;
             }
         }
@@ -325,11 +325,53 @@ public class Application implements ConnectionController, ApplicationController 
     @Override
     public void pauseSync() {
         
+        logger.info("Pausing syncing.");
+
+        indexer.stop();
+        localWatcher.stop();
+        periodic.stop();
+        cache.stop();
+        desktop.stop(config.isDaemonMode());
+
+        for (Profile profile : config.getProfiles().list()) {
+            try {
+                profile.setActive(false);
+            } catch (InitializationException ex) {
+               
+            } catch (StorageConnectException ex) {
+
+            }
+        }
+        
+        this.tray.registerProcess("StackSync");
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.DISCONNECTED);
+        tray.updateUI();
     }
 
     @Override
     public void activeSync() {
+        logger.info("Activating syncing.");
         
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.UPTODATE);
+        
+        if (config.isServiceEnabled()) {
+            desktop.start(config.isDaemonMode()); // must be started before indexer!
+        }
+        
+        try {
+            initProfiles();
+        } catch (InitializationException ex) {
+            
+        } catch (StorageConnectException ex) {
+            
+        }
+        
+        indexer.start();
+        localWatcher.start();
+        periodic.start();
+        cache.start();
+        
+        tray.updateUI();
     }
     
     @Override

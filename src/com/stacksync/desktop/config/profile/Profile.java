@@ -185,6 +185,8 @@ public class Profile implements Configurable {
             remoteWatcher.stop();
             try {
                 broker.stopBroker();
+                broker = null;
+                server = null;
             } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
             }
