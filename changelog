@@ -4,6 +4,12 @@ config.xml encryption.
 Removed torrent and sharing legacy code.
 Removed all profile, repository and update file logic.
 Changed log properties.
+Pause/resume sync.
+Fixed bug: Don't add watcher in new folders received by push notifications.
+Illegal names.
+Fixed bug: Client deletes hidden files.
+Enable/disable send logs from config.xml.
+Send logs control to avoid send the same error more than 3 times.
 
 1.6.2 - 30-10-2013 (340)
 ----------------------------
