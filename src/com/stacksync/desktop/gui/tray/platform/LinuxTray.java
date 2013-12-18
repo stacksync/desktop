@@ -17,19 +17,19 @@
  */
 package com.stacksync.desktop.gui.tray.platform;
 
-import com.stacksync.desktop.gui.linux.LinuxNativeClient;
-import com.stacksync.desktop.gui.linux.UpdateStatusIconRequest;
-import com.stacksync.desktop.gui.linux.NotifyRequest;
-import com.stacksync.desktop.gui.linux.UpdateStatusTextRequest;
-import com.stacksync.desktop.gui.linux.ListenForTrayEventRequest;
-import com.stacksync.desktop.gui.linux.UpdateMenuRequest;
-import java.io.File;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.TrayException;
+import com.stacksync.desktop.gui.linux.LinuxNativeClient;
+import com.stacksync.desktop.gui.linux.ListenForTrayEventRequest;
+import com.stacksync.desktop.gui.linux.NotifyRequest;
+import com.stacksync.desktop.gui.linux.UpdateMenuRequest;
+import com.stacksync.desktop.gui.linux.UpdateStatusIconRequest;
+import com.stacksync.desktop.gui.linux.UpdateStatusTextRequest;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
 import com.stacksync.desktop.gui.tray.TrayEventListener;
+import java.io.File;
 
 
 /**
