@@ -318,14 +318,14 @@ def do_update_menu(request):
  
 	if sync_activated:
 		'''Pause sync'''
-		menu_item_pause = gtk.MenuItem("Pause sync")
+		menu_item_pause = gtk.MenuItem("Pause Syncing")
 		menu_item_pause.connect("activate", menu_item_clicked_sync, "PAUSE_SYNC")
 
 		menu.append(menu_item_pause)
 	else:
-		'''Active sync'''
-		menu_item_pause = gtk.MenuItem("Active sync")
-		menu_item_pause.connect("activate", menu_item_clicked_sync, "ACTIVE_SYNC")
+		'''Resume sync'''
+		menu_item_pause = gtk.MenuItem("Resume Syncing")
+		menu_item_pause.connect("activate", menu_item_clicked_sync, "RESUME_SYNC")
 
 		menu.append(menu_item_pause)
 

@@ -6,11 +6,6 @@ package com.stacksync.desktop.gui.tray;
 
 import com.stacksync.desktop.ApplicationController;
 import com.stacksync.desktop.Constants;
-import static com.stacksync.desktop.gui.tray.TrayEvent.EventType.OPEN_FOLDER;
-import static com.stacksync.desktop.gui.tray.TrayEvent.EventType.PREFERENCES;
-import static com.stacksync.desktop.gui.tray.TrayEvent.EventType.QUIT;
-import static com.stacksync.desktop.gui.tray.TrayEvent.EventType.WEBSITE;
-import static com.stacksync.desktop.gui.tray.TrayEvent.EventType.WEBSITE2;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import org.apache.log4j.Logger;
@@ -52,8 +47,8 @@ public class TrayEventListenerImpl implements TrayEventListener {
                 this.controller.pauseSync();
                 break;
                 
-            case ACTIVE_SYNC:
-                this.controller.activeSync();
+            case RESUME_SYNC:
+                this.controller.resumeSync();
                 break;
 
             case QUIT:

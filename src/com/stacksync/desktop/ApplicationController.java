@@ -4,7 +4,7 @@ public interface ApplicationController {
     
     public void pauseSync();
     
-    public void activeSync();
+    public void resumeSync();
     
     public void doShutdownTray();
     

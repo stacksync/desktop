@@ -270,12 +270,12 @@ public class WindowsTray extends Tray {
         final TrayEvent.EventType newEvent;
         if (event.getType() == TrayEvent.EventType.PAUSE_SYNC) {
             name = resourceBundle.getString("tray_resume_sync");
-            newEvent = TrayEvent.EventType.ACTIVE_SYNC;
+            newEvent = TrayEvent.EventType.RESUME_SYNC;
             syncActivated = false;
             
         } else {
             name = resourceBundle.getString("tray_resume_sync");
-            newEvent = TrayEvent.EventType.ACTIVE_SYNC;
+            newEvent = TrayEvent.EventType.RESUME_SYNC;
             syncActivated = true;
         }
         try {

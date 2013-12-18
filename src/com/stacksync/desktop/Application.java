@@ -133,8 +133,7 @@ public class Application implements ConnectionController, ApplicationController 
             startThreads();
         } else {
             
-            this.tray.registerProcess("StackSync");
-            this.tray.setStatusText("StackSync", "No Internet connection.");
+            this.tray.setStatusText("StackSync", resourceBundle.getString("tray_no_internet"));
             // Start process to check internet connection
             this.connectionTester.start();
         }
@@ -155,9 +154,11 @@ public class Application implements ConnectionController, ApplicationController 
         desktop = Desktop.getInstance();
         indexer = Indexer.getInstance();
         localWatcher = LocalWatcher.getInstance();
-        tray = Tray.getInstance();
         periodic = new TreeSearch();
         cache = new CacheCleaner();
+        tray = Tray.getInstance();
+        
+        tray.registerProcess("StackSync");
     }
     
     private void startThreads() {
@@ -315,8 +316,7 @@ public class Application implements ConnectionController, ApplicationController 
         if (success) {
             startThreads();
         } else {
-            // TODO change language
-            this.tray.setStatusText("StackSync", "No Internet connection.");
+            this.tray.setStatusText("StackSync", resourceBundle.getString("tray_no_internet"));
             // Start process to check internet connection
             this.connectionTester.start();
         }
@@ -327,51 +327,55 @@ public class Application implements ConnectionController, ApplicationController 
         
         logger.info("Pausing syncing.");
 
+        for (Profile profile : config.getProfiles().list()) {
+            try {
+                profile.setActive(false);
+            } catch (Exception ex) {
+               logger.error("Could not pause synchronization: ", ex);
+               RemoteLogs.getInstance().sendLog(ex);
+               return;
+            }
+        }
+        
         indexer.stop();
         localWatcher.stop();
         periodic.stop();
         cache.stop();
         desktop.stop(config.isDaemonMode());
 
-        for (Profile profile : config.getProfiles().list()) {
-            try {
-                profile.setActive(false);
-            } catch (InitializationException ex) {
-               
-            } catch (StorageConnectException ex) {
-
-            }
-        }
-        
-        this.tray.registerProcess("StackSync");
         tray.setStatusIcon("StackSync", Tray.StatusIcon.DISCONNECTED);
-        tray.updateUI();
+        tray.updateUI();    // This is only necessary in Linux...
+        tray.setStatusText("StackSync", resourceBundle.getString("tray_paused_sync"));
     }
 
     @Override
-    public void activeSync() {
-        logger.info("Activating syncing.");
+    public void resumeSync() {
         
-        tray.setStatusIcon("StackSync", Tray.StatusIcon.UPTODATE);
-        
-        if (config.isServiceEnabled()) {
-            desktop.start(config.isDaemonMode()); // must be started before indexer!
-        }
+        logger.info("Resume syncing.");
         
         try {
             initProfiles();
         } catch (InitializationException ex) {
-            
+            // Error logged in initProfiles function.
+            return;
         } catch (StorageConnectException ex) {
-            
+            logger.error("Could not pause synchronization: ", ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            return;
+        }
+        
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.UPTODATE);
+        tray.updateUI();
+        tray.setStatusText("StackSync", "");
+        
+        if (config.isServiceEnabled()) {
+            desktop.start(config.isDaemonMode()); // must be started before indexer!
         }
         
         indexer.start();
         localWatcher.start();
         periodic.start();
         cache.start();
-        
-        tray.updateUI();
     }
     
     @Override
