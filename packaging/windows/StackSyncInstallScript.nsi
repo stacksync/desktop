@@ -19,7 +19,7 @@
 
   ;Name and file
   Name "StackSync"
-  OutFile "output\StackSync.exe"
+  OutFile "StackSync.exe"
 
   ;Default installation folder
   InstallDir "$APPDATA\StackSync_client"
@@ -30,7 +30,7 @@
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
   
-  Icon "..\dist\res\logo48.ico"
+  Icon "..\..\dist\res\logo48.ico"
 
 ;--------------------------------
 ;Interface Settings
@@ -95,7 +95,7 @@ Section "Installation Files" ;No components page, name is not important
   SetOutPath $INSTDIR
   
   ; Put file there
-  File /r "..\dist\"
+  File /r "..\..\dist\"
 
   ;Store installation folder
   WriteRegStr HKCU "Software\StackSync" "" $INSTDIR
@@ -123,14 +123,14 @@ Section "System Overlays"
 	goto end
   file_not_found:
     SetOutPath $SYSDIR
-    File "..\dlls\atl100.dll"
+    File "dll\atl100.dll"
   end:
 	
   IfFileExists "$SYSDIR\msvcr100.dll" 0 file_not_found_msvcr
     goto end2
   file_not_found_msvcr:
     SetOutPath $SYSDIR
-    File "..\dlls\msvcr100.dll"
+    File "dll\msvcr100.dll"
   end2:
   
   ;Sleep 2000
@@ -140,7 +140,7 @@ Section "System Overlays"
         goto end3
       file_not_found_util64:
         SetOutPath $SYSDIR
-        File "..\dlls\LiferayNativityUtil_x64.dll"
+        File "dll\LiferayNativityUtil_x64.dll"
       end3:
   ${Else}
     IfFileExists "$SYSDIR\LiferayNativityUtil_x86.dll" 0 file_not_found_util86
@@ -148,7 +148,7 @@ Section "System Overlays"
       file_not_found_util86:
         Messagebox MB_OK "Hola"
         SetOutPath $SYSDIR
-        File "..\dlls\LiferayNativityUtil_x86.dll"
+        File "dll\LiferayNativityUtil_x86.dll"
       end4:
   ${EndIf}
   
