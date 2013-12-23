@@ -69,6 +69,7 @@ public class ImapConnection implements Connection {
         this.folder = imapFolder;
     }
 
+    @Override
     public String getHost() {
         return host;
     }

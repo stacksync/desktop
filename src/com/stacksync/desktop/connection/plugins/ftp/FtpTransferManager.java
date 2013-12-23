@@ -63,7 +63,7 @@ public class FtpTransferManager extends AbstractTransferManager {
                     return;
                 }
 
-                logger.info(config.getMachineName() + "#FTP client connecting to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
+                logger.info("FTP client connecting to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
 
                 ftp.setConnectTimeout(TIMEOUT_CONNECT);
                 ftp.setDataTimeout(TIMEOUT_DATA);	
@@ -77,12 +77,12 @@ public class FtpTransferManager extends AbstractTransferManager {
                 
                 return;
             } catch (Exception ex) {
-                logger.error(config.getMachineName() + "#FTP client connection failed. ", ex);               
+                logger.error("FTP client connection failed. ", ex);               
                 throw new StorageConnectException(ex);
             }                        
         }
         
-        logger.error(config.getMachineName() + "#RETRYING FAILED: FTP client connection failed. ");
+        logger.error("RETRYING FAILED: FTP client connection failed. ");
     }
 
     @Override
@@ -91,7 +91,7 @@ public class FtpTransferManager extends AbstractTransferManager {
             ftp.logout();
             ftp.disconnect();
         } catch (IOException ex) {
-            logger.error(config.getMachineName() + "#Failed desconnection.", ex);
+            logger.error("Failed desconnection.", ex);
         }
     }
 
@@ -106,20 +106,20 @@ public class FtpTransferManager extends AbstractTransferManager {
             tempFile = config.getCache().createTempFile();
             OutputStream tempFOS = new FileOutputStream(tempFile);
             
-            logger.info(config.getMachineName() + "#FTP: Downloading " + remotePath + " to temp file " + tempFile);
+            logger.info("FTP: Downloading " + remotePath + " to temp file " + tempFile);
             ftp.retrieveFile(remotePath, tempFOS);
 
             tempFOS.close();
 
             // Move file
-            logger.info(config.getMachineName() + "#FTP: Renaming temp file " + tempFile + " to file " + localFile);
+            logger.info("FTP: Renaming temp file " + tempFile + " to file " + localFile);
             
             FileUtil.copy(tempFile, localFile);
             /*if (!tempFile.renameTo(localFile)) {
                 throw new StorageException("Rename to "+localFile.getAbsolutePath()+" failed.");
             }*/
         } catch (IOException ex) {            
-            logger.error(config.getMachineName() + "#Error while downloading file " + remoteFile.getName(), ex);
+            logger.error("Error while downloading file " + remoteFile.getName(), ex);
             throw new StorageException(ex);
         } finally {
             if(tempFile != null && tempFile.exists()){
@@ -160,7 +160,7 @@ public class FtpTransferManager extends AbstractTransferManager {
                 }
                 
             } catch (IOException ex) {
-                logger.error(config.getMachineName() + "#FTP: Uploading failed ", ex);
+                logger.error("FTP: Uploading failed ", ex);
                 throw new StorageException(ex);
             }
         }
@@ -181,7 +181,7 @@ public class FtpTransferManager extends AbstractTransferManager {
         try {
             // Upload to temp file
             InputStream fileFIS = new FileInputStream(localFile);
-            logger.info(config.getMachineName() + "#FTP: Uploading " + localFile + " to temp file " + tempRemotePath);          
+            logger.info("FTP: Uploading " + localFile + " to temp file " + tempRemotePath);          
             
             ftp.setFileType(FTPClient.BINARY_FILE_TYPE); // Important !!!
             
@@ -192,11 +192,11 @@ public class FtpTransferManager extends AbstractTransferManager {
             fileFIS.close();
 
             // Move
-            logger.info(config.getMachineName() + "#FTP: Renaming temp file " + tempRemotePath + " to file " + remotePath);
+            logger.info("FTP: Renaming temp file " + tempRemotePath + " to file " + remotePath);
             
             ftp.rename(tempRemotePath, remotePath);
         } catch (IOException ex) {
-            logger.error(config.getMachineName() + "#Could not upload file " + localFile + " to " + remoteFile.getName(), ex);
+            logger.error("Could not upload file " + localFile + " to " + remoteFile.getName(), ex);
             throw new StorageException(ex);
         }
     }
@@ -218,7 +218,7 @@ public class FtpTransferManager extends AbstractTransferManager {
 
             return files;
         } catch (IOException ex) {
-            logger.error(config.getMachineName() + "#Unable to list FTP directory.", ex);
+            logger.error("Unable to list FTP directory.", ex);
             throw new StorageException(ex);
         }
     }
@@ -232,7 +232,7 @@ public class FtpTransferManager extends AbstractTransferManager {
         try {
             ftp.deleteFile(path);
         } catch (IOException ex) {
-            logger.error(config.getMachineName() + "#Could not delete file " + remoteFile.getName(), ex);
+            logger.error("Could not delete file " + remoteFile.getName(), ex);
             throw new StorageException(ex);
         }
     }
@@ -253,7 +253,7 @@ public class FtpTransferManager extends AbstractTransferManager {
 
             return files;
         } catch (IOException ex) {
-            logger.error(config.getMachineName() + "#Unable to list FTP directory.", ex);
+            logger.error("Unable to list FTP directory.", ex);
             throw new StorageException(ex);
         }
     }

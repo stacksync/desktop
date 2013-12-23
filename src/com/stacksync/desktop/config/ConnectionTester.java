@@ -12,13 +12,14 @@ import java.util.TimerTask;
 
 public class ConnectionTester {
     
-    private final int INTERVAL = 10000;
+    private final int INTERVAL;
     
     private ConnectionController controller;
     private Config config;
     private Timer timer;
     
     public ConnectionTester(ConnectionController controller) {
+        this.INTERVAL = 20000;
         this.controller = controller;
         this.config = Config.getInstance();
     }

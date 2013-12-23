@@ -62,26 +62,26 @@ public class RepositoryTestPanel extends SettingsPanel {
             try{
                 doProcess();
             } catch (InitializationException ex) {
-                logger.error(config.getMachineName() + "#Exception: ", ex);
+                logger.error("Exception: ", ex);
                 setStatus(ex.getMessage());
                 setError(ex);
 
                 callbackListener.actionCompleted(false);
             } catch (NoRepositoryFoundException ex) {
-                logger.error(config.getMachineName() + "#Exception: ", ex);
+                logger.error("Exception: ", ex);
                 setStatus(resourceBundle.getString("reptest_nothing_found") + ex.getMessage());
                 setError(ex);
 
                 callbackListener.actionCompleted(false);
             } catch (StorageException ex) { 
-                logger.error(config.getMachineName() + "#Exception: ", ex);
+                logger.error("Exception: ", ex);
 
                 setStatus(resourceBundle.getString("reptest_connection_status_fail")+ex.getMessage());
                 setError(ex);
 
                 callbackListener.actionCompleted(false);
             } catch (Exception ex) {
-                logger.error(config.getMachineName() + "#Exception: ", ex);
+                logger.error("Exception: ", ex);
                 setStatus(ex.getMessage());
                 setError(ex);
 
@@ -255,7 +255,7 @@ public class RepositoryTestPanel extends SettingsPanel {
         chkToggleDetails.setSelected(true);
         scrDetails.setVisible(true);
         
-        logger.error(config.getMachineName() + "#Exception: ", e);
+        logger.error("Exception: ", e);
     }
 
     @Override

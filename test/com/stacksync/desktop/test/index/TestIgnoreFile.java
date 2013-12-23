@@ -7,7 +7,6 @@ package com.stacksync.desktop.test.index;
 import java.io.File;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.test.staticFunctionsTest;
 
 /**

@@ -2,10 +2,10 @@ package com.stacksync.desktop.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 public class WinRegistry {
@@ -252,6 +252,37 @@ public class WinRegistry {
       throw new IllegalArgumentException("rc=" + rc + "  key=" + key + "  value=" + value);
     }
   }
+
+    public static void writeWindowsRegistry(String localPath) throws Exception {
+
+        WinRegistry.writeStringValue(
+                WinRegistry.HKEY_CURRENT_USER,
+                "SOFTWARE\\StackSync",
+                "FilterFolder",
+                localPath);
+
+        WinRegistry.writeStringValue(
+                WinRegistry.HKEY_CURRENT_USER,
+                "SOFTWARE\\StackSync",
+                "EnableOverlay",
+                "1");
+    }
+    
+    public static void setOverlayActivity(boolean active) throws Exception {
+        
+        String value;
+        if (active) {
+            value = "1";
+        } else {
+            value = "0";
+        }
+        
+        WinRegistry.writeStringValue(
+                WinRegistry.HKEY_CURRENT_USER,
+                "SOFTWARE\\StackSync",
+                "EnableOverlay",
+                value);
+    }
 
   // =====================
 

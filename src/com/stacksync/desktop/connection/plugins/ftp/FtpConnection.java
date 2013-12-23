@@ -52,6 +52,7 @@ public class FtpConnection implements Connection {
         return new FtpConfigPanel(this);
     }
   
+    @Override
     public String getHost() {
         return host;
     }

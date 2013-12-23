@@ -11,6 +11,7 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
 import com.stacksync.desktop.gui.tray.TrayEventListener;
 import com.stacksync.desktop.gui.tray.TrayIconStatus;
+import com.stacksync.desktop.util.WinRegistry;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,12 +27,14 @@ public class WindowsTray extends Tray {
     private SystemTray tray;
     private PopupMenu menu;
     private TrayIcon icon;
-    private MenuItem itemStatus, itemFolder, itemWebsite, itemWebsite2, itemQuit;
-    private TrayIconStatus status;    
+    private MenuItem itemStatus, itemFolder, itemWebsite, itemWebsite2, itemQuit, itemSync;
+    private TrayIconStatus status;
+    private boolean syncActivated;
     
     public WindowsTray() {
         super();
 
+        syncActivated = true;
         // cp. init
         this.menu = null;
         this.status = new TrayIconStatus(new TrayIconStatus.TrayIconStatusListener() {
@@ -127,8 +130,18 @@ public class WindowsTray extends Tray {
 
         //menu.add(itemPreferences);
 
+        final TrayEvent.EventType eventType = TrayEvent.EventType.PAUSE_SYNC;
+        itemSync = new MenuItem(resourceBundle.getString("tray_pause_sync"));
+        itemSync.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                pauseOrResumeSync(new TrayEvent(eventType));
+            }
+        });
+        menu.add(itemSync);
         
-        //menu.addSeparator();
+        menu.addSeparator();
         itemWebsite = new MenuItem(resourceBundle.getString("tray_stacksync_website"));
         itemWebsite.addActionListener(new ActionListener() {
 
@@ -249,6 +262,36 @@ public class WindowsTray extends Tray {
             Thread.sleep(1000);
         }
 	
+    }
+    
+    private void pauseOrResumeSync(TrayEvent event) {
+        
+        String name;
+        final TrayEvent.EventType newEvent;
+        if (event.getType() == TrayEvent.EventType.PAUSE_SYNC) {
+            name = resourceBundle.getString("tray_resume_sync");
+            newEvent = TrayEvent.EventType.RESUME_SYNC;
+            syncActivated = false;
+            
+        } else {
+            name = resourceBundle.getString("tray_resume_sync");
+            newEvent = TrayEvent.EventType.RESUME_SYNC;
+            syncActivated = true;
+        }
+        try {
+            WinRegistry.setOverlayActivity(syncActivated);
+        } catch (Exception ex) {        }
+        
+        itemSync.setLabel(name);
+        itemSync.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                pauseOrResumeSync(new TrayEvent(newEvent));
+            }
+        });
+        
+        fireTrayEvent(event);
     }
     
 }

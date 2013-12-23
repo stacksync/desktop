@@ -4,9 +4,7 @@
  */
 package com.stacksync.desktop.test.cache;
 
-import java.io.File;
 import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.periodic.CacheCleaner;
 import com.stacksync.desktop.test.staticFunctionsTest;
 

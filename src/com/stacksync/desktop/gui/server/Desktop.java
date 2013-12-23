@@ -46,7 +46,7 @@ public class Desktop {
     private CommandServer commandServ;
  
     private Desktop() {
-        logger.info(config.getMachineName()+"#Creating desktop integration ...");
+        logger.info("Creating desktop integration ...");
         touchServ = new TouchServer();
         commandServ = new CommandServer();
     }
@@ -60,7 +60,7 @@ public class Desktop {
     }
 
     public void start(boolean startDemonOnly) {
-        logger.info(config.getMachineName()+"#Starting desktop services (daemon: " + startDemonOnly + ") ...");
+        logger.info("Starting desktop services (daemon: " + startDemonOnly + ") ...");
         
         if(!startDemonOnly){
             new Thread(touchServ, "Touch Server").start();
@@ -71,11 +71,19 @@ public class Desktop {
 
     public void touch(File file) {
         if (!touchServ.isRunning()) {
-            logger.debug(config.getMachineName()+"#Warning: Touch server NOT RUNNING. Ignoring touch to "+file);           
+            logger.debug("Warning: Touch server NOT RUNNING. Ignoring touch to "+file);           
             return;
         }
 
         touchServ.touch(file);
+    }
+    
+    public void stop(boolean startDemonOnly) {
+        
+        if (!startDemonOnly) {
+            touchServ.setRunning(false);
+        }
+        commandServ.setRunning(false);
     }
 
     public static void main(String[] a) throws InterruptedException, ConfigException {

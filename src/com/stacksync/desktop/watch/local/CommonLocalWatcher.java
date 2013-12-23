@@ -128,7 +128,7 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
             WatchKey toRootKey = watcher.getRootKey(toEvent.getParentKey());
 
             if (fromRootKey == null || toRootKey == null) {
-                logger.warn(config.getMachineName() + "#Unable to get root key for FROM or TO event: from = " + fromRootKey + ", to = " + toRootKey + ". IGNORING EVENT.");
+                logger.warn("Unable to get root key for FROM or TO event: from = " + fromRootKey + ", to = " + toRootKey + ". IGNORING EVENT.");
                 return;
             }
 
@@ -146,7 +146,7 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
                 || event.kind() == ExtendedWatchEventKind.KEY_INVALID) {
             // Ignore.
         } else {
-            logger.info(config.getMachineName() + "#Unhandled event: " + event + "");
+            logger.info("Unhandled event: " + event + "");
         }
     }
 }

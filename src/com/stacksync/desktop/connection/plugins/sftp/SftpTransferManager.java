@@ -78,7 +78,7 @@ public class SftpTransferManager extends AbstractTransferManager {
             for (int i=0; i<CONNECT_RETRY_COUNT; i++) {
                 try {
 
-                    logger.info(config.getMachineName() + "#SFTP client connecting to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
+                    logger.info("SFTP client connecting to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
 
                     if (getConnection().isKeyAuth()) {
                         jsch.addIdentity(getConnection().getKeyPath(), getConnection().getPassphrase());
@@ -89,7 +89,7 @@ public class SftpTransferManager extends AbstractTransferManager {
                         session.setConfig(cf);
                         session.connect();
                         if(!session.isConnected()){
-                            logger.warn(config.getMachineName() + "#SFTP client: unable to connect (user/password) to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
+                            logger.warn("SFTP client: unable to connect (user/password) to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
                         }
 
                     } else {
@@ -101,24 +101,24 @@ public class SftpTransferManager extends AbstractTransferManager {
                         session.setPassword(getConnection().getPassword());
                         session.connect();
                         if(!session.isConnected()){
-                            logger.warn(config.getMachineName() + "#SFTP client: unable to connect (user/password) to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
+                            logger.warn("SFTP client: unable to connect (user/password) to " + getConnection().getHost() + ":" + getConnection().getPort() + " ...");
                         }
                     }
 
                     this.sftp = (ChannelSftp) session.openChannel("sftp");
                     this.sftp.connect();
                     if(!sftp.isConnected()){
-                        logger.warn(config.getMachineName() + "#SFTP client: unable to connect sftp Channel (" + getConnection().getHost() + ":" + getConnection().getPort() + ") ...");
+                        logger.warn("SFTP client: unable to connect sftp Channel (" + getConnection().getHost() + ":" + getConnection().getPort() + ") ...");
                     }
 
                     return;
                 } catch (Exception ex) {
-                    logger.warn(config.getMachineName() + "#SFTP client connection failed.", ex);
+                    logger.warn("SFTP client connection failed.", ex);
                     throw new StorageConnectException(ex);
                 }                        
             }
 
-            logger.error(config.getMachineName() + "#RETRYING FAILED: SFTP client connection failed.");
+            logger.error("RETRYING FAILED: SFTP client connection failed.");
         }
     }
 
@@ -152,13 +152,13 @@ public class SftpTransferManager extends AbstractTransferManager {
             tempFile = config.getCache().createTempFile();
             OutputStream tempFOS = new FileOutputStream(tempFile);
 
-            logger.info(config.getMachineName() + "#SFTP: Downloading " + remotePath + " to temp file " + tempFile);
+            logger.info("SFTP: Downloading " + remotePath + " to temp file " + tempFile);
             sftp.get(remotePath, tempFOS);
 
             tempFOS.close();
 
             // Move file
-            logger.info(config.getMachineName() + "#SFTP: Renaming temp file " + tempFile + " to file " + localFile);
+            logger.info("SFTP: Renaming temp file " + tempFile + " to file " + localFile);
             
             FileUtil.copy(tempFile, localFile);
             /*if (!tempFile.renameTo(localFile)) {
@@ -166,7 +166,7 @@ public class SftpTransferManager extends AbstractTransferManager {
             }*/
         } catch (Exception ex) {
 
-            logger.error(config.getMachineName() + "#Error while downloading file "+remoteFile.getName(), ex);
+            logger.error("Error while downloading file "+remoteFile.getName(), ex);
             throw new StorageException(ex);
         } finally {
             if (tempFile != null) {
@@ -214,7 +214,7 @@ public class SftpTransferManager extends AbstractTransferManager {
                     sftp.cd(remotePath);
                     
                 } catch (SftpException ex) {
-                    logger.error(config.getMachineName() + "#Exception: ", ex);
+                    logger.error("Exception: ", ex);
                 }
             }
             
@@ -232,21 +232,21 @@ public class SftpTransferManager extends AbstractTransferManager {
                 InputStream fileFIS = new FileInputStream(localFile);
 
                 
-                logger.info(config.getMachineName() + "#SFTP: Uploading " + localFile + " to temp file " + tempRemotePath);
+                logger.info("SFTP: Uploading " + localFile + " to temp file " + tempRemotePath);
                 sftp.put(fileFIS, tempRemotePath);
 
                 fileFIS.close();
 
                 // Move
-                logger.info(config.getMachineName() + "#SFTP: Renaming temp file " + tempRemotePath + " to file " + remotePath);
+                logger.info("SFTP: Renaming temp file " + tempRemotePath + " to file " + remotePath);
                 sftp.rename(tempRemotePath, remotePath);
 
             } catch (Exception ex) {                
-                logger.error(config.getMachineName() + "#Could not upload file "+localFile+" to "+remoteFile.getName(), ex);
+                logger.error("Could not upload file "+localFile+" to "+remoteFile.getName(), ex);
                 throw new StorageException(ex);
             }
         } catch (SftpException ex) {
-            logger.error(config.getMachineName() + "#Exception: ", ex);            
+            logger.error("Exception: ", ex);            
         }
     }
 
@@ -270,7 +270,7 @@ public class SftpTransferManager extends AbstractTransferManager {
             return files;
         }
         catch (SftpException ex) {
-            logger.error(config.getMachineName() + "#Unable to list SFTP directory. --> " + ex.getMessage(), ex);
+            logger.error("Unable to list SFTP directory. --> " + ex.getMessage(), ex);
             throw new StorageException(ex);
         }
     }
@@ -282,7 +282,7 @@ public class SftpTransferManager extends AbstractTransferManager {
         try {
             sftp.rm(getConnection().getPath() + "/" + remoteFile.getName());
         } catch (Exception ex) {
-            logger.error(config.getMachineName() + "#Could not delete file " + remoteFile.getName(), ex);
+            logger.error("Could not delete file " + remoteFile.getName(), ex);
             throw new StorageException(ex);
         }
     }
@@ -305,7 +305,7 @@ public class SftpTransferManager extends AbstractTransferManager {
 
             return files;
         } catch (SftpException ex) {
-            logger.error(config.getMachineName() + "#Unable to list SFTP directory.", ex);
+            logger.error("Unable to list SFTP directory.", ex);
             throw new StorageException(ex);
         }
     }

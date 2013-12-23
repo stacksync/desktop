@@ -65,13 +65,6 @@ public class RollingChecksum {
    * @since 1.1
    */
   protected int index;
-
-  /**
-   * The block that is recieving new input.
-   *
-   * @since 1.1
-   */
-  protected byte[] new_block;
   
   private static double M = Math.pow(2, 16);
   private CircularByteQueue queue;

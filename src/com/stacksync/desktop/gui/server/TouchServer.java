@@ -36,14 +36,14 @@ public class TouchServer extends AbstractServer
 
     public void touch(File file) {
         if (workers.isEmpty()) {
-            logger.debug(config.getMachineName() + "#Cannot touch file. No touch workers available.");
+            logger.debug("Cannot touch file. No touch workers available.");
             return;
         }
-        logger.debug(config.getMachineName() + "#TouchServer: Touch " + file);
+        logger.debug("TouchServer: Touch " + file);
 
         synchronized (workers) {
             for (AbstractWorker worker : workers) {
-                logger.debug(config.getMachineName() + "#TouchServer: Sending shell touch to client of " + worker);
+                logger.debug("TouchServer: Sending shell touch to client of " + worker);
 
                 // Touch it, baby!
                 ((TouchWorker) worker).touch(file);
@@ -71,7 +71,7 @@ public class TouchServer extends AbstractServer
 
         @Override
         public void run() {
-            logger.debug(config.getMachineName() + "#TouchWorker: Client connected.");
+            logger.debug("TouchWorker: Client connected.");
 
             PrintWriter out = null;
             BufferedReader in = null;
@@ -89,7 +89,7 @@ public class TouchServer extends AbstractServer
                         if (touchFile == null) {
                             break;
                         }
-                        logger.debug(config.getMachineName() + "#TouchWorker: Sending touch " + touchFile + " ... ");
+                        logger.debug("TouchWorker: Sending touch " + touchFile + " ... ");
 
                         out.print("shell_touch\n");
                         out.print("path\t" + touchFile.getAbsolutePath() + "\n");
@@ -104,7 +104,7 @@ public class TouchServer extends AbstractServer
 
                 clientSocket.close();
             } catch (IOException e) {
-                logger.debug(config.getMachineName() + "#Socket error in TouchWorker.", e);
+                logger.debug("Socket error in TouchWorker.", e);
             } finally {
                 try {
                     if (out != null) {
@@ -119,7 +119,7 @@ public class TouchServer extends AbstractServer
                         in.close();
                     }                    
                 } catch (IOException ex) {
-                    logger.debug(config.getMachineName() + "#I/O Exception.", ex);
+                    logger.debug("I/O Exception.", ex);
                 }
             }
         }

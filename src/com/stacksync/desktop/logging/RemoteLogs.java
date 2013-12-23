@@ -89,7 +89,9 @@ public class RemoteLogs {
             System.out.println(ex);
         } finally {
             try {
-                out.close();
+                if (out != null){
+                    out.close();
+                }
             } catch (IOException ex) {
                 System.out.println(ex);
             }

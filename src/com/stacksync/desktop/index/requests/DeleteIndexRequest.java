@@ -120,11 +120,11 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
 
         // Delete children (if directory) -- RECURSIVELY !!
         if (dbFile.isFolder()) {     
-            logger.info(config.getMachineName()+"#Indexer: Deleting CHILDREN of "+file+" ...");
+            logger.info("Indexer: Deleting CHILDREN of "+file+" ...");
             List<CloneFile> children = db.getChildren(dbFile);
 
             for (CloneFile child : children) {
-                logger.info(config.getMachineName()+"#Indexer: Delete CHILD "+child.getAbsolutePath()+" ...");
+                logger.info("Indexer: Delete CHILD "+child.getAbsolutePath()+" ...");
                 // Do it!
                 //new DeleteIndexRequest(root, child).process();
                 Indexer.getInstance().queueDeleted(root, child);

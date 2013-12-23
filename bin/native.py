@@ -54,6 +54,8 @@ import subprocess
 # This script kills itself after X seconds if no request arrives
 # Make sure that this is higher than the NOP_INTERVAL in LinuxNativeClient.java
 CONNECT_TIMEOUT = 15
+
+sync_activated = True
     
 class RequestHandler(SocketServer.StreamRequestHandler):		
 	def handle(self):
@@ -249,7 +251,7 @@ def do_update_text(request):
 	return "OK"			
 	
 def do_update_menu(request):
-	global menu, menu_item_status
+	global menu, menu_item_status, sync_activated
 	global status_text
 
 	gtk.gdk.threads_enter()
@@ -312,8 +314,24 @@ def do_update_menu(request):
 	#menu_item_donate = gtk.MenuItem("Donate1 ...")
 	#menu_item_donate.connect("activate", menu_item_clicked, "DONATE")
 	
-	#menu.append(menu_item_donate)	
-	
+	#menu.append(menu_item_donate)
+ 
+	if sync_activated:
+		'''Pause sync'''
+		menu_item_pause = gtk.MenuItem("Pause Syncing")
+		menu_item_pause.connect("activate", menu_item_clicked_sync, "PAUSE_SYNC")
+
+		menu.append(menu_item_pause)
+	else:
+		'''Resume sync'''
+		menu_item_pause = gtk.MenuItem("Resume Syncing")
+		menu_item_pause.connect("activate", menu_item_clicked_sync, "RESUME_SYNC")
+
+		menu.append(menu_item_pause)
+
+	'''---'''
+	menu.append(gtk.SeparatorMenuItem())
+
 	'''Website'''
 	menu_item_website = gtk.MenuItem("Go to StackSync website")
 	menu_item_website.connect("activate", menu_item_clicked, "WEBSITE")
@@ -395,6 +413,15 @@ def status_icon_popup_menu_cb(status_icon, button, time):
 	
 def menu_item_clicked(widget, cmd):
 	do_print("Menu item '" + cmd + "' clicked.")
+	event_queue.put(cmd)
+	
+def menu_item_clicked_sync(widget, cmd):
+	global sync_activated
+	do_print("Menu item '" + cmd + "' clicked.")
+	if sync_activated:
+		sync_activated = False
+	else:
+		sync_activated = True
 	event_queue.put(cmd)
 
 def menu_item_folder_clicked(widget, folder):

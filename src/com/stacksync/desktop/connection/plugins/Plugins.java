@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.Constants;
-import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.util.StringUtil;
 
 /**
@@ -33,7 +32,6 @@ import com.stacksync.desktop.util.StringUtil;
  */
 public class Plugins {
     private static final Logger logger = Logger.getLogger(Plugins.class.getName());
-    private static final Config config = Config.getInstance();
     
     private static final Map<String, PluginInfo> plugins = new TreeMap<String, PluginInfo>();    
     private static boolean loaded = false;
@@ -46,9 +44,9 @@ public class Plugins {
             asyncLoadThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    logger.info(config.getMachineName()+"#Preloading Plugins Start");	
+                    logger.info("Preloading Plugins Start");	
                     Plugins.load();
-                    logger.info(config.getMachineName()+"#Preloading Plugins End");	
+                    logger.info("Preloading Plugins End");	
                 }
             }, "PreloadPlugins");
             asyncLoadThread.start();
@@ -68,26 +66,25 @@ public class Plugins {
         
         loaded = true;                
          
-        List<String> plugins = new ArrayList<String>();
+        List<String> pluginsToLoad = new ArrayList<String>();
         //plugins.add("box"); 
         //plugins.add("dropbox");
-        plugins.add("ftp");
+        pluginsToLoad.add("ftp");
         //plugins.add("gs");
         //plugins.add("imap");
         //plugins.add("local");
         //plugins.add("picasa");
         //plugins.add("pop3_smtp");
-        plugins.add("rackspace_dev");
-        plugins.add("s3");
-        plugins.add("samba");
-        plugins.add("sftp");
-        plugins.add("webdav");        
+        pluginsToLoad.add("rackspace_dev");
+        pluginsToLoad.add("s3");
+        pluginsToLoad.add("samba");
+        pluginsToLoad.add("sftp");
+        pluginsToLoad.add("webdav");        
         
-        /// GGIPART /// Only load the needed plugins        
-        for(String pl: plugins){
+        // Only load the needed plugins        
+        for(String pl: pluginsToLoad){
             loadPlugin(pl);
         }        
-        /// GGIENDPART ///
     }
 
     public static Collection<PluginInfo> list() {
@@ -144,7 +141,7 @@ public class Plugins {
             plugins.put(pluginId, pluginInfo);
         }
         catch (Exception ex) {
-            logger.warn(config.getMachineName()+"#Could not load plugin : "+className, ex);
+            logger.warn("Could not load plugin : "+className, ex);
         }
     }
 }

@@ -40,6 +40,7 @@ public abstract class AbstractServer implements Runnable {
     
     protected ServerSocket serverSocket;
     protected final List<AbstractWorker> workers;
+    private List<Thread> workersThreads;
     protected final int port;
     protected boolean running;
 
@@ -47,6 +48,7 @@ public abstract class AbstractServer implements Runnable {
 
 
         this.workers = new ArrayList<AbstractWorker>();
+        this.workersThreads = new ArrayList<Thread>();
         this.serverSocket = null;
         this.port = port;
         this.running = false;
@@ -62,16 +64,30 @@ public abstract class AbstractServer implements Runnable {
 
     public synchronized void setRunning(boolean running) {
         this.running = running;
+        if (running == false) {
+            for (int i=0; i<workersThreads.size(); i++) {
+                Thread worker = workersThreads.get(i);
+                worker.interrupt();
+            }
+            
+            this.workersThreads = new ArrayList<Thread>();
+            
+            try {
+                serverSocket.close();
+            } catch (IOException ex) {
+                
+            }
+        }
     }
 
     @Override
     public void run() {
-        logger.debug(config.getMachineName() + "#AbstractServer: Listening at localhost:" + port + " ...");
+        logger.debug("AbstractServer: Listening at localhost:" + port + " ...");
 
         try {
             serverSocket = new ServerSocket(port);
         } catch (IOException ex) {
-            logger.debug(config.getMachineName() + "#AbstractServer: Unable to bind server to port " + port + ". Address already in use?");
+            logger.debug("AbstractServer: Unable to bind server to port " + port + ". Address already in use?");
             return;
         }
 
@@ -84,9 +100,11 @@ public abstract class AbstractServer implements Runnable {
                 AbstractWorker worker = createWorker(clientSocket);
                 workers.add(worker);
 
-                new Thread(worker, "AbstractWorker").start();
+                Thread workerThread = new Thread(worker, "AbstractWorker");
+                workerThread.start();
+                workersThreads.add(workerThread);
             } catch (IOException ex) {
-                logger.debug(config.getMachineName() + "#Client disconnected", ex);
+                logger.debug("Client disconnected", ex);
             }
         }
 
@@ -100,7 +118,7 @@ public abstract class AbstractServer implements Runnable {
         // Read everything! The client must talk until 'done'!
         while (true) {
             String line = in.readLine();
-            logger.debug(config.getMachineName() + "#AbstractServer: Parameter: > " + line);
+            logger.debug("AbstractServer: Parameter: > " + line);
 
             if (line == null || line.startsWith("done")) {
                 break;
@@ -134,5 +152,22 @@ public abstract class AbstractServer implements Runnable {
         return result;
     }
 
+    /*public void stop() {
+        
+        /*Iterator<Thread> it = workersThreads.iterator();
+        while (it.hasNext()) {
+            Thread worker = it.next();
+            worker.interrupt();
+        }*
+        
+        Thread worker = workersThreads.get(0);
+        worker.interrupt();
+        /*for (Thread worker : workersThreads) {
+            worker.interrupt();
+        }*
+        this.workersThreads = new ArrayList<Thread>();
+        
+    }*/
+    
     protected abstract AbstractWorker createWorker(Socket clientSocket);
 }

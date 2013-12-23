@@ -33,7 +33,6 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
-import java.awt.event.KeyEvent;
 
 /**
  *
@@ -307,7 +306,7 @@ public class WizardDialog extends JDialog {
                 return;
             } else if (currentPanelIndex == panels.length-1) { // Last panel done!
                 
-                logger.info(config.getMachineName() + "#profiles = " + config.getProfiles() + " -- profile = " +  profile);
+                logger.info("profiles = " + config.getProfiles() + " -- profile = " +  profile);
                 setVisible(false);
                 dispose();
                 
@@ -367,9 +366,9 @@ public class WizardDialog extends JDialog {
         try {
             java.awt.EventQueue.invokeAndWait(worker);
         } catch (InterruptedException ex) {
-            logger.error(config.getMachineName() + "#Exception: ", ex);
+            logger.error("Exception: ", ex);
         } catch (InvocationTargetException ex) {
-            logger.error(config.getMachineName() + "#Exception: ", ex);
+            logger.error("Exception: ", ex);
         }        
         
         return worker.getProfile();

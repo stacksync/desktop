@@ -450,7 +450,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         try {
             return (CloneFile) query.getSingleResult();
         } catch (NoResultException ex) {
-            logger.info(env.getMachineName() + "# No result -> " + ex.getMessage());
+            logger.info(" No result -> " + ex.getMessage());
             return null;
         }
     }
@@ -493,7 +493,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         try {
             return (CloneFile) query.getSingleResult();
         } catch (NoResultException ex) {
-            logger.info(env.getMachineName() + "# No result -> " + ex.getMessage());
+            logger.info(" No result -> " + ex.getMessage());
             return null;
         }
     }
@@ -520,7 +520,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         try {
             return (CloneFile) query.getSingleResult();
         } catch (NoResultException ex) {
-            logger.info(env.getMachineName() + "# No result -> " + ex.getMessage());
+            logger.info(" No result -> " + ex.getMessage());
             return null;
         }
     }

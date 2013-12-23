@@ -18,7 +18,6 @@
 package com.stacksync.desktop;
 
 import java.awt.EventQueue;
-import java.io.File;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
@@ -27,20 +26,17 @@ import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.settings.SettingsDialog;
 import com.stacksync.desktop.gui.tray.Tray;
-import com.stacksync.desktop.gui.tray.TrayEvent;
-import com.stacksync.desktop.gui.tray.TrayEventListener;
 import com.stacksync.desktop.gui.wizard.WizardDialog;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.chunker.TTTD.RollingChecksum;
 import com.stacksync.desktop.config.ConnectionController;
 import com.stacksync.desktop.config.ConnectionTester;
 import com.stacksync.desktop.exceptions.StorageConnectException;
+import com.stacksync.desktop.gui.tray.TrayEventListenerImpl;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.periodic.CacheCleaner;
 import com.stacksync.desktop.periodic.TreeSearch;
 import com.stacksync.desktop.repository.Uploader;
-import com.stacksync.desktop.util.FileUtil;
-import com.stacksync.desktop.util.WinRegistry;
 import com.stacksync.desktop.watch.local.LocalWatcher;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import java.util.ResourceBundle;
@@ -92,12 +88,11 @@ import java.util.ResourceBundle;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class Application implements ConnectionController {
+public class Application implements ConnectionController, ApplicationController {
 
     private final Logger logger = Logger.getLogger(Application.class.getName());
     private final ResourceBundle resourceBundle = Config.getInstance().getResourceBundle();
-    private final Environment env = Environment.getInstance();
-    private Boolean startDemonOnly;
+    
     private Config config;
     private Desktop desktop;
     private Indexer indexer;
@@ -108,27 +103,27 @@ public class Application implements ConnectionController {
     private SettingsDialog settingsDialog;
     private ConnectionTester connectionTester;
 
-    public Application(Boolean startDemonOnly) {
-        this.startDemonOnly = startDemonOnly;
+    public Application() {
         this.connectionTester = new ConnectionTester(this);
     }
 
     public void start() throws InitializationException {  
-        logger.info(env.getMachineName() + "#Starting Application daemon: " + startDemonOnly + " ...");
-
+        
+        logger.info("Starting Application.");
         
         // Do NOT change the order of these method calls!
         // They strongly depend on each other.        
         initDependencies();
-        if (!startDemonOnly) {
-            logger.info(env.getMachineName() + "#Init UI...");
+        boolean deamonMode = config.isDaemonMode();
+        if (!deamonMode) {
+            logger.info("Init UI...");
             initUI();
         }
 
-        tray.setStartDemonOnly(startDemonOnly);
+        tray.setStartDemonOnly(deamonMode);
         // Desktop integration
         if (config.isServiceEnabled()) {
-            desktop.start(startDemonOnly); // must be started before indexer!
+            desktop.start(deamonMode); // must be started before indexer!
         }
         
         boolean success = loadProfiles();
@@ -138,15 +133,14 @@ public class Application implements ConnectionController {
             startThreads();
         } else {
             
-            this.tray.registerProcess("StackSync");
-            this.tray.setStatusText("StackSync", "No Internet connection.");
+            this.tray.setStatusText("StackSync", resourceBundle.getString("tray_no_internet"));
             // Start process to check internet connection
             this.connectionTester.start();
         }
     }
 
     private void initDependencies() {
-        logger.info(env.getMachineName() + "#Instantiating dependencies ...");
+        logger.info("Instantiating dependencies ...");
         config = Config.getInstance();
 
         new Thread(new Runnable() {
@@ -160,9 +154,11 @@ public class Application implements ConnectionController {
         desktop = Desktop.getInstance();
         indexer = Indexer.getInstance();
         localWatcher = LocalWatcher.getInstance();
-        tray = Tray.getInstance();
         periodic = new TreeSearch();
         cache = new CacheCleaner();
+        tray = Tray.getInstance();
+        
+        tray.registerProcess("StackSync");
     }
     
     private void startThreads() {
@@ -175,7 +171,7 @@ public class Application implements ConnectionController {
     }
 
     private void doShutdown() {
-        logger.info(env.getMachineName() + "#Shutting down ...");
+        logger.info("Shutting down ...");
 
         tray.destroy();
         indexer.stop();
@@ -212,7 +208,7 @@ public class Application implements ConnectionController {
 
         // Tray
         tray.init(resourceBundle.getString("tray_uptodate"));
-        tray.addTrayEventListener(new TrayEventListenerImpl());
+        tray.addTrayEventListener(new TrayEventListenerImpl(this));
         tray.updateUI();
 
         /*
@@ -229,10 +225,10 @@ public class Application implements ConnectionController {
         if (config.getProfiles().list().isEmpty()) {
 
             Profile profile = null;
-            if (!startDemonOnly) {
+            if (!config.isDaemonMode()) {
                 profile = initFirstTimeWizard();
             } else {
-                logger.error(env.getMachineName() + "#Daemon needs config.xml have minimum one profile to start the application...");
+                logger.error("Daemon needs config.xml have minimum one profile to start the application.");
             }
 
             if (profile == null) {
@@ -242,7 +238,7 @@ public class Application implements ConnectionController {
             try {
                 initProfiles();
             } catch (StorageConnectException ex) {
-                logger.error(desktop);
+                logger.error(ex);
                 success = false;
             }
         }
@@ -257,7 +253,7 @@ public class Application implements ConnectionController {
                 continue;
             }
             
-            this.savePathToRegistry(profile);
+            profile.savePathToRegistry();
 
             try {
                 profile.setActive(true);
@@ -279,7 +275,7 @@ public class Application implements ConnectionController {
             settingsDialog.addProfileToTree(profile, false);
             tray.updateUI();
 
-            this.savePathToRegistry(profile);
+            profile.savePathToRegistry();
             try {
                 config.save();
                 profile.setActive(true);
@@ -302,33 +298,6 @@ public class Application implements ConnectionController {
         return profile;
     }
 
-    private void WriteWindowsRegistry(Profile profile) throws Exception {
-
-        String localPath = profile.getFolders().get("stacksync").getLocalFile().getPath();
-
-        WinRegistry.writeStringValue(
-                WinRegistry.HKEY_CURRENT_USER,
-                "SOFTWARE\\StackSync",
-                "FilterFolder",
-                localPath);
-
-        WinRegistry.writeStringValue(
-                WinRegistry.HKEY_CURRENT_USER,
-                "SOFTWARE\\StackSync",
-                "EnableOverlay",
-                "1");
-    }
-    
-    private void savePathToRegistry(Profile profile){
-        if (env.getOperatingSystem() == Environment.OperatingSystem.Windows) {
-            try {
-                WriteWindowsRegistry(profile);
-            } catch (Exception ex) {
-                logger.error("Could not write Windows registry", ex);
-            }
-        }
-    }
-
     @Override
     public void connectionEstablished() {
         logger.info("Connection established!!");
@@ -347,44 +316,71 @@ public class Application implements ConnectionController {
         if (success) {
             startThreads();
         } else {
-            // TODO change language
-            this.tray.setStatusText("StackSync", "No Internet connection.");
+            this.tray.setStatusText("StackSync", resourceBundle.getString("tray_no_internet"));
             // Start process to check internet connection
             this.connectionTester.start();
         }
     }
 
-    private class TrayEventListenerImpl implements TrayEventListener {
+    @Override
+    public void pauseSync() {
+        
+        logger.info("Pausing syncing.");
 
-        @Override
-        public void trayEventOccurred(TrayEvent event) {
-            switch (event.getType()) {
-                case OPEN_FOLDER:
-                    File folder = new File((String) event.getArgs().get(0));
-                    FileUtil.openFile(folder);
-                    break;
-
-                case PREFERENCES:
-                    settingsDialog.setVisible(true);
-                    break;
-
-                case WEBSITE:
-                    FileUtil.browsePage(Constants.APPLICATION_URL);
-                    break;
-
-                case WEBSITE2:
-                    FileUtil.browsePage(Constants.APPLICATION_URL2);
-                    break;
-
-                case QUIT:
-                    doShutdown();
-                    break;
-
-                default:
-                    //checkthis
-                    logger.warn(env.getMachineName() + "#Unknown tray event type: " + event);
-                // Fressen.
+        for (Profile profile : config.getProfiles().list()) {
+            try {
+                profile.setActive(false);
+            } catch (Exception ex) {
+               logger.error("Could not pause synchronization: ", ex);
+               RemoteLogs.getInstance().sendLog(ex);
+               return;
             }
         }
+        
+        indexer.stop();
+        localWatcher.stop();
+        periodic.stop();
+        cache.stop();
+        desktop.stop(config.isDaemonMode());
+
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.DISCONNECTED);
+        tray.updateUI();    // This is only necessary in Linux...
+        tray.setStatusText("StackSync", resourceBundle.getString("tray_paused_sync"));
     }
+
+    @Override
+    public void resumeSync() {
+        
+        logger.info("Resume syncing.");
+        
+        try {
+            initProfiles();
+        } catch (InitializationException ex) {
+            // Error logged in initProfiles function.
+            return;
+        } catch (StorageConnectException ex) {
+            logger.error("Could not pause synchronization: ", ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            return;
+        }
+        
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.UPTODATE);
+        tray.updateUI();
+        tray.setStatusText("StackSync", "");
+        
+        if (config.isServiceEnabled()) {
+            desktop.start(config.isDaemonMode()); // must be started before indexer!
+        }
+        
+        indexer.start();
+        localWatcher.start();
+        periodic.start();
+        cache.start();
+    }
+    
+    @Override
+    public void doShutdownTray() {
+        doShutdown();
+    }
+    
 }

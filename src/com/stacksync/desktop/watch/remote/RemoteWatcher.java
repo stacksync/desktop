@@ -120,7 +120,7 @@ public class RemoteWatcher {
     }
     
     private void doUpdateCheck() {
-        logger.debug(config.getMachineName() + "#STARTING PERIODIC UPDATE CHECK ...");
+        logger.debug("STARTING PERIODIC UPDATE CHECK ...");
         reset();
 
         try {            
@@ -137,9 +137,9 @@ public class RemoteWatcher {
             commitLocalUpdateFile();
 
         } catch (StorageException ex) {
-            logger.warn(config.getMachineName() + "#Update check failed. Trying again in a couple of seconds.", ex);
+            logger.warn("Update check failed. Trying again in a couple of seconds.", ex);
         } finally {
-            logger.debug(config.getMachineName() + "#DONE WITH PERIODIC UPDATE CHECK ...");
+            logger.debug("DONE WITH PERIODIC UPDATE CHECK ...");
 
             try {
                 transfer.disconnect();

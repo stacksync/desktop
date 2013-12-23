@@ -131,7 +131,7 @@ public class FoldersTablePanel extends SettingsPanel {
             new Thread(new Runnable() {
                 @Override
                 public void run() {                    
-                    logger.info(config.getMachineName()+"#Retrieving available remoteIds from repository.");
+                    logger.info("Retrieving available remoteIds from repository.");
                     
                     lblLoading.setVisible(true);
                     lblLoading.setText(resourceBundle.getString("ftp_loading"));
@@ -139,7 +139,7 @@ public class FoldersTablePanel extends SettingsPanel {
                     try {
 
                         for (String remoteId : profile.getRepository().getAvailableRemoteIds()) {
-                            logger.info(config.getMachineName()+"#remoteID"+remoteId);
+                            logger.info("remoteID"+remoteId);
 
                             if (profile.getFolders().get(remoteId) != null) {
                                 continue;
@@ -211,7 +211,7 @@ public class FoldersTablePanel extends SettingsPanel {
         }        
         
         if (beforeAvailRemoteIds < profile.getRepository().getAvailableRemoteIds().size()) {
-            logger.info(config.getMachineName()+"#New folders added. Marking repository as CHANGED.");            
+            logger.info("New folders added. Marking repository as CHANGED.");            
             profile.getRepository().setChanged(true);
         }        
     }

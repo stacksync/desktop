@@ -23,7 +23,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.Application;
-import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
@@ -48,7 +47,6 @@ import com.stacksync.desktop.util.FileLister;
  */
 public class Indexer {
     private final Logger logger = Logger.getLogger(Indexer.class.getName());
-    private final Config config = Config.getInstance();
     private final DatabaseHelper db = DatabaseHelper.getInstance();
         
     private static Indexer instance;
@@ -58,7 +56,7 @@ public class Indexer {
     private Tray tray = Tray.getInstance();
 
     public Indexer() {
-        logger.info(config.getMachineName()+"#Creating indexer ...");
+        logger.info("Creating indexer ...");
              
         this.queue = new LinkedBlockingQueue<IndexRequest>();
         this.worker = null; // cp. start()
@@ -79,7 +77,7 @@ public class Indexer {
         }
         
         // Start it
-        logger.info(config.getMachineName()+"#Starting indexer thread ...");
+        logger.info("Starting indexer thread ...");
         tray.registerProcess(this.getClass().getSimpleName());
         
         worker = new Thread(new IndexWorker(), "Indexer");
@@ -91,27 +89,27 @@ public class Indexer {
             return;
         }
         
-        logger.info(config.getMachineName()+"#Stopping indexer thread ...");
+        logger.info("Stopping indexer thread ...");
         
         worker.interrupt();
         worker = null;
     }
 
     public void index(Profile profile) { 
-        logger.debug(config.getMachineName()+"#Reading folders in profile "+profile.getName()+" ...");
+        logger.debug("Reading folders in profile "+profile.getName()+" ...");
                 
         for (Folder folder : profile.getFolders().list()) {
             if (!folder.isActive() || folder.getLocalFile() == null) {
                 continue;
             }
-            logger.debug(config.getMachineName()+"#- Folder "+folder.getLocalFile()+" ...");
+            logger.debug("- Folder "+folder.getLocalFile()+" ...");
             
             // Check for files that do NOT exist anymore
             List<CloneFile> dbFiles = db.getFiles(folder);
             
             for (CloneFile dbFile: dbFiles) {
                 if (!dbFile.getFile().exists() && dbFile.getSyncStatus() != CloneFile.SyncStatus.REMOTE) {
-                    logger.info(config.getMachineName()+"#File "+dbFile.getFile()+" does NOT exist anymore. Marking as deleted.");                    
+                    logger.info("File "+dbFile.getFile()+" does NOT exist anymore. Marking as deleted.");                    
                     queueDeleted(folder, dbFile.getFile());
                     //new DeleteIndexRequest(folder, dbFile).process();
                 }
@@ -120,7 +118,7 @@ public class Indexer {
             // Check existing files
             new FileLister(folder.getLocalFile(), new FileListerListenerImpl(folder, this, true)).start();
         }	
-        logger.debug(config.getMachineName()+"#Startup indexing of profile "+profile+" finished.");       
+        logger.debug("Startup indexing of profile "+profile+" finished.");       
     }    
     
     /**
@@ -179,7 +177,7 @@ public class Indexer {
                     }                    
                 }
             } catch (InterruptedException ex) {
-               logger.error(config.getMachineName()+"#Indexer interrupted. EXITING.", ex);
+               logger.error("Indexer interrupted. EXITING.", ex);
             }
         }
     }

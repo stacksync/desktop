@@ -57,7 +57,7 @@ public class TestUtils {
 	    File folder = new File(testFolder);
 	    folder.mkdir();
 	    try {
-			String line = "";
+			String line;
 			BufferedReader in = new BufferedReader(new FileReader("test/org/stacksync/test/distributed/Computers.txt"));
 			stacksyncFolderPath = in.readLine();
 			while ((line = in.readLine()) != null) {
@@ -118,7 +118,7 @@ public class TestUtils {
 			try {
 
 				byte[] data = new byte[1024];
-				Socket sock = null;
+				Socket sock;
 
 				sock = new Socket(ip, 32586);
 				InputStream sockInput = sock.getInputStream();
@@ -222,7 +222,6 @@ public class TestUtils {
 				FileOutputStream fos = new FileOutputStream(testFolder+"/result");
 				client.get(stacksyncFolder+"/"+fileNamePath,fos);
 			} catch (IOException e) {
-				itsok = false;
 				return true;
 			}
 			if (itsok == true) {

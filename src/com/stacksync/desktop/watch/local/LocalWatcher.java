@@ -40,7 +40,7 @@ public abstract class LocalWatcher {
 
     public LocalWatcher() {
         initDependencies();
-        logger.info(config.getMachineName()+"#Creating watcher ...");        
+        logger.info("Creating watcher ...");        
     }
 
     private void initDependencies() {
@@ -51,48 +51,48 @@ public abstract class LocalWatcher {
     public void queueCheckFile(Folder root, File file) {
         // Exclude ".ignore*" files from everything
         if (FileUtil.checkIgnoreFile(root, file)) {
-            logger.debug(config.getMachineName() + "#Watcher: Ignoring file "+file.getAbsolutePath());
+            logger.debug("Watcher: Ignoring file "+file.getAbsolutePath());
             return;
         }
         
         // File vanished!
         if (!file.exists()) {
-            logger.warn(config.getMachineName()+"#Watcher: File "+file+" vanished. IGNORING.");            
+            logger.warn("Watcher: File "+file+" vanished. IGNORING.");            
             return;
         }
 
         // Add to queue    
-        logger.info(config.getMachineName()+"#Watcher: Checking new/modified file "+file);
+        logger.info("Watcher: Checking new/modified file "+file);
         indexer.queueChecked(root, file);            
     }
 
     public void queueMoveFile(Folder fromRoot, File fromFile, Folder toRoot, File toFile) {
         // Exclude ".ignore*" files from everything
         if (FileUtil.checkIgnoreFile(fromRoot, fromFile) || FileUtil.checkIgnoreFile(toRoot, toFile)) {            
-            logger.info(config.getMachineName()+"#Watcher: Ignoring file "+fromFile.getAbsolutePath());
+            logger.info("Watcher: Ignoring file "+fromFile.getAbsolutePath());
             return;
         }
         
         // File vanished!
         if (!toFile.exists()) {
-            logger.warn(config.getMachineName()+"#Watcher: File "+toFile+" vanished. IGNORING.");
+            logger.warn("Watcher: File "+toFile+" vanished. IGNORING.");
             return;
         }
 
         // Add to queue   
-        logger.info(config.getMachineName()+"#Watcher: Moving file "+fromFile+" TO "+toFile+"");     
+        logger.info("Watcher: Moving file "+fromFile+" TO "+toFile+"");     
         indexer.queueMoved(fromRoot, fromFile, toRoot, toFile);
     }
 
     public void queueDeleteFile(Folder root, File file) {
         // Exclude ".ignore*" files from everything
         if (FileUtil.checkIgnoreFile(root, file)) {
-            logger.info(config.getMachineName()+"#Watcher: Ignoring file "+file.getAbsolutePath());
+            logger.info("Watcher: Ignoring file "+file.getAbsolutePath());
             return;
         }
 
         // Add to queue
-        logger.info(config.getMachineName()+"#Watcher: Deleted file "+file+"");        
+        logger.info("Watcher: Deleted file "+file+"");        
         indexer.queueDeleted(root, file);
     }
 

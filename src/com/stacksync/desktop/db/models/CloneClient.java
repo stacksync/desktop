@@ -17,11 +17,9 @@
  */
 package com.stacksync.desktop.db.models;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
-import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.PersistentObject;
 
@@ -32,7 +30,6 @@ import com.stacksync.desktop.db.PersistentObject;
 @Entity
 @IdClass(value = CloneClientPk.class)
 public class CloneClient extends PersistentObject implements Serializable {
-    private static final Config config = Config.getInstance();
     private static final long serialVersionUID = 17398420202020111L;
 
     @Id

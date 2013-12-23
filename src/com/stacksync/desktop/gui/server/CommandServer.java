@@ -30,7 +30,6 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import com.stacksync.desktop.Environment.OperatingSystem;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.exceptions.CommandException;
 import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
@@ -77,7 +76,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
         @Override
         public void run() {
-            logger.debug(config.getUserName() + "#CommandServer: Client connected.");
+            logger.debug("CommandServer: Client connected.");
 
             try {
 
@@ -91,7 +90,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
                     String command = in.readLine();
 
                     if (command == null) {
-                        logger.debug(config.getMachineName() + "#CommandServer (worker " + Thread.currentThread().getName() + "): Client disconnected. EXITING WORKER.", null);
+                        logger.debug("CommandServer (worker " + Thread.currentThread().getName() + "): Client disconnected. EXITING WORKER.", null);
                         return;
                     }
 
@@ -110,17 +109,17 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
                     out.flush();
 
                 } catch (Exception e) {
-                    logger.error(config.getMachineName() + "#CommandServer (worker " + Thread.currentThread().getName() + "): Client disconnected. EXITING WORKER.", e);
+                    logger.error("CommandServer (worker " + Thread.currentThread().getName() + "): Client disconnected. EXITING WORKER.", e);
                 } finally {
                     try {
                         clientSocket.close();
                     } catch (IOException ex) {
-                        logger.debug(config.getMachineName() + "#I/O Exception.", ex);
+                        logger.debug("I/O Exception.", ex);
                     }
                 }
 
             } catch (IOException ex) {
-                logger.debug(config.getMachineName() + "#Could not create Input/OutputStream for CommandWorker.", ex);
+                logger.debug("Could not create Input/OutputStream for CommandWorker.", ex);
             }
         }
 
@@ -180,7 +179,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
         @Override
         public void run() {
-            logger.debug(config.getUserName() + "#CommandServer: Client connected.");
+            logger.debug("CommandServer: Client connected.");
 
             try {
                 OutputStream outStream = clientSocket.getOutputStream();
@@ -193,7 +192,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
                         String command = in.readLine();
 
                         if (command == null) {
-                            logger.debug(config.getMachineName() + "#CommandServer (worker " + Thread.currentThread().getName() + "): Client disconnected. EXITING WORKER.", null);
+                            logger.debug("CommandServer (worker " + Thread.currentThread().getName() + "): Client disconnected. EXITING WORKER.", null);
                             return;
                         }
 
@@ -204,7 +203,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
                         // Commands
                         try {
-                            logger.debug(config.getMachineName() + "#Received command " + command + ".");
+                            logger.debug("Received command " + command + ".");
 
                             Map<String, List<String>> args = readArguments(in);
                             if ("get_emblems".equals(command) || "icon_overlay_file_status".equals(command)) {
@@ -221,7 +220,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
                                 throw new CommandException("Unknown command '" + command + "'.");
                             }
                         } catch (CommandException e) {
-                            logger.debug(config.getMachineName() + "#Error in command, sending error:", e);
+                            logger.debug("Error in command, sending error:", e);
 
                             out.print("notok\n");
                             out.print(e.getMessage() + "\n");
@@ -231,7 +230,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
                     }
 
                 } catch (IOException ex) {
-                    logger.debug(config.getMachineName() + "#Exception in CommandWorker.", ex);
+                    logger.debug("Exception in CommandWorker.", ex);
                 } finally {
                     try {
                         if (outStream != null) {
@@ -240,12 +239,12 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
                         clientSocket.close();
                     } catch (IOException ex) {
-                        logger.debug(config.getMachineName() + "#I/O Exception.", ex);
+                        logger.debug("I/O Exception.", ex);
                     }
                 }
 
             } catch (IOException ex) {
-                logger.debug(config.getMachineName() + "#Could not create Input/OutputStream for CommandWorker.", ex);
+                logger.debug("Could not create Input/OutputStream for CommandWorker.", ex);
             }
         }
 
@@ -294,7 +293,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             }
 
             File file = new File(args.get("path").get(0));
-            logger.debug(config.getMachineName() + "#Command " + command + ": path= '" + file.getAbsolutePath() + "'");
+            logger.debug("Command " + command + ": path= '" + file.getAbsolutePath() + "'");
 
             if (!file.exists()) {
                 throw new CommandException("Invalid Argument: Given path '" + file.getAbsolutePath() + "' does not exist.");
@@ -308,7 +307,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             CloneFile cf = db.getFileOrFolder(file);
 
             if (cf != null) {
-                logger.debug(config.getMachineName() + "#Command " + command + ": DB entry for " + file + ":    " + cf + " (sync: " + ((cf != null) ? cf.getSyncStatus() : "N/A"));
+                logger.debug("Command " + command + ": DB entry for " + file + ":    " + cf + " (sync: " + cf.getSyncStatus());
 
                 SyncStatus status = getSyncStatusChildren(cf);
                 queryCache.put(file, new Date());
@@ -332,7 +331,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             }
 
             // Return result
-            logger.debug(config.getMachineName() + "#Command " + command + " RESULT: " + resultKey + "=" + resultValue + " for path= " + file.getAbsolutePath());
+            logger.debug("Command " + command + " RESULT: " + resultKey + "=" + resultValue + " for path= " + file.getAbsolutePath());
 
             out.print("ok\n");
             out.print(resultKey + "	" + resultValue + "\n");
@@ -346,7 +345,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             }
 
             String path = args.get("paths").get(0);
-            logger.debug(config.getMachineName() + "#Command " + command + ": icon_overlay_context_options: paths= '" + path + "'");
+            logger.debug("Command " + command + ": icon_overlay_context_options: paths= '" + path + "'");
 
             // Find file in DB
             List<String> options = new ArrayList<String>();
@@ -376,7 +375,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
             // Concatenate
             String optionsStr = StringUtil.join(options, "	");
-            logger.debug(config.getMachineName() + "#Command " + command + ": Result is: options: " + optionsStr);
+            logger.debug("Command " + command + ": Result is: options: " + optionsStr);
 
             // Return
             out.print("ok\n");
@@ -391,7 +390,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             }
 
             String path = args.get("path").get(0);
-            logger.debug(config.getMachineName() + "#Command " + command + ": get_folder_tag: path= " + path);
+            logger.debug("Command " + command + ": get_folder_tag: path= " + path);
 
             // TODO check status
             out.print("ok\n");
@@ -405,7 +404,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
              throw new CommandException("Invalid Arguments: Argument 'path' missing.");
 
              String path = args.get("path").get(0);
-             logger.debug(config.getMachineName() + "#CommandServer (worker "+Thread.currentThread().getName()+"): get_emblem_paths: path= '"+path+"'");
+             logger.debug("CommandServer (worker "+Thread.currentThread().getName()+"): get_emblem_paths: path= '"+path+"'");
              */
 
             // TODO check status
@@ -430,7 +429,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
             // Do it!
             if (verb.startsWith("restore")) {
-                logger.debug(config.getMachineName() + "#Command " + command + ": " + verb + ".");
+                logger.debug("Command " + command + ": " + verb + ".");
                 String[] splited = verb.split(":"); // verb[0] idFile[1] version[2]
 
                 String path = args.get("paths").get(0);
@@ -465,12 +464,12 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
                     try {
                         root.getProfile().getRemoteWatcher().restoreVersion(restoringVersion);
                     } catch (CouldNotApplyUpdateException e) {
-                        logger.warn(config.getMachineName() + "#Warning: could not download/assemble " + restoringVersion, e);
+                        logger.warn("Warning: could not download/assemble " + restoringVersion, e);
                     }
                 }
 
             } else {
-                logger.debug(config.getMachineName() + "#Command " + command + ": Unknown verb " + verb + ". IGNORING.");
+                logger.debug("Command " + command + ": Unknown verb " + verb + ". IGNORING.");
             }
 
             out.print("ok\n");

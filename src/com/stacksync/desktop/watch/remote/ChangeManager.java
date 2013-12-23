@@ -145,13 +145,13 @@ public class ChangeManager {
 
         while (null != (update = queue.poll())) {
             tray.setStatusText(this.getClass().getSimpleName(), "Changing " + (queue.size() + 1) +  " files...");
-            logger.info(config.getMachineName() + "#Processing update " + update);                    
+            logger.info("Processing update " + update);                    
 
             CloneFile existingVersion = db.getFileOrFolder(profile, update.getFileId(), update.getVersion());            
             boolean isLocalConflict = isLocalConflict(existingVersion, update) | update.getConflicted();
             ///Existing version equals update -> skip: file is up-to-date!
             if (existingVersion != null && !isLocalConflict && (existingVersion.getSyncStatus()== SyncStatus.UPTODATE)) {
-                logger.info(config.getMachineName() + "#- File " + update.getPath() + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
+                logger.info("File " + update.getPath() + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
                 
                 if(!existingVersion.getServerUploadedAck()){
                     existingVersion.setServerUploadedAck(true);
@@ -161,7 +161,7 @@ public class ChangeManager {
                 continue;
             }
             
-            logger.info(config.getMachineName() + "#- Processing update: " + update);
+            logger.info("Processing update: " + update);
             if (!newUpdatesMap.containsKey(update.getFileId())) {
                 newUpdatesMap.put(update.getFileId(), new ArrayList<Update>());
             }
@@ -173,7 +173,7 @@ public class ChangeManager {
             
             if (localVersionById != null) { // A) I know the file ID
                 if (isLocalConflict) { /// a) Conflict exists
-                    logger.info(config.getMachineName() + "#Aa) File ID " + update.getFileId() + " known, conflict found of " + existingVersion + " with updates " + update + ". Resolving conflict ...");
+                    logger.info("Aa) File ID " + update.getFileId() + " known, conflict found of " + existingVersion + " with updates " + update + ". Resolving conflict ...");
                     
                     if(update.isFolder()){
                         resolveFolderConflict(existingVersion, update);
@@ -189,7 +189,7 @@ public class ChangeManager {
                     }
 
                 } else { /// b) No conflict exists (only apply new versions)
-                    logger.info(config.getMachineName() + "#Ab) File ID " + update.getFileId() + " known. New update found. Applying ...");
+                    logger.info("Ab) File ID " + update.getFileId() + " known. New update found. Applying ...");
                     applyUpdate(localVersionById, update);
                 }
             } else { // B) I do not know the file ID
@@ -197,7 +197,7 @@ public class ChangeManager {
                 root = profile.getFolders().get(update.getRootId());
                 if (root == null) {
                     // TODO given ROOT is unknown! 
-                    logger.error(config.getMachineName() + "#TODO TODO TODO  --- ROOT ID " + update.getRootId() + " is unknown. ");
+                    logger.error("TODO TODO TODO  --- ROOT ID " + update.getRootId() + " is unknown. ");
                     continue;
                 }
 
@@ -206,17 +206,17 @@ public class ChangeManager {
 
                 // a) No local file (in DB) exists: This one must be new!
                 if (localVersionByFilename == null) {
-                    logger.info(config.getMachineName() + "#Ba) File ID " + update.getFileId() + " NOT known. No conflicting filename found in DB. Applying updates of new file ...");
+                    logger.info("Ba) File ID " + update.getFileId() + " NOT known. No conflicting filename found in DB. Applying updates of new file ...");
                     applyUpdate(null, update);
                 } else { // b) Local file exists:
-                    logger.info(config.getMachineName() + "#Bb) File ID " + update.getFileId() + " NOT known. Conflicting file (same file path) FOUND in DB: " + localVersionByFilename);
+                    logger.info("Bb) File ID " + update.getFileId() + " NOT known. Conflicting file (same file path) FOUND in DB: " + localVersionByFilename);
                     
                     if(update.isFolder()){
                         resolveFolderConflict(localVersionByFilename, update);
                     } else {
                         
                         if(localVersionByFilename.getServerUploadedAck()){
-                            logger.error(config.getMachineName() + "#) File " + update.getFileId() + " has the same path " + update.getPath() + "/" + update.getName() + " and different id.");
+                            logger.error(") File " + update.getFileId() + " has the same path " + update.getPath() + "/" + update.getName() + " and different id.");
                         } else{
                             List<CloneFile> previusVersions = localVersionByFilename.getPreviousVersions();
                             previusVersions.add(localVersionByFilename);
@@ -288,12 +288,12 @@ public class ChangeManager {
 
     private void resolveFolderConflict(CloneFile firstConflictingVersion, Update conflictUpdate) {
         ///// C. Add updates to DB
-        logger.info(config.getMachineName() + "#resolveFolderConflict: C. Adding updates to DB: " + conflictUpdate);
+        logger.info("resolveFolderConflict: C. Adding updates to DB: " + conflictUpdate);
         CloneFile winningVersion = addToDB(conflictUpdate);
         winningVersion.setStatus(Status.RENAMED);
         
         ///// D. Create 'winning' file
-        logger.info(config.getMachineName() + "#resolveFolderConflict: D. Create/Download winning file ...");
+        logger.info("resolveFolderConflict: D. Create/Download winning file ...");
         // TODO what if this is a rename-only history??? 
 
         File fileOldVersion = new File(firstConflictingVersion.getAbsolutePath());
@@ -343,7 +343,7 @@ public class ChangeManager {
         }        
         
         ///// A. Adjust local history (first conflicting version - last local version)
-        logger.info(config.getMachineName() + "#resolveConflict: A. Adjusting local history of " + firstConflictingVersion + " ...");
+        logger.info("resolveConflict: A. Adjusting local history of " + firstConflictingVersion + " ...");
 
         // I lose! Adjust complete history
         List<CloneFile> nextVersions = firstConflictingVersion.getNextVersions();
@@ -364,7 +364,7 @@ public class ChangeManager {
         String newFileName = generateConflictName(firstConflictingVersion);
 
         for (CloneFile cf: versionsToAdjust) {
-            logger.info(config.getMachineName() + "#- Adding adjusted version " + cf + " from DB: " + cf.getAbsolutePath() + "");
+            logger.info("- Adding adjusted version " + cf + " from DB: " + cf.getAbsolutePath() + "");
             
             /// GGIPART /// Solved bug trying remove old version and insert new version            
             CloneFile cfclone = (CloneFile) cf.clone();
@@ -395,7 +395,7 @@ public class ChangeManager {
         em.getTransaction().commit();
 
         ///// B. Rename last local file to 'conflicting copy'
-        logger.info(config.getMachineName() + "#resolveConflict: B. Renaming local file " + oldConflictingLocalFile + " to " + newConflictingLocalFile + "");
+        logger.info("resolveConflict: B. Renaming local file " + oldConflictingLocalFile + " to " + newConflictingLocalFile + "");
         FileUtil.renameVia(oldConflictingLocalFile, newConflictingLocalFile.getFile());
 
         // Q upload if name is legal
@@ -404,7 +404,7 @@ public class ChangeManager {
         }
 
         ///// C. Add updates to DB	
-        logger.info(config.getMachineName() + "#resolveConflict: C. Adding updates to DB: " + conflictUpdate);
+        logger.info("resolveConflict: C. Adding updates to DB: " + conflictUpdate);
         CloneFile winningVersion = addToDB(conflictUpdate);
 
         if(winningVersion.getStatus() == Status.DELETED){            
@@ -418,7 +418,7 @@ public class ChangeManager {
         } else {
             updateSyncStatus(winningVersion, SyncStatus.REMOTE);
             ///// D. Create 'winning' file
-            logger.info(config.getMachineName() + "#resolveConflict: D. Create/Download winning file ...");
+            logger.info("resolveConflict: D. Create/Download winning file ...");
             // TODO what if this is a rename-only history??? 
 
             File tempWinningFile = new File(winningVersion.getFile().getParentFile().getAbsoluteFile() + File.separator + ".ignore-assemble-to-" + winningVersion.getFile().getName());
@@ -427,7 +427,7 @@ public class ChangeManager {
             // Download and assemble winning file
             downloadChunks(winningVersion);
             assembleFile(winningVersion, tempWinningFile);
-            logger.info(config.getMachineName() + "#resolveConflict: D2. Rename temp file to " + winningVersion.getFile() + " ...");
+            logger.info("resolveConflict: D2. Rename temp file to " + winningVersion.getFile() + " ...");
             tempWinningFile.renameTo(winningVersion.getFile());
 
             // Update DB
@@ -440,12 +440,12 @@ public class ChangeManager {
     private CloneFile addToDB(Update newFileUpdate) {        
         CloneFile existingVersion = db.getFileOrFolder(profile, newFileUpdate.getFileId(), newFileUpdate.getVersion());
         if(existingVersion != null){
-            logger.info(config.getMachineName() + "#found clonefile in database " + existingVersion);
+            logger.info("found clonefile in database " + existingVersion);
             existingVersion.setSyncStatus(SyncStatus.REMOTE);
             existingVersion.merge();
             return existingVersion; //Remote Version
         } else {
-            logger.info(config.getMachineName() + "#creating new clonefile in database.");
+            logger.info("creating new clonefile in database.");
             return db.createFile(profile, newFileUpdate);
         }
     }
@@ -489,9 +489,9 @@ public class ChangeManager {
     private void applyRenameOnlyChanges(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException {
         if(lastMatchingVersion == null || !checkChunks(lastMatchingVersion.getChunks(), newFileUpdate.getChunks())){
             if(lastMatchingVersion == null){
-                logger.warn(config.getMachineName() + "#Error lastmatching version is nul");
+                logger.warn("Error lastmatching version is nul");
             } else {
-                logger.warn(config.getMachineName() + "#Error file chunks not matching " + lastMatchingVersion.getFileId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + "; Trying to download the file ...");
+                logger.warn("Error file chunks not matching " + lastMatchingVersion.getFileId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + "; Trying to download the file ...");
             }
 
             applyChangeOrNew(lastMatchingVersion, newFileUpdate);
@@ -499,7 +499,7 @@ public class ChangeManager {
         }        
         
         if (!lastMatchingVersion.getFile().exists()) {
-            logger.warn(config.getMachineName() + "#Error while renaming file " + lastMatchingVersion.getFileId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + " does NOT exist; Trying to download the file ...");
+            logger.warn("Error while renaming file " + lastMatchingVersion.getFileId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + " does NOT exist; Trying to download the file ...");
 
             applyChangeOrNew(lastMatchingVersion, newFileUpdate);
             return;
@@ -509,11 +509,11 @@ public class ChangeManager {
         CloneFile newestVersion = addToDB(newFileUpdate);
 
         ///// B. Rename current local version to the last update version
-        logger.info(config.getMachineName() + "#- ChangeManager: Renaming file " + lastMatchingVersion.getFile() + " to " + newestVersion.getFile());
+        logger.info("- ChangeManager: Renaming file " + lastMatchingVersion.getFile() + " to " + newestVersion.getFile());
 
         if (newestVersion.getFile().exists()) {
-            logger.warn(config.getMachineName() + "#- ChangeManager: Unable to rename file. " + newestVersion.getFile() + " already exists.");
-            logger.warn(config.getMachineName() + "#TODO TODO TODO what do we do in this case???");
+            logger.warn("- ChangeManager: Unable to rename file. " + newestVersion.getFile() + " already exists.");
+            logger.warn("TODO TODO TODO what do we do in this case???");
             
             //si esta renombrado comprobar el checksum i sino coincide aplicar changeornew
             //checkear si checksum coincide                    
@@ -528,14 +528,14 @@ public class ChangeManager {
 
         // No difference between folder and file !
         if (!lastMatchingVersion.getFile().renameTo(tempFile)) {
-            logger.warn(config.getMachineName() + "#ChangeManager Renaming NOT successful: from " + lastMatchingVersion.getFile() + " to " + tempFile + "");
+            logger.warn("ChangeManager Renaming NOT successful: from " + lastMatchingVersion.getFile() + " to " + tempFile + "");
             throw new CouldNotApplyUpdateException(new Exception("Renaming NOT successful"));
         }
 
         tempFile.setLastModified(lastMatchingVersion.getLastModified().getTime());
 
         if (!tempFile.renameTo(newestVersion.getFile())) {
-            logger.warn(config.getMachineName() + "#ChangeManager Renaming NOT successful: from " + tempFile + " to " + newestVersion.getFile() + "");
+            logger.warn("ChangeManager Renaming NOT successful: from " + tempFile + " to " + newestVersion.getFile() + "");
             throw new CouldNotApplyUpdateException(new Exception("Renaming NOT successful"));
         }
 
@@ -553,7 +553,7 @@ public class ChangeManager {
      * @param newFileUpdates
      */
     private void applyDeleteChanges(CloneFile lastMatchingVersion, Update newFileUpdate) {
-        logger.info(config.getMachineName() + "#Deleting " + newFileUpdate.getName() + "");
+        logger.info("Deleting " + newFileUpdate.getName() + "");
 
         ///// A. Add to DB
         CloneFile deletedVersion = addToDB(newFileUpdate);
@@ -568,7 +568,7 @@ public class ChangeManager {
         
         // No local version exists (weird!)
         if (!fileToDelete.exists()) {
-            logger.warn(config.getMachineName() + "#Error while deleting file " + deletedVersion.getFileId() + "v" + deletedVersion.getVersion() + ": " + deletedVersion.getRelativePath() + " does NOT exist.");                        
+            logger.warn("Error while deleting file " + deletedVersion.getFileId() + "v" + deletedVersion.getVersion() + ": " + deletedVersion.getRelativePath() + " does NOT exist.");                        
         } else {
             
             // No difference between folder and file !
@@ -643,12 +643,12 @@ public class ChangeManager {
     private void applyChangeOrNew(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException{
         ///// A. Add to DB
         CloneFile newestVersion = addToDB(newFileUpdate);
-        logger.info(config.getMachineName() + "#- ChangeManager: Downloading/Updating " + newestVersion.getFile() + "");
+        logger.info("- ChangeManager: Downloading/Updating " + newestVersion.getFile() + "");
 
         // Skip conditions
         boolean unknownButFileExists = lastMatchingVersion == null && newestVersion.getFile().exists();
         if (unknownButFileExists) {
-            logger.warn(config.getMachineName() + "#File " + newestVersion.getFile() + " already exists.");
+            logger.warn("File " + newestVersion.getFile() + " already exists.");
             
             if(!newestVersion.isFolder()){
                 try {
@@ -659,7 +659,7 @@ public class ChangeManager {
                     chunks.closeStream();
 
                     if(checksum != newestVersion.getChecksum()){
-                        logger.info(config.getMachineName() + "#resolveConflict: renaming localfile " + newestVersion + " ...");
+                        logger.info("resolveConflict: renaming localfile " + newestVersion + " ...");
                         String newFileName = generateConflictName(newestVersion);
         
                         File conflictedCopy = new File(newestVersion.getAbsoluteParentDirectory() + File.separator + newFileName);
@@ -668,7 +668,7 @@ public class ChangeManager {
                         downloadChangeOrNew(lastMatchingVersion, newestVersion);
                     }
                 } catch (FileNotFoundException ex) {
-                    logger.warn(config.getMachineName() + "#Cannot createChunks, File not exists:" + ex.getMessage() + " but ¿¿¿already checked before???");
+                    logger.warn("Cannot createChunks, File not exists:" + ex.getMessage() + " but ¿¿¿already checked before???");
                     throw new CouldNotApplyUpdateException(ex);
                 }
             }
@@ -682,18 +682,18 @@ public class ChangeManager {
     }
 
     private void downloadChunks(CloneFile file) throws CouldNotApplyUpdateException {
-        logger.info(config.getMachineName() + "#Downloading file " + file.getRelativePath() + " ...");  
+        logger.info("Downloading file " + file.getRelativePath() + " ...");  
 
         for (CloneChunk chunk: file.getChunks()) {
             File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
             if (chunk.getCacheStatus() == CacheStatus.CACHED && chunkCacheFile.exists()) {
-                logger.info(config.getMachineName() + "#- Chunk " + chunk + " found in local cache.");
+                logger.info("- Chunk " + chunk + " found in local cache.");
                 continue;
             }
 
             try {
-                logger.info(config.getMachineName() + "#- Downloading chunk (" + chunk.getOrder() + "/" + file.getChunks().size() + ") " + chunk + " ...");
+                logger.info("- Downloading chunk (" + chunk.getOrder() + "/" + file.getChunks().size() + ") " + chunk + " ...");
 
                 String fileName = chunk.getFileName();
                 transfer.download(new RemoteFile(fileName), chunkCacheFile);                
@@ -707,12 +707,12 @@ public class ChangeManager {
                  em.flush();
                  em.getTransaction().commit();*/
             } catch (StorageException e) {
-                logger.warn(config.getMachineName() + "#- ERR: Chunk " + chunk + " not found (or something else)", e);
+                logger.warn("- ERR: Chunk " + chunk + " not found (or something else)", e);
                 throw new CouldNotApplyUpdateException(e);
             }
         }
 
-        logger.info(config.getMachineName() + "#- File " + file.getRelativePath() + " downloaded; Assembling ...");
+        logger.info("- File " + file.getRelativePath() + " downloaded; Assembling ...");
     }
 
 
@@ -721,10 +721,10 @@ public class ChangeManager {
         FileOutputStream fos = null;       
         try {
             fos = new FileOutputStream(tempFile, false);
-            logger.info(config.getMachineName() + "#- Decrypting chunks to temp file  " + tempFile.getAbsolutePath() + " ...");
+            logger.info("- Decrypting chunks to temp file  " + tempFile.getAbsolutePath() + " ...");
 
             for (CloneChunk chunk: cf.getChunks()) {
-                logger.info(config.getMachineName() + "#Chunk (" + chunk.getOrder() + File.separator + cf.getChunks().size() + ")" + config.getCache().getCacheChunk(chunk));
+                logger.info("Chunk (" + chunk.getOrder() + File.separator + cf.getChunks().size() + ")" + config.getCache().getCacheChunk(chunk));
 
                 // Read file to buffer
                 File chunkFile = config.getCache().getCacheChunk(chunk);
@@ -746,11 +746,11 @@ public class ChangeManager {
                     fos.close();
                 }                
             } catch (IOException ex) {
-                logger.error(config.getMachineName()+"#Exception: ", ex);
+                logger.error("Exception: ", ex);
             }
         }
 
-        logger.info(config.getMachineName() + "#- File " + cf.getRelativePath() + " downloaded");
+        logger.info("- File " + cf.getRelativePath() + " downloaded");
     }
 
     /**
@@ -794,7 +794,7 @@ public class ChangeManager {
         }
 
         if(existingVersion.getSyncStatus() == SyncStatus.REMOTE && existingVersion.getVersion() == update.getVersion()){
-            logger.info(config.getMachineName() + "#Reapply the update again: " + update);
+            logger.info("Reapply the update again: " + update);
             return false;
         }        
         
@@ -804,13 +804,13 @@ public class ChangeManager {
         
         // If we were first, the remote client has to fix it!
         if (existingVersion.getUpdated().before(update.getUpdated())) {
-            logger.info(config.getMachineName() + "#- Nothing to resolve. I win. Local version " + existingVersion + " is older than update " + update);
+            logger.info("- Nothing to resolve. I win. Local version " + existingVersion + " is older than update " + update);
             return false;
         }
 
         // Rare case: Updated at the same time; Choose client with the "smallest" name (alphabetical)
         if (existingVersion.getUpdated().equals(update.getUpdated()) && config.getMachineName().compareTo(update.getClientName()) == 1) {
-            logger.info(config.getMachineName() + "#- Nothing to resolve. I win. RARE CASE: Decision by client name!");
+            logger.info("- Nothing to resolve. I win. RARE CASE: Decision by client name!");
             return false;
         } */                
 

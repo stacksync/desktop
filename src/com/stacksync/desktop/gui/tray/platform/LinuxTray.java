@@ -17,19 +17,19 @@
  */
 package com.stacksync.desktop.gui.tray.platform;
 
-import com.stacksync.desktop.gui.linux.LinuxNativeClient;
-import com.stacksync.desktop.gui.linux.UpdateStatusIconRequest;
-import com.stacksync.desktop.gui.linux.NotifyRequest;
-import com.stacksync.desktop.gui.linux.UpdateStatusTextRequest;
-import com.stacksync.desktop.gui.linux.ListenForTrayEventRequest;
-import com.stacksync.desktop.gui.linux.UpdateMenuRequest;
-import java.io.File;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.TrayException;
+import com.stacksync.desktop.gui.linux.LinuxNativeClient;
+import com.stacksync.desktop.gui.linux.ListenForTrayEventRequest;
+import com.stacksync.desktop.gui.linux.NotifyRequest;
+import com.stacksync.desktop.gui.linux.UpdateMenuRequest;
+import com.stacksync.desktop.gui.linux.UpdateStatusIconRequest;
+import com.stacksync.desktop.gui.linux.UpdateStatusTextRequest;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
 import com.stacksync.desktop.gui.tray.TrayEventListener;
+import java.io.File;
 
 
 /**
@@ -57,7 +57,7 @@ public class LinuxTray extends Tray {
     @Override
     public synchronized void destroy() {
         if (!initialized) {
-            logger.warn(config.getMachineName()+"#Cannot destroy. Tray not initialized yet.");                
+            logger.warn("Cannot destroy. Tray not initialized yet.");                
             return;
         }
         
@@ -67,7 +67,7 @@ public class LinuxTray extends Tray {
     @Override
     public void setStatusIconPlatform(StatusIcon status) {
         if (!initialized) {
-            logger.debug(config.getMachineName()+"#Cannot change icon. Tray not initialized yet.");                
+            logger.debug("Cannot change icon. Tray not initialized yet.");                
             return;
         }
         try {
@@ -78,7 +78,7 @@ public class LinuxTray extends Tray {
     @Override
     public void notify(String summary, String body, File imageFile) {
         if (!initialized) {
-            logger.warn(config.getMachineName()+"#Cannot send notification. Tray not initialized yet.");                
+            logger.warn("Cannot send notification. Tray not initialized yet.");                
             return;
         }
         try {
@@ -89,7 +89,7 @@ public class LinuxTray extends Tray {
     @Override
     public void updateUI() {
         if (!initialized) {
-            logger.warn(config.getMachineName()+"#Cannot update tray menu. Tray not initialized yet.");                
+            logger.warn("Cannot update tray menu. Tray not initialized yet.");                
             return;
         }
 
@@ -121,16 +121,16 @@ public class LinuxTray extends Tray {
 
         config.load();
         Tray tray = Tray.getInstance();
-        tray.registerProcess(tray.getInstance().getClass().getSimpleName());
+        tray.registerProcess(tray.getClass().getSimpleName());
         tray.init("Everything is up to date.");
 
         tray.notify("hello", "test", null);
-        tray.setStatusIcon(tray.getInstance().getClass().getSimpleName(), StatusIcon.UPDATING);
-        tray.setStatusText(tray.getInstance().getClass().getSimpleName(), "hello!");
+        tray.setStatusIcon(tray.getClass().getSimpleName(), StatusIcon.UPDATING);
+        tray.setStatusText(tray.getClass().getSimpleName(), "hello!");
         
         
         Thread.sleep(1000);
-        tray.setStatusIcon(tray.getInstance().getClass().getSimpleName(), StatusIcon.UPTODATE);
+        tray.setStatusIcon(tray.getClass().getSimpleName(), StatusIcon.UPTODATE);
         
         tray.addTrayEventListener(new TrayEventListener() {
 

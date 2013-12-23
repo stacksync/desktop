@@ -121,11 +121,11 @@ public class LinuxNativeClient {
                 // Request
                 out.print(request + "\n");
                 out.flush();
-                logger.debug(config.getMachineName() + "#Sent request " + request + ". Waiting for response ...");
+                logger.debug("Sent request " + request + ". Waiting for response ...");
 
                 // Response
                 Object response = request.parseResponse(in.readLine());
-                logger.debug(config.getMachineName() + "#Received response: " + response);
+                logger.debug("Received response: " + response);
 
                 in.close();
                 out.close();                
@@ -134,7 +134,7 @@ public class LinuxNativeClient {
                 return response;
             } catch (Exception ex) {
                 if (i < RETRY_COUNT) {
-                    logger.warn(config.getMachineName() + "#Could not send request " + request + " to native server. RETRYING ...", ex);
+                    logger.warn("Could not send request " + request + " to native server. RETRYING ...", ex);
 
                     try {
                         Thread.sleep(RETRY_SLEEP);
@@ -157,7 +157,7 @@ public class LinuxNativeClient {
                         in.close();
                     }                    
                 } catch (IOException ex) {
-                    logger.debug(config.getMachineName() + "#I/O Exception.", ex);
+                    logger.debug("I/O Exception.", ex);
                 }
             }
         }
@@ -174,11 +174,11 @@ public class LinuxNativeClient {
         for (int i = 0; i < RETRY_COUNT; i++) {
             try {
                 connection.connect(new InetSocketAddress("localhost", servicePort), 1000);
-                logger.debug(config.getMachineName() + "#Connected to native server on port " + servicePort);
+                logger.debug("Connected to native server on port " + servicePort);
                 return connection;
             } catch (IOException e) {
                 if (i < RETRY_COUNT) {
-                    logger.warn(config.getMachineName() + "#Cannot connect to native server on port " + servicePort + ". RETRYING ...", e);
+                    logger.warn("Cannot connect to native server on port " + servicePort + ". RETRYING ...", e);
 
                     try {
                         Thread.sleep(RETRY_SLEEP);
@@ -273,7 +273,7 @@ public class LinuxNativeClient {
             ProcessBuilder builder = new ProcessBuilder(pythonBinary, nativeScript, config.getResDir().getAbsolutePath(), initialMessage);
 
             builder.redirectErrorStream(true);
-            logger.debug(config.getMachineName() + "#Starting LinuxNativeService : " + builder.command());
+            logger.debug("Starting LinuxNativeService : " + builder.command());
 
             // Start the server process
             servicePort = 0;
@@ -281,7 +281,7 @@ public class LinuxNativeClient {
             serviceIn = new BufferedReader(new InputStreamReader(serviceProcess.getInputStream()));
 
             // Read the port (one-line)
-            String line = "NO_LINE";
+            String line;
             List<String> errors = new ArrayList<String>();
 
             while (servicePort == 0) {
@@ -331,7 +331,7 @@ public class LinuxNativeClient {
                         String line;
 
                         while ((line = serviceIn.readLine()) != null) {
-                            logger.debug(config.getMachineName() + "#" + line);
+                            logger.debug("" + line);
                         }
                     } catch (IOException ex) {
                         logger.warn("TRAY SERVICE TERMINATED.", ex);

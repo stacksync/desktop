@@ -38,7 +38,6 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import com.stacksync.desktop.db.models.Workspace;
-import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.desktop.util.StringUtil;
@@ -50,7 +49,6 @@ import com.stacksync.desktop.util.StringUtil;
  */
 public class DatabaseHelper {
     
-    private final Config env = Config.getInstance();
     private final Config config = Config.getInstance();
     private final Logger logger = Logger.getLogger(DatabaseHelper.class.getName());
     private static final DatabaseHelper instance = new DatabaseHelper();
@@ -58,7 +56,7 @@ public class DatabaseHelper {
     
 
     private DatabaseHelper() {
-        logger.debug(config.getMachineName() + "#Creating DB helper ...");
+        logger.debug("Creating DB helper ...");
     }
 
     public static DatabaseHelper getInstance() {
@@ -121,14 +119,16 @@ public class DatabaseHelper {
         String queryStr =
                 "select f from CloneFile f where "
                 + "      f.rootId = :rootId "
-                + ((root != null) ? " and f.profileId = :profileId " : "")
+                + " and f.profileId = :profileId "
                 + "      and f.filePath = :path "
                 + "      and f.name = :name "
                 + ((folder != null) ? "and f.folder = :folder " : " ")
                 + "      and f.status <> :notStatus1 "
                 //+ "      and f.status <> :notStatus2 "
                 //+ "      and f.syncStatus <> :notSyncStatus "
-                + "      and f.version = (select max(ff.version) from CloneFile ff where " + ((root != null) ? " ff.profileId = :profileId and " : "") + " ff.rootId = :rootId and f.fileId = ff.fileId) "
+                + "      and f.version = (select max(ff.version) from CloneFile ff where "
+                + "         ff.profileId = :profileId "
+                + "         and  ff.rootId = :rootId and f.fileId = ff.fileId) "
                 + "      order by f.updated desc";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
@@ -145,9 +145,7 @@ public class DatabaseHelper {
         //query.setParameter("notStatus2", Status.MERGED);
         //query.setParameter("notSyncStatus", CloneFile.SyncStatus.SYNCING); // this is required for chmgr.applyNewOrChange()
 
-        if (root != null) {
-            query.setParameter("profileId", root.getProfile().getId());
-        }
+        query.setParameter("profileId", root.getProfile().getId());
 
         if (folder != null) {
             query.setParameter("folder", folder);
@@ -249,7 +247,7 @@ public class DatabaseHelper {
                 return (CloneFile) query.getSingleResult();
 
             } catch (NoResultException ex) {
-                logger.debug(env.getMachineName() + "# No result for p->" + profile.getId() + " fId->" + fileId + " fV-> " + version + " -> " + ex.getMessage());
+                logger.debug(" No result for p->" + profile.getId() + " fId->" + fileId + " fV-> " + version + " -> " + ex.getMessage());
                 continue;
             } 
         }
@@ -278,7 +276,7 @@ public class DatabaseHelper {
         try {
             return (CloneFile) query.getSingleResult();
         } catch (NoResultException ex) {
-            logger.debug(env.getMachineName() + "# No result -> " + ex.getMessage());
+            logger.debug(" No result -> " + ex.getMessage());
             return null;
         }
     }
@@ -430,7 +428,7 @@ public class DatabaseHelper {
                 /// GGI -> removed now always add the news chunks
                 //newFile.setChunks(previousVersion.getChunks());
             } else {
-                logger.warn(config.getUserName() + "#Could not find previous version for file" + newFile + "in database.");
+                logger.warn("Could not find previous version for file" + newFile + "in database.");
             }
         }
 
@@ -488,11 +486,11 @@ public class DatabaseHelper {
             try {
                 return (CloneClient) query.getSingleResult();
             } catch (NoResultException ex) {
-                logger.debug(env.getMachineName() + "# No result -> " + ex.getMessage());
+                logger.debug("No result -> " + ex.getMessage());
                 CloneClient client = null;
 
                 if (create) {
-                    logger.debug(config.getMachineName() + "#Logger: Client " + machineName + " unknown. Adding to DB.");
+                    logger.debug("Logger: Client " + machineName + " unknown. Adding to DB.");
 
                     client = new CloneClient(machineName, profile.getId());
                     client.merge();
@@ -536,7 +534,7 @@ public class DatabaseHelper {
         try {
             return (Long) query.getSingleResult();
         } catch (NoResultException ex) {
-            logger.debug(env.getMachineName() + "# No result -> " + ex.getMessage());
+            logger.debug("No result -> " + ex.getMessage());
             return new Long(0);
         }      
     }
@@ -563,9 +561,9 @@ public class DatabaseHelper {
 
         try {
             chunk = (CloneChunk) query.getSingleResult();
-            logger.info(config.getUserName() + "#Found chunk (" + chunkOrder + ") in DB: " + chunk);
+            logger.info("Found chunk (" + chunkOrder + ") in DB: " + chunk);
         } catch (NoResultException e) {
-            logger.info(config.getUserName() + "#New chunk (" + chunkOrder + "): " + checksum);
+            logger.info("New chunk (" + chunkOrder + "): " + checksum);
 
             chunk = new CloneChunk(checksum, chunkOrder, status);
             chunk.setPath(path);
@@ -573,7 +571,7 @@ public class DatabaseHelper {
             /*try {
                 chunk.merge();
             } catch (Exception e1) {
-                logger.info(config.getUserName() + "#RETRY for chunk (" + chunkOrder + ") " + checksum + ", because adding failed!! (try = " + tryCount + ")", e1);
+                logger.info("RETRY for chunk (" + chunkOrder + ") " + checksum + ", because adding failed!! (try = " + tryCount + ")", e1);
                 continue;
             }*/
             // TODO: can clash if two accounts index the same files at the same time

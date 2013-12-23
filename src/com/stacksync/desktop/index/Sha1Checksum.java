@@ -10,7 +10,6 @@ import java.util.zip.CheckedInputStream;
 import java.util.zip.Checksum;
 import javax.xml.bind.DatatypeConverter;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  * @author Guillermo Guerrero
@@ -41,7 +40,6 @@ public class Sha1Checksum implements ChecksumCreator {
             String hash = toHexString(mdbytes);
             return hash;
         } catch (NoSuchAlgorithmException e) {
-             //LogConfig.sendErrorLogs(logger, config.getMachineName() + "#", e);
             logger.error("No such algorithm: ", e);
         }
 

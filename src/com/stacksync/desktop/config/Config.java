@@ -75,6 +75,7 @@ public class Config {
     private Profiles profiles;
     private BrokerProperties brokerProps;
     private boolean extendedMode;
+    private boolean daemonMode;
 
     private Config() {
         // Note: Do NOT add a logger here, as the logger needs the Config instance.        
@@ -85,6 +86,7 @@ public class Config {
         machineName = null;
         serviceEnabled = true;
         extendedMode = false;
+        daemonMode = false;
 
         Locale locale = new Locale("en", "US");
         Locale defaultLocale = Locale.getDefault();
@@ -232,6 +234,14 @@ public class Config {
     public void setExtendedMode(boolean extendedMode) {
         this.extendedMode = extendedMode;
     }
+    
+    public boolean isDaemonMode() {
+        return daemonMode;
+    }
+
+    public void setDaemonMode(boolean daemonMode) {
+        this.daemonMode = daemonMode;
+    }
 
     public boolean isRemoteLogs() {
         return remoteLogs;
@@ -246,7 +256,7 @@ public class Config {
     }
 
     public void load(File configFolder) throws ConfigException {
-        logger.info(env.getMachineName() + "#Loading configuration from " + configFolder);
+        logger.info("Loading configuration from " + configFolder);
 
         configDir = configFolder;
         configFile = new File(configDir.getAbsoluteFile() + File.separator + Constants.CONFIG_FILENAME);

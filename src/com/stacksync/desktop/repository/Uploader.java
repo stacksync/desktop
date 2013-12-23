@@ -150,7 +150,7 @@ public class Uploader {
                 }                
             }
         } catch (InterruptedException ex) {
-            logger.error(config.getMachineName() + "#Exception: ", ex);
+            logger.error("Exception: ", ex);
         }            
     }
 
@@ -193,12 +193,12 @@ public class Uploader {
                     }
                 }
             } catch (InterruptedException iex) {
-                logger.error(config.getMachineName()+"#Exception ", iex);
+                logger.error("Exception ", iex);
             }
         }
 
         private void processRequest(CloneFile file) throws StorageException, StorageQuotaExcedeedException {            
-            logger.info(config.getMachineName() + "#UploadManager: Uploading file " + file.getFileName() + " ...");           
+            logger.info("UploadManager: Uploading file " + file.getFileName() + " ...");           
 
             // Update DB sync status                
             //now do this the newIndexRequest
@@ -235,14 +235,14 @@ public class Uploader {
                     long remoteSize = rFile.getSize();
 
                     if (localSize == remoteSize) {
-                        logger.info(config.getMachineName() + "#UploadManager: Chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
+                        logger.info("UploadManager: Chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
                         continue;
                     }
                 }
 
                 // Upload it!
                 try {
-                    logger.info(config.getMachineName() + "#UploadManager: Uploading chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
+                    logger.info("UploadManager: Uploading chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
                     transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName));
                 } catch (StorageException ex) {
                     logger.error("UploadManager: Uploading chunk ("+chunk.getOrder()+File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
@@ -253,7 +253,7 @@ public class Uploader {
                     throw ex;
                 }
             }
-            logger.info(config.getMachineName() + "#UploadManager: File " + file.getAbsolutePath() + " uploaded");
+            logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
 
             //config.getDatabase().getEntityManager().refresh(file);
             file = db.getFileOrFolder(profile, file.getFileId(), file.getVersion());
