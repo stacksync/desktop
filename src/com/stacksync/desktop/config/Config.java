@@ -293,7 +293,7 @@ public class Config {
                         is.close();
                     }
                 } catch (IOException ex) {
-                    logger.error(getMachineName() + "#Exception: ", ex);
+                    logger.error("Exception: ", ex);
                 }
             }
         }
@@ -315,7 +315,7 @@ public class Config {
                     stream.close();
                 }
             } catch (IOException ex) {
-                logger.error(getMachineName() + "#Exception: ", ex);
+                logger.error("Exception: ", ex);
             }
         }
     }
@@ -386,7 +386,7 @@ public class Config {
                     outputStream.close();
                 }
             } catch (IOException ex) {
-                logger.error(getMachineName() + "#I/O Exception.", ex);
+                logger.error("I/O Exception.", ex);
             }
         }
     }
@@ -462,7 +462,7 @@ public class Config {
                     resourceBundle = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, new Locale(languageSplit[0].toLowerCase(), languageSplit[1].toUpperCase()));
                 }
             } catch (MissingResourceException e) {
-                logger.warn(getMachineName() + "#COULD NOT LOAD resource bundle for " + language, e);
+                logger.warn("COULD NOT LOAD resource bundle for " + language, e);
                 /* Use default; Loaded in constructor */
             }
         }

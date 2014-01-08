@@ -40,51 +40,28 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         this.changeManager = changeManager;
     }
 
-    private void markAsUpdated(CloneFile cf, Update update) {
-        cf.setServerUploadedAck(true);
-        cf.setUpdated(update.getUpdated());
-        cf.merge();
-    }
-
     @Override
     public void notifyCommit(CommitResult cr) {
         List<CommitInfo> listObjects = cr.getObjects();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
-        String requestIdStr = cr.getRequestID();
-        String[] requestId = requestIdStr.split("-");
+        String fullReqId = cr.getRequestID();
+        String deviceName = fullReqId.split("-")[0];
         List<Update> ul = new ArrayList<Update>();
 
         for (CommitInfo obj : listObjects) {
             boolean committed = obj.isCommitted();
-            long version = obj.getVersion();
-            long fileId = obj.getFileId();
-
+            Update update;
             try {
-                ObjectMetadata objMetadata = obj.getMetadata();
+                
                 if (committed) {
-                    Update update = StringUtil.parseUpdate(objMetadata, workspace);
-                    CloneFile existingVersion = db.getFileOrFolder(profile, fileId, version);
-                    if (config.getMachineName().compareTo(requestId[0]) == 0) { //same pc ack
-                        if (existingVersion != null) {
-                            markAsUpdated(existingVersion, update);
-                        } else {
-                            logger.info("Exception: existing version is null");
-                        }
-                    } else { //other client
-                        ul.add(update);
-                    }
+                    update = doActionCommitted(deviceName, obj);
                 } else {
-                    if (config.getMachineName().compareTo(requestId[0]) == 0) { //same pc ack
-                        Update update = StringUtil.parseUpdate(objMetadata, workspace);
-                        CloneFile existingVersion = db.getFileOrFolder(profile, update.getFileId(), update.getVersion());
-                        if (existingVersion == null) {
-                            update.setConflicted(true);
-                            ul.add(update);
-                        } else {
-                            markAsUpdated(existingVersion, update);
-                        }
-                    }
+                    update = doActionNotCommited(deviceName, obj);
+                }
+                
+                if (update != null) {
+                    ul.add(update);
                 }
 
             } catch (NullPointerException ex) {
@@ -92,9 +69,58 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
             }
         }
 
-        logger.info("Queuing updates(" + ul.size() + ")");
-        if (ul.size() > 0) {
+        if (ul != null && ul.size() > 0) {
+            logger.info("Queuing updates(" + ul.size() + ")");
             changeManager.queueUpdates(ul);
         }
+    }
+
+    private Update doActionCommitted(String deviceName, CommitInfo obj) {
+        
+        long version = obj.getVersion();
+        long fileId = obj.getFileId();
+        ObjectMetadata objMetadata = obj.getMetadata();
+            
+        Update update = StringUtil.parseUpdate(objMetadata, workspace);
+        CloneFile existingVersion = db.getFileOrFolder(profile, fileId, version);
+        if (isMyCommit(deviceName)) {
+            if (existingVersion != null) {
+                markAsUpdated(existingVersion, update);
+            } else {
+                logger.info("Exception: existing version is null");
+            }
+        } else {
+            // It is not my commit.
+            return update;
+        }
+        
+        return null;
+    }
+
+    private Update doActionNotCommited(String deviceName, CommitInfo obj) {
+       
+        ObjectMetadata objMetadata = obj.getMetadata();
+        
+        if (isMyCommit(deviceName)) {
+            Update update = StringUtil.parseUpdate(objMetadata, workspace);
+            CloneFile existingVersion = db.getFileOrFolder(profile, update.getFileId(), update.getVersion());
+            if (existingVersion == null) {
+                update.setConflicted(true);
+                return update;
+            } else {
+                markAsUpdated(existingVersion, update);
+            }
+        }
+        return null;
+    }
+    
+    private boolean isMyCommit(String deviceName) {
+        return config.getMachineName().compareTo(deviceName) == 0;
+    }
+    
+    private void markAsUpdated(CloneFile cf, Update update) {
+        cf.setServerUploadedAck(true);
+        cf.setUpdated(update.getUpdated());
+        cf.merge();
     }
 }

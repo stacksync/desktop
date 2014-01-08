@@ -114,11 +114,11 @@ public class SettingsDialog extends javax.swing.JFrame {
                 Profile profile = WizardDialog.showWizard(true);
 
                 if (profile == null) {
-                    logger.info(config.getMachineName()+ "#Cancel clicked.");
+                    logger.info("Cancel clicked.");
                     return;
                 }
 
-                logger.info(config.getMachineName()+ "#SUCCESS: " + profile);
+                logger.info("SUCCESS: " + profile);
                 config.getProfiles().add(profile);
                 addProfileToTree(profile, true);
                 

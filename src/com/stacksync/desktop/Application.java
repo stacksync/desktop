@@ -187,8 +187,13 @@ public class Application implements ConnectionController, ApplicationController 
     }
 
     private void initUI() throws InitializationException {
+        
+        /* THIS IS NOT NECESSARY SINCE THE SETTINGS DIALOG IS NOT ENABLED
+         * LEAVE THE CODE HERE FOR A FUTURE USE!
+         */
+        
         // Settings Dialog
-        try {
+        /* try {
             EventQueue.invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
@@ -204,7 +209,7 @@ public class Application implements ConnectionController, ApplicationController 
             logger.error("Unable to init SettingsDialog: ", ex);
             RemoteLogs.getInstance().sendLog(ex);
             throw new InitializationException(ex);
-        }
+        }*/
 
         // Tray
         tray.init(resourceBundle.getString("tray_uptodate"));
