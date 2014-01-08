@@ -33,7 +33,6 @@ import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
-import com.stacksync.desktop.db.models.CloneClient;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
@@ -450,59 +449,6 @@ public class DatabaseHelper {
 
         newFile.merge();
         return newFile;
-    }
-
-    /**
-     *
-     * @param name
-     * @return
-     */
-    /*    public CloneClient getClient(Profile profile, String name) {
-     return getClient(profile, name, false);
-     }*/
-    /**
-     * Retrieves the client with the given name from the database. If it does
-     * not exist and the {@code create}-parameter is true, it creates a new one
-     * and returns it.
-     *
-     * @param machineName
-     * @param create
-     * @return Returns the client or null if it does not exist
-     */
-    public synchronized CloneClient getClient(Profile profile, String machineName, boolean create) {
-        for (int i = 1; i <= MAXTRIES; i++) {
-            
-            String queryStr = "select c from CloneClient c where "
-                    + "     c.profileId = :profileId and "
-                    + "     c.machineName = :machineName";
-            
-            Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneClient.class);
-            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-            query.setHint("eclipselink.cache-usage", "DoNotCheckCache");            
-            
-            query.setParameter("profileId", profile.getId());
-            query.setParameter("machineName", machineName);
-
-            try {
-                return (CloneClient) query.getSingleResult();
-            } catch (NoResultException ex) {
-                logger.debug("No result -> " + ex.getMessage());
-                CloneClient client = null;
-
-                if (create) {
-                    logger.debug("Logger: Client " + machineName + " unknown. Adding to DB.");
-
-                    client = new CloneClient(machineName, profile.getId());
-                    client.merge();
-                }
-
-                return client;
-            }            
-        }
-        
-        logger.error("Adding client " + machineName + " FAILED completely. Retrying FAILED.");
-        //RemoteLogs.getInstance().sendLog(new Exception());
-        return null;
     }
 
     /**

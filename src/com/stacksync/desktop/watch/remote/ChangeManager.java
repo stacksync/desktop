@@ -34,7 +34,6 @@ import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
-import com.stacksync.desktop.db.models.CloneClient;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
@@ -44,10 +43,6 @@ import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.Chunker;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
-import static com.stacksync.desktop.db.models.CloneFile.Status.CHANGED;
-import static com.stacksync.desktop.db.models.CloneFile.Status.DELETED;
-import static com.stacksync.desktop.db.models.CloneFile.Status.NEW;
-import static com.stacksync.desktop.db.models.CloneFile.Status.RENAMED;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
@@ -837,72 +832,9 @@ public class ChangeManager {
             }
         }
 
-        // Firgure out if only one client edited stuff
-        String clientName = null;
-
-        a:
-        for (List<Update> updates : appliedUpdates.values()) {
-            b:
-            for (Update u : updates) {
-                if (clientName == null) {
-                    clientName = u.getClientName();
-                } else if (!clientName.equals(u.getClientName())) {
-                    clientName = null;
-                    break a;
-                }
-            }
-        }
-
-        // Only one client
-        if (clientName != null) {
-            CloneClient client = db.getClient(profile, clientName, true);
-
-            File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
-            String summary = (client.getUserName() != null) ? client.getUserName() : client.getMachineName();
-            String body;
-
-            Long[] fileIds = appliedUpdates.keySet().toArray(new Long[0]);
-
-            // Only one file
-            if (fileIds.length == 1) {
-                List<Update> updates = appliedUpdates.get(fileIds[0]);
-
-                Update lastUpdate = updates.get(updates.size() - 1);
-                Update secondLastUpdate = (updates.size() > 1) ? updates.get(updates.size() - 2) : null;
-                // TODO this should be CloneFile instances
-
-                switch (lastUpdate.getStatus()) {
-                    case RENAMED:
-                        if (secondLastUpdate != null) {
-                            body = "renamed '" + secondLastUpdate.getName() + "' to '" + lastUpdate.getName() + "'";
-                        } else {
-                            body = "renamed '" + lastUpdate.getName() + "'";
-                        }
-
-                        break;
-                    case DELETED:
-                        body = "deleted '" + lastUpdate.getName() + "'";
-                        break;
-                    case CHANGED:
-                        body = "edited '" + lastUpdate.getName() + "'";
-                        break;
-                    case NEW:
-                        body = "added '" + lastUpdate.getName() + "'";
-                        break;
-                    default:
-                        body = "updated '" + lastUpdate.getName() + "'";
-                        break;
-                }
-
-                tray.notify(summary, body, imageFile);
-            } else { // More files
-                tray.notify(summary, "updated " + appliedUpdates.size() + " file(s)", imageFile);
-            }
-
-        } else { // More than one client
-            File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
-            tray.notify(Constants.APPLICATION_NAME, appliedUpdates.size() + " file(s) updated", imageFile);
-        }
+        // TODO: Insert here special notifications
+        File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
+        tray.notify(Constants.APPLICATION_NAME, appliedUpdates.size() + " file(s) updated", imageFile);
     }
 
     /// GGIPART ///
