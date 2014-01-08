@@ -277,7 +277,7 @@ public class Application implements ConnectionController, ApplicationController 
         // Ok clicked
         if (profile != null) {
             config.getProfiles().add(profile);
-            settingsDialog.addProfileToTree(profile, false);
+            //settingsDialog.addProfileToTree(profile, false);
             tray.updateUI();
 
             profile.savePathToRegistry();
