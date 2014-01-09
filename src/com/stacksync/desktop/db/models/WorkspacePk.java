@@ -11,12 +11,7 @@ public class WorkspacePk implements Serializable {
     @Id
     @Column(name="id", nullable=false)
     private String id;
-    
-    @Id
-    @Column(name="profile_id_work", nullable=false)
-    private int profileId;
         
-
     public String getId() {
         return id;
     } 
@@ -24,10 +19,6 @@ public class WorkspacePk implements Serializable {
     public void setId(String id) {
         this.id = id;
     }     
-    
-    public void setProfileId(int profileId) {
-        this.profileId = profileId;
-    }
 
     @Override
     public int hashCode() {
@@ -46,6 +37,6 @@ public class WorkspacePk implements Serializable {
 
     @Override
     public String toString() {
-        return "Workspace[id=" + id + ", profile_id=" + profileId + "]";
+        return "Workspace[id=" + id + "]";
     }            
 }

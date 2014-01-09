@@ -77,10 +77,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     private long version;
     
     @Id
-    @Column(name = "profile_id", nullable = false)
-    private int profileId;
-    
-    @Id
     @Column(name = "root_id", nullable = false)
     private String rootId;
     
@@ -105,7 +101,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @JoinColumns({
         @JoinColumn(name = "parent_file_id", referencedColumnName = "file_id"),
         @JoinColumn(name = "parent_file_version", referencedColumnName = "file_version"),
-        @JoinColumn(name = "parent_profile_id", referencedColumnName = "profile_id"),
         @JoinColumn(name = "parent_root_id", referencedColumnName = "root_id")
     })
     private CloneFile parent;
@@ -181,7 +176,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
         // Set account
         this.profile = root.getProfile();
-        this.profileId = root.getProfile().getId();
         this.root = root;
         this.rootId = root.getRemoteId();
 
@@ -229,15 +223,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setProfile(Profile profile) {
         this.profile = profile;
-        this.profileId = profile.getId();
-    }
-
-    public int getProfileId() {
-        return profileId;
-    }
-
-    public void setProfileId(int profileId) {
-        this.profileId = profileId;
     }
 
     public String getRootId() {
@@ -386,7 +371,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         }
 
         String queryStr = "select c from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.fileId = :fileId and "
                 + "     c.version < :version "
                 + "     order by c.version asc";
@@ -395,7 +379,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", getProfileId());
         query.setParameter("fileId", getFileId());
         query.setParameter("version", getVersion());
 
@@ -405,7 +388,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     
     public List<CloneFile> getNextVersions() {
         String queryStr = "select c from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.fileId = :fileId and "
                 + "     c.version > :version "
                 + "     order by c.version asc";
@@ -414,7 +396,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", getProfileId());
         query.setParameter("fileId", getFileId());
         query.setParameter("version", getVersion());
         
@@ -434,7 +415,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public CloneFile getFirstVersion() {
         String queryStr = "select c from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.fileId = :fileId "
                // + "   and c.version = 1");
                 + "     order by c.version asc";
@@ -444,7 +424,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setMaxResults(1);
-        query.setParameter("profileId", getProfileId());
         query.setParameter("fileId", getFileId());
 
         try {
@@ -478,7 +457,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public CloneFile getLastVersion() {
         String queryStr = "select c from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.fileId = :fileId "
                 + "     order by c.version desc";
 
@@ -487,7 +465,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setMaxResults(1);
-        query.setParameter("profileId", getProfileId());
         query.setParameter("fileId", getFileId());
 
         try {
@@ -501,7 +478,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     public CloneFile getLastSyncedVersion() {
 
         String queryStr = "select c from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.fileId = :fileId and "
                 + "     c.version < :version and "
                 + "     c.syncStatus = :syncStatus "
@@ -512,7 +488,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");    
         query.setMaxResults(1);
         
-        query.setParameter("profileId", getProfileId());
         query.setParameter("fileId", getFileId());
         query.setParameter("version", getVersion());
         query.setParameter("syncStatus", SyncStatus.UPTODATE);
@@ -528,13 +503,11 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     public void deleteHigherVersion() {
 
         String queryStr = "DELETE from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.fileId = :fileId and "
                 + "     c.version > :version";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         
-        query.setParameter("profileId", getProfileId());
         query.setParameter("fileId", getFileId());
         query.setParameter("version", getVersion());
 
@@ -636,7 +609,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             clone.checksum = getChecksum();
             clone.lastModified = new Date(getLastModified().getTime());
             clone.profile = getProfile(); // POINTER; No Copy!
-            clone.profileId = getProfileId();
             clone.root = getRoot(); // POINTER; No Copy!
             clone.rootId = getRootId();
             clone.folder = isFolder();

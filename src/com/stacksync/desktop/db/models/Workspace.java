@@ -35,10 +35,6 @@ public class Workspace extends PersistentObject implements Serializable {
     @Column(name="id", nullable=false)
     private String id;
     
-    @Id
-    @Column(name="profile_id_work", nullable=false)
-    private int profileId;
-    
     @Column(name="path_workspace", nullable=false)
     private String pathWorkspace;
     
@@ -91,10 +87,6 @@ public class Workspace extends PersistentObject implements Serializable {
     public void setRemoteRevision(Integer remoteLastUpdate) {
         this.remoteLastUpdate = remoteLastUpdate;
     }    
-    
-    public void setProfileId(int profileId) {
-        this.profileId = profileId;
-    }
 
     @Override
     public int hashCode() {
@@ -151,7 +143,6 @@ public class Workspace extends PersistentObject implements Serializable {
             if(localWorkspaces.containsKey(w.getId())){
                 localWorkspaces.get(w.getId()).setRemoteRevision(w.getRemoteRevision());
             }else{
-                w.setProfileId(profile.getId());
                 localWorkspaces.put(w.getId(), w);                    
             }
 

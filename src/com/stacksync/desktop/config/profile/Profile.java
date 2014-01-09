@@ -62,7 +62,6 @@ public class Profile implements Configurable {
     private static final LocalWatcher localWatcher = LocalWatcher.getInstance();
     //private static final Config config = Config.getInstance();
     private boolean active;
-    private int id;
     private boolean enabled;
     private boolean initialized;
     private String name;
@@ -78,7 +77,6 @@ public class Profile implements Configurable {
         active = false;
         initialized = false;
         
-        id = 1;
         enabled = true;
         name = "(unknown)";
         //repository = new Repository();
@@ -215,10 +213,6 @@ public class Profile implements Configurable {
         return folders;
     }
 
-    public int getId() {
-        return id;
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
@@ -241,10 +235,6 @@ public class Profile implements Configurable {
 
     public void setFolders(Folders folders) {
         this.folders = folders;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public void setRepository(Repository repository) {
@@ -273,7 +263,6 @@ public class Profile implements Configurable {
         initialize();
         
         try {
-            id = Integer.parseInt(node.getAttribute("id"));
             enabled = node.getBoolean("enabled");
             name = node.getProperty("name");
 
@@ -297,7 +286,6 @@ public class Profile implements Configurable {
 
     @Override
     public void save(ConfigNode node) {
-        node.setAttribute("id", id);
         node.setProperty("enabled", enabled);
         node.setProperty("name", name);
 
@@ -334,7 +322,7 @@ public class Profile implements Configurable {
 
     @Override
     public String toString() {
-        return "Profile[active=" + active + ", id=" + id + ", enabled= " + enabled + ", name=" + name + ", "
+        return "Profile[active=" + active  + ", enabled= " + enabled + ", name=" + name + ", "
                 + "repository=" + repository + ", folders:" + folders + "]";
     }
 }

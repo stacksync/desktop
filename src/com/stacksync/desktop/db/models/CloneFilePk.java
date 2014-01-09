@@ -15,23 +15,11 @@ public class CloneFilePk implements Serializable {
     @Column(name = "file_version", nullable = false)
     private long version;
     @Id
-    @Column(name = "profile_id", nullable = false)
-    private int profileId;
-    @Id
     @Column(name = "root_id", nullable = false)
     private String rootId;
     
     
     public CloneFilePk() { }
-
-
-    public int getProfileId() {
-        return profileId;
-    }
-
-    public void setProfileId(int profileId) {
-        this.profileId = profileId;
-    }
 
     public String getRootId() {
         return rootId;
@@ -79,9 +67,6 @@ public class CloneFilePk implements Serializable {
             return false;
         }
         if (this.version != other.version) {
-            return false;
-        }
-        if (this.profileId != other.profileId) {
             return false;
         }
         if ((this.rootId == null) ? (other.rootId != null) : !this.rootId.equals(other.rootId)) {

@@ -118,17 +118,15 @@ public class DatabaseHelper {
         // First, check by full file path
         String queryStr =
                 "select f from CloneFile f where "
-                + "      f.rootId = :rootId "
-                + " and f.profileId = :profileId "
-                + "      and f.filePath = :path "
-                + "      and f.name = :name "
+                + "      f.rootId = :rootId and "
+                + "      f.filePath = :path and "
+                + "      f.name = :name "
                 + ((folder != null) ? "and f.folder = :folder " : " ")
                 + "      and f.status <> :notStatus1 "
                 //+ "      and f.status <> :notStatus2 "
                 //+ "      and f.syncStatus <> :notSyncStatus "
                 + "      and f.version = (select max(ff.version) from CloneFile ff where "
-                + "         ff.profileId = :profileId "
-                + "         and  ff.rootId = :rootId and f.fileId = ff.fileId) "
+                + "         ff.rootId = :rootId and f.fileId = ff.fileId) "
                 + "      order by f.updated desc";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
@@ -144,8 +142,6 @@ public class DatabaseHelper {
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
         //query.setParameter("notSyncStatus", CloneFile.SyncStatus.SYNCING); // this is required for chmgr.applyNewOrChange()
-
-        query.setParameter("profileId", root.getProfile().getId());
 
         if (folder != null) {
             query.setParameter("folder", folder);
@@ -168,13 +164,11 @@ public class DatabaseHelper {
     public List<CloneFile> getChildren(CloneFile parentFile) {
         // First, check by full file path
         String queryStr = "select f from CloneFile f where "
-                + "      f.profileId = :profileId and "
                 + "      f.rootId = :rootId and "
                 + "      f.status <> :notStatus1 and "
                 //+ "      f.status <> :notStatus2 and "
                 + "      f.parent = :parent and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                         ff.profileId = :profileId and "
                 + "                                         ff.rootId = :rootId and "
                 + "                                         f.fileId = ff.fileId) ";
 
@@ -184,7 +178,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
-        query.setParameter("profileId", parentFile.getProfile().getId());
         query.setParameter("rootId", parentFile.getRoot().getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
@@ -196,13 +189,11 @@ public class DatabaseHelper {
     public List<CloneFile> getAllChildren(CloneFile parentFile) {
         // First, check by full file path
         String queryStr = "select f from CloneFile f where "
-                + "      f.profileId = :profileId and "
                 + "      f.rootId = :rootId and "
                 + "      f.status <> :notStatus1 and "
                 //+ "      f.status <> :notStatus2 and "
                 + "      f.path like :pathPrefix and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                         ff.profileId = :profileId and "
                 + "                                         ff.rootId = :rootId and "
                 + "                                         f.fileId = ff.fileId) ";
 
@@ -212,7 +203,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", parentFile.getProfile().getId());
         query.setParameter("rootId", parentFile.getRoot().getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
@@ -232,7 +222,6 @@ public class DatabaseHelper {
         for (int i = 1; i <= MAXTRIES; i++) {
             try {
                 String queryStr = "select f from CloneFile f where "
-                        + "      f.profileId = :profileId and "
                         + "      f.fileId = :fileId and "
                         + "      f.version = :version";
 
@@ -240,14 +229,13 @@ public class DatabaseHelper {
                 query.setHint("javax.persistence.cache.storeMode", "REFRESH");
                 query.setHint("eclipselink.cache-usage", "DoNotCheckCache");                
                 
-                query.setParameter("profileId", profile.getId());
                 query.setParameter("fileId", fileId);
                 query.setParameter("version", version);
 
                 return (CloneFile) query.getSingleResult();
 
             } catch (NoResultException ex) {
-                logger.debug(" No result for p->" + profile.getId() + " fId->" + fileId + " fV-> " + version + " -> " + ex.getMessage());
+                logger.debug(" No result for fId->" + fileId + " fV-> " + version + " -> " + ex.getMessage());
                 continue;
             } 
         }
@@ -260,17 +248,14 @@ public class DatabaseHelper {
      */
     public CloneFile getFileOrFolder(Profile profile, long fileId) {
         String queryStr = "select f from CloneFile f "
-                + "where f.profileId = :profileId "
-                + "      and f.fileId = :fileId "
+                + "where f.fileId = :fileId "
                 + "      and f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                     ff.profileId = :profileId and "
                 + "                                     f.fileId = ff.fileId)";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", profile.getId());
         query.setParameter("fileId", fileId);
 
         try {
@@ -290,7 +275,6 @@ public class DatabaseHelper {
      */
     public CloneFile getNearestFile(Folder root, File file, long checksum) {
         String queryStr = "select f from CloneFile f where "
-                + "      f.profileId = :profileId and "
                 + "      f.rootId = :rootId and "
                 + "      f.checksum = :checksum and "
                 + "      f.status <> :notStatus1 and "
@@ -303,7 +287,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", root.getProfile().getId());
         query.setParameter("rootId", root.getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
@@ -339,12 +322,10 @@ public class DatabaseHelper {
 
     public List<CloneFile> getFiles(Folder root) {
         String queryStr = "select f from CloneFile f where "
-                + "      f.profileId = :profileId and "
                 + "      f.rootId = :rootId and "
                 + "      f.status <> :notStatus1 and"
                 //+ "      f.status <> :notStatus2 and"
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                     ff.profileId = :profileId and "
                 + "                                     ff.rootId = :rootId and "
                 + "                                     f.fileId = ff.fileId) ";
 
@@ -352,7 +333,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", root.getProfile().getId());
         query.setParameter("rootId", root.getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
@@ -362,7 +342,6 @@ public class DatabaseHelper {
 
     public List<CloneFile> getFiles(Folder root, String clientName, CloneFile.SyncStatus status) {
         String queryStr = "select f from CloneFile f where "
-                + "      f.profileId = :profileId and "
                 + "      f.rootId = :rootId and "
                 + "      f.clientName = :clientName and "
                 + "      f.syncStatus = :StatusSync ";
@@ -371,7 +350,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", root.getProfile().getId());
         query.setParameter("rootId", root.getRemoteId());
         query.setParameter("StatusSync", status);
         query.setParameter("clientName", clientName);
@@ -462,7 +440,6 @@ public class DatabaseHelper {
  
         // Newest file update
         String queryStr = "select count(c.fileId) from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.syncStatus = :StatusSync and "                                       
 
                 + "     c.serverUploadedAck = false and "                
@@ -473,7 +450,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", profile.getId());
         query.setParameter("StatusSync", CloneFile.SyncStatus.UPTODATE);
         query.setParameter("timeNow", time);
         query.setMaxResults(1);
@@ -578,9 +554,7 @@ public class DatabaseHelper {
         Date time = cal.getTime();        
         
         String queryStr = "select c from CloneFile c where "
-                + "     c.profileId = :profileId and "
                 + "     c.syncStatus = :statusSync and "                
-                
                 + "     c.serverUploadedAck = false and "                
                 + "     (c.serverUploadedTime < :timeNow or "
                 + "     c.serverUploadedTime is null) order by "
@@ -590,7 +564,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("profileId", profile.getId());
         query.setParameter("statusSync", CloneFile.SyncStatus.UPTODATE);       
         query.setParameter("timeNow", time);
         
