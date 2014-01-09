@@ -60,10 +60,11 @@ public class Profile implements Configurable {
     }
     private static final Logger logger = Logger.getLogger(Profile.class.getName());
     private static final LocalWatcher localWatcher = LocalWatcher.getInstance();
-    private static final Config config = Config.getInstance();
+    //private static final Config config = Config.getInstance();
     private boolean active;
     private int id;
     private boolean enabled;
+    private boolean initialized;
     private String name;
     private Repository repository;
     private Folders folders;
@@ -75,15 +76,27 @@ public class Profile implements Configurable {
 
     public Profile() {
         active = false;
-
-        id = -1;
+        initialized = false;
+        
+        id = 1;
         enabled = true;
         name = "(unknown)";
-        repository = new Repository();
+        //repository = new Repository();
         folders = new Folders(this);
 
+        //uploader = new Uploader(this);
+        //remoteWatcher = new RemoteWatcher(this);
+    }
+    
+    private void initialize() {
+        
+        if (initialized){
+            return;
+        }
+        
         uploader = new Uploader(this);
         remoteWatcher = new RemoteWatcher(this);
+        initialized = true;
     }
 
     public boolean isActive() {
@@ -92,6 +105,7 @@ public class Profile implements Configurable {
 
     @Deprecated
     public void setFactory() throws InitializationException {
+        Config config = Config.getInstance();
         brokerProps = config.getBrokerProps();
         brokerProps.setRPCReply(config.getMachineName());
         
@@ -119,6 +133,8 @@ public class Profile implements Configurable {
         if (active == isActive()) {
             return;
         }
+        
+        initialize();
 
         // Activate
         if (active) {
@@ -242,9 +258,20 @@ public class Profile implements Configurable {
     public Uploader getUploader() {
         return uploader;
     }
+    
+    public boolean isInitialized() {
+        return initialized;
+    }
 
     @Override
     public void load(ConfigNode node) throws ConfigException {
+        
+        if (node == null) {
+            return;
+        }
+        
+        initialize();
+        
         try {
             id = Integer.parseInt(node.getAttribute("id"));
             enabled = node.getBoolean("enabled");

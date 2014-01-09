@@ -27,7 +27,7 @@ public class TestIndexer {
         Indexer indexer = Indexer.getInstance();
         indexer.start();
         
-        Profile profile = config.getProfiles().get(1);
+        Profile profile = config.getProfile();
                 
         Folder root = profile.getFolders().list().get(0);
         staticFunctionsTest.createFile(root.getLocalFile().getPath() + staticFunctionsTest.fileName1, "content4");

@@ -65,11 +65,11 @@ public class staticFunctionsTest {
         config.load(is);
         is.close();
         
-        if(config.getProfiles().list().isEmpty()){
+        if(config.getProfile() == null){
             throw new ConfigException("Error can't load the profile!");
         }
         
-        Profile profile = config.getProfiles().get(1);
+        Profile profile = config.getProfile();
         if(profile.getFolders().list().isEmpty()){
             throw new ConfigException("The profile hasn't the folder configuration!");
         }

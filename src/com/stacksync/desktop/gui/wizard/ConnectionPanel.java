@@ -80,12 +80,12 @@ public class ConnectionPanel extends SettingsPanel {
     public void save() {
         // Get name
         String newProfileName = resourceBundle.getString("cp_new_profile_name");
-        String newProfileNameSyntax = resourceBundle.getString("cp_new_profile_name").concat(" %d");
+        /*String newProfileNameSyntax = resourceBundle.getString("cp_new_profile_name").concat(" %d");
         int newProfileCount = 1;
 
-        while (config.getProfiles().get(newProfileName) != null) {
+        while (config.getProfile().get(newProfileName) != null) {
             newProfileName = String.format(newProfileNameSyntax, newProfileCount++);
-        }
+        }*/
 
         profile.setName(newProfileName);
         

@@ -31,7 +31,7 @@ public class TestConflictedDeleteWithChange {
        
     public static void main(String[] args) throws Exception {
         Folder root = staticFunctionsTest.initConfig(config);
-        Profile profile = config.getProfiles().get(1);
+        Profile profile = config.getProfile();
                 
         //create v1
         File f1 = staticFunctionsTest.createFile(root.getLocalFile().getPath() + staticFunctionsTest.fileName1, "content1");

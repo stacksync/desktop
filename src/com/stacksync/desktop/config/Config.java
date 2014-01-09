@@ -18,7 +18,6 @@
 package com.stacksync.desktop.config;
 
 import com.stacksync.desktop.config.profile.BrokerProperties;
-import com.stacksync.desktop.config.profile.Profiles;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,6 +36,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
+import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.DataInputStream;
@@ -72,7 +72,7 @@ public class Config {
     private File resDir;
     private Database database;
     private Cache cache;
-    private Profiles profiles;
+    private Profile profile;
     private BrokerProperties brokerProps;
     private boolean extendedMode;
     private boolean daemonMode;
@@ -108,7 +108,7 @@ public class Config {
         brokerProps = new BrokerProperties();
         database = new Database();
         cache = new Cache();
-        profiles = new Profiles();
+        //profile = new Profile();
 
         encryption = getEncryption();
     }
@@ -218,9 +218,13 @@ public class Config {
     public Cache getCache() {
         return cache;
     }
-
-    public Profiles getProfiles() {
-        return profiles;
+    
+    public Profile getProfile(){
+        return profile;
+    }
+    
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     public ResourceBundle getResourceBundle() {
@@ -479,7 +483,8 @@ public class Config {
         brokerProps.load(node.findChildByName("rabbitMQ"));
         database.load(node.findChildByName("database"));
         cache.load(node.findChildByName("cache"));
-        profiles.load(node.findOrCreateChildByXpath("profiles", "profiles"));
+        profile = new Profile();
+        profile.load(node.findChildByName("profile"));
     }
 
     private void saveDOM(ConfigNode node) {
@@ -496,6 +501,6 @@ public class Config {
         // DO NOT SAVE "database"
         brokerProps.save(node.findOrCreateChildByXpath("rabbitMQ", "rabbitMQ"));
         cache.save(node.findOrCreateChildByXpath("cache", "cache"));
-        profiles.save(node.findOrCreateChildByXpath("profiles", "profiles"));
+        profile.save(node.findOrCreateChildByXpath("profile", "profile"));
     }
 }

@@ -53,11 +53,11 @@ public class Stacksync_dummy {
 
         config.load(configFolder);
         
-        if (config.getProfiles().list().isEmpty()) {
+        if (config.getProfile() == null) {
             throw new IOException("Could not load a profile, check the configuration file.");
         }
         
-        this.profile = config.getProfiles().get(1);
+        this.profile = config.getProfile();
         this.trans = profile.getRepository().getConnection().createTransferManager();
         this.cloudId = trans.getUser();
 

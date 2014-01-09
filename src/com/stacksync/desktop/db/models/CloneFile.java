@@ -221,7 +221,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public Profile getProfile() {
         if (profile == null) {
-            profile = config.getProfiles().get(getProfileId());
+            profile = config.getProfile();
         }
 
         return profile;

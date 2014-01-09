@@ -64,7 +64,7 @@ public class TestConflictedNewFile {
         List<Update> list = new ArrayList<Update>();
         list.add(update);
         
-        Profile profile = config.getProfiles().get(1);
+        Profile profile = config.getProfile();
         ChangeManager cm = profile.getRemoteWatcher().getChangeManager();
         cm.queueUpdates(list);                
         System.out.println("FINISH!!!!\n\n");        

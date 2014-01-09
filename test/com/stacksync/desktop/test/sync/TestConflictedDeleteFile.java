@@ -68,7 +68,7 @@ public class TestConflictedDeleteFile {
         list.add(update);
         
         
-        Profile profile = config.getProfiles().get(1);
+        Profile profile = config.getProfile();
         ChangeManager cm = profile.getRemoteWatcher().getChangeManager();
         cm.queueUpdates(list);
                 

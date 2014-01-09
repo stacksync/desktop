@@ -17,7 +17,6 @@
  */
 package com.stacksync.desktop;
 
-import java.awt.EventQueue;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
@@ -102,6 +101,7 @@ public class Application implements ConnectionController, ApplicationController 
     private CacheCleaner cache;
     private SettingsDialog settingsDialog;
     private ConnectionTester connectionTester;
+    private Profile profile;
 
     public Application() {
         this.connectionTester = new ConnectionTester(this);
@@ -126,7 +126,7 @@ public class Application implements ConnectionController, ApplicationController 
             desktop.start(deamonMode); // must be started before indexer!
         }
         
-        boolean success = loadProfiles();
+        boolean success = loadProfile();
         
         
         if (success) {
@@ -157,6 +157,7 @@ public class Application implements ConnectionController, ApplicationController 
         periodic = new TreeSearch();
         cache = new CacheCleaner();
         tray = Tray.getInstance();
+        profile = config.getProfile();
         
         tray.registerProcess("StackSync");
     }
@@ -179,8 +180,8 @@ public class Application implements ConnectionController, ApplicationController 
         periodic.stop();
         cache.stop();
 
-        for (Profile profile : config.getProfiles().list()) {
-            profile.stop();
+        if (config.getProfile() != null) {
+            config.getProfile().stop();
         }
 
         System.exit(0);
@@ -223,13 +224,13 @@ public class Application implements ConnectionController, ApplicationController 
          } */
     }
     
-    private boolean loadProfiles() throws InitializationException {
+    private boolean loadProfile() throws InitializationException {
         
         boolean success = true;
+        Profile profile = config.getProfile();
         // a. Launch first time wizard                
-        if (config.getProfiles().list().isEmpty()) {
+        if (!profile.isInitialized()) {
 
-            Profile profile = null;
             if (!config.isDaemonMode()) {
                 profile = initFirstTimeWizard();
             } else {
@@ -241,7 +242,7 @@ public class Application implements ConnectionController, ApplicationController 
             }
         } else { // b. Activate profiles (Index files, then start local/remote watcher)
             try {
-                initProfiles();
+                initProfile();
             } catch (StorageConnectException ex) {
                 logger.error(ex);
                 success = false;
@@ -251,22 +252,24 @@ public class Application implements ConnectionController, ApplicationController 
         return success;
     }
 
-    private void initProfiles() throws InitializationException, StorageConnectException {
+    private void initProfile() throws InitializationException, StorageConnectException {
 
-        for (Profile profile : config.getProfiles().list()) {
-            if (!profile.isEnabled()) {
-                continue;
-            }
-            
-            profile.savePathToRegistry();
+        if (profile == null) {
+            throw new InitializationException("No profile found!");
+        }
+        
+        if (!profile.isEnabled()) {
+            return;
+        }
 
-            try {
-                profile.setActive(true);
-            } catch (InitializationException ex) {
-                logger.error("Can't load the profile.", ex);
-                RemoteLogs.getInstance().sendLog(ex);
-                throw ex;
-            }           
+        profile.savePathToRegistry();
+
+        try {
+            profile.setActive(true);
+        } catch (InitializationException ex) {
+            logger.error("Can't load the profile.", ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            throw ex;
         }
 
     }
@@ -276,7 +279,7 @@ public class Application implements ConnectionController, ApplicationController 
 
         // Ok clicked
         if (profile != null) {
-            config.getProfiles().add(profile);
+            config.setProfile(profile);
             //settingsDialog.addProfileToTree(profile, false);
             tray.updateUI();
 
@@ -312,7 +315,7 @@ public class Application implements ConnectionController, ApplicationController 
         
         boolean success = false;
         try {
-            success = loadProfiles();
+            success = loadProfile();
         } catch (InitializationException ex) {
             logger.error(ex);
             System.exit(2);
@@ -332,14 +335,16 @@ public class Application implements ConnectionController, ApplicationController 
         
         logger.info("Pausing syncing.");
 
-        for (Profile profile : config.getProfiles().list()) {
-            try {
-                profile.setActive(false);
-            } catch (Exception ex) {
-               logger.error("Could not pause synchronization: ", ex);
-               RemoteLogs.getInstance().sendLog(ex);
-               return;
-            }
+        if (profile == null) {
+            return;
+        }
+        
+        try {
+            profile.setActive(false);
+        } catch (Exception ex) {
+           logger.error("Could not pause synchronization: ", ex);
+           RemoteLogs.getInstance().sendLog(ex);
+           return;
         }
         
         indexer.stop();
@@ -359,7 +364,7 @@ public class Application implements ConnectionController, ApplicationController 
         logger.info("Resume syncing.");
         
         try {
-            initProfiles();
+            initProfile();
         } catch (InitializationException ex) {
             // Error logged in initProfiles function.
             return;

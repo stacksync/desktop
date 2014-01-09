@@ -255,7 +255,7 @@ public class LinuxNativeClient {
                 folder.setLocalFile(new File("/home"));
                 folder.setRemoteId("home");
                 profile.getFolders().add(folder);
-                config.getProfiles().add(profile);
+                config.setProfile(profile);
                 tray.updateUI();
             }
 

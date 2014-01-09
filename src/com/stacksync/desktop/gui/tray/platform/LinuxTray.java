@@ -93,7 +93,7 @@ public class LinuxTray extends Tray {
             return;
         }
 
-        UpdateMenuRequest menu = new UpdateMenuRequest(config.getProfiles().list());       
+        UpdateMenuRequest menu = new UpdateMenuRequest(config.getProfile());       
         try {
             nativeClient.send(menu);
         } catch (TrayException ex) { }

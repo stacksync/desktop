@@ -48,25 +48,31 @@ public class ConnectionTester {
     private void test() {
         
         boolean connection = true;
-        for (Profile profile : this.config.getProfiles().list()) {
-            TransferManager tm = profile.getRepository().getConnection().createTransferManager();
-            try {
-                tm.connect();
-            }  catch (StorageConnectException ex) {
-            
-                connection = false;
-                // This error is from connect() function
-                // It is necessary to differenciate between unauthorize, no connection or others...
-                String message = ex.getCause().getMessage();
-                if (message.contains("Incorrect")) {
-                    // Unauthorize
-                } else if (message.contains("not known") || message.contains("unreachable")) {
-                    // Network problems
-                } else {
-                    // Unknown problems...
-                }
+        
+        Profile profile = config.getProfile();
+        
+        if (profile == null) {
+            return;
+        }
 
+        
+        TransferManager tm = profile.getRepository().getConnection().createTransferManager();
+        try {
+            tm.connect();
+        }  catch (StorageConnectException ex) {
+
+            connection = false;
+            // This error is from connect() function
+            // It is necessary to differenciate between unauthorize, no connection or others...
+            String message = ex.getCause().getMessage();
+            if (message.contains("Incorrect")) {
+                // Unauthorize
+            } else if (message.contains("not known") || message.contains("unreachable")) {
+                // Network problems
+            } else {
+                // Unknown problems...
             }
+
         }
         
         if (connection) {

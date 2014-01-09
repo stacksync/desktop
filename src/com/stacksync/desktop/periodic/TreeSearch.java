@@ -68,18 +68,18 @@ public class TreeSearch {
         logger.debug("Started periodic tree search ...");
 
         try {
-            for (Profile profile: config.getProfiles().list()) {
-                if (!profile.isEnabled()) {
-                    continue;
-                }
-
-                while(profile.getRemoteWatcher().getChangeManager().queuesUpdatesIsWorking()){ 
-                    Thread.sleep(1000);
-                }                        
-                
-                logger.debug("Checking profile "+profile.getName()+" ...");                        
-                Indexer.getInstance().index(profile);
+            Profile profile = config.getProfile();
+            if (!profile.isEnabled()) {
+                return;
             }
+
+            while(profile.getRemoteWatcher().getChangeManager().queuesUpdatesIsWorking()){ 
+                Thread.sleep(1000);
+            }                        
+
+            logger.debug("Checking profile "+profile.getName()+" ...");                        
+            Indexer.getInstance().index(profile);
+                
             logger.debug("Finished periodic tree search. Now sleeping "+Constants.PERIODIC_SEARCH_INTERVAL+" seconds.");
         } catch (InterruptedException ex) {
             logger.error("PeriodicTreeSearch catches exception", ex);

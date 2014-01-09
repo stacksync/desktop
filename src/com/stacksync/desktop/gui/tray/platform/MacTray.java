@@ -162,60 +162,30 @@ public class MacTray extends Tray {
 
         menu.add(itemStatus);
 
-        // Profiles and folders
-        List<Profile> profiles = config.getProfiles().list();
+        // Profile and folders
         menu.addSeparator();
 
-        if (profiles.size() == 1) {
-            Profile profile = profiles.get(0);
+        Profile profile = config.getProfile();
 
-            for (final Folder folder : profile.getFolders().list()) {
-                if (!folder.isActive() || folder.getLocalFile() == null) {
-                    continue;
-                }
-                
-                MenuItem itemFolder = new MenuItem(folder.getLocalFile().getName());
-
-                itemFolder.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent ae) {
-                        fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
-                    }
-                });
-
-                menu.add(itemFolder);
+        for (final Folder folder : profile.getFolders().list()) {
+            if (!folder.isActive() || folder.getLocalFile() == null) {
+                continue;
             }
 
-            menu.addSeparator();
-        }
-        else if (profiles.size() > 1) {
-            for (Profile profile : profiles) {
-                Menu itemProfile = new Menu(profile.getName());
+            MenuItem itemFolder = new MenuItem(folder.getLocalFile().getName());
 
-                for (final Folder folder : profile.getFolders().list()) {
-                    if (!folder.isActive() || folder.getLocalFile() == null) {
-                        continue;
-                    }
-                    
-                    MenuItem itemFolder = new MenuItem(folder.getLocalFile().getName());
+            itemFolder.addActionListener(new ActionListener() {
 
-                    itemFolder.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent ae) {
-                            fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
-                        }
-                    });
-
-                    itemProfile.add(itemFolder);
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
                 }
+            });
 
-                menu.add(itemProfile);
-            }
-
-            menu.addSeparator();
+            menu.add(itemFolder);
         }
+
+        menu.addSeparator();
 
         // Preferences
         //itemPreferences = new MenuItem("Preferencias ...");

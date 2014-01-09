@@ -306,7 +306,7 @@ public class WizardDialog extends JDialog {
                 return;
             } else if (currentPanelIndex == panels.length-1) { // Last panel done!
                 
-                logger.info("profiles = " + config.getProfiles() + " -- profile = " +  profile);
+                logger.info("profile = " + profile);
                 setVisible(false);
                 dispose();
                 

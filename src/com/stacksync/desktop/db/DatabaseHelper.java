@@ -77,10 +77,11 @@ public class DatabaseHelper {
     public CloneFile getFileOrFolder(File file) {
         // Get root
         Folder root = null;
-
+        Profile profile = config.getProfile();
+        
         // TODO This is terribly implemented, and veeery inefficient!
-        a:
-        for (Profile profile : config.getProfiles().list()) {
+        if (profile != null) {
+            a:
             for (Folder aRoot : profile.getFolders().list()) {
                 if (aRoot.getLocalFile() == null) {
                     continue;
