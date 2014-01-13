@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <stacksync>
-	<username/> <!-- optional -->
-	<machinename/> <!-- optional -->
-	<userimage>system</userimage> <!-- optional --> 
-	<service-enabled>true</service-enabled> <!-- optional -->
-	<autostart>true</autostart> <!-- optional -->
-	<notifications>true</notifications> <!-- optional -->
+	<username/>
+	<machinename/>
+	<autostart>true</autostart>
+	<notifications>true</notifications>
 	    
     <apiLogUrl>URL_LOG_SERVER_API</apiLogUrl>   
     <remoteLogs>false</remoteLogs>

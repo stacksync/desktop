@@ -122,9 +122,7 @@ public class Application implements ConnectionController, ApplicationController 
 
         tray.setStartDemonOnly(deamonMode);
         // Desktop integration
-        if (config.isServiceEnabled()) {
-            desktop.start(deamonMode); // must be started before indexer!
-        }
+        desktop.start(deamonMode); // must be started before indexer!
         
         boolean success = loadProfile();
         
@@ -219,9 +217,8 @@ public class Application implements ConnectionController, ApplicationController 
 
         /*
          // Desktop integration
-         if (config.isServiceEnabled()) {
          desktop.start(); // must be started before indexer!
-         } */
+        */
     }
     
     private boolean loadProfile() throws InitializationException {
@@ -378,9 +375,7 @@ public class Application implements ConnectionController, ApplicationController 
         tray.updateUI();
         tray.setStatusText("StackSync", "");
         
-        if (config.isServiceEnabled()) {
-            desktop.start(config.isDaemonMode()); // must be started before indexer!
-        }
+        desktop.start(config.isDaemonMode()); // must be started before indexer!
         
         indexer.start();
         localWatcher.start();

@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.db.models.Workspace;
 import com.stacksync.desktop.repository.Update;
@@ -38,7 +37,6 @@ public class Server {
     private ISyncService syncServer;
     private Broker broker;
     private Map<String, WorkspaceInfo> rWorkspaces;
-    private Properties env;
     private int i;
 
     public ISyncService getSyncServer() {
@@ -89,6 +87,27 @@ public class Server {
         }
 
         return workspaces;
+    }
+    
+    public void updateDevice(String cloudId, String deviceName, String os, String IP, String version) {
+        /*
+        String requestId = getRequestId();
+        long deviceId;
+        
+        DeviceInfo device = new DeviceInfo(null, config.getMachineName(), cloudId, Environment.getInstance().getOperatingSystem());
+        deviceId = syncServer.registerDevice(cloudId, requestId, device);
+        logger.debug("Obtained deviceId: "+deviceId);
+        
+        if (deviceId != -1) {
+            // Set registerId in config
+            // Something else?
+            
+            logger.info("Device registered");
+        } else {
+            // What to do here??
+            logger.error("Device not registered!!");
+        }
+        */
     }
 
     public void commit(String cloudId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {

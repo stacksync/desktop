@@ -64,7 +64,6 @@ public class Config {
     // Config values
     private String userName;
     private String machineName;
-    private boolean serviceEnabled;
     private boolean autostart;
     private boolean notificationsEnabled;
     private ResourceBundle resourceBundle;
@@ -84,7 +83,6 @@ public class Config {
         logApiRestUrl = null;
         userName = null;
         machineName = null;
-        serviceEnabled = true;
         extendedMode = false;
         daemonMode = false;
 
@@ -156,14 +154,6 @@ public class Config {
 
     public void setMachineName(String machineName) {
         this.machineName = machineName.replace("-", "_");
-    }
-
-    public void setServiceEnabled(boolean serviceEnabled) {
-        this.serviceEnabled = serviceEnabled;
-    }
-
-    public boolean isServiceEnabled() {
-        return serviceEnabled;
     }
 
     public boolean isAutostart() {
@@ -440,7 +430,6 @@ public class Config {
         // Flat values
         userName = node.getProperty("username", env.getUserName());
         machineName = node.getProperty("machinename", env.getMachineName()).replace("-", "_");
-        serviceEnabled = node.getBoolean("service-enabled", true);
         autostart = node.getBoolean("autostart", Constants.DEFAULT_AUTOSTART_ENABLED);
         notificationsEnabled = node.getBoolean("notifications", Constants.DEFAULT_NOTIFICATIONS_ENABLED);
 
@@ -491,7 +480,6 @@ public class Config {
         // Flat values
         node.setProperty("username", userName);
         node.setProperty("machinename", machineName);
-        node.setProperty("service-enabled", serviceEnabled);
         node.setProperty("autostart", autostart);
         node.setProperty("notifications", notificationsEnabled);
         node.setProperty("apiLogUrl", logApiRestUrl);
