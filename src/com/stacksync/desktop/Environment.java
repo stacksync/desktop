@@ -56,7 +56,7 @@ public class Environment {
     /**
      * Local computer name / host name.
      */
-    private static String machineName;
+    private static String deviceName;
 
     /**
      * Local user name (login-name).
@@ -170,20 +170,20 @@ public class Environment {
                 
                 Document doc = dBuilder.parse(defaultUserConfigFile);            
                 ConfigNode self = new ConfigNode(doc.getDocumentElement());
-                machineName = self.getProperty("machinename", defaultMachineName);
+                deviceName = self.getProperty("machinename", defaultMachineName);
                 
-                if(machineName.isEmpty()){
-                    machineName = defaultMachineName;
+                if(deviceName.isEmpty()){
+                    deviceName = defaultMachineName;
                 }                
             } catch (Exception ex) {
                 logger.error("aplicationstarter#ERROR: cant set machineName", ex);
-                machineName = defaultMachineName;
+                deviceName = defaultMachineName;
             }
         } else{        
-            machineName = defaultMachineName;
+            deviceName = defaultMachineName;
         }
         
-        machineName = machineName.replace("-", "_");
+        deviceName = deviceName.replace("-", "_");
         userName = System.getProperty("user.name");
 
         // GUI 
@@ -236,8 +236,8 @@ public class Environment {
         return defaultUserConfDir;
     }
     
-    public String getMachineName() {
-        return machineName.replace("-", "_");
+    public String getDeviceName() {
+        return deviceName.replace("-", "_");
     }
 
     public String getUserName() {

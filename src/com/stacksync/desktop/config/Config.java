@@ -63,7 +63,7 @@ public class Config {
     private String logApiRestUrl;
     // Config values
     private String userName;
-    private String machineName;
+    private String deviceName;
     private boolean autostart;
     private boolean notificationsEnabled;
     private ResourceBundle resourceBundle;
@@ -82,7 +82,7 @@ public class Config {
         configFile = null;
         logApiRestUrl = null;
         userName = null;
-        machineName = null;
+        deviceName = null;
         extendedMode = false;
         daemonMode = false;
 
@@ -148,12 +148,12 @@ public class Config {
         this.userName = userName;
     }
 
-    public String getMachineName() {
-        return (machineName != null) ? machineName : env.getMachineName();
+    public String getDeviceName() {
+        return (deviceName != null) ? deviceName : env.getDeviceName();
     }
 
-    public void setMachineName(String machineName) {
-        this.machineName = machineName.replace("-", "_");
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName.replace("-", "_");
     }
 
     public boolean isAutostart() {
@@ -429,7 +429,7 @@ public class Config {
     private void loadDOM(ConfigNode node) throws ConfigException {
         // Flat values
         userName = node.getProperty("username", env.getUserName());
-        machineName = node.getProperty("machinename", env.getMachineName()).replace("-", "_");
+        deviceName = node.getProperty("devicename", env.getDeviceName()).replace("-", "_");
         autostart = node.getBoolean("autostart", Constants.DEFAULT_AUTOSTART_ENABLED);
         notificationsEnabled = node.getBoolean("notifications", Constants.DEFAULT_NOTIFICATIONS_ENABLED);
 
@@ -440,8 +440,8 @@ public class Config {
             userName = env.getUserName();
         }
 
-        if (machineName.isEmpty()) {
-            machineName = env.getMachineName();
+        if (deviceName.isEmpty()) {
+            deviceName = env.getDeviceName();
         }
 
         // Resource bundle
@@ -479,7 +479,7 @@ public class Config {
     private void saveDOM(ConfigNode node) {
         // Flat values
         node.setProperty("username", userName);
-        node.setProperty("machinename", machineName);
+        node.setProperty("devicename", deviceName);
         node.setProperty("autostart", autostart);
         node.setProperty("notifications", notificationsEnabled);
         node.setProperty("apiLogUrl", logApiRestUrl);

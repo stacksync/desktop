@@ -115,7 +115,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     }
     
     private boolean isMyCommit(String deviceName) {
-        return config.getMachineName().compareTo(deviceName) == 0;
+        return config.getDeviceName().compareTo(deviceName) == 0;
     }
     
     private void markAsUpdated(CloneFile cf, Update update) {

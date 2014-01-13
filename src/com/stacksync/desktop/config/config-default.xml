@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <stacksync>
 	<username/>
-	<machinename/>
+	<devicename/>
 	<autostart>true</autostart>
 	<notifications>true</notifications>
 	    

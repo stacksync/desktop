@@ -123,7 +123,7 @@ public class MoveIndexRequest extends IndexRequest {
         dbToFile.setStatus(Status.RENAMED);
         dbToFile.setSyncStatus(CloneFile.SyncStatus.LOCAL);
         
-        dbToFile.setClientName(config.getMachineName());
+        dbToFile.setClientName(config.getDeviceName());
 
         dbToFile.setParent(cToParentFolder);
         dbToFile.setMimetype(FileUtil.getMimeType(dbToFile.getFile()));

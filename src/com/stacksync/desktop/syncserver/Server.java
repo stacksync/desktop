@@ -53,7 +53,7 @@ public class Server {
     }
 
     public String getRequestId() {
-        return config.getMachineName() + "-" + (new Date()).getTime();
+        return config.getDeviceName() + "-" + (new Date()).getTime();
     }
 
     public List<Update> getChanges(String cloudId, Workspace workspace) {
@@ -94,7 +94,7 @@ public class Server {
         String requestId = getRequestId();
         long deviceId;
         
-        DeviceInfo device = new DeviceInfo(null, config.getMachineName(), cloudId, Environment.getInstance().getOperatingSystem());
+        DeviceInfo device = new DeviceInfo(null, config.getDeviceName(), cloudId, Environment.getInstance().getOperatingSystem());
         deviceId = syncServer.registerDevice(cloudId, requestId, device);
         logger.debug("Obtained deviceId: "+deviceId);
         
@@ -112,7 +112,7 @@ public class Server {
 
     public void commit(String cloudId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
         String requestId = getRequestId();
-        String device = config.getMachineName();
+        String device = config.getDeviceName();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
         syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);
@@ -121,7 +121,7 @@ public class Server {
     }
     
     public void commit(String cloudId, String requestId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
-        String device = config.getMachineName();
+        String device = config.getDeviceName();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
         syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);

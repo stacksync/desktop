@@ -105,7 +105,7 @@ public class Profile implements Configurable {
     public void setFactory() throws InitializationException {
         Config config = Config.getInstance();
         brokerProps = config.getBrokerProps();
-        brokerProps.setRPCReply(config.getMachineName());
+        brokerProps.setRPCReply(config.getDeviceName());
         
         try {
             if (broker == null) {

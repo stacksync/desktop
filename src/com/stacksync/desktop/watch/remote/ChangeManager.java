@@ -322,8 +322,8 @@ public class ChangeManager {
 
         // New filename
         String newFileName = fileName
-                + " (" + config.getMachineName()
-                + (config.getMachineName().endsWith("s") ? "'" : "'s")
+                + " (" + config.getDeviceName()
+                + (config.getDeviceName().endsWith("s") ? "'" : "'s")
                 + " conflicting copy, "
                 + dateFormat.format(conflictFile.getUpdated())
                 + ")" + FileUtil.getExtension(conflictFile.getName(), true);
@@ -804,7 +804,7 @@ public class ChangeManager {
         }
 
         // Rare case: Updated at the same time; Choose client with the "smallest" name (alphabetical)
-        if (existingVersion.getUpdated().equals(update.getUpdated()) && config.getMachineName().compareTo(update.getClientName()) == 1) {
+        if (existingVersion.getUpdated().equals(update.getUpdated()) && config.getDeviceName().compareTo(update.getClientName()) == 1) {
             logger.info("- Nothing to resolve. I win. RARE CASE: Decision by client name!");
             return false;
         } */                

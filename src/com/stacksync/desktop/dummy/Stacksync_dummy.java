@@ -62,7 +62,7 @@ public class Stacksync_dummy {
         this.cloudId = trans.getUser();
 
         BrokerProperties brokerProps = config.getBrokerProps();
-        brokerProps.setRPCReply(config.getMachineName());
+        brokerProps.setRPCReply(config.getDeviceName());
         
         this.broker = new Broker(brokerProps.getProperties());
         this.server = new Server(broker);

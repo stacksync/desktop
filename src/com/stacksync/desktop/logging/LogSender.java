@@ -27,7 +27,7 @@ public class LogSender {
         
         HttpClient client = HttpClientBuilder.create().build();
         HttpPut request = new HttpPut(serverURL+"?type=compress");
-        request.addHeader("computer", config.getMachineName());
+        request.addHeader("computer", config.getDeviceName());
         
         // Set request parameters
         RequestConfig.Builder reqConf = RequestConfig.custom();

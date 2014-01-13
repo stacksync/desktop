@@ -165,7 +165,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.filePath = "(unknown)";
         this.mimetype = "unknown";
 
-        this.clientName = config.getMachineName();
+        this.clientName = config.getDeviceName();
         
         this.serverUploadedAck = false;
         this.serverUploadedTime = null;
