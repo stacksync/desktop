@@ -14,20 +14,9 @@ public class CloneFilePk implements Serializable {
     @Id
     @Column(name = "file_version", nullable = false)
     private long version;
-    @Id
-    @Column(name = "root_id", nullable = false)
-    private String rootId;
     
     
     public CloneFilePk() { }
-
-    public String getRootId() {
-        return rootId;
-    }
-
-    public void setRootId(String rootId) {
-        this.rootId = rootId;
-    }
 
     public long getVersion() {
         return version;
@@ -67,9 +56,6 @@ public class CloneFilePk implements Serializable {
             return false;
         }
         if (this.version != other.version) {
-            return false;
-        }
-        if ((this.rootId == null) ? (other.rootId != null) : !this.rootId.equals(other.rootId)) {
             return false;
         }
         return true;

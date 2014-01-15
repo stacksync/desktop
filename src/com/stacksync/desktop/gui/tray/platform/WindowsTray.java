@@ -56,7 +56,7 @@ public class WindowsTray extends Tray {
             public void actionPerformed(ActionEvent e) {
                 //TODO change to open the folder where changes happend
                 Profile profile = config.getProfile();
-                Folder folder = profile.getFolders().list().get(0);
+                Folder folder = profile.getFolder();
                 fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
             }
         });
@@ -181,10 +181,8 @@ public class WindowsTray extends Tray {
         
         try {
             Profile profile = config.getProfile();
-            for (final Folder folder : profile.getFolders().list()) {
-                if (!folder.isActive() || folder.getLocalFile() == null) {
-                    continue;
-                }
+            final Folder folder = profile.getFolder();
+            if (folder != null && folder.isActive() && folder.getLocalFile() != null) {
 
                 itemFolder.setLabel(folder.getLocalFile().getName());
                 itemFolder.setEnabled(true);
@@ -221,7 +219,7 @@ public class WindowsTray extends Tray {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     Profile profile = config.getProfile();
-                    Folder folder = profile.getFolders().list().get(0);
+                    Folder folder = profile.getFolder();
                     fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
                 }
             }

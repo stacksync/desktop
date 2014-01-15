@@ -70,7 +70,7 @@ public class staticFunctionsTest {
         }
         
         Profile profile = config.getProfile();
-        if(profile.getFolders().list().isEmpty()){
+        if(profile.getFolder() == null){
             throw new ConfigException("The profile hasn't the folder configuration!");
         }
         
@@ -83,7 +83,7 @@ public class staticFunctionsTest {
         Tray tray = Tray.getInstance(); 
         tray.setStartDemonOnly(true);
         
-        Folder root = profile.getFolders().list().get(0);
+        Folder root = profile.getFolder();
         return root;
     }
     

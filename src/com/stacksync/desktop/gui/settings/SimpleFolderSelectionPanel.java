@@ -88,9 +88,9 @@ public class SimpleFolderSelectionPanel extends SettingsPanel {
         if (file != null && !file.getPath().equals("")) {
             this.txtFolderPath.setText(file.getAbsolutePath());
             
-            Folder folder = profile.getFolders().get("stacksync");
+            Folder folder = profile.getFolder();
             folder.setLocalFile(file);
-            profile.getFolders().update(folder);
+            profile.setFolder(folder);
         }
     }//GEN-LAST:event_btnBrowseActionPerformed
 
@@ -102,7 +102,7 @@ public class SimpleFolderSelectionPanel extends SettingsPanel {
 
     @Override
     public void clean() {
-        profile.getFolders().clear();  
+        //profile.getFolders().clear();  
     }
 
     @Override
@@ -120,18 +120,12 @@ public class SimpleFolderSelectionPanel extends SettingsPanel {
 
                     try {
 
-                        for (String remoteId : profile.getRepository().getAvailableRemoteIds()) {
-                            logger.info("remoteID"+remoteId);
-
-                            if (profile.getFolders().get(remoteId) != null) {
-                                continue;
-                            }
+                        if (profile.getFolder() == null) {
 
                             Folder folder = new Folder(profile);
-                            folder.setRemoteId(remoteId);
                             folder.setLocalFile(new File(env.getDefaultUserHome() + "stacksync_folder"));
 
-                            profile.getFolders().add(folder);
+                            profile.setFolder(folder);
                         }
 
                         txtFolderPath.setText(env.getDefaultUserHome() + "stacksync_folder");
@@ -151,10 +145,9 @@ public class SimpleFolderSelectionPanel extends SettingsPanel {
         } else { //repository is not connected
             
             Folder folder = new Folder(profile);
-            folder.setRemoteId("stacksync");
             folder.setLocalFile(new File(env.getDefaultUserHome() + "stacksync_folder"));
 
-            profile.getFolders().add(folder);
+            profile.setFolder(folder);
             txtFolderPath.setText(env.getDefaultUserHome() + "stacksync_folder");
             //tblFolders.updateUI();
         }
@@ -162,49 +155,51 @@ public class SimpleFolderSelectionPanel extends SettingsPanel {
 
     @Override
     public void save() {
-        int beforeAvailRemoteIds = profile.getRepository().getAvailableRemoteIds().size();        
-        for (Folder folder: profile.getFolders().list()) {
-            profile.getRepository().getAvailableRemoteIds().add(folder.getRemoteId());
-            if(!folder.getLocalFile().exists()){
-                folder.getLocalFile().mkdirs();
-                
-                // Creates a folderLink in favorites
-                if(env.getOperatingSystem() == Environment.OperatingSystem.Windows){
-                    File file = new File(env.getDefaultUserHome() + "Links");
-                    if(file.exists()){
-                        FileUtil.createWindowsLink(env.getDefaultUserHome() + "Links\\Stacksync.lnk", folder.getLocalFile().getPath());
-                    }
-                    
-                    Locale locale = new Locale("en", "US");        
-                    Locale defaultLocale = Locale.getDefault();
-                    if(defaultLocale.getLanguage().toLowerCase().compareTo("es") == 0){
-                        locale = new Locale("es", "ES");
-                    } else if(defaultLocale.getLanguage().toLowerCase().compareTo("fr") == 0){
-                        locale = new Locale("fr", "FR");
-                    }
+        
+        Folder folder = profile.getFolder();
+        
+        if (folder == null) {
+            return;
+        }
+        
+        if(!folder.getLocalFile().exists()){
+            folder.getLocalFile().mkdirs();
 
-                    ResourceBundle resourceBundletmp = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, locale);                    
-                    String desktopDirectory = resourceBundletmp.getString("desktop_directory");
-                    
-                    file = new File(env.getDefaultUserHome() + desktopDirectory);
-                    if(file.exists()){
-                        FileUtil.createWindowsLink(env.getDefaultUserHome() + desktopDirectory + "\\Stacksync.lnk", folder.getLocalFile().getPath());
-                    }
+            // Creates a folderLink in favorites
+            if(env.getOperatingSystem() == Environment.OperatingSystem.Windows){
+                File file = new File(env.getDefaultUserHome() + "Links");
+                if(file.exists()){
+                    FileUtil.createWindowsLink(env.getDefaultUserHome() + "Links\\Stacksync.lnk", folder.getLocalFile().getPath());
+                }
+
+                Locale locale = new Locale("en", "US");        
+                Locale defaultLocale = Locale.getDefault();
+                if(defaultLocale.getLanguage().toLowerCase().compareTo("es") == 0){
+                    locale = new Locale("es", "ES");
+                } else if(defaultLocale.getLanguage().toLowerCase().compareTo("fr") == 0){
+                    locale = new Locale("fr", "FR");
+                }
+
+                ResourceBundle resourceBundletmp = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, locale);                    
+                String desktopDirectory = resourceBundletmp.getString("desktop_directory");
+
+                file = new File(env.getDefaultUserHome() + desktopDirectory);
+                if(file.exists()){
+                    FileUtil.createWindowsLink(env.getDefaultUserHome() + desktopDirectory + "\\Stacksync.lnk", folder.getLocalFile().getPath());
                 }
             }
-        }        
-        
-        if (beforeAvailRemoteIds < profile.getRepository().getAvailableRemoteIds().size()) {
-            logger.info("New folders added. Marking repository as CHANGED.");            
-            profile.getRepository().setChanged(true);
         }
+    
+        
     }
 
     @Override
     public boolean check() {
         boolean check = false;
         
-        for(Folder folder: profile.getFolders().list()){
+        Folder folder = profile.getFolder();
+        
+        if (folder != null) {
             if(folder.isActive()){
                 if(folder.getLocalFile() != null && folder.getLocalFile().getPath().length() > 0){
                     check = true;

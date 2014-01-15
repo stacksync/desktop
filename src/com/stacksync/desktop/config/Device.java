@@ -49,13 +49,13 @@ public class Device implements Configurable {
             return;
         }
         
-        setId(Long.parseLong(node.getProperty("id")));
+        //setId(Long.parseLong(node.getProperty("id")));
         setName(node.getProperty("name").replace("-", "_"));
     }
 
     @Override
     public void save(ConfigNode node) {
-        node.setProperty("id", id);
+        //node.setProperty("id", id);
         node.setProperty("name", name);
     }
     

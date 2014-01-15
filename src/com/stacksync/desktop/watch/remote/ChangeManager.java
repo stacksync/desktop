@@ -189,12 +189,12 @@ public class ChangeManager {
                 }
             } else { // B) I do not know the file ID
 
-                root = profile.getFolders().get(update.getRootId());
-                if (root == null) {
+                root = profile.getFolder();
+                /*if (root == null) {
                     // TODO given ROOT is unknown! 
                     logger.error("TODO TODO TODO  --- ROOT ID " + update.getRootId() + " is unknown. ");
                     continue;
-                }
+                }*/
 
                 File localFileName = FileUtil.getCanonicalFile(new File(root.getLocalFile() + File.separator + update.getPath() + File.separator + update.getName()));
                 CloneFile localVersionByFilename = db.getFileOrFolder(root, localFileName); //update.getRootId(), update.getPath(), update.getName());

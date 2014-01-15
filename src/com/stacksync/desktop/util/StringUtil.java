@@ -171,7 +171,6 @@ public class StringUtil {
         update.setServerUploadedAck(true);
         update.setServerUploadedTime(new Date());
 
-        update.setRootId(objMetadata.get("rootId").getAsString());
         update.setFileId(objMetadata.get("fileId").getAsLong());
         update.setVersion(objMetadata.get("version").getAsLong());
 
@@ -190,7 +189,6 @@ public class StringUtil {
 
         // Parent
         if (objMetadata.get("parentFileId").getAsString() != null && !objMetadata.get("parentFileId").getAsString().isEmpty()) {
-            update.setParentRootId(objMetadata.get("parentRootId").getAsString());
             update.setParentFileId(objMetadata.get("parentFileId").getAsLong());
             update.setParentFileVersion(objMetadata.get("parentFileVersion").getAsLong());
         }
@@ -221,7 +219,6 @@ public class StringUtil {
         update.setServerUploadedAck(true);
         update.setServerUploadedTime(new Date());
 
-        update.setRootId(objMetadata.getRootId());
         update.setFileId(objMetadata.getFileId());
         update.setVersion(objMetadata.getVersion());
 
@@ -240,7 +237,6 @@ public class StringUtil {
 
         // Parent
         if (objMetadata.getParentFileId() != null && !objMetadata.getParentFileId().toString().isEmpty()) {
-            update.setParentRootId(objMetadata.getParentRootId());
             update.setParentFileId(objMetadata.getParentFileId());
             if (objMetadata.getParentFileVersion() != null) {
                 update.setParentFileVersion(objMetadata.getParentFileVersion());
@@ -256,7 +252,6 @@ public class StringUtil {
     public static ObjectMetadata parseJson2Update(CloneFile cloneFile) throws NullPointerException {
         ObjectMetadata object = new ObjectMetadata();
 
-        object.setRootId(cloneFile.getRootId());
         object.setFileId(cloneFile.getFileId());
         object.setVersion(cloneFile.getVersion());
         
@@ -278,8 +273,7 @@ public class StringUtil {
         // Parent
         if (cloneFile.getParent() != null) {
             object.setParentFileId(cloneFile.getParent().getFileId());            
-            object.setParentFileVersion(cloneFile.getParent().getVersion());
-            object.setParentRootId(cloneFile.getParent().getRootId());            
+            object.setParentFileVersion(cloneFile.getParent().getVersion());           
         } else{
             object.setParentFileId(null);            
             object.setParentFileVersion(null);

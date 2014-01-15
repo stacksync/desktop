@@ -30,7 +30,6 @@ import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.config.Folders;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
@@ -250,11 +249,9 @@ public class LinuxNativeClient {
 
                 Profile profile = new Profile();
                 profile.setName("Profile " + (i++));
-                profile.setFolders(new Folders(profile));
+                profile.setFolder(new Folder(profile));
                 Folder folder = new Folder(profile);
                 folder.setLocalFile(new File("/home"));
-                folder.setRemoteId("home");
-                profile.getFolders().add(folder);
                 config.setProfile(profile);
                 tray.updateUI();
             }

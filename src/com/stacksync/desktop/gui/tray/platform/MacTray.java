@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.List;
 import javax.swing.*;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
@@ -167,10 +166,8 @@ public class MacTray extends Tray {
 
         Profile profile = config.getProfile();
 
-        for (final Folder folder : profile.getFolders().list()) {
-            if (!folder.isActive() || folder.getLocalFile() == null) {
-                continue;
-            }
+        final Folder folder = profile.getFolder();
+        if (folder != null && folder.isActive() && folder.getLocalFile() != null) {
 
             MenuItem itemFolder = new MenuItem(folder.getLocalFile().getName());
 

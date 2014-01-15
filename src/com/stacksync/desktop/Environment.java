@@ -170,7 +170,7 @@ public class Environment {
                 device.load(self.findChildByName("device"));
                 deviceName = device.getName();
                 
-                if(deviceName.isEmpty()){
+                if(deviceName == null || deviceName.isEmpty()){
                     deviceName = defaultDeviceName;
                 }                
             } catch (Exception ex) {

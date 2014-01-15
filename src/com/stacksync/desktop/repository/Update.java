@@ -35,8 +35,6 @@ public class Update {
     private String clientName; // This is just a helper field, NOT saved in the update file!
     private long fileId;
     private long version;
-    private String rootId;
-    private String parentRootId;
     private long parentFileId;
     private long parentFileVersion;
 
@@ -174,14 +172,6 @@ public class Update {
         this.chunks = chunks;
     }
 
-    public String getRootId() {
-        return rootId;
-    }
-
-    public void setRootId(String rootId) {
-        this.rootId = rootId;
-    }
-
     public long getParentFileId() {
         return parentFileId;
     }
@@ -196,14 +186,6 @@ public class Update {
 
     public void setParentFileVersion(long parentFileVersion) {
         this.parentFileVersion = parentFileVersion;
-    }
-
-    public String getParentRootId() {
-        return parentRootId;
-    }
-
-    public void setParentRootId(String parentRootId) {
-        this.parentRootId = parentRootId;
     }
 
     @Override
@@ -302,10 +284,8 @@ public class Update {
         update.setClientName(cf.getClientName());
         update.setFileId(cf.getFileId());
         update.setVersion(cf.getVersion());
-        update.setRootId(cf.getRootId());
         
         if(cf.getParent() != null){
-            update.setParentRootId(cf.getParent().getRootId());
             update.setParentFileId(cf.getParent().getFileId());
             update.setParentFileVersion(cf.getParent().getVersion());
         }

@@ -64,20 +64,25 @@ public class Folder implements Configurable {
         this.localFile = localFile;
     }
 
-    public void setRemoteId(String remoteId) {
+    /*public void setRemoteId(String remoteId) {
         this.remoteId = remoteId;
-    }
+    }*/
     
     public File getLocalFile() {
         return localFile;
     }
 
-    public String getRemoteId() {
+    /*public String getRemoteId() {
         return remoteId;
-    }
+    }*/
 
     @Override
     public void load(ConfigNode node) throws ConfigException {
+        
+        if (node == null) {
+            return;
+        }
+        
         try {
             if (node.hasProperty("active")) {
                 active = node.getBoolean("active");

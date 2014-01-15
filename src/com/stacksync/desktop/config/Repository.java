@@ -33,7 +33,6 @@ public final class Repository implements Configurable {
 
     private Connection connection;
     private Encryption encryption;
-    private Set<String> availableRemoteIds;
 
     /**
      * Maximum size of each (unencrypted) chunk in bytes. After encrypting
@@ -44,8 +43,7 @@ public final class Repository implements Configurable {
      */
     private int chunkSize;
     
-    private Date lastUpdate;
-    private boolean changed;    
+    private Date lastUpdate;   
     private boolean connected;
 
     // New
@@ -53,10 +51,8 @@ public final class Repository implements Configurable {
         // Fressen
         connection = null; // Loaded or set dynamically!
         encryption = new Encryption();
-        availableRemoteIds = new HashSet<String>();
         
         lastUpdate = null;
-        changed = false;
         connected = false;
     }
  
@@ -88,20 +84,8 @@ public final class Repository implements Configurable {
         this.encryption = encryption;
     }
 
-    public Set<String> getAvailableRemoteIds() {
-        return availableRemoteIds;
-    }
-
     public boolean isConnected() {
         return connected;
-    }
-
-    public boolean isChanged() {
-        return changed;
-    }
-
-    public void setChanged(boolean changed) {
-        this.changed = changed;
     }
 
     public Date getLastUpdate() {

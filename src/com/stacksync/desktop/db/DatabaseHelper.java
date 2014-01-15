@@ -81,18 +81,12 @@ public class DatabaseHelper {
         
         // TODO This is terribly implemented, and veeery inefficient!
         if (profile != null) {
-            a:
-            for (Folder aRoot : profile.getFolders().list()) {
-                if (aRoot.getLocalFile() == null) {
-                    continue;
-                }
-
-                if (!file.getAbsolutePath().startsWith(aRoot.getLocalFile().getAbsolutePath())) {
-                    continue;
-                }
-
+            
+            Folder aRoot = profile.getFolder();
+            
+            if (aRoot != null && aRoot.getLocalFile() != null &&
+                    file.getAbsolutePath().startsWith(aRoot.getLocalFile().getAbsolutePath())) {
                 root = aRoot;
-                break a;
             }
         }
 
@@ -118,7 +112,6 @@ public class DatabaseHelper {
         // First, check by full file path
         String queryStr =
                 "select f from CloneFile f where "
-                + "      f.rootId = :rootId and "
                 + "      f.filePath = :path and "
                 + "      f.name = :name "
                 + ((folder != null) ? "and f.folder = :folder " : " ")
@@ -126,7 +119,7 @@ public class DatabaseHelper {
                 //+ "      and f.status <> :notStatus2 "
                 //+ "      and f.syncStatus <> :notSyncStatus "
                 + "      and f.version = (select max(ff.version) from CloneFile ff where "
-                + "         ff.rootId = :rootId and f.fileId = ff.fileId) "
+                + "         f.fileId = ff.fileId) "
                 + "      order by f.updated desc";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
@@ -136,7 +129,6 @@ public class DatabaseHelper {
         //System.err.println(queryStr);
         //logger.severe("getFileOrFolder: rel parent = " + FileUtil.getRelativeParentDirectory(root.getLocalFile(), file) + " / file name = " + file.getName() + " / folder = " + file.isDirectory());
         query.setMaxResults(1);
-        query.setParameter("rootId", root.getRemoteId());
         query.setParameter("path", path);
         query.setParameter("name", file.getName());
         query.setParameter("notStatus1", Status.DELETED);
@@ -164,12 +156,10 @@ public class DatabaseHelper {
     public List<CloneFile> getChildren(CloneFile parentFile) {
         // First, check by full file path
         String queryStr = "select f from CloneFile f where "
-                + "      f.rootId = :rootId and "
                 + "      f.status <> :notStatus1 and "
                 //+ "      f.status <> :notStatus2 and "
                 + "      f.parent = :parent and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                         ff.rootId = :rootId and "
                 + "                                         f.fileId = ff.fileId) ";
 
 //	Systconfig.getDatabase().getEntityManager().err.println("rel parent = "+FileUtil.getRelativeParentDirectory(root.getFile(), file) + " / file name = "+file.getName() + " / folder = "+file.isDirectory());
@@ -178,7 +168,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
-        query.setParameter("rootId", parentFile.getRoot().getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
         query.setParameter("parent", parentFile);
@@ -189,12 +178,10 @@ public class DatabaseHelper {
     public List<CloneFile> getAllChildren(CloneFile parentFile) {
         // First, check by full file path
         String queryStr = "select f from CloneFile f where "
-                + "      f.rootId = :rootId and "
                 + "      f.status <> :notStatus1 and "
                 //+ "      f.status <> :notStatus2 and "
                 + "      f.path like :pathPrefix and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                         ff.rootId = :rootId and "
                 + "                                         f.fileId = ff.fileId) ";
 
 //	Systconfig.getDatabase().getEntityManager().err.println("rel parent = "+FileUtil.getRelativeParentDirectory(root.getFile(), file) + " / file name = "+file.getName() + " / folder = "+file.isDirectory());
@@ -203,7 +190,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("rootId", parentFile.getRoot().getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
         query.setParameter("pathPrefix", FileUtil.getRelativePath(parentFile.getRoot().getLocalFile(), parentFile.getFile()));
@@ -275,7 +261,6 @@ public class DatabaseHelper {
      */
     public CloneFile getNearestFile(Folder root, File file, long checksum) {
         String queryStr = "select f from CloneFile f where "
-                + "      f.rootId = :rootId and "
                 + "      f.checksum = :checksum and "
                 + "      f.status <> :notStatus1 and "
                 //+ "      f.status <> :notStatus2 and "
@@ -287,7 +272,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("rootId", root.getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
         query.setParameter("checksum", checksum);
@@ -322,18 +306,15 @@ public class DatabaseHelper {
 
     public List<CloneFile> getFiles(Folder root) {
         String queryStr = "select f from CloneFile f where "
-                + "      f.rootId = :rootId and "
                 + "      f.status <> :notStatus1 and"
                 //+ "      f.status <> :notStatus2 and"
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                     ff.rootId = :rootId and "
                 + "                                     f.fileId = ff.fileId) ";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("rootId", root.getRemoteId());
         query.setParameter("notStatus1", Status.DELETED);
         //query.setParameter("notStatus2", Status.MERGED);
 
@@ -342,7 +323,6 @@ public class DatabaseHelper {
 
     public List<CloneFile> getFiles(Folder root, String clientName, CloneFile.SyncStatus status) {
         String queryStr = "select f from CloneFile f where "
-                + "      f.rootId = :rootId and "
                 + "      f.clientName = :clientName and "
                 + "      f.syncStatus = :StatusSync ";
 
@@ -350,7 +330,6 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("rootId", root.getRemoteId());
         query.setParameter("StatusSync", status);
         query.setParameter("clientName", clientName);
 
@@ -370,7 +349,6 @@ public class DatabaseHelper {
         newFile.setUpdated(update.getUpdated());
         newFile.setChecksum(update.getChecksum());
         newFile.setProfile(profile);
-        newFile.setRootId(update.getRootId());
 
         ///GGIPART ///
         String path = update.getPath();

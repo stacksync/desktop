@@ -58,40 +58,50 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
 
     @Override
     public synchronized void watch(Profile profile) {
-        for (Folder folder : profile.getFolders().list()) {
-            if (!folder.isActive() || folder.getLocalFile() == null) {
-                continue;
-            }
+        
+        Folder folder = profile.getFolder();
+        
+        if (folder == null) {
+            return;
+        }
+        
+        if (!folder.isActive() || folder.getLocalFile() == null) {
+            return;
+        }
 
-            try {
-                WatchKey rootKey = watcher.addWatch(folder.getLocalFile(), true, this);
-                keyRootMap.put(rootKey, folder);
-            } catch (IOException ex) {
-                logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
-                RemoteLogs.getInstance().sendLog(ex);
-            } catch (UnsupportedOperationException ex) {
-                logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
-                RemoteLogs.getInstance().sendLog(ex);
-            }
+        try {
+            WatchKey rootKey = watcher.addWatch(folder.getLocalFile(), true, this);
+            keyRootMap.put(rootKey, folder);
+        } catch (IOException ex) {
+            logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
+            RemoteLogs.getInstance().sendLog(ex);
+        } catch (UnsupportedOperationException ex) {
+            logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
+            RemoteLogs.getInstance().sendLog(ex);
         }
     }
 
     @Override
     public void unwatch(Profile profile) {
-        for (Folder folder : profile.getFolders().list()) {
-            if (!folder.isActive() || folder.getLocalFile() == null) {
-                continue;
-            }
+        
+        Folder folder = profile.getFolder();
+        
+        if (folder == null) {
+            return;
+        }
+        
+        if (!folder.isActive() || folder.getLocalFile() == null) {
+            return;
+        }
 
-            watcher.removeWatch(folder.getLocalFile());
+        watcher.removeWatch(folder.getLocalFile());
 
-            // Remove form map
-            allfolders:
-            for (Map.Entry<WatchKey, Folder> e : keyRootMap.entrySet()) {
-                if (e.getValue().equals(folder)) {
-                    keyRootMap.remove(e.getKey());
-                    break allfolders;
-                }
+        // Remove form map
+        allfolders:
+        for (Map.Entry<WatchKey, Folder> e : keyRootMap.entrySet()) {
+            if (e.getValue().equals(folder)) {
+                keyRootMap.remove(e.getKey());
+                break allfolders;
             }
         }
     }

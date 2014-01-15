@@ -149,7 +149,7 @@ public class MoveIndexRequest extends IndexRequest {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
             
-            Folder folderProfile = cf.getProfile().getFolders().get(cf.getRootId()); 
+            Folder folderProfile = cf.getProfile().getFolder(); 
             String path = file.getParent().replace(folderProfile.getLocalFile().getPath(), "");
             path = path.replace('\\', '/');
 

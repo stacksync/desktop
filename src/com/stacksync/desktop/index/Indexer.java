@@ -97,11 +97,9 @@ public class Indexer {
 
     public void index(Profile profile) { 
         logger.debug("Reading folders in profile "+profile.getName()+" ...");
-                
-        for (Folder folder : profile.getFolders().list()) {
-            if (!folder.isActive() || folder.getLocalFile() == null) {
-                continue;
-            }
+        
+        final Folder folder = profile.getFolder();
+        if (folder != null && folder.isActive() && folder.getLocalFile() != null) {
             logger.debug("- Folder "+folder.getLocalFile()+" ...");
             
             // Check for files that do NOT exist anymore

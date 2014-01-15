@@ -61,7 +61,7 @@ public class FoldersTablePanel extends SettingsPanel {
         initButtons();
         initTable();
         
-        if(profile.getFolders().list().size() > 0){
+        if(profile.getFolder() != null){
             btnAdd.setVisible(false);
         }
         
@@ -138,24 +138,17 @@ public class FoldersTablePanel extends SettingsPanel {
 
                     try {
 
-                        for (String remoteId : profile.getRepository().getAvailableRemoteIds()) {
-                            logger.info("remoteID"+remoteId);
-
-                            if (profile.getFolders().get(remoteId) != null) {
-                                continue;
-                            }
-
+                        if (profile.getFolder() == null) {
                             Folder folder = new Folder(profile);
-                            folder.setRemoteId(remoteId);
                             folder.setLocalFile(new File(env.getDefaultUserHome() + "stacksync_folder"));
 
-                            profile.getFolders().add(folder);
+                            profile.setFolder(folder);
                         }
 
                         tblFolders.updateUI();
                         lblLoading.setVisible(false);
                         
-                        if(profile.getFolders().list().size() > 0){
+                        if(profile.getFolder() != null){
                             btnAdd.setVisible(false);
                         }
                     } catch (Exception ex) {
@@ -168,52 +161,50 @@ public class FoldersTablePanel extends SettingsPanel {
         } else { //repository is not connected
             
             Folder folder = new Folder(profile);
-            folder.setRemoteId("stacksync");
             folder.setLocalFile(new File(env.getDefaultUserHome() + "stacksync_folder"));
 
-            profile.getFolders().add(folder);
+            profile.setFolder(folder);
             tblFolders.updateUI();
         }
     }
 
     @Override
     public void save() {        
-        int beforeAvailRemoteIds = profile.getRepository().getAvailableRemoteIds().size();        
-        for (Folder folder: profile.getFolders().list()) {
-            profile.getRepository().getAvailableRemoteIds().add(folder.getRemoteId());
-            if(!folder.getLocalFile().exists()){
-                folder.getLocalFile().mkdirs();
-                
-                // Creates a folderLink in favorites
-                if(env.getOperatingSystem() == OperatingSystem.Windows){
-                    File file = new File(env.getDefaultUserHome() + "Links");
-                    if(file.exists()){
-                        FileUtil.createWindowsLink(env.getDefaultUserHome() + "Links\\Stacksync.lnk", folder.getLocalFile().getPath());
-                    }
-                    
-                    Locale locale = new Locale("en", "US");        
-                    Locale defaultLocale = Locale.getDefault();
-                    if(defaultLocale.getLanguage().toLowerCase().compareTo("es") == 0){
-                        locale = new Locale("es", "ES");
-                    } else if(defaultLocale.getLanguage().toLowerCase().compareTo("fr") == 0){
-                        locale = new Locale("fr", "FR");
-                    }
+        
+        Folder folder = profile.getFolder();
+        
+        if (folder == null) {
+            return;
+        }
+        
+        if(!folder.getLocalFile().exists()){
+            folder.getLocalFile().mkdirs();
 
-                    ResourceBundle resourceBundletmp = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, locale);                    
-                    String desktopDirectory = resourceBundletmp.getString("desktop_directory");
-                    
-                    file = new File(env.getDefaultUserHome() + desktopDirectory);
-                    if(file.exists()){
-                        FileUtil.createWindowsLink(env.getDefaultUserHome() + desktopDirectory + "\\Stacksync.lnk", folder.getLocalFile().getPath());
-                    }
+            // Creates a folderLink in favorites
+            if(env.getOperatingSystem() == OperatingSystem.Windows){
+                File file = new File(env.getDefaultUserHome() + "Links");
+                if(file.exists()){
+                    FileUtil.createWindowsLink(env.getDefaultUserHome() + "Links\\Stacksync.lnk", folder.getLocalFile().getPath());
+                }
+
+                Locale locale = new Locale("en", "US");        
+                Locale defaultLocale = Locale.getDefault();
+                if(defaultLocale.getLanguage().toLowerCase().compareTo("es") == 0){
+                    locale = new Locale("es", "ES");
+                } else if(defaultLocale.getLanguage().toLowerCase().compareTo("fr") == 0){
+                    locale = new Locale("fr", "FR");
+                }
+
+                ResourceBundle resourceBundletmp = ResourceBundle.getBundle(Constants.RESOURCE_BUNDLE, locale);                    
+                String desktopDirectory = resourceBundletmp.getString("desktop_directory");
+
+                file = new File(env.getDefaultUserHome() + desktopDirectory);
+                if(file.exists()){
+                    FileUtil.createWindowsLink(env.getDefaultUserHome() + desktopDirectory + "\\Stacksync.lnk", folder.getLocalFile().getPath());
                 }
             }
-        }        
+        }
         
-        if (beforeAvailRemoteIds < profile.getRepository().getAvailableRemoteIds().size()) {
-            logger.info("New folders added. Marking repository as CHANGED.");            
-            profile.getRepository().setChanged(true);
-        }        
     }
 
     /** This method is called from within the constructor to
@@ -310,7 +301,7 @@ public class FoldersTablePanel extends SettingsPanel {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         Folder folder = FolderDialog.showDialog(null);
         if (folder != null) {
-            profile.getFolders().add(folder);
+            profile.setFolder(folder);
             tblFolders.updateUI();
             btnAdd.setVisible(false);
         }
@@ -321,10 +312,10 @@ public class FoldersTablePanel extends SettingsPanel {
             return;
         }
 
-        Folder folder = profile.getFolders().list().get(tblFolders.getSelectionModel().getLeadSelectionIndex());
+        /*Folder folder = profile.getFolders().list().get(tblFolders.getSelectionModel().getLeadSelectionIndex());
         if (FolderDialog.showDialog(null, folder) == null) {
             return;
-        }
+        }*/
 
         tblFolders.updateUI();
     }//GEN-LAST:event_btnEditActionPerformed
@@ -338,18 +329,17 @@ public class FoldersTablePanel extends SettingsPanel {
 
     @Override
     public void clean() { 
-        profile.getFolders().clear();    
+        //profile.getFolder().clear();    
     }
     
     @Override
     public boolean check() { 
         boolean check = false;
         
-        for(Folder folder: profile.getFolders().list()){
-            if(folder.isActive()){
-                if(folder.getLocalFile() != null && folder.getLocalFile().getPath().length() > 0){
-                    check = true;
-                }
+        Folder folder = profile.getFolder();
+        if (folder != null && folder.isActive()){
+            if(folder.getLocalFile() != null && folder.getLocalFile().getPath().length() > 0){
+                check = true;
             }
         }
         
@@ -444,7 +434,8 @@ public class FoldersTablePanel extends SettingsPanel {
 
         @Override
         public int getRowCount() {
-            return profile.getFolders().list().size();
+            //return profile.getFolders().list().size();
+            return 1;
         }
 
         @Override
@@ -490,13 +481,11 @@ public class FoldersTablePanel extends SettingsPanel {
                 throw new ArrayIndexOutOfBoundsException(resourceBundle.getString("err_outofbound_message_part1") + " " + getRowCount() + " " + resourceBundle.getString("err_outofbound_message_part2_rows") + " " + rowIndex + " " + resourceBundle.getString("err_outofbound_message_part3"));
             }
 
-            Folder folder = profile.getFolders().list().get(rowIndex);
+            Folder folder = profile.getFolder();
 
             switch (columnIndex) {
                 case COLUMN_INDEX_ACTIVE:
                     return folder.isActive();
-                case COLUMN_INDEX_REMOTE:
-                    return folder.getRemoteId();
                 case COLUMN_INDEX_LOCAL:
                     return (folder.getLocalFile() == null) ? "(not defined)" : folder.getLocalFile().getAbsolutePath();
             }
@@ -510,14 +499,11 @@ public class FoldersTablePanel extends SettingsPanel {
                 throw new ArrayIndexOutOfBoundsException(resourceBundle.getString("ftp_err_outofbound_message_part1") + " " + getRowCount() + " " + resourceBundle.getString("ftp_err_outofbound_message_part2_rows") + " " +  rowIndex + " " + resourceBundle.getString("ftp_err_outofbound_message_part3"));
             }
 
-            Folder folder = profile.getFolders().list().get(rowIndex);
+            Folder folder = profile.getFolder();
 
             switch (columnIndex) {
                 case COLUMN_INDEX_ACTIVE:
                     folder.setActive((Boolean) aValue);
-                    return;
-                case COLUMN_INDEX_REMOTE:
-                    folder.setRemoteId(aValue.toString());
                     return;
                 case COLUMN_INDEX_LOCAL:
                     folder.setLocalFile(new File(aValue.toString()));

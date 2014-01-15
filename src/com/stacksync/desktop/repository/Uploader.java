@@ -110,10 +110,10 @@ public class Uploader {
     
     public synchronized void queuePendingFiles() {
         //Queue the pending Syncing and Local files if networks goes down and after ups.
-        List<CloneFile> filesSyncing = db.getFiles(profile.getFolders().list().get(0), env.getDeviceName(), CloneFile.SyncStatus.SYNCING);
+        List<CloneFile> filesSyncing = db.getFiles(profile.getFolder(), env.getDeviceName(), CloneFile.SyncStatus.SYNCING);
         queuePendingList(filesSyncing);
         
-        filesSyncing = db.getFiles(profile.getFolders().list().get(0), env.getDeviceName(), CloneFile.SyncStatus.LOCAL);
+        filesSyncing = db.getFiles(profile.getFolder(), env.getDeviceName(), CloneFile.SyncStatus.LOCAL);
         queuePendingList(filesSyncing);
     }
 

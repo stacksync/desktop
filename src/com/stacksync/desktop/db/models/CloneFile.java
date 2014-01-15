@@ -76,10 +76,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Column(name = "file_version", nullable = false)
     private long version;
     
-    @Id
-    @Column(name = "root_id", nullable = false)
-    private String rootId;
-    
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated")
     private Date updated;
@@ -101,7 +97,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @JoinColumns({
         @JoinColumn(name = "parent_file_id", referencedColumnName = "file_id"),
         @JoinColumn(name = "parent_file_version", referencedColumnName = "file_version"),
-        @JoinColumn(name = "parent_root_id", referencedColumnName = "root_id")
     })
     private CloneFile parent;
     
@@ -177,7 +172,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         // Set account
         this.profile = root.getProfile();
         this.root = root;
-        this.rootId = root.getRemoteId();
 
         this.name = file.getName();
         this.filePath = "/" + FileUtil.getRelativeParentDirectory(root.getLocalFile(), file);
@@ -194,7 +188,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public Folder getRoot() {
         if (root == null) {
-            root = getProfile().getFolders().get(getRootId());
+            root = getProfile().getFolder();
         }
 
         return root;
@@ -202,7 +196,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setRoot(Folder root) {
         this.root = root;
-        this.rootId = root.getRemoteId();
     }
 
     public void setParent(CloneFile parent) {
@@ -223,14 +216,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setProfile(Profile profile) {
         this.profile = profile;
-    }
-
-    public String getRootId() {
-        return rootId;
-    }
-
-    public void setRootId(String rootId) {
-        this.rootId = rootId;
     }
 
     public boolean isFolder() {
@@ -610,7 +595,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             clone.lastModified = new Date(getLastModified().getTime());
             clone.profile = getProfile(); // POINTER; No Copy!
             clone.root = getRoot(); // POINTER; No Copy!
-            clone.rootId = getRootId();
             clone.folder = isFolder();
             clone.filePath = getPath();
             clone.name = getName();

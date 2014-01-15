@@ -26,7 +26,6 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.config.Folders;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.models.Workspace;
@@ -68,7 +67,7 @@ public class Profile implements Configurable {
     private String name;
     private String cloudId;
     private Repository repository;
-    private Folders folders;
+    private Folder folder;
     private Uploader uploader;
     private RemoteWatcher remoteWatcher;
     private BrokerProperties brokerProps;
@@ -81,11 +80,7 @@ public class Profile implements Configurable {
         
         enabled = true;
         name = "(unknown)";
-        //repository = new Repository();
-        folders = new Folders(this);
 
-        //uploader = new Uploader(this);
-        //remoteWatcher = new RemoteWatcher(this);
     }
     
     private void initialize() {
@@ -138,7 +133,7 @@ public class Profile implements Configurable {
 
         // Activate
         if (active) {
-            File folder = getFolders().list().get(0).getLocalFile();
+            File folder = getFolder().getLocalFile();
             if (!folder.exists()) {
                 folder.mkdirs();
             }
@@ -158,7 +153,7 @@ public class Profile implements Configurable {
             cloudId = transferManager.getUser();
 
             setFactory();
-            server.updateDevice(cloudId);
+            //server.updateDevice(cloudId);
             Map<String, Workspace> workspaces = Workspace.InitializeWorkspaces(this);
 
             // Start threads 1/2
@@ -210,10 +205,6 @@ public class Profile implements Configurable {
         }
     }
 
-    public Folders getFolders() {
-        return folders;
-    }
-
     public boolean isEnabled() {
         return enabled;
     }
@@ -242,10 +233,6 @@ public class Profile implements Configurable {
         this.cloudId = cloudId;
     }
 
-    public void setFolders(Folders folders) {
-        this.folders = folders;
-    }
-
     public void setRepository(Repository repository) {
         this.repository = repository;
     }
@@ -260,6 +247,14 @@ public class Profile implements Configurable {
     
     public boolean isInitialized() {
         return initialized;
+    }
+    
+    public Folder getFolder() {
+        return this.folder;
+    }
+    
+    public void setFolder(Folder folder) {
+        this.folder = folder;
     }
 
     @Override
@@ -280,14 +275,16 @@ public class Profile implements Configurable {
             repository = new Repository();
             repository.load(node.findChildByName("repository"));
 
-            // Folders
-            folders = new Folders(this);
-            folders.load(node.findChildByXPath("folders"));
+            // Folder
+            folder = new Folder(this);
+            folder.load(node.findChildByXPath("folder"));
+            //folders = new Folders(this);
+            //folders.load(node.findChildByXPath("folders"));
 
             // Remote IDs
-            for (Folder folder : folders.list()) {
+            /*for (Folder folder : folders.list()) {
                 repository.getAvailableRemoteIds().add(folder.getRemoteId());
-            }
+            }*/
 
         } catch (Exception e) {
             throw new ConfigException("Unable to load profile: " + e, e);
@@ -304,7 +301,7 @@ public class Profile implements Configurable {
         repository.save(node.findOrCreateChildByXpath("repository", "repository"));
 
         // Folders
-        folders.save(node.findOrCreateChildByXpath("folders", "folders"));
+        folder.save(node.findOrCreateChildByXpath("folder", "folder"));
 
     }
 
@@ -323,7 +320,7 @@ public class Profile implements Configurable {
         
         if (env.getOperatingSystem() == Environment.OperatingSystem.Windows) {
             try {
-                WinRegistry.writeWindowsRegistry(this.getFolders().get("stacksync").getLocalFile().getPath());
+                WinRegistry.writeWindowsRegistry(this.getFolder().getLocalFile().getPath());
             } catch (Exception ex) {
                 logger.error("Could not write Windows registry", ex);
             }
@@ -333,6 +330,6 @@ public class Profile implements Configurable {
     @Override
     public String toString() {
         return "Profile[active=" + active  + ", enabled= " + enabled + ", name=" + name + ", "
-                + "repository=" + repository + ", folders:" + folders + "]";
+                + "repository=" + repository + ", folder:" + folder + "]";
     }
 }
