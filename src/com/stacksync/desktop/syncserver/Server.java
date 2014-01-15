@@ -96,8 +96,11 @@ public class Server {
         String requestId = getRequestId();
         long deviceId;
         
-        DeviceInfo device = new DeviceInfo(config.getDeviceId(), config.getDeviceName(), cloudId, Environment.getInstance().getOperatingSystem().toString(),
-                null, null, null, null);
+        Environment env = Environment.getInstance();
+        String osInfo = env.getOperatingSystem().toString() + env.getArchitecture();
+        
+        DeviceInfo device = new DeviceInfo(config.getDeviceId(), config.getDeviceName(),
+                cloudId, osInfo, null);
         deviceId = syncServer.updateDevice(cloudId, requestId, device);
         logger.debug("Obtained deviceId: "+deviceId);
         
