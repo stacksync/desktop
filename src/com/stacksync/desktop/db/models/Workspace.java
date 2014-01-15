@@ -11,8 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
 import com.stacksync.desktop.config.profile.Profile;
-import com.stacksync.desktop.config.Repository;
-import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.exceptions.InitializationException;
@@ -112,16 +110,14 @@ public class Workspace extends PersistentObject implements Serializable {
         return this.files;
     }
     
-    public static Map<String, Workspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener) throws InitializationException{        
-        Repository repository = profile.getRepository();
-        //getWorkspaces                
-
-        TransferManager trans = repository.getConnection().createTransferManager();
+    public static Map<String, Workspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener)
+            throws InitializationException{
+                  
         List<Workspace> remoteWorkspaces = new ArrayList<Workspace>();
                                             
         try {
             Server server = profile.getServer();
-            remoteWorkspaces = server.getWorkspaces(trans.getUser());
+            remoteWorkspaces = server.getWorkspaces(profile.getCloudId());
 
             if(remoteWorkspaces.isEmpty()){
                 throw new IOException();
@@ -155,5 +151,12 @@ public class Workspace extends PersistentObject implements Serializable {
         }
         
         return localWorkspaces;
+    }
+    
+    public static Map<String, Workspace> InitializeWorkspaces(Profile profile) 
+        throws InitializationException{
+        
+        return InitializeWorkspaces(profile, null);
+        
     }
 }

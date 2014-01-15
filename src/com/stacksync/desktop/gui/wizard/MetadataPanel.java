@@ -112,12 +112,12 @@ public class MetadataPanel extends SettingsPanel {
         txtUsername.setText(rabbitConnection.getUsername());
         txtPassword.setText(rabbitConnection.getPassword());
         
-        txtMachineName.setText(env.getMachineName());
+        txtMachineName.setText(env.getDeviceName());
     }
 
     @Override
     public void save() {        
-        config.setMachineName(txtMachineName.getText());
+        config.setDeviceName(txtMachineName.getText());
         
         rabbitConnection.setHost(txtServerIp.getText());
         rabbitConnection.setPort(Integer.parseInt(spnPort.getValue().toString()));

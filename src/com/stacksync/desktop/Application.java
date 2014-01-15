@@ -17,21 +17,20 @@
  */
 package com.stacksync.desktop;
 
-import org.apache.log4j.Logger;
+import com.stacksync.desktop.chunker.TTTD.RollingChecksum;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.ConnectionController;
+import com.stacksync.desktop.config.ConnectionTester;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
+import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.settings.SettingsDialog;
 import com.stacksync.desktop.gui.tray.Tray;
+import com.stacksync.desktop.gui.tray.TrayEventListenerImpl;
 import com.stacksync.desktop.gui.wizard.WizardDialog;
 import com.stacksync.desktop.index.Indexer;
-import com.stacksync.desktop.chunker.TTTD.RollingChecksum;
-import com.stacksync.desktop.config.ConnectionController;
-import com.stacksync.desktop.config.ConnectionTester;
-import com.stacksync.desktop.exceptions.StorageConnectException;
-import com.stacksync.desktop.gui.tray.TrayEventListenerImpl;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.periodic.CacheCleaner;
 import com.stacksync.desktop.periodic.TreeSearch;
@@ -39,6 +38,7 @@ import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.watch.local.LocalWatcher;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import java.util.ResourceBundle;
+import org.apache.log4j.Logger;
 
 /**
  * Represents the application.

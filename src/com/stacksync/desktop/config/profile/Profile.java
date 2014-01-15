@@ -60,11 +60,13 @@ public class Profile implements Configurable {
     }
     private static final Logger logger = Logger.getLogger(Profile.class.getName());
     private static final LocalWatcher localWatcher = LocalWatcher.getInstance();
+    private Environment env = Environment.getInstance();
     //private static final Config config = Config.getInstance();
     private boolean active;
     private boolean enabled;
     private boolean initialized;
     private String name;
+    private String cloudId;
     private Repository repository;
     private Folders folders;
     private Uploader uploader;
@@ -105,7 +107,7 @@ public class Profile implements Configurable {
     public void setFactory() throws InitializationException {
         Config config = Config.getInstance();
         brokerProps = config.getBrokerProps();
-        brokerProps.setRPCReply(config.getDeviceName());
+        brokerProps.setRPCReply(config.getQueueName());
         
         try {
             if (broker == null) {
@@ -152,18 +154,18 @@ public class Profile implements Configurable {
             } catch (StorageException ex) {
                 throw new InitializationException(ex);
             }
+            
+            cloudId = transferManager.getUser();
 
             setFactory();
-            // Synchronously index files and add file system watches
-            Map<String, Workspace> workspaces = Workspace.InitializeWorkspaces(this, null);
+            server.updateDevice(cloudId);
+            Map<String, Workspace> workspaces = Workspace.InitializeWorkspaces(this);
 
             // Start threads 1/2
             uploader.start();
             ChangeManager changeManager = remoteWatcher.getChangeManager();
             changeManager.start();
-
-            //Map<String, Workspace> workspaces = db.getWorkspaces();                        
-            TransferManager trans = repository.getConnection().createTransferManager();
+                    
             for (Workspace w : workspaces.values()) {
                 try {
                     // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
@@ -173,15 +175,14 @@ public class Profile implements Configurable {
                 }
 
                 // Get changes
-                List<Update> changes = server.getChanges(trans.getUser(), w);
+                List<Update> changes = server.getChanges(cloudId, w);
                 changeManager.queueUpdates(changes);
             }
 
             while (changeManager.queuesUpdatesIsWorking()) {
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                }
+                } catch (InterruptedException ex) { }
             }
 
             // Start threads 2/2            
@@ -232,6 +233,14 @@ public class Profile implements Configurable {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public String getCloudId() {
+        return cloudId;
+    }
+    
+    public void setCloudId(String cloudId) {
+        this.cloudId = cloudId;
+    }
 
     public void setFolders(Folders folders) {
         this.folders = folders;
@@ -265,6 +274,7 @@ public class Profile implements Configurable {
         try {
             enabled = node.getBoolean("enabled");
             name = node.getProperty("name");
+            cloudId = node.getProperty("cloudid");
 
             // Repo
             repository = new Repository();
@@ -288,6 +298,7 @@ public class Profile implements Configurable {
     public void save(ConfigNode node) {
         node.setProperty("enabled", enabled);
         node.setProperty("name", name);
+        node.setProperty("cloudid", cloudId);
 
         // Repo
         repository.save(node.findOrCreateChildByXpath("repository", "repository"));
@@ -310,7 +321,6 @@ public class Profile implements Configurable {
     
     public void savePathToRegistry(){
         
-        Environment env = Environment.getInstance();
         if (env.getOperatingSystem() == Environment.OperatingSystem.Windows) {
             try {
                 WinRegistry.writeWindowsRegistry(this.getFolders().get("stacksync").getLocalFile().getPath());

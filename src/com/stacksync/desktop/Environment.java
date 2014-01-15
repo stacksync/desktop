@@ -28,6 +28,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.ConfigNode;
+import com.stacksync.desktop.config.Device;
 import org.w3c.dom.Document;
 
 /**
@@ -145,22 +146,17 @@ public class Environment {
         if (!appLibDir.exists() ) {
             throw new RuntimeException("Could not find application library directory at "+appLibDir);
         }
-
-        // Machine stuff        
-        java.util.Date date = new java.util.Date(); 
-        java.text.SimpleDateFormat sdf=new java.text.SimpleDateFormat("yyyyMMddHHmm");
                
-        String defaultMachineName;
+        String defaultDeviceName;
         try { 
-            defaultMachineName = InetAddress.getLocalHost().getHostName();
+            defaultDeviceName = InetAddress.getLocalHost().getHostName();
 
-            if(defaultMachineName.length() > 10){
-                defaultMachineName = InetAddress.getLocalHost().getHostName().substring(0, 9);
+            if(defaultDeviceName.length() > 10){
+                defaultDeviceName = InetAddress.getLocalHost().getHostName().substring(0, 9);
             }
-            defaultMachineName += sdf.format(date); 
         } catch (UnknownHostException ex) { 
             logger.error("aplicationstarter#ERROR: cannot find host", ex);
-            defaultMachineName = "(unknown)" + sdf.format(date); 
+            defaultDeviceName = "(unknown)"; 
         }
                 
         if(defaultUserConfigFile.exists()){
@@ -168,22 +164,23 @@ public class Environment {
             try {
                 DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
                 
-                Document doc = dBuilder.parse(defaultUserConfigFile);            
+                Document doc = dBuilder.parse(defaultUserConfigFile);
                 ConfigNode self = new ConfigNode(doc.getDocumentElement());
-                deviceName = self.getProperty("machinename", defaultMachineName);
+                Device device = new Device();
+                device.load(self.findChildByName("device"));
+                deviceName = device.getName();
                 
                 if(deviceName.isEmpty()){
-                    deviceName = defaultMachineName;
+                    deviceName = defaultDeviceName;
                 }                
             } catch (Exception ex) {
-                logger.error("aplicationstarter#ERROR: cant set machineName", ex);
-                deviceName = defaultMachineName;
+                logger.error("ERROR: cant set machineName", ex);
+                deviceName = defaultDeviceName;
             }
         } else{        
-            deviceName = defaultMachineName;
+            deviceName = defaultDeviceName.replace("-", "_");
         }
         
-        deviceName = deviceName.replace("-", "_");
         userName = System.getProperty("user.name");
 
         // GUI 
@@ -240,6 +237,14 @@ public class Environment {
         return deviceName.replace("-", "_");
     }
 
+    public String getDeviceNameWithTimestamp() {
+        // Machine stuff        
+        java.util.Date date = new java.util.Date(); 
+        java.text.SimpleDateFormat sdf=new java.text.SimpleDateFormat("yyyyMMddHHmm");
+        
+        return deviceName+sdf.format(date);
+    }
+    
     public String getUserName() {
         return userName;
     }

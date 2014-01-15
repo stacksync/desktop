@@ -1,44 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <stacksync>
-	<username/>
-	<devicename/>
-	<autostart>true</autostart>
-	<notifications>true</notifications>
-	    
-    <apiLogUrl>URL_LOG_SERVER_API</apiLogUrl>   
+    <username/>
+    <autostart>true</autostart>
+    <notifications>true</notifications>
+    
+    <apiLogUrl>URL_LOG_SERVER_API</apiLogUrl>
     <remoteLogs>false</remoteLogs>
 
     <rabbitMQ>
         <host />
         
-        <!--Default non-authenticated-->
         <port>5672</port>
         <enableSSL>false</enableSSL>
-                    
-        <!--Default authenticated-->
-        <!--
-        <port>5673</port>        
-        <enableSSL>true</enableSSL>
-        -->
-        
+
         <username>guest</username>
         <password>guest</password>
         <rpc_exchange>rpc_global_exchange</rpc_exchange>
     </rabbitMQ>
-            
-    <!--	
-    <database> 
-		<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/stacksync"/>
-		<property name="javax.persistence.jdbc.password" value="stacksync"/>
-		<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
-		<property name="javax.persistence.jdbc.user" value="stacksync"/>
-		<property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
-	</database>
+
+    <!--
+    <database>
+        <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/stacksync"/>
+        <property name="javax.persistence.jdbc.password" value="stacksync"/>
+        <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+        <property name="javax.persistence.jdbc.user" value="stacksync"/>
+        <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+    </database>
     -->
-      	
-    <!-- default folder -> /home/user/.stacksync/cache and size -> 1024 -->
-	<cache>
-		<size>1024</size>
-    </cache>	
-	
+
+    <cache>
+        <size>1024</size>
+    </cache>
+
 </stacksync>

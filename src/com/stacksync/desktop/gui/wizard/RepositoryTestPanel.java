@@ -10,6 +10,7 @@
  */
 package com.stacksync.desktop.gui.wizard;
 
+import com.stacksync.desktop.config.Device;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.config.Repository;
@@ -41,15 +42,21 @@ public class RepositoryTestPanel extends SettingsPanel {
             this.callbackListener = callbackListener;
         }
 
-        private void doProcess() throws CacheException, StorageConnectException, NoRepositoryFoundException, StorageException, InitializationException{
+        private void doProcess() throws CacheException, StorageConnectException,
+                NoRepositoryFoundException, StorageException, InitializationException{
+            
             TransferManager transfer = repository.getConnection().createTransferManager();
             
+            progress.setValue(2);
             transfer.initStorage(); 
 
-            progress.setValue(4);                            
-            setStatus(resourceBundle.getString("reptest_created_status_ok"));
-
+            /*progress.setValue(3);
+            setStatus("Registrando dispositivo.");
+            Device.initializeDevice(profile, callbackListener);*/
+            
+            progress.setValue(4);   
             setStatus("Initializing workspaces...");
+            profile.setCloudId(transfer.getUser());
             profile.setFactory();
             Workspace.InitializeWorkspaces(profile, callbackListener);
             progress.setValue(progress.getMaximum());            

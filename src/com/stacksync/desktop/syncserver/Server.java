@@ -8,6 +8,7 @@ package com.stacksync.desktop.syncserver;
  *
  * @author gguerrero
  */
+import com.stacksync.desktop.Environment;
 import com.stacksync.syncservice.models.ObjectMetadata;
 import com.stacksync.syncservice.omq.ISyncService;
 import java.io.IOException;
@@ -21,10 +22,11 @@ import com.stacksync.desktop.db.models.Workspace;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.util.StringUtil;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.exceptions.ConfigException;
+import com.stacksync.syncservice.models.DeviceInfo;
 import com.stacksync.syncservice.models.WorkspaceInfo;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.logging.Level;
 
 import omq.common.broker.Broker;
 import omq.common.util.Serializers.JavaImp;
@@ -89,25 +91,32 @@ public class Server {
         return workspaces;
     }
     
-    public void updateDevice(String cloudId, String deviceName, String os, String IP, String version) {
-        /*
+    public void updateDevice(String cloudId) {
+        
         String requestId = getRequestId();
         long deviceId;
         
-        DeviceInfo device = new DeviceInfo(null, config.getDeviceName(), cloudId, Environment.getInstance().getOperatingSystem());
-        deviceId = syncServer.registerDevice(cloudId, requestId, device);
+        DeviceInfo device = new DeviceInfo(config.getDeviceId(), config.getDeviceName(), cloudId, Environment.getInstance().getOperatingSystem().toString(),
+                null, null, null, null);
+        deviceId = syncServer.updateDevice(cloudId, requestId, device);
         logger.debug("Obtained deviceId: "+deviceId);
         
         if (deviceId != -1) {
-            // Set registerId in config
-            // Something else?
-            
-            logger.info("Device registered");
+            try {
+                // Set registerId in config
+                config.setDeviceId(deviceId);
+                config.save();
+                // Something else?
+
+                logger.info("Device registered");
+            } catch (ConfigException ex) {
+                
+            }
         } else {
             // What to do here??
             logger.error("Device not registered!!");
         }
-        */
+        
     }
 
     public void commit(String cloudId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
@@ -146,7 +155,7 @@ public class Server {
                 outputStream.close();
                 this.i++;
             } catch (Exception ex) {
-                java.util.logging.Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                //java.util.logging.Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
