@@ -164,7 +164,7 @@ public class ChangeManager {
             newUpdatesMap.get(update.getFileId()).add(update);
 
             ///// 3. Handle all possible cases
-            CloneFile localVersionById = db.getFileOrFolder(profile, update.getFileId());
+            CloneFile localVersionById = db.getFileOrFolder(update.getFileId());
             
             if (localVersionById != null) { // A) I know the file ID
                 if (isLocalConflict) { /// a) Conflict exists

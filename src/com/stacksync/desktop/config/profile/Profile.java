@@ -164,7 +164,7 @@ public class Profile implements Configurable {
             for (Workspace w : workspaces.values()) {
                 try {
                     // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
-                    broker.bind(w.getId(), new RemoteWorkspaceImpl(this, w, changeManager));
+                    broker.bind(w.getId(), new RemoteWorkspaceImpl(w, changeManager));
                 } catch (Exception ex) {
                     throw new InitializationException(ex);
                 }

@@ -204,7 +204,7 @@ public class DatabaseHelper {
      * @param version
      * @return
      */
-    public CloneFile getFileOrFolder(Profile profile, long fileId, long version) {        
+    public CloneFile getFileOrFolder(long fileId, long version) {        
         for (int i = 1; i <= MAXTRIES; i++) {
             try {
                 String queryStr = "select f from CloneFile f where "
@@ -232,7 +232,7 @@ public class DatabaseHelper {
     /**
      * Get file in current (newest) version.
      */
-    public CloneFile getFileOrFolder(Profile profile, long fileId) {
+    public CloneFile getFileOrFolder(long fileId) {
         String queryStr = "select f from CloneFile f "
                 + "where f.fileId = :fileId "
                 + "      and f.version = (select max(ff.version) from CloneFile ff where "
@@ -366,7 +366,7 @@ public class DatabaseHelper {
         newFile.setFolder(update.isFolder());
 
         if (update.getParentFileId() != 0) {
-            CloneFile parentCF = getFileOrFolder(profile, update.getParentFileId(), update.getParentFileVersion());
+            CloneFile parentCF = getFileOrFolder(update.getParentFileId(), update.getParentFileVersion());
             newFile.setParent(parentCF);
         }
         newFile.merge();
@@ -374,7 +374,7 @@ public class DatabaseHelper {
         // Chunks from previous version
         if (update.getVersion() > 1) {
 
-            CloneFile previousVersion = getFileOrFolder(profile, update.getFileId(), update.getVersion() - 1);
+            CloneFile previousVersion = getFileOrFolder(update.getFileId(), update.getVersion() - 1);
             if (previousVersion != null) {
                 /// GGI -> removed now always add the news chunks
                 //newFile.setChunks(previousVersion.getChunks());

@@ -31,12 +31,10 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     private final DatabaseHelper db = DatabaseHelper.getInstance();
     private final Config config = Config.getInstance();
     private Workspace workspace;
-    private Profile profile;
     private ChangeManager changeManager;
 
-    public RemoteWorkspaceImpl(Profile profile, Workspace workspace, ChangeManager changeManager) {
+    public RemoteWorkspaceImpl(Workspace workspace, ChangeManager changeManager) {
         this.workspace = workspace;
-        this.profile = profile;
         this.changeManager = changeManager;
     }
 
@@ -82,7 +80,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         ObjectMetadata objMetadata = obj.getMetadata();
             
         Update update = StringUtil.parseUpdate(objMetadata, workspace);
-        CloneFile existingVersion = db.getFileOrFolder(profile, fileId, version);
+        CloneFile existingVersion = db.getFileOrFolder(fileId, version);
         if (isMyCommit(deviceName)) {
             if (existingVersion != null) {
                 markAsUpdated(existingVersion, update);
@@ -103,7 +101,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         
         if (isMyCommit(deviceName)) {
             Update update = StringUtil.parseUpdate(objMetadata, workspace);
-            CloneFile existingVersion = db.getFileOrFolder(profile, update.getFileId(), update.getVersion());
+            CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
             if (existingVersion == null) {
                 update.setConflicted(true);
                 return update;

@@ -49,7 +49,7 @@ public class TestConflictedDeleteWithChange {
         deleteIndex.process();        
         
         Thread.sleep(1000); 
-        dbFile = db.getFileOrFolder(profile, fileId, 2);
+        dbFile = db.getFileOrFolder(fileId, 2);
         
         if(f1.exists()){
             f1.delete();

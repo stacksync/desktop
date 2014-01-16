@@ -202,7 +202,7 @@ public class Uploader {
 
             // Update DB sync status                
             //now do this the newIndexRequest
-            file = db.getFileOrFolder(profile, file.getFileId(), file.getVersion());
+            file = db.getFileOrFolder(file.getFileId(), file.getVersion());
             file.setSyncStatus(CloneFile.SyncStatus.SYNCING);
             file.merge();
 
@@ -256,7 +256,7 @@ public class Uploader {
             logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
 
             //config.getDatabase().getEntityManager().refresh(file);
-            file = db.getFileOrFolder(profile, file.getFileId(), file.getVersion());
+            file = db.getFileOrFolder(file.getFileId(), file.getVersion());
             
             // Update DB sync status
             file.setSyncStatus(SyncStatus.UPTODATE);
