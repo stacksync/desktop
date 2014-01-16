@@ -26,11 +26,9 @@ import java.io.Serializable;
  */
 public class FolderProxy implements Serializable {
 
-    private String remoteId;
     private File localFile;
 
-    public FolderProxy(String remoteId, File localFile) {
-        this.remoteId = remoteId;
+    public FolderProxy(File localFile) {
         this.localFile = localFile;
     }
 
@@ -40,14 +38,6 @@ public class FolderProxy implements Serializable {
 
     public void setLocalFile(File localFile) {
         this.localFile = localFile;
-    }
-
-    public String getRemoteId() {
-        return remoteId;
-    }
-
-    public void setRemoteId(String remoteId) {
-        this.remoteId = remoteId;
     }
 
     @Override

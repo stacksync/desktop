@@ -88,7 +88,6 @@ public class Folder implements Configurable {
                 active = node.getBoolean("active");
             }
 
-            remoteId = node.getProperty("remote");
             localFile = node.getFile("local");
             
             if(!localFile.exists()){
@@ -105,7 +104,6 @@ public class Folder implements Configurable {
     @Override
     public void save(ConfigNode node) {
         node.setProperty("active", active);
-        node.setProperty("remote", remoteId);
         node.setProperty("local", localFile.getAbsolutePath());
     }
     

@@ -44,7 +44,7 @@ public class UpdateMenuRequest implements Request {
         Folder folder = profile.getFolder();
         
         if (folder != null) {
-            //folderProxies.add(new FolderProxy(folder.getRemoteId(), folder.getLocalFile()));
+            folderProxies.add(new FolderProxy(folder.getLocalFile()));
         }
 
         profileProxy.setFolders(folderProxies);
