@@ -32,7 +32,6 @@ import com.stacksync.desktop.db.models.Workspace;
 public class Update {
 
     private String mimeType;
-    private String clientName; // This is just a helper field, NOT saved in the update file!
     private long fileId;
     private long version;
     private long parentFileId;
@@ -74,14 +73,6 @@ public class Update {
     
     public void setConflicted(boolean conflicted){
         this.conflicted = conflicted;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
     }
 
     public long getChecksum() {
@@ -281,7 +272,6 @@ public class Update {
         
         Update update = new Update();
         
-        update.setClientName(cf.getClientName());
         update.setFileId(cf.getFileId());
         update.setVersion(cf.getVersion());
         

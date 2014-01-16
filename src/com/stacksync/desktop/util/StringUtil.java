@@ -228,7 +228,6 @@ public class StringUtil {
         update.setStatus(CloneFile.Status.valueOf(objMetadata.getStatus()));
         update.setChecksum(objMetadata.getChecksum());
         update.setMimeType(objMetadata.getMimetype());
-        update.setClientName(objMetadata.getClientName());
         update.setFileSize(objMetadata.getFileSize());
         update.setFolder(objMetadata.isFolder());
 
@@ -262,7 +261,6 @@ public class StringUtil {
         object.setStatus(cloneFile.getStatus().toString());
         object.setChecksum(cloneFile.getChecksum());
         object.setMimetype(cloneFile.getMimetype());
-        object.setClientName(cloneFile.getClientName());
         
         object.setFileSize(cloneFile.getFileSize());
         object.setFolder(cloneFile.isFolder());
@@ -277,7 +275,6 @@ public class StringUtil {
         } else{
             object.setParentFileId(null);            
             object.setParentFileVersion(null);
-            object.setParentRootId(null);
         }
         
         List<String> chunks = new ArrayList<String>();        

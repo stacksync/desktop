@@ -97,10 +97,10 @@ public class Server {
         long deviceId;
         
         Environment env = Environment.getInstance();
-        String osInfo = env.getOperatingSystem().toString() + env.getArchitecture();
+        String osInfo = env.getOperatingSystem().toString() + "-" + env.getArchitecture();
         
         DeviceInfo device = new DeviceInfo(config.getDeviceId(), config.getDeviceName(),
-                cloudId, osInfo, null);
+                osInfo, null, null);
         deviceId = syncServer.updateDevice(cloudId, requestId, device);
         logger.debug("Obtained deviceId: "+deviceId);
         
@@ -124,7 +124,7 @@ public class Server {
 
     public void commit(String cloudId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
         String requestId = getRequestId();
-        String device = config.getDeviceName();
+        Long device = config.getDeviceId();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
         syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);
@@ -133,7 +133,7 @@ public class Server {
     }
     
     public void commit(String cloudId, String requestId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
-        String device = config.getDeviceName();
+        Long device = config.getDeviceId();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
         syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);

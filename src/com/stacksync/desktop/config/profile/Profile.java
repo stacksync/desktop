@@ -153,7 +153,7 @@ public class Profile implements Configurable {
             cloudId = transferManager.getUser();
 
             setFactory();
-            //server.updateDevice(cloudId);
+            server.updateDevice(cloudId);
             Map<String, Workspace> workspaces = Workspace.InitializeWorkspaces(this);
 
             // Start threads 1/2

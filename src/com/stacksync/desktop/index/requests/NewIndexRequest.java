@@ -107,7 +107,6 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         newVersion.setFileSize(file.length());
         
         newVersion.setLastModified(new Date(file.lastModified()));
-        newVersion.setClientName(config.getDeviceName());
         newVersion.setUpdated(new Date());
         newVersion.setSyncStatus(SyncStatus.LOCAL);
         newVersion.merge();

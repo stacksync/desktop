@@ -131,10 +131,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Column(name = "sync_status")
     private SyncStatus syncStatus;
     
-    // TODO this should be a CloneClient instance
-    @Column(name = "client_name")
-    private String clientName;
-    
     @Column(name = "mimetype")
     private String mimetype;    
     
@@ -159,8 +155,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.name = "(unknown)";
         this.filePath = "(unknown)";
         this.mimetype = "unknown";
-
-        this.clientName = config.getDeviceName();
         
         this.serverUploadedAck = false;
         this.serverUploadedTime = null;
@@ -324,14 +318,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setChecksum(long checksum) {
         this.checksum = checksum;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
     }
 
     public CloneFile getPreviousVersion() {
@@ -598,7 +584,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             clone.folder = isFolder();
             clone.filePath = getPath();
             clone.name = getName();
-            clone.clientName = getClientName();
             clone.fileSize = getFileSize();
             clone.chunks = getChunks(); // POINTER; No Copy!
             clone.status = getStatus(); //TODO: is this ok?

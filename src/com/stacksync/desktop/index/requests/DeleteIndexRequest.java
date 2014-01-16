@@ -94,7 +94,6 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
                 deletedVersion.setUpdated(new Date());
                 deletedVersion.setStatus(Status.DELETED);
                 deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-                deletedVersion.setClientName(config.getDeviceName());
 
                 deletedVersion.merge();
                 
@@ -110,7 +109,6 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
             deletedVersion.setStatus(Status.DELETED);
             //deletedVersion.setSyncStatus(CloneFile.SyncStatus.LOCAL);
             deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-            deletedVersion.setClientName(config.getDeviceName());
 
             deletedVersion.merge();
         }

@@ -321,9 +321,8 @@ public class DatabaseHelper {
         return query.getResultList();
     }
 
-    public List<CloneFile> getFiles(Folder root, String clientName, CloneFile.SyncStatus status) {
+    public List<CloneFile> getFiles(Folder root, CloneFile.SyncStatus status) {
         String queryStr = "select f from CloneFile f where "
-                + "      f.clientName = :clientName and "
                 + "      f.syncStatus = :StatusSync ";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
@@ -331,7 +330,6 @@ public class DatabaseHelper {
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("StatusSync", status);
-        query.setParameter("clientName", clientName);
 
         return query.getResultList();
     }
@@ -350,7 +348,6 @@ public class DatabaseHelper {
         newFile.setChecksum(update.getChecksum());
         newFile.setProfile(profile);
 
-        ///GGIPART ///
         String path = update.getPath();
 
         path = FileUtil.getFilePathCleaned(path);
@@ -360,11 +357,9 @@ public class DatabaseHelper {
         newFile.setMimetype(update.getMimeType());
         newFile.setServerUploadedAck(true);
         newFile.setServerUploadedTime(update.getServerUploadedTime());        
-        /// GGIENDPART ///
         
         newFile.setName(update.getName());
         newFile.setLastModified(update.getLastModified());
-        newFile.setClientName(update.getClientName());
         newFile.setFileSize(update.getFileSize());
         newFile.setStatus(update.getStatus());
         newFile.setSyncStatus(syncStatus);

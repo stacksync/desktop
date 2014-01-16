@@ -50,7 +50,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         List<Update> ul = new ArrayList<Update>();
 
         for (CommitInfo obj : listObjects) {
-            boolean committed = obj.isCommitted();
+            boolean committed = obj.isCommitSucceed();
             Update update;
             try {
                 
@@ -77,8 +77,8 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
 
     private Update doActionCommitted(String deviceName, CommitInfo obj) {
         
-        long version = obj.getVersion();
-        long fileId = obj.getFileId();
+        long version = obj.getCommittedVersion();
+        long fileId = obj.getMetadata().getFileId();
         ObjectMetadata objMetadata = obj.getMetadata();
             
         Update update = StringUtil.parseUpdate(objMetadata, workspace);
