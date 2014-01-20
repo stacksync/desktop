@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.Random;
 import javax.persistence.*;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
+import com.stacksync.syncservice.models.ObjectMetadata;
 
 /**
  * Represents a version of a file.
@@ -46,7 +46,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     private static final Logger logger = Logger.getLogger(CloneFile.class.getName());
     private static final Config config = Config.getInstance();
-    private static final Environment env = Environment.getInstance();
     
     private static final long serialVersionUID = 12314234L;
 
@@ -677,5 +676,42 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
                 }                
             }
         }
+    }
+    
+    public ObjectMetadata mapToObjectMetadata() throws NullPointerException {
+        ObjectMetadata object = new ObjectMetadata();
+
+        object.setFileId(getFileId());
+        object.setVersion(getVersion());
+        
+        object.setServerDateModified(getUpdated());
+        object.setClientDateModified(getLastModified());
+
+        
+        object.setStatus(getStatus().toString());
+        object.setChecksum(getChecksum());
+        object.setMimetype(getMimetype());
+        
+        object.setFileSize(getFileSize());
+        object.setFolder(isFolder());
+        
+        object.setFileName(getName());
+
+        // Parent
+        if (getParent() != null) {
+            object.setParentFileId(getParent().getFileId());            
+            object.setParentFileVersion(getParent().getVersion());           
+        } else{
+            object.setParentFileId(null);            
+            object.setParentFileVersion(null);
+        }
+        
+        List<String> chunks = new ArrayList<String>();        
+        for(CloneChunk chunk: getChunks()){
+            chunks.add(chunk.getChecksum());
+        }
+        
+        object.setChunks(chunks);        
+        return object;
     }
 }

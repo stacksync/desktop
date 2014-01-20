@@ -10,11 +10,9 @@ package com.stacksync.desktop.syncserver;
  */
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.Workspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
-import com.stacksync.desktop.util.StringUtil;
 import com.stacksync.syncservice.models.DeviceInfo;
 import com.stacksync.syncservice.models.ObjectMetadata;
 import com.stacksync.syncservice.models.WorkspaceInfo;
@@ -66,8 +64,7 @@ public class Server {
 
         List<ObjectMetadata> objects = syncServer.getChanges(cloudId, requestId, rWorkspace);
         for (ObjectMetadata obj : objects) {
-            //String path = DatabaseHelper.getInstance().;
-            Update update = StringUtil.parseUpdate(obj, workspace);
+            Update update = Update.parse(obj, workspace);
             updates.add(update);
         }
 

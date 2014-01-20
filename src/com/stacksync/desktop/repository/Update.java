@@ -17,6 +17,7 @@
  */
 package com.stacksync.desktop.repository;
 
+import com.stacksync.desktop.db.DatabaseHelper;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,7 @@ import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.syncservice.models.ObjectMetadata;
 
 /**
  *
@@ -46,7 +48,6 @@ public class Update {
     private String name;
     private String path;
     
-    private String updateFilePath;
     private Workspace workspace;
     
     private boolean serverUploaded;        
@@ -58,8 +59,6 @@ public class Update {
     private List<String> chunks;   
 
     public Update() {
-        // Fressen
-        updateFilePath = "";
         
         serverUploaded = false;
         serverUploadedAck = false;
@@ -217,11 +216,7 @@ public class Update {
         }
         strPath = strPath + getName();
         
-        return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + ", file=" + strPath + ", updatePath = " + updateFilePath + "]";
-    }
-    
-    public void setUpdateFilePath(String path){
-        this.updateFilePath = path;
+        return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + ", file=" + strPath + "]";
     }
     
     public void setServerUploaded(boolean serverUploaded){
@@ -246,10 +241,6 @@ public class Update {
     
     public Date getServerUploadedTime(){
         return this.serverUploadedTime;
-    }
-    
-    public String getUpdateFilePath(){
-        return updateFilePath;
     }
 
     public void setWorkpace(Workspace workspace) {
@@ -301,6 +292,50 @@ public class Update {
         update.setServerUploadedAck(cf.getServerUploadedAck());
         
         return update;
+    }
+    
+    public static Update parse(ObjectMetadata objMetadata, Workspace workspace) 
+        throws NullPointerException {
+        
+        Update update = new Update();
+
+        update.setServerUploaded(true);
+        update.setServerUploadedAck(true);
+        update.setServerUploadedTime(new Date());
+
+        update.setFileId(objMetadata.getFileId());
+        update.setVersion(objMetadata.getVersion());
+
+        update.setUpdated(objMetadata.getServerDateModified());
+        update.setLastModified(objMetadata.getClientDateModified());
+
+        update.setStatus(CloneFile.Status.valueOf(objMetadata.getStatus()));
+        update.setChecksum(objMetadata.getChecksum());
+        update.setMimeType(objMetadata.getMimetype());
+        update.setFileSize(objMetadata.getFileSize());
+        update.setFolder(objMetadata.isFolder());
+
+        update.setName(objMetadata.getFileName());
+        
+        String path = objMetadata.getPath();
+        if (path != null && path.length() > 1 && path.endsWith("/")){
+            path = path.substring(0, path.length()-1);
+        }
+        update.setPath(path);
+
+        // Parent
+        if (objMetadata.getParentFileId() != null && !objMetadata.getParentFileId().toString().isEmpty()) {
+            update.setParentFileId(objMetadata.getParentFileId());
+            if (objMetadata.getParentFileVersion() != null) {
+                update.setParentFileVersion(objMetadata.getParentFileVersion());
+            }
+        }
+
+        update.setChunks(objMetadata.getChunks());
+        update.setWorkpace(workspace);
+
+        return update;
+        
     }
     
 }

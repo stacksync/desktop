@@ -31,7 +31,6 @@ import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.syncserver.Server;
-import com.stacksync.desktop.util.StringUtil;
 
 /**
  * Does periodical checks on the online storage, and applies them locally.
@@ -155,7 +154,7 @@ public class RemoteWatcher {
         Date lastUpdateFileDate = new Date();
         
         // Check if new update file needs to be created/uploaded
-        Long fileVersionCount = db.getFileVersionCount(profile);
+        Long fileVersionCount = db.getFileVersionCount();
         if (fileVersionCount == 0) {
             logger.debug("No local changes. Skipping step upload.");
             return;
@@ -164,7 +163,7 @@ public class RemoteWatcher {
         try {
             logger.info("Commit new changes.");
             
-            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate(profile);
+            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
             // Upload
             Workspace workspace = null;
@@ -177,7 +176,7 @@ public class RemoteWatcher {
                     c.merge(); 
                     workspace = c.getWorkspace();
                     
-                    ObjectMetadata obj = StringUtil.parseJson2Update(c);
+                    ObjectMetadata obj = c.mapToObjectMetadata();
                     commitObjects.add(obj);
                 }
             }

@@ -79,7 +79,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         long fileId = obj.getMetadata().getFileId();
         ObjectMetadata objMetadata = obj.getMetadata();
             
-        Update update = StringUtil.parseUpdate(objMetadata, workspace);
+        Update update = Update.parse(objMetadata, workspace);
         CloneFile existingVersion = db.getFileOrFolder(fileId, version);
         if (isMyCommit(deviceName)) {
             if (existingVersion != null) {
@@ -100,7 +100,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         ObjectMetadata objMetadata = obj.getMetadata();
         
         if (isMyCommit(deviceName)) {
-            Update update = StringUtil.parseUpdate(objMetadata, workspace);
+            Update update = Update.parse(objMetadata, workspace);
             CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
             if (existingVersion == null) {
                 update.setConflicted(true);

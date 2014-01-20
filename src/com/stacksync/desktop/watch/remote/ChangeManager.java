@@ -142,7 +142,7 @@ public class ChangeManager {
             tray.setStatusText(this.getClass().getSimpleName(), "Changing " + (queue.size() + 1) +  " files...");
             logger.info("Processing update " + update);                    
 
-            CloneFile existingVersion = db.getFileOrFolder(profile, update.getFileId(), update.getVersion());            
+            CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());            
             boolean isLocalConflict = isLocalConflict(existingVersion, update) | update.getConflicted();
             ///Existing version equals update -> skip: file is up-to-date!
             if (existingVersion != null && !isLocalConflict && (existingVersion.getSyncStatus()== SyncStatus.UPTODATE)) {
@@ -433,7 +433,7 @@ public class ChangeManager {
     }
 
     private CloneFile addToDB(Update newFileUpdate) {        
-        CloneFile existingVersion = db.getFileOrFolder(profile, newFileUpdate.getFileId(), newFileUpdate.getVersion());
+        CloneFile existingVersion = db.getFileOrFolder(newFileUpdate.getFileId(), newFileUpdate.getVersion());
         if(existingVersion != null){
             logger.info("found clonefile in database " + existingVersion);
             existingVersion.setSyncStatus(SyncStatus.REMOTE);
@@ -825,7 +825,7 @@ public class ChangeManager {
         for (List<Update> updates : appliedUpdates.values()) {
             Update lastUpdate = updates.get(updates.size() - 1);
 
-            CloneFile file = db.getFileOrFolder(profile, lastUpdate.getFileId(), lastUpdate.getVersion());
+            CloneFile file = db.getFileOrFolder(lastUpdate.getFileId(), lastUpdate.getVersion());
 
             if (file != null) {
                 desktop.touch(file.getFile());

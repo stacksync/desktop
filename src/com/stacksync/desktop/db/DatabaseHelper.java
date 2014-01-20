@@ -126,13 +126,10 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
-        //System.err.println(queryStr);
-        //logger.severe("getFileOrFolder: rel parent = " + FileUtil.getRelativeParentDirectory(root.getLocalFile(), file) + " / file name = " + file.getName() + " / folder = " + file.isDirectory());
         query.setMaxResults(1);
         query.setParameter("path", path);
         query.setParameter("name", file.getName());
         query.setParameter("notStatus1", Status.DELETED);
-        //query.setParameter("notStatus2", Status.MERGED);
         //query.setParameter("notSyncStatus", CloneFile.SyncStatus.SYNCING); // this is required for chmgr.applyNewOrChange()
 
         if (folder != null) {
@@ -157,19 +154,15 @@ public class DatabaseHelper {
         // First, check by full file path
         String queryStr = "select f from CloneFile f where "
                 + "      f.status <> :notStatus1 and "
-                //+ "      f.status <> :notStatus2 and "
                 + "      f.parent = :parent and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
                 + "                                         f.fileId = ff.fileId) ";
 
-//	Systconfig.getDatabase().getEntityManager().err.println("rel parent = "+FileUtil.getRelativeParentDirectory(root.getFile(), file) + " / file name = "+file.getName() + " / folder = "+file.isDirectory());
-        
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
         query.setParameter("notStatus1", Status.DELETED);
-        //query.setParameter("notStatus2", Status.MERGED);
         query.setParameter("parent", parentFile);
 
         return query.getResultList();
@@ -179,19 +172,15 @@ public class DatabaseHelper {
         // First, check by full file path
         String queryStr = "select f from CloneFile f where "
                 + "      f.status <> :notStatus1 and "
-                //+ "      f.status <> :notStatus2 and "
                 + "      f.path like :pathPrefix and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
                 + "                                         f.fileId = ff.fileId) ";
-
-//	Systconfig.getDatabase().getEntityManager().err.println("rel parent = "+FileUtil.getRelativeParentDirectory(root.getFile(), file) + " / file name = "+file.getName() + " / folder = "+file.isDirectory());
         
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("notStatus1", Status.DELETED);
-        //query.setParameter("notStatus2", Status.MERGED);
         query.setParameter("pathPrefix", FileUtil.getRelativePath(parentFile.getRoot().getLocalFile(), parentFile.getFile()));
 
         return query.getResultList();
@@ -406,7 +395,7 @@ public class DatabaseHelper {
     /**
      * Retrieves the last chunk/file update.
      */
-    public Long getFileVersionCount(Profile profile) {
+    public Long getFileVersionCount() {
         Calendar cal = Calendar.getInstance();  
         cal.set(getFieldTimeout(), getValueTimeout(cal)); 
         Date time = cal.getTime();
@@ -521,7 +510,7 @@ public class DatabaseHelper {
         return cal.get(Calendar.MINUTE) - 1;
     }
     
-    public Map<String, List<CloneFile>> getHistoryUptoDate(Profile profile) {
+    public Map<String, List<CloneFile>> getHistoryUptoDate() {
         Calendar cal = Calendar.getInstance();  
         cal.set(getFieldTimeout(), getValueTimeout(cal)); 
         Date time = cal.getTime();        
