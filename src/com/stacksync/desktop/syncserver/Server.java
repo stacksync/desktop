@@ -14,7 +14,7 @@ import com.stacksync.desktop.db.models.Workspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.syncservice.models.DeviceInfo;
-import com.stacksync.syncservice.models.ObjectMetadata;
+import com.stacksync.syncservice.models.ItemMetadata;
 import com.stacksync.syncservice.models.WorkspaceInfo;
 import com.stacksync.syncservice.omq.ISyncService;
 import java.io.File;
@@ -62,9 +62,9 @@ public class Server {
         String requestId = getRequestId();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
-        List<ObjectMetadata> objects = syncServer.getChanges(cloudId, requestId, rWorkspace);
-        for (ObjectMetadata obj : objects) {
-            Update update = Update.parse(obj, workspace);
+        List<ItemMetadata> items = syncServer.getChanges(cloudId, requestId, rWorkspace);
+        for (ItemMetadata item : items) {
+            Update update = Update.parse(item, workspace);
             updates.add(update);
         }
 
@@ -120,26 +120,26 @@ public class Server {
         
     }
 
-    public void commit(String cloudId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
+    public void commit(String cloudId, Workspace workspace, List<ItemMetadata> commitItems) throws IOException {
         String requestId = getRequestId();
         Long device = config.getDeviceId();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
-        syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);
+        syncServer.commit(cloudId, requestId, rWorkspace, device, commitItems);
 //        saveLog(commitObjects);
-        logger.info(" [x] Sent '" + commitObjects + "'");
+        logger.info(" [x] Sent '" + commitItems + "'");
     }
     
-    public void commit(String cloudId, String requestId, Workspace workspace, List<ObjectMetadata> commitObjects) throws IOException {
+    public void commit(String cloudId, String requestId, Workspace workspace, List<ItemMetadata> commitItems) throws IOException {
         Long device = config.getDeviceId();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
-        syncServer.commit(cloudId, requestId, rWorkspace, device, commitObjects);
-        saveLog(commitObjects);
-        logger.info(" [x] Sent '" + commitObjects + "'");
+        syncServer.commit(cloudId, requestId, rWorkspace, device, commitItems);
+        saveLog(commitItems);
+        logger.info(" [x] Sent '" + commitItems + "'");
     }
 
-    private void saveLog(List<ObjectMetadata> commitObjects) {
+    private void saveLog(List<ItemMetadata> commitItems) {
         String debugPath = "test";
         if (debugPath.length() > 0) {
             try {
@@ -148,7 +148,7 @@ public class Server {
                 outputFolder.mkdirs();
 
                 JavaImp serializer = new JavaImp();
-                byte[] bytes = serializer.serialize(commitObjects);
+                byte[] bytes = serializer.serialize(commitItems);
 
                 File outputFileContent = new File(outputFolder.getAbsoluteFile() + File.separator + "client-files-" + i);
                 FileOutputStream outputStream = new FileOutputStream(outputFileContent);

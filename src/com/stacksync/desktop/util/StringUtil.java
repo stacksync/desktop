@@ -17,22 +17,11 @@
  */
 package com.stacksync.desktop.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.stacksync.desktop.db.models.CloneChunk;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.Workspace;
-import com.stacksync.desktop.repository.Update;
-import com.stacksync.syncservice.models.ObjectMetadata;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>

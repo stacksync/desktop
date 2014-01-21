@@ -17,10 +17,6 @@
  */
 package com.stacksync.desktop.watch.remote;
 
-import com.stacksync.syncservice.models.ObjectMetadata;
-import java.io.IOException;
-import java.util.*;
-import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
@@ -31,6 +27,10 @@ import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.syncserver.Server;
+import com.stacksync.syncservice.models.ItemMetadata;
+import java.io.IOException;
+import java.util.*;
+import org.apache.log4j.Logger;
 
 /**
  * Does periodical checks on the online storage, and applies them locally.
@@ -167,7 +167,7 @@ public class RemoteWatcher {
 
             // Upload
             Workspace workspace = null;
-            List<ObjectMetadata> commitObjects = new ArrayList<ObjectMetadata>();
+            List<ItemMetadata> commitItems = new ArrayList<ItemMetadata>();
             
             for(List<CloneFile> w: updatedFiles.values()){
                 for(CloneFile c: w){
@@ -176,15 +176,15 @@ public class RemoteWatcher {
                     c.merge(); 
                     workspace = c.getWorkspace();
                     
-                    ObjectMetadata obj = c.mapToObjectMetadata();
-                    commitObjects.add(obj);
+                    ItemMetadata obj = c.mapToItemMetadata();
+                    commitItems.add(obj);
                 }
             }
             
             //String message = FileUtils.readFileToString(localUpdateFile);
             String cloudId = transfer.getUser();
             
-            server.commit(cloudId, workspace, commitObjects);
+            server.commit(cloudId, workspace, commitItems);
         } catch (IOException ex) {
             logger.error("Failed to write file.", ex);
             RemoteLogs.getInstance().sendLog(ex);

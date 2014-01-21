@@ -372,7 +372,7 @@ public class ChangeManager {
             }
             cfclone.setName(newFileName);
             cfclone.setVersion(version);
-            cfclone.setFileId(fileId);
+            cfclone.setId(fileId);
 
             newConflictingLocalFile = cfclone;
 
@@ -486,7 +486,7 @@ public class ChangeManager {
             if(lastMatchingVersion == null){
                 logger.warn("Error lastmatching version is nul");
             } else {
-                logger.warn("Error file chunks not matching " + lastMatchingVersion.getFileId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + "; Trying to download the file ...");
+                logger.warn("Error file chunks not matching " + lastMatchingVersion.getId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + "; Trying to download the file ...");
             }
 
             applyChangeOrNew(lastMatchingVersion, newFileUpdate);
@@ -494,7 +494,7 @@ public class ChangeManager {
         }        
         
         if (!lastMatchingVersion.getFile().exists()) {
-            logger.warn("Error while renaming file " + lastMatchingVersion.getFileId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + " does NOT exist; Trying to download the file ...");
+            logger.warn("Error while renaming file " + lastMatchingVersion.getId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + " does NOT exist; Trying to download the file ...");
 
             applyChangeOrNew(lastMatchingVersion, newFileUpdate);
             return;
@@ -563,7 +563,7 @@ public class ChangeManager {
         
         // No local version exists (weird!)
         if (!fileToDelete.exists()) {
-            logger.warn("Error while deleting file " + deletedVersion.getFileId() + "v" + deletedVersion.getVersion() + ": " + deletedVersion.getRelativePath() + " does NOT exist.");                        
+            logger.warn("Error while deleting file " + deletedVersion.getId() + "v" + deletedVersion.getVersion() + ": " + deletedVersion.getRelativePath() + " does NOT exist.");                        
         } else {
             
             // No difference between folder and file !
@@ -771,7 +771,7 @@ public class ChangeManager {
         }
 
         if (existingVersion.getStatus() == Status.NEW && update.getStatus() == Status.NEW
-                && existingVersion.getFileSize() == update.getFileSize()
+                && existingVersion.getSize() == update.getFileSize()
                 && existingVersion.getChecksum() == update.getChecksum()
                 && existingVersion.getPath().equals(update.getPath())
                 && existingVersion.getName().equals(update.getName())) {
@@ -780,7 +780,7 @@ public class ChangeManager {
         }
 
         if (existingVersion.getStatus() == Status.CHANGED && update.getStatus() == Status.CHANGED
-                && existingVersion.getFileSize() == update.getFileSize()
+                && existingVersion.getSize() == update.getFileSize()
                 && existingVersion.getChecksum() == update.getChecksum()
                 && existingVersion.getPath().equals(update.getPath())
                 && existingVersion.getName().equals(update.getName())) {

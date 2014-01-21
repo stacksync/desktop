@@ -112,14 +112,14 @@ public class DatabaseHelper {
         // First, check by full file path
         String queryStr =
                 "select f from CloneFile f where "
-                + "      f.filePath = :path and "
+                + "      f.path = :path and "
                 + "      f.name = :name "
                 + ((folder != null) ? "and f.folder = :folder " : " ")
                 + "      and f.status <> :notStatus1 "
                 //+ "      and f.status <> :notStatus2 "
                 //+ "      and f.syncStatus <> :notSyncStatus "
                 + "      and f.version = (select max(ff.version) from CloneFile ff where "
-                + "         f.fileId = ff.fileId) "
+                + "         f.id = ff.id) "
                 + "      order by f.updated desc";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
@@ -156,7 +156,7 @@ public class DatabaseHelper {
                 + "      f.status <> :notStatus1 and "
                 + "      f.parent = :parent and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                         f.fileId = ff.fileId) ";
+                + "                                         f.id = ff.id) ";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
@@ -174,7 +174,7 @@ public class DatabaseHelper {
                 + "      f.status <> :notStatus1 and "
                 + "      f.path like :pathPrefix and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                         f.fileId = ff.fileId) ";
+                + "                                         f.id = ff.id) ";
         
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
@@ -189,28 +189,28 @@ public class DatabaseHelper {
     /**
      * Get file in exact version.
      *
-     * @param fileId
+     * @param id
      * @param version
      * @return
      */
-    public CloneFile getFileOrFolder(long fileId, long version) {        
+    public CloneFile getFileOrFolder(long id, long version) {        
         for (int i = 1; i <= MAXTRIES; i++) {
             try {
                 String queryStr = "select f from CloneFile f where "
-                        + "      f.fileId = :fileId and "
+                        + "      f.id = :id and "
                         + "      f.version = :version";
 
                 Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
                 query.setHint("javax.persistence.cache.storeMode", "REFRESH");
                 query.setHint("eclipselink.cache-usage", "DoNotCheckCache");                
                 
-                query.setParameter("fileId", fileId);
+                query.setParameter("id", id);
                 query.setParameter("version", version);
 
                 return (CloneFile) query.getSingleResult();
 
             } catch (NoResultException ex) {
-                logger.debug(" No result for fId->" + fileId + " fV-> " + version + " -> " + ex.getMessage());
+                logger.debug(" No result for fId->" + id + " fV-> " + version + " -> " + ex.getMessage());
                 continue;
             } 
         }
@@ -221,17 +221,17 @@ public class DatabaseHelper {
     /**
      * Get file in current (newest) version.
      */
-    public CloneFile getFileOrFolder(long fileId) {
+    public CloneFile getFileOrFolder(long id) {
         String queryStr = "select f from CloneFile f "
-                + "where f.fileId = :fileId "
+                + "where f.id = :id "
                 + "      and f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                     f.fileId = ff.fileId)";
+                + "                                     f.id = ff.id)";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("fileId", fileId);
+        query.setParameter("id", id);
 
         try {
             return (CloneFile) query.getSingleResult();
@@ -254,7 +254,7 @@ public class DatabaseHelper {
                 + "      f.status <> :notStatus1 and "
                 //+ "      f.status <> :notStatus2 and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                     f.fileId = ff.fileId) "
+                + "                                     f.id = ff.id) "
                 + "      order by f.updated desc";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
@@ -298,7 +298,7 @@ public class DatabaseHelper {
                 + "      f.status <> :notStatus1 and"
                 //+ "      f.status <> :notStatus2 and"
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                     f.fileId = ff.fileId) ";
+                + "                                     f.id = ff.id) ";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
@@ -331,7 +331,7 @@ public class DatabaseHelper {
     private CloneFile createFile(Profile profile, Update update, SyncStatus syncStatus) {
         CloneFile newFile = new CloneFile();
                
-        newFile.setFileId(update.getFileId());
+        newFile.setId(update.getFileId());
         newFile.setVersion(update.getVersion());
         newFile.setUpdated(update.getUpdated());
         newFile.setChecksum(update.getChecksum());
@@ -348,8 +348,8 @@ public class DatabaseHelper {
         newFile.setServerUploadedTime(update.getServerUploadedTime());        
         
         newFile.setName(update.getName());
-        newFile.setLastModified(update.getLastModified());
-        newFile.setFileSize(update.getFileSize());
+        newFile.setLastModified(update.getModifiedAt());
+        newFile.setSize(update.getFileSize());
         newFile.setStatus(update.getStatus());
         newFile.setSyncStatus(syncStatus);
         newFile.setFolder(update.isFolder());
@@ -401,7 +401,7 @@ public class DatabaseHelper {
         Date time = cal.getTime();
  
         // Newest file update
-        String queryStr = "select count(c.fileId) from CloneFile c where "
+        String queryStr = "select count(c.id) from CloneFile c where "
                 + "     c.syncStatus = :StatusSync and "                                       
 
                 + "     c.serverUploadedAck = false and "                
@@ -520,7 +520,7 @@ public class DatabaseHelper {
                 + "     c.serverUploadedAck = false and "                
                 + "     (c.serverUploadedTime < :timeNow or "
                 + "     c.serverUploadedTime is null) order by "
-                + "                                     c.filePath asc, c.version asc";    
+                + "                                     c.path asc, c.version asc";    
         
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");

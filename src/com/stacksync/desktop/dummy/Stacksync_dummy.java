@@ -4,7 +4,7 @@
  */
 package com.stacksync.desktop.dummy;
 
-import com.stacksync.syncservice.models.ObjectMetadata;
+import com.stacksync.syncservice.models.ItemMetadata;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -120,12 +120,12 @@ public class Stacksync_dummy {
         JavaImp serializer = new JavaImp();
         byte[] bytes = readFile(file);
 
-        List<ObjectMetadata> objects = (List<ObjectMetadata>) serializer.deserializeObject(bytes);
-        System.out.println("Sending(" + j + "/" + this.commitsSecond + ")!! -> " + file.getAbsolutePath() + " -- " + objects);
+        List<ItemMetadata> items = (List<ItemMetadata>) serializer.deserializeObject(bytes);
+        System.out.println("Sending(" + j + "/" + this.commitsSecond + ")!! -> " + file.getAbsolutePath() + " -- " + items);
 
         String requestId = server.getRequestId();
         saveTimeSendRequestLog("Client-time-commit", requestId, "commit-start");
-        server.commit(cloudId, requestId, workspace, objects);                
+        server.commit(cloudId, requestId, workspace, items);                
     }
 
     private static void showHelp(Options options) {

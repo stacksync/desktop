@@ -368,8 +368,8 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
                     i++;
                     options.add("Restore '" + pv.getName() + "' ("
                             + DateUtil.toNiceFormat(pv.getUpdated()) + ", "
-                            + FileUtil.formatSize(pv.getFileSize())
-                            + ")~Restores the file from the remote storage.~restore:" + pv.getFileId() + ":" + pv.getVersion());
+                            + FileUtil.formatSize(pv.getSize())
+                            + ")~Restores the file from the remote storage.~restore:" + pv.getId() + ":" + pv.getVersion());
                 }
             }
 

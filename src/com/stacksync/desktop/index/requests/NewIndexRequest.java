@@ -104,7 +104,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         }
         
         newVersion.setFolder(file.isDirectory());
-        newVersion.setFileSize(file.length());
+        newVersion.setSize(file.length());
         
         newVersion.setLastModified(new Date(file.lastModified()));
         newVersion.setUpdated(new Date());

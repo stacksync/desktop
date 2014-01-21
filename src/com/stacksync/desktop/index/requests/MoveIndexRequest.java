@@ -117,7 +117,7 @@ public class MoveIndexRequest extends IndexRequest {
         dbToFile.setPath(path);   
         
         dbToFile.setName(toFile.getName());
-        dbToFile.setFileSize((toFile.isDirectory()) ? 0 : toFile.length());
+        dbToFile.setSize((toFile.isDirectory()) ? 0 : toFile.length());
         dbToFile.setVersion(dbToFile.getVersion()+1);
         dbToFile.setUpdated(new Date());
         dbToFile.setStatus(Status.RENAMED);

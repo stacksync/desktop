@@ -36,7 +36,7 @@ public class TestConflictedDeleteWithChange {
         //create v1
         File f1 = staticFunctionsTest.createFile(root.getLocalFile().getPath() + staticFunctionsTest.fileName1, "content1");
         CloneFile dbFile = staticFunctionsTest.indexNewRequest(root, f1, null);        
-        Long fileId = dbFile.getFileId();
+        Long fileId = dbFile.getId();
                 
         dbFile.setSyncStatus(SyncStatus.UPTODATE);
         dbFile.setServerUploadedAck(true);

@@ -93,9 +93,9 @@ public class Uploader {
             for (CloneFile file2 : queue) {
                 if (file.getName().compareTo(file2.getName()) == 0
                         && file.getChecksum() == file2.getChecksum()
-                        && file.getFileId() == file2.getFileId()
+                        && file.getId() == file2.getId()
                         && file.getVersion() == file2.getVersion()
-                        && file.getFileSize() == file2.getFileSize()) {
+                        && file.getSize() == file2.getSize()) {
 
                     found = true;
                     break;
@@ -129,7 +129,7 @@ public class Uploader {
     private void searchAddInQueue(CloneFile file) throws InterruptedException{
         boolean found = false;
         for(CloneFile cf: queue){
-            if(cf.getFileId() == file.getFileId() && cf.getVersion() == file.getVersion()){                        
+            if(cf.getId() == file.getId() && cf.getVersion() == file.getVersion()){                        
                 found = true;
                 break;
             }
@@ -145,7 +145,7 @@ public class Uploader {
             if(workingFile == null){                
                 searchAddInQueue(file);
             } else{            
-                if(workingFile.getFileId() != file.getFileId() || workingFile.getVersion() != file.getVersion()){
+                if(workingFile.getId() != file.getId() || workingFile.getVersion() != file.getVersion()){
                     searchAddInQueue(file);
                 }                
             }
@@ -202,7 +202,7 @@ public class Uploader {
 
             // Update DB sync status                
             //now do this the newIndexRequest
-            file = db.getFileOrFolder(file.getFileId(), file.getVersion());
+            file = db.getFileOrFolder(file.getId(), file.getVersion());
             file.setSyncStatus(CloneFile.SyncStatus.SYNCING);
             file.merge();
 
@@ -256,7 +256,7 @@ public class Uploader {
             logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
 
             //config.getDatabase().getEntityManager().refresh(file);
-            file = db.getFileOrFolder(file.getFileId(), file.getVersion());
+            file = db.getFileOrFolder(file.getId(), file.getVersion());
             
             // Update DB sync status
             file.setSyncStatus(SyncStatus.UPTODATE);

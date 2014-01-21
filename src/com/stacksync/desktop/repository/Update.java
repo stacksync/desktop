@@ -17,7 +17,6 @@
  */
 package com.stacksync.desktop.repository;
 
-import com.stacksync.desktop.db.DatabaseHelper;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +24,7 @@ import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.Workspace;
-import com.stacksync.syncservice.models.ObjectMetadata;
+import com.stacksync.syncservice.models.ItemMetadata;
 
 /**
  *
@@ -41,7 +40,7 @@ public class Update {
 
     private Date updated;
     private Status status;
-    private Date lastModified;
+    private Date modifiedAt;
     private long checksum;
     private long fileSize;
     private boolean folder;
@@ -98,12 +97,12 @@ public class Update {
         this.fileId = fileId;
     }
 
-    public Date getLastModified() {
-        return lastModified;
+    public Date getModifiedAt() {
+        return modifiedAt;
     }
 
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 
     public String getName() {
@@ -263,21 +262,21 @@ public class Update {
         
         Update update = new Update();
         
-        update.setFileId(cf.getFileId());
+        update.setFileId(cf.getId());
         update.setVersion(cf.getVersion());
         
         if(cf.getParent() != null){
-            update.setParentFileId(cf.getParent().getFileId());
+            update.setParentFileId(cf.getParent().getId());
             update.setParentFileVersion(cf.getParent().getVersion());
         }
         
         update.setUpdated(cf.getUpdated());
         update.setStatus(cf.getStatus());
         
-        update.setLastModified(cf.getLastModified());
+        update.setModifiedAt(cf.getLastModified());
         update.setChecksum(cf.getChecksum());
         
-        update.setFileSize(cf.getFileSize());
+        update.setFileSize(cf.getSize());
         update.setFolder(cf.isFolder());
         update.setName(cf.getName());
         update.setPath(cf.getPath());
@@ -294,7 +293,7 @@ public class Update {
         return update;
     }
     
-    public static Update parse(ObjectMetadata objMetadata, Workspace workspace) 
+    public static Update parse(ItemMetadata itemMetadata, Workspace workspace) 
         throws NullPointerException {
         
         Update update = new Update();
@@ -303,35 +302,35 @@ public class Update {
         update.setServerUploadedAck(true);
         update.setServerUploadedTime(new Date());
 
-        update.setFileId(objMetadata.getFileId());
-        update.setVersion(objMetadata.getVersion());
+        update.setFileId(itemMetadata.getId());
+        update.setVersion(itemMetadata.getVersion());
 
-        update.setUpdated(objMetadata.getServerDateModified());
-        update.setLastModified(objMetadata.getClientDateModified());
+        //update.setUpdated(itemMetadata.getServerDateModified());
+        update.setModifiedAt(itemMetadata.getModifiedAt());
 
-        update.setStatus(CloneFile.Status.valueOf(objMetadata.getStatus()));
-        update.setChecksum(objMetadata.getChecksum());
-        update.setMimeType(objMetadata.getMimetype());
-        update.setFileSize(objMetadata.getFileSize());
-        update.setFolder(objMetadata.isFolder());
+        update.setStatus(CloneFile.Status.valueOf(itemMetadata.getStatus()));
+        update.setChecksum(itemMetadata.getChecksum());
+        update.setMimeType(itemMetadata.getMimetype());
+        update.setFileSize(itemMetadata.getSize());
+        update.setFolder(itemMetadata.isFolder());
 
-        update.setName(objMetadata.getFileName());
+        update.setName(itemMetadata.getFilename());
         
-        String path = objMetadata.getPath();
+        String path = itemMetadata.getPath();
         if (path != null && path.length() > 1 && path.endsWith("/")){
             path = path.substring(0, path.length()-1);
         }
         update.setPath(path);
 
         // Parent
-        if (objMetadata.getParentFileId() != null && !objMetadata.getParentFileId().toString().isEmpty()) {
-            update.setParentFileId(objMetadata.getParentFileId());
-            if (objMetadata.getParentFileVersion() != null) {
-                update.setParentFileVersion(objMetadata.getParentFileVersion());
+        if (itemMetadata.getParentId() != null && !itemMetadata.getParentId().toString().isEmpty()) {
+            update.setParentFileId(itemMetadata.getParentId());
+            if (itemMetadata.getParentVersion() != null) {
+                update.setParentFileVersion(itemMetadata.getParentVersion());
             }
         }
 
-        update.setChunks(objMetadata.getChunks());
+        update.setChunks(itemMetadata.getChunks());
         update.setWorkpace(workspace);
 
         return update;
