@@ -485,6 +485,22 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         query.executeUpdate();
         config.getDatabase().getEntityManager().getTransaction().commit();
     }
+    
+    public void deleteFromDB() {
+
+        String queryStr = "DELETE from CloneFile c where "
+                + "     c.id = :id and "
+                + "     c.version = :version";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
+        
+        query.setParameter("id", getId());
+        query.setParameter("version", getVersion());
+
+        config.getDatabase().getEntityManager().getTransaction().begin();
+        query.executeUpdate();
+        config.getDatabase().getEntityManager().getTransaction().commit();
+    }
 
     public Status getStatus() {
         return status;
@@ -504,6 +520,10 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     
     public void setServerUploadedTime(Date serverUploadedTime){
         this.serverUploadedTime = serverUploadedTime;
+    }
+    
+    public Date getServerUploadedTime() {
+        return this.serverUploadedTime;
     }
     
     public void setStatus(Status status) {

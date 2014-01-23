@@ -581,4 +581,19 @@ public class DatabaseHelper {
         return query.getResultList();        
     }
 
+    public void updateParentId(CloneFile newParent, CloneFile currentParent) {
+        String queryStr = "UPDATE CloneFile c set c.parent=:new_parent"
+                + "     WHERE c.parent = :current_parent";
+
+        
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
+        
+        query.setParameter("new_parent", newParent);
+        query.setParameter("current_parent", currentParent);
+
+        config.getDatabase().getEntityManager().getTransaction().begin();
+        query.executeUpdate();
+        config.getDatabase().getEntityManager().getTransaction().commit();
+    }
+
 }

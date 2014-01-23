@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.stacksync.desktop.syncserver;
 
 import com.stacksync.desktop.config.Config;
@@ -40,100 +36,72 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         String fullReqId = cr.getRequestID();
         String deviceName = fullReqId.split("-")[0];
         List<Update> ul = new ArrayList<Update>();
+        TempIdManager tempIdManager = new TempIdManager();
 
         for (CommitInfo obj : listObjects) {
-            boolean committed = obj.isCommitSucceed();
-            Update update;
+            
             try {
-                
-                if (committed) {
-                    update = doActionCommitted(deviceName, obj);
+                Update update = null;
+                boolean committed = obj.isCommitSucceed();
+
+                if (isMyCommit(deviceName) && committed) {
+                    doActionCommitted(obj, tempIdManager);
+                } else if (isMyCommit(deviceName) && !committed) {
+                    update = doActionNotCommited(obj);
                 } else {
-                    update = doActionNotCommited(deviceName, obj);
+                    update = Update.parse(obj.getMetadata(), workspace);
                 }
-                
+
                 if (update != null) {
                     ul.add(update);
                 }
-
+            
             } catch (NullPointerException ex) {
                 logger.info("Error parsing: " + obj, ex);
             }
         }
 
-        if (ul != null && ul.size() > 0) {
+        if (!ul.isEmpty()) {
             logger.info("Queuing updates(" + ul.size() + ")");
             changeManager.queueUpdates(ul);
         }
     }
-
-    /*private Update doActionCommitted(String deviceName, CommitInfo commit) {
-        
-        long version = commit.getCommittedVersion();
-        long fileId = commit.getMetadata().getId();
-        ItemMetadata itemMetadata = commit.getMetadata();
-            
-        Update update = Update.parse(itemMetadata, workspace);
-        
-        if (isMyCommit(deviceName)) {
-            
-            CloneFile existingVersion;
-            // If first version, set unique ID
-            if (version == 1) {
-                Long tempId = itemMetadata.getTempId();
-                existingVersion = changeTempId(itemMetadata);
-            } else {
-                existingVersion = db.getFileOrFolder(fileId, version);
-            }
-            
-            if (existingVersion != null) {
-                markAsUpdated(existingVersion, update);
-            } else {
-                logger.info("Exception: existing version is null");
-            }
-        } else {
-            // It is not my commit.
-            return update;
-        }
-        
-        return null;
-    }*/
     
-    private Update doActionCommitted(String deviceName, CommitInfo commit) {
+    private void doActionCommitted(CommitInfo commit, TempIdManager tempIdManager) {
         
         long version = commit.getCommittedVersion();
         long fileId = commit.getMetadata().getId();
         ItemMetadata itemMetadata = commit.getMetadata();
             
         Update update = Update.parse(itemMetadata, workspace);
-        CloneFile existingVersion = db.getFileOrFolder(fileId, version);
-        if (isMyCommit(deviceName)) {
-            if (existingVersion != null) {
-                markAsUpdated(existingVersion, update);
-            } else {
-                logger.info("Exception: existing version is null");
-            }
+            
+        CloneFile existingVersion;
+        Long tempId = itemMetadata.getTempId();
+        if (tempId != null) {
+            existingVersion = changeTempId(itemMetadata, tempIdManager);
         } else {
-            // It is not my commit.
-            return update;
+            existingVersion = db.getFileOrFolder(fileId, version);
+        }
+
+        if (existingVersion != null) {
+            markAsUpdated(existingVersion, update);
+        } else {
+            logger.info("Exception: existing version is null");
         }
         
-        return null;
     }
 
-    private Update doActionNotCommited(String deviceName, CommitInfo commit) {
+    private Update doActionNotCommited(CommitInfo commit) {
        
         ItemMetadata itemMetadata = commit.getMetadata();
         
-        if (isMyCommit(deviceName)) {
-            Update update = Update.parse(itemMetadata, workspace);
-            CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
-            if (existingVersion == null) {
-                update.setConflicted(true);
-                return update;
-            } else {
-                markAsUpdated(existingVersion, update);
-            }
+        Update update = Update.parse(itemMetadata, workspace);
+        CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
+        if (existingVersion == null) {
+            update.setConflicted(true);
+            return update;
+        } else {
+            markAsUpdated(existingVersion, update);
         }
         return null;
     }
@@ -142,8 +110,23 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         return config.getDeviceName().compareTo(deviceName) == 0;
     }
     
-    private CloneFile changeTempId(ItemMetadata itemMetadata) {
-        return null;
+    private CloneFile changeTempId(ItemMetadata itemMetadata, TempIdManager tempIdManager) {
+        
+        CloneFile localFile = db.getFileOrFolder(itemMetadata.getTempId(), itemMetadata.getVersion());
+        
+        return tempIdManager.changeTempId(localFile, itemMetadata.getId());
+        
+        /*CloneFile newFile = (CloneFile)localFile.clone();
+        newFile.setServerUploadedAck(localFile.getServerUploadedAck());
+        newFile.setServerUploadedTime(localFile.getServerUploadedTime());
+        
+        //newFile.setChunks(localFile.getChunks());
+        newFile.setId(itemMetadata.getId());
+        newFile.merge();
+        //localFile.merge();
+        //localFile.deleteFromDB();
+        filesWithTempId.add(0, localFile);
+        return newFile;*/
     }
     
     private void markAsUpdated(CloneFile cf, Update update) {
@@ -151,4 +134,6 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         cf.setUpdated(update.getUpdated());
         cf.merge();
     }
+
+
 }
