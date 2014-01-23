@@ -714,6 +714,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         object.setStatus(getStatus().toString());
         object.setChecksum(getChecksum());
         object.setMimetype(getMimetype());
+        object.setPath(getPath());
         
         object.setSize(getSize());
         object.setIsFolder(isFolder());
