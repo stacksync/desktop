@@ -23,7 +23,7 @@ import java.util.List;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.syncservice.models.ItemMetadata;
 
 /**
@@ -47,7 +47,7 @@ public class Update {
     private String name;
     private String path;
     
-    private Workspace workspace;
+    private CloneWorkspace workspace;
     
     private boolean serverUploaded;        
     private boolean serverUploadedAck;    
@@ -242,11 +242,11 @@ public class Update {
         return this.serverUploadedTime;
     }
 
-    public void setWorkpace(Workspace workspace) {
+    public void setWorkpace(CloneWorkspace workspace) {
         this.workspace = workspace;
     }
     
-    public Workspace getWorkspace(){
+    public CloneWorkspace getWorkspace(){
         return this.workspace;                
     }
     
@@ -293,7 +293,7 @@ public class Update {
         return update;
     }
     
-    public static Update parse(ItemMetadata itemMetadata, Workspace workspace) 
+    public static Update parse(ItemMetadata itemMetadata, CloneWorkspace workspace) 
         throws NullPointerException {
         
         Update update = new Update();

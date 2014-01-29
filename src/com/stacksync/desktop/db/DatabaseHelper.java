@@ -36,7 +36,7 @@ import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.desktop.util.StringUtil;
@@ -542,17 +542,17 @@ public class DatabaseHelper {
         return workspaces;
     }
     
-    public Map<String, Workspace> getWorkspaces() {        
-        String queryStr = "select w from Workspace w";        
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, Workspace.class);
+    public Map<String, CloneWorkspace> getWorkspaces() {        
+        String queryStr = "select w from CloneWorkspace w";        
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         
-        List<Workspace> workspaces = query.getResultList();
-        Map<String, Workspace> localWorkspaces = new HashMap<String, Workspace>();
+        List<CloneWorkspace> workspaces = query.getResultList();
+        Map<String, CloneWorkspace> localWorkspaces = new HashMap<String, CloneWorkspace>();
         
-        for (Workspace w: workspaces){
+        for (CloneWorkspace w: workspaces){
             localWorkspaces.put(w.getId(), w);
         }
         

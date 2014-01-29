@@ -22,7 +22,7 @@ import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.logging.RemoteLogs;
@@ -166,7 +166,7 @@ public class RemoteWatcher {
             Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
             // Upload
-            Workspace workspace = null;
+            CloneWorkspace workspace = null;
             List<ItemMetadata> commitItems = new ArrayList<ItemMetadata>();
             
             for(List<CloneFile> w: updatedFiles.values()){

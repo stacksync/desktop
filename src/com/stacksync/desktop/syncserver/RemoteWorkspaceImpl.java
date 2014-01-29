@@ -3,7 +3,7 @@ package com.stacksync.desktop.syncserver;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import com.stacksync.syncservice.models.CommitResult;
@@ -20,10 +20,10 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     private final Logger logger = Logger.getLogger(RemoteWorkspaceImpl.class.getName());
     private final DatabaseHelper db = DatabaseHelper.getInstance();
     private final Config config = Config.getInstance();
-    private Workspace workspace;
+    private CloneWorkspace workspace;
     private ChangeManager changeManager;
 
-    public RemoteWorkspaceImpl(Workspace workspace, ChangeManager changeManager) {
+    public RemoteWorkspaceImpl(CloneWorkspace workspace, ChangeManager changeManager) {
         this.workspace = workspace;
         this.changeManager = changeManager;
     }

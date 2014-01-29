@@ -120,7 +120,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     private List<CloneChunk> chunks;
    
     @OneToOne
-    private Workspace workspace;
+    private CloneWorkspace workspace;
         
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -653,11 +653,11 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         return new Random().nextLong();
     }
     
-    public Workspace getWorkspace() {
+    public CloneWorkspace getWorkspace() {
         return this.workspace;
     }
     
-    public void setWorkspace(Workspace workspace){
+    public void setWorkspace(CloneWorkspace workspace){
         this.workspace = workspace;
     }
     
@@ -676,14 +676,14 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
                 String queryStr = "select w from Workspace w where "
                       + "     w.pathWorkspace = :path";
 
-                Query query = config.getDatabase().getEntityManager().createQuery(queryStr, Workspace.class);
+                Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
                 query.setHint("javax.persistence.cache.storeMode", "REFRESH");
                 query.setHint("eclipselink.cache-usage", "DoNotCheckCache");                
                 
                 query.setMaxResults(1);
                 query.setParameter("path", path);
 
-                Workspace fileWorkspace = (Workspace) query.getSingleResult();
+                CloneWorkspace fileWorkspace = (CloneWorkspace) query.getSingleResult();
                 this.workspace = fileWorkspace;
             } catch (NoResultException e){
                 if(path.compareTo("/") != 0){

@@ -5,7 +5,7 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 
 
-public class WorkspacePk implements Serializable {
+public class CloneWorkspacePk implements Serializable {
     private static final long serialVersionUID = 3232299912L;
 
     @Id
@@ -27,11 +27,11 @@ public class WorkspacePk implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof WorkspacePk)) {
+        if (!(object instanceof CloneWorkspacePk)) {
             return false;
         }
         
-        WorkspacePk other = (WorkspacePk) object;
+        CloneWorkspacePk other = (CloneWorkspacePk) object;
         return this.id.compareTo(other.id) == 0;        
     }
 

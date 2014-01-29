@@ -29,6 +29,7 @@ import com.stacksync.desktop.gui.linux.UpdateStatusTextRequest;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
 import com.stacksync.desktop.gui.tray.TrayEventListener;
+import com.stacksync.desktop.gui.tray.TrayEventListenerImpl;
 import java.io.File;
 
 
@@ -132,13 +133,15 @@ public class LinuxTray extends Tray {
         Thread.sleep(1000);
         tray.setStatusIcon(tray.getClass().getSimpleName(), StatusIcon.UPTODATE);
         
-        tray.addTrayEventListener(new TrayEventListener() {
+        /*tray.addTrayEventListener(new TrayEventListener() {
 
             @Override
             public void trayEventOccurred(TrayEvent event) {
             System.out.println(event);
             }
-        });
+        });*/
+        
+        tray.addTrayEventListener(new TrayEventListenerImpl(null));
         
         //System.out.println(FileUtil.showBrowseDirectoryDialog());
 

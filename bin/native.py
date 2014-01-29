@@ -315,7 +315,12 @@ def do_update_menu(request):
 	#menu_item_donate.connect("activate", menu_item_clicked, "DONATE")
 	
 	#menu.append(menu_item_donate)
- 
+
+	menu_item_share = gtk.MenuItem("Share folder")
+	menu_item_share.connect("activate", menu_item_clicked, "SHARE")
+	
+	menu.append(menu_item_share)
+
 	if sync_activated:
 		'''Pause sync'''
 		menu_item_pause = gtk.MenuItem("Pause Syncing")

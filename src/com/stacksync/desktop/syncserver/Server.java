@@ -10,7 +10,7 @@ package com.stacksync.desktop.syncserver;
  */
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.syncservice.models.DeviceInfo;
@@ -56,7 +56,7 @@ public class Server {
         return config.getDeviceName() + "-" + (new Date()).getTime();
     }
 
-    public List<Update> getChanges(String cloudId, Workspace workspace) {
+    public List<Update> getChanges(String cloudId, CloneWorkspace workspace) {
         List<Update> updates = new ArrayList<Update>();
 
         String requestId = getRequestId();
@@ -71,9 +71,9 @@ public class Server {
         return updates;
     }
 
-    public List<Workspace> getWorkspaces(String cloudId) throws IOException {
+    public List<CloneWorkspace> getWorkspaces(String cloudId) throws IOException {
         String requestId = getRequestId();
-        List<Workspace> workspaces = new ArrayList<Workspace>();
+        List<CloneWorkspace> workspaces = new ArrayList<CloneWorkspace>();
 
         List<WorkspaceInfo> remoteWorkspaces = syncServer.getWorkspaces(cloudId, requestId);
         if (remoteWorkspaces.isEmpty()) {
@@ -81,7 +81,7 @@ public class Server {
         }
 
         for (WorkspaceInfo rWorkspace : remoteWorkspaces) {
-            Workspace workspace = new Workspace(rWorkspace);
+            CloneWorkspace workspace = new CloneWorkspace(rWorkspace);
             workspaces.add(workspace);
             rWorkspaces.put(workspace.getId(), rWorkspace);
         }
@@ -120,17 +120,31 @@ public class Server {
         
     }
 
-    public void commit(String cloudId, Workspace workspace, List<ItemMetadata> commitItems) throws IOException {
+    public void commit(String cloudId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
         String requestId = getRequestId();
         Long device = config.getDeviceId();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 
         syncServer.commit(cloudId, requestId, rWorkspace, device, commitItems);
-//        saveLog(commitObjects);
         logger.info(" [x] Sent '" + commitItems + "'");
     }
     
-    public void commit(String cloudId, String requestId, Workspace workspace, List<ItemMetadata> commitItems) throws IOException {
+    public void createShareProposal(String cloudId, List<String> emails, String folderName) {
+        
+        String requestId = getRequestId();
+        logger.info("Sending share proposal.");
+        Long newWorkspaceId = syncServer.createShareProposal(cloudId, requestId, emails, cloudId);
+        if (newWorkspaceId == -1) {
+            logger.info("Proposal not accepted.");
+            // Show message error.
+        } else {
+            logger.info("Proposal accepted. New workspace: "+newWorkspaceId);
+            
+        }
+        
+    }
+    
+    public void commit(String cloudId, String requestId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
         Long device = config.getDeviceId();
         WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
 

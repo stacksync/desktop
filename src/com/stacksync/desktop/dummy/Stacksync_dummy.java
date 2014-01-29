@@ -23,7 +23,7 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.BrokerProperties;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.syncserver.RemoteWorkspaceDummy;
@@ -74,7 +74,7 @@ public class Stacksync_dummy {
     
     public void start() throws Exception {
         
-        Workspace workspace = this.loadWorkspaces();
+        CloneWorkspace workspace = this.loadWorkspaces();
         List<File> files = Arrays.asList(this.path.listFiles());
         
         for(int i=0; i<this.path.listFiles().length; i+=this.commitsSecond){
@@ -100,15 +100,15 @@ public class Stacksync_dummy {
         }
     }
     
-    public Workspace loadWorkspaces() throws Exception {
+    public CloneWorkspace loadWorkspaces() throws Exception {
 
-        List<Workspace> remoteWorkspaces = server.getWorkspaces(cloudId);
+        List<CloneWorkspace> remoteWorkspaces = server.getWorkspaces(cloudId);
 
         if(remoteWorkspaces.isEmpty()){
             throw new IOException();
         }
         
-        for (Workspace w : remoteWorkspaces) {
+        for (CloneWorkspace w : remoteWorkspaces) {
             // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
             broker.bind(w.getId(), new RemoteWorkspaceDummy(w));
         }
@@ -116,7 +116,7 @@ public class Stacksync_dummy {
         return remoteWorkspaces.get(0);
     }
     
-    private void doCommit(int j, String cloudId, Workspace workspace, File file) throws Exception{
+    private void doCommit(int j, String cloudId, CloneWorkspace workspace, File file) throws Exception{
         JavaImp serializer = new JavaImp();
         byte[] bytes = readFile(file);
 

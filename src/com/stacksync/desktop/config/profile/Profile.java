@@ -28,7 +28,7 @@ import com.stacksync.desktop.config.Configurable;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
@@ -154,14 +154,14 @@ public class Profile implements Configurable {
 
             setFactory();
             server.updateDevice(cloudId);
-            Map<String, Workspace> workspaces = Workspace.InitializeWorkspaces(this);
+            Map<String, CloneWorkspace> workspaces = CloneWorkspace.InitializeWorkspaces(this);
 
             // Start threads 1/2
             uploader.start();
             ChangeManager changeManager = remoteWatcher.getChangeManager();
             changeManager.start();
                     
-            for (Workspace w : workspaces.values()) {
+            for (CloneWorkspace w : workspaces.values()) {
                 try {
                     // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
                     broker.bind(w.getId(), new RemoteWorkspaceImpl(w, changeManager));

@@ -31,7 +31,6 @@ import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.gui.tray.Tray;
-import com.stacksync.desktop.gui.wizard.WizardDialog;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 

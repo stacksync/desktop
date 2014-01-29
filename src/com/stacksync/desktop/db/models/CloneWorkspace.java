@@ -18,14 +18,9 @@ import com.stacksync.desktop.gui.wizard.RepositoryTestPanel.TestListener;
 import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.syncservice.models.WorkspaceInfo;
 
-/**
- * .
- * 
- * @author Guillermo Guerrero
- */
 @Entity
-@IdClass(value = WorkspacePk.class)
-public class Workspace extends PersistentObject implements Serializable {
+@IdClass(value = CloneWorkspacePk.class)
+public class CloneWorkspace extends PersistentObject implements Serializable {
         
     private static final long serialVersionUID = 3232299912L;
 
@@ -44,18 +39,10 @@ public class Workspace extends PersistentObject implements Serializable {
             
     @OneToMany
     private List<CloneFile> files;
-
-    public Workspace() { }        
     
-    /*
-    public Workspace(String id, String pathWorkspace, Date localLastUpdate, Date remoteLastUpdate) {        
-        this.id = id;
-        this.pathWorkspace = pathWorkspace;
-        this.localLastUpdate = localLastUpdate;
-        this.remoteLastUpdate = remoteLastUpdate;
-    }*/
+    public CloneWorkspace(){}
     
-    public Workspace(WorkspaceInfo r){
+    public CloneWorkspace(WorkspaceInfo r){
         this.id = r.getIdentifier();
         this.pathWorkspace = r.getPath();
         this.localLastUpdate = r.getLatestRevision();
@@ -93,27 +80,27 @@ public class Workspace extends PersistentObject implements Serializable {
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof Workspace)) {
+        if (!(object instanceof CloneWorkspace)) {
             return false;
         }
         
-        Workspace other = (Workspace) object;
+        CloneWorkspace other = (CloneWorkspace) object;
         return this.id.compareTo(other.id) == 0;        
     }
 
     @Override
     public String toString() {
-        return "Workspace[id=" + id + ", pathWorkspace=" + pathWorkspace + ", localLastUpdate=" + localLastUpdate + ", remoteLastUpdate=" + remoteLastUpdate + "]";
+        return "CloneWorkspace[id=" + id + ", pathWorkspace=" + pathWorkspace + ", localLastUpdate=" + localLastUpdate + ", remoteLastUpdate=" + remoteLastUpdate + "]";
     }
         
     public List<CloneFile> getFiles(){
         return this.files;
     }
     
-    public static Map<String, Workspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener)
+    public static Map<String, CloneWorkspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener)
             throws InitializationException{
                   
-        List<Workspace> remoteWorkspaces = new ArrayList<Workspace>();
+        List<CloneWorkspace> remoteWorkspaces = new ArrayList<CloneWorkspace>();
                                             
         try {
             Server server = profile.getServer();
@@ -133,9 +120,9 @@ public class Workspace extends PersistentObject implements Serializable {
         }
 
         DatabaseHelper db = DatabaseHelper.getInstance();
-        Map<String, Workspace> localWorkspaces = db.getWorkspaces();
+        Map<String, CloneWorkspace> localWorkspaces = db.getWorkspaces();
 
-        for(Workspace w: remoteWorkspaces){                
+        for(CloneWorkspace w: remoteWorkspaces){                
             if(localWorkspaces.containsKey(w.getId())){
                 localWorkspaces.get(w.getId()).setRemoteRevision(w.getRemoteRevision());
             }else{
@@ -153,7 +140,7 @@ public class Workspace extends PersistentObject implements Serializable {
         return localWorkspaces;
     }
     
-    public static Map<String, Workspace> InitializeWorkspaces(Profile profile) 
+    public static Map<String, CloneWorkspace> InitializeWorkspaces(Profile profile) 
         throws InitializationException{
         
         return InitializeWorkspaces(profile, null);

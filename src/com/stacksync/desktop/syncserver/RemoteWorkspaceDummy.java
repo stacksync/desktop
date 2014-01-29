@@ -7,7 +7,7 @@ package com.stacksync.desktop.syncserver;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.dummy.Stacksync_dummy;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import com.stacksync.syncservice.models.CommitResult;
@@ -23,9 +23,9 @@ public class RemoteWorkspaceDummy extends RemoteObject implements RemoteWorkspac
     private final Logger logger = Logger.getLogger(RemoteWorkspaceDummy.class.getName());
     private final DatabaseHelper db = DatabaseHelper.getInstance();
     private final Config config = Config.getInstance();
-    private Workspace workspace;
+    private CloneWorkspace workspace;
 
-    public RemoteWorkspaceDummy(Workspace workspace) {
+    public RemoteWorkspaceDummy(CloneWorkspace workspace) {
         this.workspace = workspace;
     }
 
