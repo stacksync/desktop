@@ -27,7 +27,7 @@ import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.syncserver.Server;
-import com.stacksync.syncservice.models.ItemMetadata;
+import com.stacksync.commons.models.ItemMetadata;
 import java.io.IOException;
 import java.util.*;
 import org.apache.log4j.Logger;
@@ -163,7 +163,7 @@ public class RemoteWatcher {
         try {
             logger.info("Commit new changes.");
             
-            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
+            Map<Long, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
             // Upload
             CloneWorkspace workspace = null;

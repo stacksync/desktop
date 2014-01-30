@@ -4,21 +4,7 @@
  */
 package com.stacksync.desktop.dummy;
 
-import com.stacksync.syncservice.models.ItemMetadata;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import omq.common.util.Serializers.JavaImp;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.io.IOUtils;
+import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.BrokerProperties;
 import com.stacksync.desktop.config.profile.Profile;
@@ -28,8 +14,22 @@ import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.syncserver.RemoteWorkspaceDummy;
 import com.stacksync.desktop.syncserver.Server;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 import omq.common.broker.Broker;
+import omq.common.util.Serializers.JavaImp;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -110,7 +110,7 @@ public class Stacksync_dummy {
         
         for (CloneWorkspace w : remoteWorkspaces) {
             // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
-            broker.bind(w.getId(), new RemoteWorkspaceDummy(w));
+            broker.bind(w.getId().toString(), new RemoteWorkspaceDummy(w));
         }
         
         return remoteWorkspaces.get(0);

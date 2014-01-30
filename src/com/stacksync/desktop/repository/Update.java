@@ -24,7 +24,7 @@ import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
-import com.stacksync.syncservice.models.ItemMetadata;
+import com.stacksync.commons.models.ItemMetadata;
 
 /**
  *

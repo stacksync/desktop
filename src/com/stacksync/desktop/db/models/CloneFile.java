@@ -31,7 +31,7 @@ import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
-import com.stacksync.syncservice.models.ItemMetadata;
+import com.stacksync.commons.models.ItemMetadata;
 
 /**
  * Represents a version of a file.
@@ -673,7 +673,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         
         while(this.workspace == null && path.length() > 0){
             try{                
-                String queryStr = "select w from Workspace w where "
+                String queryStr = "select w from CloneWorkspace w where "
                       + "     w.pathWorkspace = :path";
 
                 Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);

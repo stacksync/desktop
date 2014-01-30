@@ -154,7 +154,7 @@ public class Profile implements Configurable {
 
             setFactory();
             server.updateDevice(cloudId);
-            Map<String, CloneWorkspace> workspaces = CloneWorkspace.InitializeWorkspaces(this);
+            Map<Long, CloneWorkspace> workspaces = CloneWorkspace.InitializeWorkspaces(this);
 
             // Start threads 1/2
             uploader.start();
@@ -164,7 +164,7 @@ public class Profile implements Configurable {
             for (CloneWorkspace w : workspaces.values()) {
                 try {
                     // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
-                    broker.bind(w.getId(), new RemoteWorkspaceImpl(w, changeManager));
+                    broker.bind(w.getId().toString(), new RemoteWorkspaceImpl(w, changeManager));
                 } catch (Exception ex) {
                     throw new InitializationException(ex);
                 }

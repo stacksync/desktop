@@ -8,15 +8,17 @@ package com.stacksync.desktop.syncserver;
  *
  * @author gguerrero
  */
+import com.stacksync.commons.models.Device;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
-import com.stacksync.syncservice.models.DeviceInfo;
-import com.stacksync.syncservice.models.ItemMetadata;
-import com.stacksync.syncservice.models.WorkspaceInfo;
-import com.stacksync.syncservice.omq.ISyncService;
+import com.stacksync.commons.models.DeviceInfo;
+import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.commons.models.User;
+import com.stacksync.commons.models.Workspace;
+import com.stacksync.commons.omq.ISyncService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,7 +38,7 @@ public class Server {
     private final Config config = Config.getInstance();
     private ISyncService syncServer;
     private Broker broker;
-    private Map<String, WorkspaceInfo> rWorkspaces;
+    private Map<Long, Workspace> rWorkspaces;
     private int i;
 
     public ISyncService getSyncServer() {
@@ -48,7 +50,7 @@ public class Server {
 
         this.broker = broker;
         this.syncServer = this.broker.lookup(ISyncService.class.getSimpleName(), ISyncService.class);
-        this.rWorkspaces = new HashMap<String, WorkspaceInfo>();
+        this.rWorkspaces = new HashMap<Long, Workspace>();
         this.i = 0;
     }
 
@@ -60,9 +62,12 @@ public class Server {
         List<Update> updates = new ArrayList<Update>();
 
         String requestId = getRequestId();
-        WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
+        Workspace rWorkspace = rWorkspaces.get(workspace.getId());
+        
+        User user = new User();
+        user.setCloudId(cloudId);
 
-        List<ItemMetadata> items = syncServer.getChanges(cloudId, requestId, rWorkspace);
+        List<ItemMetadata> items = syncServer.getChanges(requestId, user, rWorkspace);
         for (ItemMetadata item : items) {
             Update update = Update.parse(item, workspace);
             updates.add(update);
@@ -75,12 +80,12 @@ public class Server {
         String requestId = getRequestId();
         List<CloneWorkspace> workspaces = new ArrayList<CloneWorkspace>();
 
-        List<WorkspaceInfo> remoteWorkspaces = syncServer.getWorkspaces(cloudId, requestId);
+        List<Workspace> remoteWorkspaces = syncServer.getWorkspaces(cloudId, requestId);
         if (remoteWorkspaces.isEmpty()) {
             throw new IOException("get_workspaces hasn't workspaces");
         }
 
-        for (WorkspaceInfo rWorkspace : remoteWorkspaces) {
+        for (Workspace rWorkspace : remoteWorkspaces) {
             CloneWorkspace workspace = new CloneWorkspace(rWorkspace);
             workspaces.add(workspace);
             rWorkspaces.put(workspace.getId(), rWorkspace);
@@ -99,7 +104,11 @@ public class Server {
         
         DeviceInfo device = new DeviceInfo(config.getDeviceId(), config.getDeviceName(),
                 osInfo, null, null);
-        deviceId = syncServer.updateDevice(cloudId, requestId, device);
+        
+        User user = new User();
+        user.setCloudId(cloudId);
+        
+        deviceId = syncServer.updateDevice(requestId, user, device);
         logger.debug("Obtained deviceId: "+deviceId);
         
         if (deviceId != -1) {
@@ -122,10 +131,14 @@ public class Server {
 
     public void commit(String cloudId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
         String requestId = getRequestId();
-        Long device = config.getDeviceId();
-        WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
+        Workspace rWorkspace = rWorkspaces.get(workspace.getId());
 
-        syncServer.commit(cloudId, requestId, rWorkspace, device, commitItems);
+        User user = new User();
+        user.setCloudId(cloudId);
+        
+        Device device = new Device(config.getDeviceId());
+        
+        syncServer.commit(requestId, user, rWorkspace, device, commitItems);
         logger.info(" [x] Sent '" + commitItems + "'");
     }
     
@@ -145,10 +158,14 @@ public class Server {
     }
     
     public void commit(String cloudId, String requestId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
-        Long device = config.getDeviceId();
-        WorkspaceInfo rWorkspace = rWorkspaces.get(workspace.getId());
+        Workspace rWorkspace = rWorkspaces.get(workspace.getId());
 
-        syncServer.commit(cloudId, requestId, rWorkspace, device, commitItems);
+        User user = new User();
+        user.setCloudId(cloudId);
+        
+        Device device = new Device(config.getDeviceId());
+        
+        syncServer.commit(requestId, user, rWorkspace, device, commitItems);
         saveLog(commitItems);
         logger.info(" [x] Sent '" + commitItems + "'");
     }

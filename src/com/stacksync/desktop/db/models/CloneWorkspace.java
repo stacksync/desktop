@@ -16,7 +16,7 @@ import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.gui.wizard.RepositoryTestPanel.TestListener;
 import com.stacksync.desktop.syncserver.Server;
-import com.stacksync.syncservice.models.WorkspaceInfo;
+import com.stacksync.commons.models.Workspace;
 
 @Entity
 @IdClass(value = CloneWorkspacePk.class)
@@ -26,7 +26,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
 
     @Id
     @Column(name="id", nullable=false)
-    private String id;
+    private Long id;
     
     @Column(name="path_workspace", nullable=false)
     private String pathWorkspace;
@@ -42,14 +42,15 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     public CloneWorkspace(){}
     
-    public CloneWorkspace(WorkspaceInfo r){
-        this.id = r.getIdentifier();
-        this.pathWorkspace = r.getPath();
+    public CloneWorkspace(Workspace r){
+        this.id = r.getId();
+        //this.pathWorkspace = r.getPath();
+        this.pathWorkspace = "/";
         this.localLastUpdate = r.getLatestRevision();
         this.remoteLastUpdate = r.getLatestRevision();
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
     
@@ -97,7 +98,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         return this.files;
     }
     
-    public static Map<String, CloneWorkspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener)
+    public static Map<Long, CloneWorkspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener)
             throws InitializationException{
                   
         List<CloneWorkspace> remoteWorkspaces = new ArrayList<CloneWorkspace>();
@@ -120,7 +121,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         }
 
         DatabaseHelper db = DatabaseHelper.getInstance();
-        Map<String, CloneWorkspace> localWorkspaces = db.getWorkspaces();
+        Map<Long, CloneWorkspace> localWorkspaces = db.getWorkspaces();
 
         for(CloneWorkspace w: remoteWorkspaces){                
             if(localWorkspaces.containsKey(w.getId())){
@@ -140,7 +141,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         return localWorkspaces;
     }
     
-    public static Map<String, CloneWorkspace> InitializeWorkspaces(Profile profile) 
+    public static Map<Long, CloneWorkspace> InitializeWorkspaces(Profile profile) 
         throws InitializationException{
         
         return InitializeWorkspaces(profile, null);
