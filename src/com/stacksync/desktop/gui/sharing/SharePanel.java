@@ -1,6 +1,10 @@
 package com.stacksync.desktop.gui.sharing;
 
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.syncserver.Server;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class SharePanel extends javax.swing.JPanel {
@@ -94,9 +98,17 @@ public class SharePanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void shareButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shareButtonActionPerformed
-        // TODO add your handling code here:
-        System.out.println(emailField.getText());
-        System.out.println(folderNameField.getText());
+
+        if (this.emailField.getText().isEmpty() || this.folderNameField.getText().isEmpty()) {
+            return;
+        }
+        
+        
+        Profile profile = config.getProfile();
+        Server server = profile.getServer();
+        List<String> mails = new ArrayList<String>();
+        mails.add(this.emailField.getText());
+        server.createShareProposal(profile.getCloudId(), mails, this.folderNameField.getText());
     }//GEN-LAST:event_shareButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed

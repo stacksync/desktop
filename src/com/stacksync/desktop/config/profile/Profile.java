@@ -18,10 +18,6 @@
 package com.stacksync.desktop.config.profile;
 
 import com.stacksync.desktop.Environment;
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
@@ -42,7 +38,11 @@ import com.stacksync.desktop.util.WinRegistry;
 import com.stacksync.desktop.watch.local.LocalWatcher;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import com.stacksync.desktop.watch.remote.RemoteWatcher;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
 import omq.common.broker.Broker;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -203,6 +203,24 @@ public class Profile implements Configurable {
 
             this.active = active;
         }
+    }
+    
+    public void addNewWorkspace(CloneWorkspace cloneWorkspace) throws Exception {
+        
+        ChangeManager changeManager = remoteWatcher.getChangeManager();
+        changeManager.start();
+        
+        try {
+            // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
+            broker.bind(cloneWorkspace.getId().toString(), new RemoteWorkspaceImpl(cloneWorkspace, changeManager));
+        } catch (Exception ex) {
+            throw new Exception(ex);
+        }
+        
+        // Get changes
+        List<Update> changes = server.getChanges(cloudId, cloneWorkspace);
+        changeManager.queueUpdates(changes);
+        
     }
 
     public boolean isEnabled() {

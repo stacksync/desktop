@@ -1,24 +1,20 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.stacksync.desktop.syncserver;
 
-/**
- *
- * @author gguerrero
- */
+import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
+import com.stacksync.commons.exceptions.DeviceNotValidException;
+import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.commons.models.Device;
+import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.commons.models.User;
+import com.stacksync.commons.models.Workspace;
+import com.stacksync.commons.omq.ISyncService;
+import com.stacksync.commons.requests.ShareProposalRequest;
+import com.stacksync.commons.requests.UpdateDeviceRequest;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
-import com.stacksync.commons.models.DeviceInfo;
-import com.stacksync.commons.models.ItemMetadata;
-import com.stacksync.commons.models.User;
-import com.stacksync.commons.models.Workspace;
-import com.stacksync.commons.omq.ISyncService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -96,35 +92,31 @@ public class Server {
     
     public void updateDevice(String cloudId) {
         
-        String requestId = getRequestId();
         long deviceId;
         
         Environment env = Environment.getInstance();
         String osInfo = env.getOperatingSystem().toString() + "-" + env.getArchitecture();
         
-        DeviceInfo device = new DeviceInfo(config.getDeviceId(), config.getDeviceName(),
-                osInfo, null, null);
-        
-        User user = new User();
-        user.setCloudId(cloudId);
-        
-        deviceId = syncServer.updateDevice(requestId, user, device);
-        logger.debug("Obtained deviceId: "+deviceId);
-        
-        if (deviceId != -1) {
-            try {
-                // Set registerId in config
-                config.setDeviceId(deviceId);
-                config.save();
-                // Something else?
+        UpdateDeviceRequest deviceReq = new UpdateDeviceRequest(cloudId, config.getDeviceId(),
+                config.getDeviceName(), osInfo, null, null);
+        try {
+            
+            deviceId = syncServer.updateDevice(deviceReq);
+            logger.debug("Obtained deviceId: "+deviceId);
+            // Set registerId in config
+            config.setDeviceId(deviceId);
+            config.save();
 
-                logger.info("Device registered");
-            } catch (ConfigException ex) {
-                
-            }
-        } else {
-            // What to do here??
-            logger.error("Device not registered!!");
+            logger.info("Device registered");
+
+        } catch (UserNotFoundException ex) {
+            logger.error(ex);
+        } catch (DeviceNotValidException ex) {
+            logger.error(ex);
+        } catch (DeviceNotUpdatedException ex) {
+            logger.error(ex);
+        } catch (ConfigException ex) {
+            logger.error(ex);
         }
         
     }
@@ -144,17 +136,33 @@ public class Server {
     
     public void createShareProposal(String cloudId, List<String> emails, String folderName) {
         
-        String requestId = getRequestId();
+        Long newWorkspaceId = null;
         logger.info("Sending share proposal.");
-        Long newWorkspaceId = syncServer.createShareProposal(cloudId, requestId, emails, cloudId);
-        if (newWorkspaceId == -1) {
-            logger.info("Proposal not accepted.");
-            // Show message error.
-        } else {
-            logger.info("Proposal accepted. New workspace: "+newWorkspaceId);
-            
+        
+        ShareProposalRequest shareRequest = new ShareProposalRequest(cloudId, emails, folderName);
+        
+        try {
+            newWorkspaceId = syncServer.createShareProposal(shareRequest);
+        } catch (Exception e) {
+            // Show error and return
+            logger.error("New workspace not created: "+e);
+            return;
         }
         
+        Workspace newWorkspace = new Workspace(newWorkspaceId);
+        
+        logger.info("Proposal accepted. New workspace: "+ newWorkspace.getId());
+        rWorkspaces.put(newWorkspace.getId(), newWorkspace);
+        
+        // Save new workspace in DB
+        CloneWorkspace cloneWorkspace = new CloneWorkspace(newWorkspace);
+        cloneWorkspace.merge();
+        
+        try {
+            config.getProfile().addNewWorkspace(cloneWorkspace);
+        } catch (Exception e) {
+            logger.error("Error trying to listen new workspace: "+e);
+        }
     }
     
     public void commit(String cloudId, String requestId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
