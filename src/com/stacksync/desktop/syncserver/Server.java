@@ -2,12 +2,14 @@ package com.stacksync.desktop.syncserver;
 
 import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
 import com.stacksync.commons.exceptions.DeviceNotValidException;
+import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.commons.models.Device;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.Workspace;
 import com.stacksync.commons.omq.ISyncService;
+import com.stacksync.commons.requests.GetWorkspacesRequest;
 import com.stacksync.commons.requests.ShareProposalRequest;
 import com.stacksync.commons.requests.UpdateDeviceRequest;
 import com.stacksync.desktop.Environment;
@@ -15,6 +17,7 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
+import com.stacksync.desktop.sharing.SharingController;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,6 +35,7 @@ public class Server {
 
     private final Logger logger = Logger.getLogger(Server.class.getName());
     private final Config config = Config.getInstance();
+    private final SharingController sharingController = SharingController.getInstance();
     private ISyncService syncServer;
     private Broker broker;
     private Map<Long, Workspace> rWorkspaces;
@@ -72,14 +76,12 @@ public class Server {
         return updates;
     }
 
-    public List<CloneWorkspace> getWorkspaces(String cloudId) throws IOException {
-        String requestId = getRequestId();
+    public List<CloneWorkspace> getWorkspaces(String cloudId) throws NoWorkspacesFoundException {
         List<CloneWorkspace> workspaces = new ArrayList<CloneWorkspace>();
 
-        List<Workspace> remoteWorkspaces = syncServer.getWorkspaces(cloudId, requestId);
-        if (remoteWorkspaces.isEmpty()) {
-            throw new IOException("get_workspaces hasn't workspaces");
-        }
+        GetWorkspacesRequest workspacesReq = new GetWorkspacesRequest(cloudId);
+        
+        List<Workspace> remoteWorkspaces = syncServer.getWorkspaces(workspacesReq);
 
         for (Workspace rWorkspace : remoteWorkspaces) {
             CloneWorkspace workspace = new CloneWorkspace(rWorkspace);
@@ -160,6 +162,7 @@ public class Server {
         
         try {
             config.getProfile().addNewWorkspace(cloneWorkspace);
+            sharingController.createNewWorkspace(cloneWorkspace, folderName);
         } catch (Exception e) {
             logger.error("Error trying to listen new workspace: "+e);
         }

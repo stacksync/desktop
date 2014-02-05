@@ -55,7 +55,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
             case SHARE:
                 //Show share panel
                 JFrame frame = new JFrame("Share a folder");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
                 
                 SharePanel panel = new SharePanel();
                 

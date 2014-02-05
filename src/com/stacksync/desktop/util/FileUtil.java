@@ -60,7 +60,6 @@ public class FileUtil {
     private static final MagicMimeTypeIdentifier mimeTypesMap = new MagicMimeTypeIdentifier();
     private static final Logger logger = Logger.getLogger(FileUtil.class.getName());    
     private static final Environment env = Environment.getInstance();
-    private static final Config config = Config.getInstance();
     
     private static final double BASE = 1024, KB = BASE, MB = KB * BASE, GB = MB * BASE;
     private static final DecimalFormat df = new DecimalFormat("#.##");

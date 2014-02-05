@@ -103,7 +103,6 @@ public class SharePanel extends javax.swing.JPanel {
             return;
         }
         
-        
         Profile profile = config.getProfile();
         Server server = profile.getServer();
         List<String> mails = new ArrayList<String>();

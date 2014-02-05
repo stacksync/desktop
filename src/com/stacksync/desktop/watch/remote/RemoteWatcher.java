@@ -165,26 +165,38 @@ public class RemoteWatcher {
             
             Map<Long, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
-            // Upload
-            CloneWorkspace workspace = null;
-            List<ItemMetadata> commitItems = new ArrayList<ItemMetadata>();
+            // This hashmap contains a list of files changed in each workspace.
+            HashMap<CloneWorkspace, List<ItemMetadata>> workspaces = new HashMap<CloneWorkspace, List<ItemMetadata>>();
             
             for(List<CloneFile> w: updatedFiles.values()){
                 for(CloneFile c: w){
-                    //c.setServerUploaded(true);
+                    
                     c.setServerUploadedTime(lastUpdateFileDate);
                     c.merge(); 
-                    workspace = c.getWorkspace();
                     
+                    CloneWorkspace workspace = c.getWorkspace();
                     ItemMetadata obj = c.mapToItemMetadata();
-                    commitItems.add(obj);
+                    
+                    List<ItemMetadata> itemsToCommit;
+                    if (workspaces.containsKey(workspace)) {
+                        itemsToCommit = workspaces.get(workspace);
+                    } else {
+                        itemsToCommit = new ArrayList<ItemMetadata>();
+                    }
+                    
+                    itemsToCommit.add(obj);
+                    workspaces.put(workspace, itemsToCommit);
                 }
             }
             
-            //String message = FileUtils.readFileToString(localUpdateFile);
             String cloudId = transfer.getUser();
             
-            server.commit(cloudId, workspace, commitItems);
+            // Commit all files modified in each workspace
+            for (CloneWorkspace workspace : workspaces.keySet()) {
+                List<ItemMetadata> commitItems = workspaces.get(workspace);
+                server.commit(cloudId, workspace, commitItems);
+            }
+            
         } catch (IOException ex) {
             logger.error("Failed to write file.", ex);
             RemoteLogs.getInstance().sendLog(ex);

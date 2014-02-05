@@ -6,7 +6,7 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.watch.remote.ChangeManager;
-import com.stacksync.commons.models.CommitResult;
+import com.stacksync.commons.notifications.CommitNotification;
 import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.CommitInfo;
@@ -29,11 +29,11 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     }
 
     @Override
-    public void notifyCommit(CommitResult cr) {
+    public void notifyCommit(CommitNotification cr) {
         List<CommitInfo> listObjects = cr.getObjects();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
-        String fullReqId = cr.getRequestID();
+        String fullReqId = cr.getRequestId();
         String deviceName = fullReqId.split("-")[0];
         List<Update> ul = new ArrayList<Update>();
         TempIdManager tempIdManager = new TempIdManager();

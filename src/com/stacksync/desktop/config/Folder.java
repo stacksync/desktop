@@ -63,18 +63,10 @@ public class Folder implements Configurable {
     public void setLocalFile(File localFile) {
         this.localFile = localFile;
     }
-
-    /*public void setRemoteId(String remoteId) {
-        this.remoteId = remoteId;
-    }*/
     
     public File getLocalFile() {
         return localFile;
     }
-
-    /*public String getRemoteId() {
-        return remoteId;
-    }*/
 
     @Override
     public void load(ConfigNode node) throws ConfigException {

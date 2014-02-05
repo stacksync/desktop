@@ -1,5 +1,6 @@
 package com.stacksync.desktop.db.models;
 
+import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -106,11 +107,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         try {
             Server server = profile.getServer();
             remoteWorkspaces = server.getWorkspaces(profile.getCloudId());
-
-            if(remoteWorkspaces.isEmpty()){
-                throw new IOException();
-            }
-        } catch (IOException ex) {
+        } catch (NoWorkspacesFoundException ex) {
             if(callbackListener != null){
                 callbackListener.setStatus("Can't load the workspaces from syncserver. ");
                 callbackListener.setError(ex);

@@ -17,6 +17,8 @@
  */
 package com.stacksync.desktop.config.profile;
 
+import com.stacksync.commons.notifications.ShareProposalNotification;
+import com.stacksync.commons.omq.RemoteClient;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
@@ -32,6 +34,7 @@ import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageUnauthorizeException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
+import com.stacksync.desktop.syncserver.RemoteClientImpl;
 import com.stacksync.desktop.syncserver.RemoteWorkspaceImpl;
 import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.desktop.util.WinRegistry;
@@ -41,7 +44,11 @@ import com.stacksync.desktop.watch.remote.RemoteWatcher;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import omq.common.broker.Broker;
+import omq.exception.AlreadyBoundException;
+import omq.exception.RemoteException;
+import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
 /**
@@ -160,6 +167,13 @@ public class Profile implements Configurable {
             uploader.start();
             ChangeManager changeManager = remoteWatcher.getChangeManager();
             changeManager.start();
+            
+            try {
+                broker.bind(cloudId, new RemoteClientImpl());
+            } catch (Exception ex) {
+                logger.error("TONTO!");
+                throw new InitializationException(ex);
+            } 
                     
             for (CloneWorkspace w : workspaces.values()) {
                 try {

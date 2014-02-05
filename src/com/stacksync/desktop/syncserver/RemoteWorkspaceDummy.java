@@ -7,7 +7,7 @@ package com.stacksync.desktop.syncserver;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.dummy.Stacksync_dummy;
-import com.stacksync.commons.models.CommitResult;
+import com.stacksync.commons.notifications.CommitNotification;
 import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.CommitInfo;
 import java.io.IOException;
@@ -26,12 +26,12 @@ public class RemoteWorkspaceDummy extends RemoteObject implements RemoteWorkspac
     }
 
     @Override
-    public void notifyCommit(CommitResult cr) {
+    public void notifyCommit(CommitNotification cr) {
         List<CommitInfo> listObjects = cr.getObjects();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
         try {
-            Stacksync_dummy.saveTimeSendRequestLog("Client-time-commit", cr.getRequestID(), "commit-end");
+            Stacksync_dummy.saveTimeSendRequestLog("Client-time-commit", cr.getRequestId(), "commit-end");
         } catch (IOException ex) {
             ex.printStackTrace();
         }

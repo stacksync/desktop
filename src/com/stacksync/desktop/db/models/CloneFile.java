@@ -33,15 +33,9 @@ import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.commons.models.ItemMetadata;
 
-/**
- * Represents a version of a file.
- *
- * @author Philipp C. Heckel
- */
 @Entity
 @Cacheable(false)
 @IdClass(value = CloneFilePk.class)
-//@Table( uniqueConstraints={@UniqueConstraint(columnNames={"last_modified", "checksum"})} )
 public class CloneFile extends PersistentObject implements Serializable, Cloneable {
 
     private static final Logger logger = Logger.getLogger(CloneFile.class.getName());
@@ -64,6 +58,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
      * (= complete DB dump)
      */
     public enum SyncStatus { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
+    
     /**
      * versionId of the root file; identifies the history of a file
      */
