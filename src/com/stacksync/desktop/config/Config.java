@@ -467,6 +467,10 @@ public class Config {
         if (userName.isEmpty()) {
             userName = env.getUserName();
         }
+        
+        if (queueName.isEmpty()) {
+            queueName = env.getDeviceNameWithTimestamp();
+        }
 
         // Resource bundle
         String language = node.getProperty("language", null);
