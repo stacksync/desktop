@@ -102,7 +102,6 @@ public class MoveIndexRequest extends IndexRequest {
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
 
         // Parent 
-        String relToParentFolder = FileUtil.getRelativeParentDirectory(toRoot.getLocalFile(), toFile);
         String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
         CloneFile cToParentFolder = db.getFolder(toRoot, new File(absToParentFolder));
 
@@ -115,7 +114,6 @@ public class MoveIndexRequest extends IndexRequest {
         dbToFile.setName(toFile.getName());
         dbToFile.setSize((toFile.isDirectory()) ? 0 : toFile.length());
         dbToFile.setVersion(dbToFile.getVersion()+1);
-        dbToFile.setUpdated(new Date());
         dbToFile.setStatus(Status.RENAMED);
         dbToFile.setSyncStatus(CloneFile.SyncStatus.LOCAL);
 

@@ -136,14 +136,6 @@ public class Update {
         this.version = version;
     }
 
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
     public List<String> getChunks() {
         return chunks;
     }
@@ -255,7 +247,6 @@ public class Update {
             update.setParentFileVersion(cf.getParent().getVersion());
         }
         
-        update.setUpdated(cf.getUpdated());
         update.setStatus(cf.getStatus());
         
         update.setModifiedAt(cf.getLastModified());

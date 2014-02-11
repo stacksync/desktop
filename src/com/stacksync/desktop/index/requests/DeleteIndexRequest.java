@@ -91,7 +91,6 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
                 deletedVersion.setVersion(lastSynced.getVersion()+1);
 
                 // Updated changes
-                deletedVersion.setUpdated(new Date());
                 deletedVersion.setStatus(Status.DELETED);
                 deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
 
@@ -105,9 +104,7 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
 
             // Updated changes
             deletedVersion.setVersion(deletedVersion.getVersion()+1);
-            deletedVersion.setUpdated(new Date());
             deletedVersion.setStatus(Status.DELETED);
-            //deletedVersion.setSyncStatus(CloneFile.SyncStatus.LOCAL);
             deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
 
             deletedVersion.merge();
@@ -124,7 +121,6 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
             for (CloneFile child : children) {
                 logger.info("Indexer: Delete CHILD "+child.getAbsolutePath()+" ...");
                 // Do it!
-                //new DeleteIndexRequest(root, child).process();
                 Indexer.getInstance().queueDeleted(root, child);
             }
         }

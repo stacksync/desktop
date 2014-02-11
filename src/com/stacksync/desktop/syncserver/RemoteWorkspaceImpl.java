@@ -73,8 +73,6 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         long fileId = commit.getMetadata().getId();
         ItemMetadata itemMetadata = commit.getMetadata();
             
-        Update update = Update.parse(itemMetadata, workspace);
-            
         CloneFile existingVersion;
         Long tempId = itemMetadata.getTempId();
         if (tempId != null) {
@@ -84,7 +82,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         }
 
         if (existingVersion != null) {
-            markAsUpdated(existingVersion, update);
+            markAsUpdated(existingVersion);
         } else {
             logger.info("Exception: existing version is null");
         }
@@ -101,7 +99,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
             update.setConflicted(true);
             return update;
         } else {
-            markAsUpdated(existingVersion, update);
+            markAsUpdated(existingVersion);
         }
         return null;
     }
@@ -116,22 +114,10 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         
         return tempIdManager.changeTempId(localFile, itemMetadata.getId());
         
-        /*CloneFile newFile = (CloneFile)localFile.clone();
-        newFile.setServerUploadedAck(localFile.getServerUploadedAck());
-        newFile.setServerUploadedTime(localFile.getServerUploadedTime());
-        
-        //newFile.setChunks(localFile.getChunks());
-        newFile.setId(itemMetadata.getId());
-        newFile.merge();
-        //localFile.merge();
-        //localFile.deleteFromDB();
-        filesWithTempId.add(0, localFile);
-        return newFile;*/
     }
     
-    private void markAsUpdated(CloneFile cf, Update update) {
+    private void markAsUpdated(CloneFile cf) {
         cf.setServerUploadedAck(true);
-        cf.setUpdated(update.getUpdated());
         cf.merge();
     }
 

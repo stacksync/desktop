@@ -104,11 +104,6 @@ public class DatabaseHelper {
     private CloneFile getFileOrFolder(Folder root, File file, Boolean folder) {
         assert root != null;
 
-        /// GGIPART ///
-        String path = FileUtil.getRelativeParentDirectory(root.getLocalFile(), file);
-        path = FileUtil.getFilePathCleaned(path);
-        /// GGIENDPART ///
-
         // First, check by full file path
         String queryStr =
                 "select f from CloneFile f where "
@@ -116,21 +111,21 @@ public class DatabaseHelper {
                 + "      f.name = :name "
                 + ((folder != null) ? "and f.folder = :folder " : " ")
                 + "      and f.status <> :notStatus1 "
-                //+ "      and f.status <> :notStatus2 "
-                //+ "      and f.syncStatus <> :notSyncStatus "
                 + "      and f.version = (select max(ff.version) from CloneFile ff where "
                 + "         f.id = ff.id) "
-                + "      order by f.updated desc";
+                + "      order by f.lastModified desc";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
         query.setMaxResults(1);
+        
+        String path = FileUtil.getRelativeParentDirectory(root.getLocalFile(), file);
+        path = FileUtil.getFilePathCleaned(path);
         query.setParameter("path", path);
         query.setParameter("name", file.getName());
         query.setParameter("notStatus1", Status.DELETED);
-        //query.setParameter("notSyncStatus", CloneFile.SyncStatus.SYNCING); // this is required for chmgr.applyNewOrChange()
 
         if (folder != null) {
             query.setParameter("folder", folder);
@@ -252,17 +247,15 @@ public class DatabaseHelper {
         String queryStr = "select f from CloneFile f where "
                 + "      f.checksum = :checksum and "
                 + "      f.status <> :notStatus1 and "
-                //+ "      f.status <> :notStatus2 and "
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
                 + "                                     f.id = ff.id) "
-                + "      order by f.updated desc";
+                + "      order by f.lastModified desc";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("notStatus1", Status.DELETED);
-        //query.setParameter("notStatus2", Status.MERGED);
         query.setParameter("checksum", checksum);
 
         List<CloneFile> sameChecksumFiles = query.getResultList();
@@ -296,7 +289,6 @@ public class DatabaseHelper {
     public List<CloneFile> getFiles(Folder root) {
         String queryStr = "select f from CloneFile f where "
                 + "      f.status <> :notStatus1 and"
-                //+ "      f.status <> :notStatus2 and"
                 + "      f.version = (select max(ff.version) from CloneFile ff where "
                 + "                                     f.id = ff.id) ";
 
@@ -305,7 +297,6 @@ public class DatabaseHelper {
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("notStatus1", Status.DELETED);
-        //query.setParameter("notStatus2", Status.MERGED);
 
         return query.getResultList();
     }
@@ -333,7 +324,6 @@ public class DatabaseHelper {
                
         newFile.setId(update.getFileId());
         newFile.setVersion(update.getVersion());
-        newFile.setUpdated(update.getUpdated());
         newFile.setChecksum(update.getChecksum());
         newFile.setProfile(profile);
         newFile.setWorkspace(update.getWorkspace());
@@ -387,7 +377,6 @@ public class DatabaseHelper {
         // Newest file update
         String queryStr = "select count(c.id) from CloneFile c where "
                 + "     c.syncStatus = :StatusSync and "                                       
-
                 + "     c.serverUploadedAck = false and "                
                 + "     (c.serverUploadedTime < :timeNow or "
                 + "     c.serverUploadedTime is null)";

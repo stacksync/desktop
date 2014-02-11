@@ -69,10 +69,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Id
     @Column(name = "file_version", nullable = false)
     private long version;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated")
-    private Date updated;
     
     @Column(name = "checksum")
     private long checksum;
@@ -224,14 +220,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.id = id;
     }
 
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
     public String getPath() {
         
         generatePath();
@@ -261,7 +249,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     }
 
     public void setSyncStatus(SyncStatus syncStatus) {
-        this.updated = new Date();
         this.syncStatus = syncStatus;
     }
 
@@ -596,7 +583,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             CloneFile clone = (CloneFile) super.clone();
 
             clone.id = getId();
-            clone.updated = getUpdated();
             clone.checksum = getChecksum();
             clone.lastModified = new Date(getLastModified().getTime());
             clone.profile = getProfile(); // POINTER; No Copy!

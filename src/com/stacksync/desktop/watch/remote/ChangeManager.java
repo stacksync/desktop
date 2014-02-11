@@ -191,8 +191,6 @@ public class ChangeManager {
 
                 root = profile.getFolder();
 
-                // PUTA
-                //File localFileName = FileUtil.getCanonicalFile(new File(root.getLocalFile() + File.separator + update.getPath() + File.separator + update.getName()));
                 String path = root.getLocalFile().getAbsolutePath() + File.separator;
                 if (update.getParentFileId() != 0) {
                     CloneFile parentCF = db.getFileOrFolder(update.getParentFileId(), update.getParentFileVersion());
@@ -330,7 +328,7 @@ public class ChangeManager {
                 + " (" + config.getDeviceName()
                 + (config.getDeviceName().endsWith("s") ? "'" : "'s")
                 + " conflicting copy, "
-                + dateFormat.format(conflictFile.getUpdated())
+                + dateFormat.format(conflictFile.getLastModified())
                 + ")" + FileUtil.getExtension(conflictFile.getName(), true);
         
         return newFileName;

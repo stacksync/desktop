@@ -108,7 +108,6 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         newVersion.setSize(file.length());
         
         newVersion.setLastModified(new Date(file.lastModified()));
-        newVersion.setUpdated(new Date());
         newVersion.setSyncStatus(SyncStatus.LOCAL);
         newVersion.merge();
         
@@ -194,7 +193,6 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             
             // Do it!
             logger.info("Indexer: Parent: "+file+" / CHILD "+child+" ...");
-            //new NewIndexRequest(root, child, null).process();
             Indexer.getInstance().queueNewIndex(root, child, null, -1);
         }
     }
