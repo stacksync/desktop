@@ -303,7 +303,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             String resultKey = (embl) ? "emblems" : "status";
             String resultValue = "";
 
-            // Find current version in DB                
+            // Find current version in DB
             CloneFile cf = db.getFileOrFolder(file);
 
             if (cf != null) {
@@ -367,7 +367,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
                     i++;
                     options.add("Restore '" + pv.getName() + "' ("
-                            + DateUtil.toNiceFormat(pv.getUpdated()) + ", "
+                            //+ DateUtil.toNiceFormat(pv.getUpdated()) + ", "
                             + FileUtil.formatSize(pv.getSize())
                             + ")~Restores the file from the remote storage.~restore:" + pv.getId() + ":" + pv.getVersion());
                 }

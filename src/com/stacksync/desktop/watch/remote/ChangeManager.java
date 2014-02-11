@@ -146,7 +146,7 @@ public class ChangeManager {
             boolean isLocalConflict = isLocalConflict(existingVersion, update) | update.getConflicted();
             ///Existing version equals update -> skip: file is up-to-date!
             if (existingVersion != null && !isLocalConflict && (existingVersion.getSyncStatus()== SyncStatus.UPTODATE)) {
-                logger.info("File " + update.getPath() + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
+                logger.info("File " + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
                 
                 if(!existingVersion.getServerUploadedAck()){
                     existingVersion.setServerUploadedAck(true);
@@ -190,13 +190,17 @@ public class ChangeManager {
             } else { // B) I do not know the file ID
 
                 root = profile.getFolder();
-                /*if (root == null) {
-                    // TODO given ROOT is unknown! 
-                    logger.error("TODO TODO TODO  --- ROOT ID " + update.getRootId() + " is unknown. ");
-                    continue;
-                }*/
 
-                File localFileName = FileUtil.getCanonicalFile(new File(root.getLocalFile() + File.separator + update.getPath() + File.separator + update.getName()));
+                // PUTA
+                //File localFileName = FileUtil.getCanonicalFile(new File(root.getLocalFile() + File.separator + update.getPath() + File.separator + update.getName()));
+                String path = root.getLocalFile().getAbsolutePath() + File.separator;
+                if (update.getParentFileId() != 0) {
+                    CloneFile parentCF = db.getFileOrFolder(update.getParentFileId(), update.getParentFileVersion());
+                    path += parentCF.getName()+File.separator;
+                }
+                path += update.getName();
+                
+                File localFileName = FileUtil.getCanonicalFile(new File(path));
                 CloneFile localVersionByFilename = db.getFileOrFolder(root, localFileName); //update.getRootId(), update.getPath(), update.getName());
 
                 // a) No local file (in DB) exists: This one must be new!
@@ -211,7 +215,8 @@ public class ChangeManager {
                     } else {
                         
                         if(localVersionByFilename.getServerUploadedAck()){
-                            logger.error(") File " + update.getFileId() + " has the same path " + update.getPath() + "/" + update.getName() + " and different id.");
+                            // TODO delete path from log
+                            //logger.error(") File " + update.getFileId() + " has the same path " + update.getPath() + "/" + update.getName() + " and different id.");
                         } else{
                             List<CloneFile> previusVersions = localVersionByFilename.getPreviousVersions();
                             previusVersions.add(localVersionByFilename);
@@ -679,6 +684,7 @@ public class ChangeManager {
     private void downloadChunks(CloneFile file) throws CouldNotApplyUpdateException {
         logger.info("Downloading file " + file.getRelativePath() + " ...");  
 
+        int chunkNum = 1;
         for (CloneChunk chunk: file.getChunks()) {
             File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
@@ -688,7 +694,7 @@ public class ChangeManager {
             }
 
             try {
-                logger.info("- Downloading chunk (" + chunk.getOrder() + "/" + file.getChunks().size() + ") " + chunk + " ...");
+                logger.info("- Downloading chunk (" + chunkNum + "/" + file.getChunks().size() + ") " + chunk + " ...");
 
                 String fileName = chunk.getFileName();
                 transfer.download(new RemoteFile(fileName), chunkCacheFile);                
@@ -696,11 +702,7 @@ public class ChangeManager {
                 // Change DB state of chunk
                 chunk.setCacheStatus(CacheStatus.CACHED);
                 chunk.merge();
-                /*
-                 em.getTransaction().begin();
-                 em.merge(chunk);
-                 em.flush();
-                 em.getTransaction().commit();*/
+                chunkNum++;
             } catch (StorageException e) {
                 logger.warn("- ERR: Chunk " + chunk + " not found (or something else)", e);
                 throw new CouldNotApplyUpdateException(e);
@@ -718,8 +720,9 @@ public class ChangeManager {
             fos = new FileOutputStream(tempFile, false);
             logger.info("- Decrypting chunks to temp file  " + tempFile.getAbsolutePath() + " ...");
 
+            int chunkNum = 1;
             for (CloneChunk chunk: cf.getChunks()) {
-                logger.info("Chunk (" + chunk.getOrder() + File.separator + cf.getChunks().size() + ")" + config.getCache().getCacheChunk(chunk));
+                logger.info("Chunk (" + chunkNum + File.separator + cf.getChunks().size() + ")" + config.getCache().getCacheChunk(chunk));
 
                 // Read file to buffer
                 File chunkFile = config.getCache().getCacheChunk(chunk);
@@ -729,7 +732,7 @@ public class ChangeManager {
 
                 // Write decrypted chunk to file
                 fos.write(unpacked);
-
+                chunkNum++;
             }
 
             fos.close();
@@ -761,10 +764,13 @@ public class ChangeManager {
 
         if (existingVersion.getStatus() == Status.DELETED && update.getStatus() == Status.DELETED) {
             return false;
-        }            
+        }
+        
+        Long evParentId = existingVersion.getParent().getId();
+        Long updateParentId = update.getParentFileId();
         
         if (existingVersion.getStatus() == Status.RENAMED && update.getStatus() == Status.RENAMED
-                && existingVersion.getPath().equals(update.getPath())
+                && isSameParent(evParentId, updateParentId)
                 && existingVersion.getName().equals(update.getName())) {
 
             return false;
@@ -773,7 +779,7 @@ public class ChangeManager {
         if (existingVersion.getStatus() == Status.NEW && update.getStatus() == Status.NEW
                 && existingVersion.getSize() == update.getFileSize()
                 && existingVersion.getChecksum() == update.getChecksum()
-                && existingVersion.getPath().equals(update.getPath())
+                && isSameParent(evParentId, updateParentId)
                 && existingVersion.getName().equals(update.getName())) {
 
             return false;
@@ -782,7 +788,7 @@ public class ChangeManager {
         if (existingVersion.getStatus() == Status.CHANGED && update.getStatus() == Status.CHANGED
                 && existingVersion.getSize() == update.getFileSize()
                 && existingVersion.getChecksum() == update.getChecksum()
-                && existingVersion.getPath().equals(update.getPath())
+                && isSameParent(evParentId, updateParentId)
                 && existingVersion.getName().equals(update.getName())) {
 
             return false;
@@ -791,26 +797,28 @@ public class ChangeManager {
         if(existingVersion.getSyncStatus() == SyncStatus.REMOTE && existingVersion.getVersion() == update.getVersion()){
             logger.info("Reapply the update again: " + update);
             return false;
-        }        
-        
-        /*
-        // Okay, from this point on, we DO have a conflict.
-        // Now we have to decide whether to care about it or not.
-        
-        // If we were first, the remote client has to fix it!
-        if (existingVersion.getUpdated().before(update.getUpdated())) {
-            logger.info("- Nothing to resolve. I win. Local version " + existingVersion + " is older than update " + update);
-            return false;
         }
-
-        // Rare case: Updated at the same time; Choose client with the "smallest" name (alphabetical)
-        if (existingVersion.getUpdated().equals(update.getUpdated()) && config.getDeviceName().compareTo(update.getClientName()) == 1) {
-            logger.info("- Nothing to resolve. I win. RARE CASE: Decision by client name!");
-            return false;
-        } */                
 
         // Conflict, I lose!
         return true;
+    }
+    
+    public boolean isSameParent(Long parentId1, Long parentId2) {
+        
+        if ( parentId1 == null && parentId2 == null ) {
+            return true;
+        }
+        
+        if ( parentId1 == null || parentId2 == null ) {
+            return false;
+        }
+        
+        if ( parentId1 == parentId2 ) {
+            return true;
+        }
+        
+        return false;
+        
     }
 
     public void showNotification(Map<Long, List<Update>> appliedUpdates) {

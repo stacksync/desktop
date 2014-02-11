@@ -94,9 +94,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     })
     private CloneFile parent;
     
-    /**
-     * Locally cached value of the path. Not populated in the update-files.
-     */
     @Column(name = "file_path", nullable = false)
     private String path;
     
@@ -127,9 +124,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     
     @Column(name = "mimetype")
     private String mimetype;    
-    
-    //@Column(name="server_uploaded")
-    //private boolean serverUploaded;
     
     @Column(name="server_uploaded_ack")
     private boolean serverUploadedAck;
@@ -171,7 +165,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
               
         this.mimetype = FileUtil.getMimeType(file);
         
-        setWorkspaceByPath(path);
+        setWorkspaceByPath(getPath());
     }
 
     public Folder getRoot() {
@@ -239,11 +233,27 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     }
 
     public String getPath() {
+        
+        generatePath();
+        path = FileUtil.getFilePathCleaned(path);
         return path;
     }
-
-    public void setPath(String path) {
-        this.path = path;
+    
+    public void generatePath() {
+        /*if (path != null && !path.equals("(unknown)")) {
+            return;
+        }*/
+        
+        if (parent == null) {
+            path = "/";
+        } else {
+            String parentPath = parent.getPath();
+            if (parentPath.equals("/")) {
+                path = parentPath+parent.getName();
+            } else {
+                path = parentPath+"/"+parent.getName();
+            }
+        }
     }
 
     public SyncStatus getSyncStatus() {
@@ -500,10 +510,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     public Status getStatus() {
         return status;
     }
-
-    /*public void setServerUploaded(boolean serverUploaded){
-        this.serverUploaded = serverUploaded;
-    }*/
     
     public boolean getServerUploadedAck(){
         return this.serverUploadedAck;
@@ -605,8 +611,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             clone.parent = getParent(); // POINTER
             
             //clone.addChunks(getChunks()); // TODO is this ok??            
-            
-            //clone.serverUploaded = false;            
+                      
             clone.serverUploadedAck = false;
             clone.serverUploadedTime = null;
             
@@ -636,12 +641,11 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     @Override
     public String toString() {
-        String strPath = "/";
-        if(path.compareTo("/") != 0){
-            strPath = path;
-        }
-        
-        return "CloneFile[id=" + id + ", version=" + version + ", name=" + strPath + name + " checksum=" + checksum + ", chunks=" + chunks.size() + ", status=" + status + ", syncStatus=" + syncStatus + ", workspace=" + workspace + "]";
+
+        return "CloneFile[id=" + id + ", version=" + version + ", name=" + getPath() 
+                + name + " checksum=" + checksum + ", chunks=" + chunks.size() 
+                + ", status=" + status + ", syncStatus=" + syncStatus + ", workspace=" 
+                + workspace + "]";
     }
 
     public long getNewRandom() {
@@ -709,7 +713,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         object.setStatus(getStatus().toString());
         object.setChecksum(getChecksum());
         object.setMimetype(getMimetype());
-        object.setPath(getPath());
         
         object.setSize(getSize());
         object.setIsFolder(isFolder());
@@ -726,12 +729,12 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             object.setParentVersion(null);
         }
         
-        List<String> chunks = new ArrayList<String>();        
+        List<String> chunksList = new ArrayList<String>();        
         for(CloneChunk chunk: getChunks()){
-            chunks.add(chunk.getChecksum());
+            chunksList.add(chunk.getChecksum());
         }
         
-        object.setChunks(chunks);        
+        object.setChunks(chunksList);        
         return object;
     }
 }

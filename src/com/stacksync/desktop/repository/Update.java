@@ -17,14 +17,14 @@
  */
 package com.stacksync.desktop.repository;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
-import com.stacksync.commons.models.ItemMetadata;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -45,7 +45,6 @@ public class Update {
     private long fileSize;
     private boolean folder;
     private String name;
-    private String path;
     
     private CloneWorkspace workspace;
     
@@ -111,14 +110,6 @@ public class Update {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public boolean isFolder() {
@@ -209,13 +200,7 @@ public class Update {
     
     @Override
     public String toString() {
-        String strPath = getPath();
-        if(!strPath.endsWith("/")){
-            strPath = strPath + "/";
-        }
-        strPath = strPath + getName();
-        
-        return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + ", file=" + strPath + "]";
+        return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + "]";
     }
     
     public void setServerUploaded(boolean serverUploaded){
@@ -279,7 +264,6 @@ public class Update {
         update.setFileSize(cf.getSize());
         update.setFolder(cf.isFolder());
         update.setName(cf.getName());
-        update.setPath(cf.getPath());
         update.setMimeType(cf.getMimetype());
         
         List<String> chunksAdded = new ArrayList<String>();
@@ -304,10 +288,8 @@ public class Update {
 
         update.setFileId(itemMetadata.getId());
         update.setVersion(itemMetadata.getVersion());
-
-        //update.setUpdated(itemMetadata.getServerDateModified());
+        
         update.setModifiedAt(itemMetadata.getModifiedAt());
-
         update.setStatus(CloneFile.Status.valueOf(itemMetadata.getStatus()));
         update.setChecksum(itemMetadata.getChecksum());
         update.setMimeType(itemMetadata.getMimetype());
@@ -315,12 +297,6 @@ public class Update {
         update.setFolder(itemMetadata.isFolder());
 
         update.setName(itemMetadata.getFilename());
-        
-        String path = itemMetadata.getPath();
-        if (path != null && path.length() > 1 && path.endsWith("/")){
-            path = path.substring(0, path.length()-1);
-        }
-        update.setPath(path);
 
         // Parent
         if (itemMetadata.getParentId() != null && !itemMetadata.getParentId().toString().isEmpty()) {

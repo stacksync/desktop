@@ -219,10 +219,11 @@ public class Uploader {
                 }
             }
 
+            int numChunk = 0;
             for (CloneChunk chunk: file.getChunks()) {
                 // Chunk has been uploaded before
 
-                if(chunk.getOrder() % 10 == 0){
+                if(numChunk % 10 == 0){
                     tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "Uploading " + (queue.size() + 1) +  " files...");
                 }
                 
@@ -235,27 +236,34 @@ public class Uploader {
                     long remoteSize = rFile.getSize();
 
                     if (localSize == remoteSize) {
-                        logger.info("UploadManager: Chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
+                        logger.info("UploadManager: Chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
                         continue;
                     }
                 }
 
                 // Upload it!
                 try {
-                    logger.info("UploadManager: Uploading chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
+                    logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
                     transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName));
                 } catch (StorageException ex) {
-                    logger.error("UploadManager: Uploading chunk ("+chunk.getOrder()+File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
-                    //LogConfig.sendLog();              
+                    logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
                     throw ex;
                 } catch (StorageQuotaExcedeedException ex) {
                     logger.error("UploaderManager: Quota excedeed.", ex);
                     throw ex;
                 }
+                
+                numChunk++;
             }
             logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
 
-            //config.getDatabase().getEntityManager().refresh(file);
+            /**
+             * Test this code:
+            file.setSyncStatus(SyncStatus.UPTODATE);
+            file.merge();
+             * Is it necessary to get again the file from the DB???
+             */
+            
             file = db.getFileOrFolder(file.getId(), file.getVersion());
             
             // Update DB sync status

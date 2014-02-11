@@ -144,9 +144,9 @@ public class DatabaseHelper {
         } else {
             // Success
             return dbFiles.get(0);
-        }
-    }
-
+                }
+            }
+            
     /*
      * get direct children
      */
@@ -336,11 +336,6 @@ public class DatabaseHelper {
         newFile.setUpdated(update.getUpdated());
         newFile.setChecksum(update.getChecksum());
         newFile.setProfile(profile);
-
-        String path = update.getPath();
-
-        path = FileUtil.getFilePathCleaned(path);
-        newFile.setPath(path);
         newFile.setWorkspace(update.getWorkspace());
         
         newFile.setMimetype(update.getMimeType());
@@ -358,26 +353,15 @@ public class DatabaseHelper {
             CloneFile parentCF = getFileOrFolder(update.getParentFileId(), update.getParentFileVersion());
             newFile.setParent(parentCF);
         }
+        newFile.generatePath();
         newFile.merge();
-        
-        // Chunks from previous version
-        if (update.getVersion() > 1) {
-
-            CloneFile previousVersion = getFileOrFolder(update.getFileId(), update.getVersion() - 1);
-            if (previousVersion != null) {
-                /// GGI -> removed now always add the news chunks
-                //newFile.setChunks(previousVersion.getChunks());
-            } else {
-                logger.warn("Could not find previous version for file" + newFile + "in database.");
-            }
-        }
 
         // Add Chunks (if there are any!)
         // Triggered for new files (= version 1) AND for grown files (= more chunks)
         if (!update.getChunks().isEmpty()) {
             for(int i=0; i<update.getChunks().size(); i++){
                 String chunkId = update.getChunks().get(i);
-                CloneChunk chunk = getChunk(chunkId, path, i, CacheStatus.REMOTE);
+                CloneChunk chunk = getChunk(chunkId, CacheStatus.REMOTE);
                                                 
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
                 if(chunkCacheFile.exists() && chunkCacheFile.length() > 0){
@@ -424,43 +408,24 @@ public class DatabaseHelper {
         }      
     }
 
-    public synchronized CloneChunk getChunk(String checksum, String path, int chunkOrder, CacheStatus status) {
+    public synchronized CloneChunk getChunk(String checksum, CacheStatus status) {
         CloneChunk chunk;
 
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
-
         String queryStr = "select c from CloneChunk c where "
-                + "     c.checksum = :checksum and "
-                + "     c.chunkOrder = :chunkOrder and "
-                + "     c.chunkpath = :path";
+                + "     c.checksum = :checksum";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("checksum", checksum);
-        query.setParameter("chunkOrder", chunkOrder);
-        query.setParameter("path", path);
 
         try {
             chunk = (CloneChunk) query.getSingleResult();
-            logger.info("Found chunk (" + chunkOrder + ") in DB: " + chunk);
+            logger.info("Found chunk in DB: " + chunk);
         } catch (NoResultException e) {
-            logger.info("New chunk (" + chunkOrder + "): " + checksum);
-
-            chunk = new CloneChunk(checksum, chunkOrder, status);
-            chunk.setPath(path);
-
-            /*try {
-                chunk.merge();
-            } catch (Exception e1) {
-                logger.info("RETRY for chunk (" + chunkOrder + ") " + checksum + ", because adding failed!! (try = " + tryCount + ")", e1);
-                continue;
-            }*/
-            // TODO: can clash if two accounts index the same files at the same time
-            // TODO: that's why we do a merge here!
+            logger.info("New chunk: " + checksum);
+            chunk = new CloneChunk(checksum, status);
         }
 
         return chunk;

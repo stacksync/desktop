@@ -203,19 +203,14 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         try {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
-                        
-            Folder folderProfile = cf.getProfile().getFolder(); 
-            String path = file.getParent().replace(folderProfile.getLocalFile().getPath(), "");
-            path = path.replace('\\', '/');
 
             //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
             while (chunks.hasMoreElements()) {
                 chunkInfo = chunks.nextElement();                
-                int chunkOrder = Integer.parseInt(Long.toString(chunkInfo.getNumber()));
 
                 // create chunk in DB (or retrieve it)
-                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), path, chunkOrder, CacheStatus.CACHED);                         
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED);
                 
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);

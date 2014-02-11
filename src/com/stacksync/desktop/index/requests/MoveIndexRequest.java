@@ -112,10 +112,6 @@ public class MoveIndexRequest extends IndexRequest {
         // Updated changes
         dbToFile.setRoot(toRoot);
         dbToFile.setLastModified(new Date(toFile.lastModified()));
-                      
-        String path = FileUtil.getFilePathCleaned(relToParentFolder);        
-        dbToFile.setPath(path);   
-        
         dbToFile.setName(toFile.getName());
         dbToFile.setSize((toFile.isDirectory()) ? 0 : toFile.length());
         dbToFile.setVersion(dbToFile.getVersion()+1);
@@ -125,6 +121,7 @@ public class MoveIndexRequest extends IndexRequest {
 
         dbToFile.setParent(cToParentFolder);
         dbToFile.setMimetype(FileUtil.getMimeType(dbToFile.getFile()));
+        dbToFile.generatePath();
         dbToFile.merge();
 	    
         // Notify file manager
@@ -146,10 +143,6 @@ public class MoveIndexRequest extends IndexRequest {
             
             // 1. Chunk it!
             FileChunk chunkInfo = null;
-            
-            Folder folderProfile = cf.getProfile().getFolder(); 
-            String path = file.getParent().replace(folderProfile.getLocalFile().getPath(), "");
-            path = path.replace('\\', '/');
 
             //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
@@ -159,7 +152,7 @@ public class MoveIndexRequest extends IndexRequest {
                 int order = Integer.parseInt(Long.toString(chunkInfo.getNumber()));
                 
                 // create chunk in DB (or retrieve it)
-                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), path, order, CacheStatus.CACHED);                         
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED);                         
                 
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
