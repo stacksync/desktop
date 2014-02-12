@@ -45,7 +45,7 @@ public class TestConflictedDeleteWithChange {
         dbFile.merge();
                 
         //delete v2
-        DeleteIndexRequest deleteIndex = new DeleteIndexRequest(root, dbFile);        
+        DeleteIndexRequest deleteIndex = new DeleteIndexRequest(root, dbFile, null);        
         deleteIndex.process();        
         
         Thread.sleep(1000); 

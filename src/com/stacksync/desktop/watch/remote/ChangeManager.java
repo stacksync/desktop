@@ -48,6 +48,7 @@ import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.repository.files.RemoteFile;
 import com.stacksync.desktop.util.FileUtil;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -65,7 +66,8 @@ public class ChangeManager {
     private final int INTERVAL = 5000;    
     
     // cp start()
-    private final DependencyQueue queue;
+    private final LinkedBlockingQueue<Update> queue;
+    private boolean processingFiles;
     private Profile profile;
     private Timer timer;
     private TransferManager transfer;
@@ -79,7 +81,9 @@ public class ChangeManager {
     public ChangeManager(Profile profile) {
 
         this.profile = profile;
-        this.queue = new DependencyQueue();
+        //this.queue = new DependencyQueue();
+        this.queue = new LinkedBlockingQueue<Update>();
+        this.processingFiles = false;
 
         // cmp. start()
         this.timer = null;
@@ -132,7 +136,7 @@ public class ChangeManager {
         Folder root;
 
         synchronized (queue) {
-            queue.setProcessingFile(true);
+            this.processingFiles = true;
             if (!queue.isEmpty()) {
                 tray.setStatusIcon(this.getClass().getSimpleName(), Tray.StatusIcon.UPDATING);
             }
@@ -193,8 +197,9 @@ public class ChangeManager {
 
                 String path = root.getLocalFile().getAbsolutePath() + File.separator;
                 if (update.getParentFileId() != 0) {
-                    CloneFile parentCF = db.getFileOrFolder(update.getParentFileId(), update.getParentFileVersion());
-                    path += parentCF.getName()+File.separator;
+                    CloneFile parentCF = db.getFileOrFolder(update.getParentFileId());
+                    path += parentCF.getPath() + File.separator;
+                    path += parentCF.getName() + File.separator;
                 }
                 path += update.getName();
                 
@@ -245,7 +250,7 @@ public class ChangeManager {
         }
         
         synchronized (queue) {
-            queue.setProcessingFile(false);
+            this.processingFiles = false;
         }
 
         // Q empty!!
@@ -894,7 +899,7 @@ public class ChangeManager {
         
         synchronized (queue) {
             empty = queue.isEmpty();
-            processingFile = queue.getProcessingFile();
+            processingFile = this.processingFiles;
         }
         
         return !empty | processingFile;

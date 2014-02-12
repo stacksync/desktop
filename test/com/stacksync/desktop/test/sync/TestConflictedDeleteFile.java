@@ -53,7 +53,7 @@ public class TestConflictedDeleteFile {
         
         
         //Delete v3
-        DeleteIndexRequest delete = new DeleteIndexRequest(root, dbFile);
+        DeleteIndexRequest delete = new DeleteIndexRequest(root, dbFile, null);
         delete.process();
         
         

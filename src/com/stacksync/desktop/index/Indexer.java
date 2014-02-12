@@ -146,8 +146,8 @@ public class Indexer {
         queue.add(new DeleteIndexRequest(root, file));
     }
     
-    public void queueDeleted(Folder root, CloneFile file) {
-        queue.add(new DeleteIndexRequest(root, file));
+    public void queueDeleted(Folder root, CloneFile file, CloneFile deletedParent) {
+        queue.add(new DeleteIndexRequest(root, file, deletedParent));
     }    
     
     public void queueNewIndex(Folder root, File file, CloneFile previousVersion, long checksum){
