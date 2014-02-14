@@ -17,8 +17,6 @@
  */
 package com.stacksync.desktop.config.profile;
 
-import com.stacksync.commons.notifications.ShareProposalNotification;
-import com.stacksync.commons.omq.RemoteClient;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
@@ -44,11 +42,7 @@ import com.stacksync.desktop.watch.remote.RemoteWatcher;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import omq.common.broker.Broker;
-import omq.exception.AlreadyBoundException;
-import omq.exception.RemoteException;
-import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
 /**

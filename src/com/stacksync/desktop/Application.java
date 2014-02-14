@@ -126,7 +126,6 @@ public class Application implements ConnectionController, ApplicationController 
         
         boolean success = loadProfile();
         
-        
         if (success) {
             startThreads();
         } else {

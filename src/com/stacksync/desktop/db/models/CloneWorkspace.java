@@ -1,7 +1,13 @@
 package com.stacksync.desktop.db.models;
 
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
-import java.io.IOException;
+import com.stacksync.commons.models.Workspace;
+import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.db.DatabaseHelper;
+import com.stacksync.desktop.db.PersistentObject;
+import com.stacksync.desktop.exceptions.InitializationException;
+import com.stacksync.desktop.gui.wizard.RepositoryTestPanel.TestListener;
+import com.stacksync.desktop.syncserver.Server;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,13 +17,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.OneToMany;
-import com.stacksync.desktop.config.profile.Profile;
-import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.PersistentObject;
-import com.stacksync.desktop.exceptions.InitializationException;
-import com.stacksync.desktop.gui.wizard.RepositoryTestPanel.TestListener;
-import com.stacksync.desktop.syncserver.Server;
-import com.stacksync.commons.models.Workspace;
 
 @Entity
 @IdClass(value = CloneWorkspacePk.class)
@@ -37,6 +36,12 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         
     @Column(name="remote_revision", nullable=false)
     private Integer remoteLastUpdate;
+    
+    @Column(name="swift_container")
+    private String swiftContainer;
+    
+    @Column(name="swift_url")
+    private String swiftStorageURL;
             
     @OneToMany
     private List<CloneFile> files;
@@ -49,6 +54,8 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.pathWorkspace = "/";
         this.localLastUpdate = r.getLatestRevision();
         this.remoteLastUpdate = r.getLatestRevision();
+        this.swiftContainer = r.getSwiftContainer();
+        this.swiftStorageURL = r.getSwiftURL();
     }
 
     public Long getId() {
@@ -74,6 +81,22 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     public void setRemoteRevision(Integer remoteLastUpdate) {
         this.remoteLastUpdate = remoteLastUpdate;
     }    
+
+    public String getSwiftContainer() {
+        return swiftContainer;
+    }
+
+    public void setSwiftContainer(String swiftContainer) {
+        this.swiftContainer = swiftContainer;
+    }
+
+    public String getSwiftStorageURL() {
+        return swiftStorageURL;
+    }
+
+    public void setSwiftStorageURL(String swiftStorageURL) {
+        this.swiftStorageURL = swiftStorageURL;
+    }
 
     @Override
     public int hashCode() {

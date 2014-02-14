@@ -77,9 +77,9 @@ public class Plugins {
         //plugins.add("pop3_smtp");
         pluginsToLoad.add("rackspace_dev");
         pluginsToLoad.add("s3");
-        pluginsToLoad.add("samba");
+        //pluginsToLoad.add("samba");
         pluginsToLoad.add("sftp");
-        pluginsToLoad.add("webdav");        
+        //pluginsToLoad.add("webdav");        
         
         // Only load the needed plugins        
         for(String pl: pluginsToLoad){

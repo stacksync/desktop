@@ -33,6 +33,7 @@ import com.stacksync.desktop.index.requests.DeleteIndexRequest;
 import com.stacksync.desktop.index.requests.IndexRequest;
 import com.stacksync.desktop.index.requests.MoveIndexRequest;
 import com.stacksync.desktop.index.requests.NewIndexRequest;
+import com.stacksync.desktop.index.requests.NewIndexSharedRequest;
 import com.stacksync.desktop.util.FileLister;
 
 /**
@@ -156,6 +157,10 @@ public class Indexer {
     
     public void queueNewIndex(NewIndexRequest newRequest) {
         queue.add(newRequest);
+    }
+
+    public void queueNewIndexShared(Folder root, File sharedFolder, long checksum) {
+        queue.add(new NewIndexSharedRequest(root, sharedFolder, checksum));
     }
 
     private class IndexWorker implements Runnable {

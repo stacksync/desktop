@@ -75,7 +75,11 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
         } else {           
             // Add as new
             logger.info("Folder " + file.toString() + " NOT found in DB. Adding as new file.");
-            Indexer.getInstance().queueNewIndex(root, file, null, -1);
+            if (file.getName().startsWith(".nw_")){
+                Indexer.getInstance().queueNewIndexShared(root, file, -1);
+            } else {
+                Indexer.getInstance().queueNewIndex(root, file, null, -1);
+            }
         }
     }
 

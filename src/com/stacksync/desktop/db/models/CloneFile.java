@@ -127,6 +127,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="server_uploaded_time")
     private Date serverUploadedTime;
+    
+    @Column(name="is_temp_id", nullable= false)
+    private boolean usingTempId;
 
     public CloneFile() {
         this.id = new Random().nextLong();
@@ -142,6 +145,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         
         this.serverUploadedAck = false;
         this.serverUploadedTime = null;
+        this.usingTempId = true;
     }
 
     public CloneFile(Folder root, File file) {
@@ -218,6 +222,14 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public boolean isUsingTempId() {
+        return usingTempId;
+    }
+
+    public void setUsingTempId(boolean usingTempId) {
+        this.usingTempId = usingTempId;
     }
 
     public String getPath() {
@@ -600,6 +612,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
                       
             clone.serverUploadedAck = false;
             clone.serverUploadedTime = null;
+            clone.usingTempId = isUsingTempId();
             
             return clone;
         } catch (Exception ex) {
@@ -686,7 +699,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     public ItemMetadata mapToItemMetadata() throws NullPointerException {
         ItemMetadata object = new ItemMetadata();
 
-        if (getVersion() == 1 && !getServerUploadedAck()) {
+        if (isUsingTempId()) {
             object.setId(null);
             object.setTempId(getId());
         } else {

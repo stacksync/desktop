@@ -17,6 +17,7 @@
  */
 package com.stacksync.desktop.connection.plugins;
 
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import java.io.File;
 import java.util.Map;
 import com.stacksync.desktop.exceptions.LocalFileNotFoundException;
@@ -76,7 +77,8 @@ public interface TransferManager {
      * @throws StorageException If the connection fails due to no internet connection,
      *         authentication errors, etc.
      */
-    public void download(RemoteFile remoteFile, File localFile) throws RemoteFileNotFoundException, StorageException;
+    public void download(RemoteFile remoteFile, File localFile) 
+            throws RemoteFileNotFoundException, StorageException;
 
     /**
      * Update an existing local file to the online storage.
@@ -93,7 +95,8 @@ public interface TransferManager {
      * @throws StorageException If the connection fails due to no internet connection,
      *         authentication errors, etc.
      */
-    public void upload(File localFile, RemoteFile remoteFile) throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException;
+    public void upload(File localFile, RemoteFile remoteFile) 
+            throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException;
 
     /**
      * Deletes an existing file from the remote storage permanently.
@@ -139,7 +142,15 @@ public interface TransferManager {
      *         authentication errors, etc
      */
     public void clean() throws StorageException;
+    
+    public void download(RemoteFile remoteFile, File localFile, CloneWorkspace workspace)
+            throws RemoteFileNotFoundException, StorageException;
+    
+    public void upload(File localFile, RemoteFile remoteFile, CloneWorkspace workspace)
+            throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException;
       
+    public Map<String, RemoteFile> list(String namePrefix, CloneWorkspace workspace)
+            throws StorageException;
     
     public void initStorage() throws StorageException;
     public String getUser();

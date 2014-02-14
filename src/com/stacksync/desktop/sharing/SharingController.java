@@ -35,8 +35,6 @@ public class SharingController {
         
         String tempFolderName = ".nw_"+workspace.getId()+"_"+folderName;
         
-        System.out.println(config.getProfile().getFolder().getLocalFile().getAbsolutePath());
-        
         File tempFolder = new File(config.getProfile().getFolder().getLocalFile().getAbsolutePath()
                 + "/" + tempFolderName);
         

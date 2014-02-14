@@ -22,11 +22,25 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
+import java.util.Random;
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class StringUtil {
+    
+    private static final char[] symbols = new char[36];
+
+    static {
+      for (int idx = 0; idx < 10; ++idx)
+        symbols[idx] = (char) ('0' + idx);
+      for (int idx = 10; idx < 36; ++idx)
+        symbols[idx] = (char) ('a' + idx - 10);
+    }
+    
+    private static final Random random = new Random();
+
+    private static final char[] buf = new char[6];
 
     private static int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
@@ -151,5 +165,13 @@ public class StringUtil {
         }
 
         return hash;
+    }
+    
+    public static String generateRandomString() {
+        
+        for (int idx = 0; idx < buf.length; ++idx) {
+            buf[idx] = symbols[random.nextInt(symbols.length)];
+        }
+        return new String(buf);
     }
 }

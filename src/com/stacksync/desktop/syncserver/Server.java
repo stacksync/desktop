@@ -14,10 +14,12 @@ import com.stacksync.commons.requests.ShareProposalRequest;
 import com.stacksync.commons.requests.UpdateDeviceRequest;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.sharing.SharingController;
+import com.stacksync.desktop.util.StringUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import omq.common.broker.Broker;
 import omq.common.util.Serializers.JavaImp;
 import org.apache.commons.io.IOUtils;
@@ -131,7 +134,10 @@ public class Server {
         Long newWorkspaceId = null;
         logger.info("Sending share proposal.");
         
-        ShareProposalRequest request = new ShareProposalRequest(cloudId, emails, folderName);
+        String container = StringUtil.generateRandomString();
+        String storageURL = "http://10.30.236.175:8080/v1/"+cloudId;
+        
+        ShareProposalRequest request = new ShareProposalRequest(cloudId, emails, folderName, container, storageURL);
         
         try {
             newWorkspaceId = syncServer.createShareProposal(request);
@@ -142,6 +148,8 @@ public class Server {
         }
         
         Workspace newWorkspace = new Workspace(newWorkspaceId);
+        newWorkspace.setSwiftContainer(container);
+        newWorkspace.setSwiftURL(storageURL);
         
         logger.info("Proposal accepted. New workspace: "+ newWorkspace.getId());
         rWorkspaces.put(newWorkspace.getId(), newWorkspace);

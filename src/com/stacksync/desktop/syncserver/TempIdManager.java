@@ -19,6 +19,7 @@ public class TempIdManager {
         
         //newFile.setChunks(localFile.getChunks());
         fileWithNewId.setId(newId);
+        fileWithNewId.setUsingTempId(false);
         fileWithNewId.merge();
         
         DatabaseHelper.getInstance().updateParentId(fileWithNewId, oldFile);

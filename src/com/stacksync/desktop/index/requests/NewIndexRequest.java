@@ -30,7 +30,6 @@ import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
-import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
@@ -122,25 +121,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     }
 
     private CloneFile addNewVersion() {
-        CloneFile newVersion = new CloneFile(root, file);
-        
-        String folderName = file.getName();
-        if (folderName.startsWith(".nw_")) {
-            String[] info = folderName.split("_");
-            if (info.length != 3) {
-                // Throw exception!!
-            }
-            
-            Long workspaceId = Long.parseLong(info[1]);
-            //String workspaceName = info[2];
-            CloneWorkspace workspace = db.getWorkspaces().get(workspaceId);
-            if (workspace == null) {
-                // Throw exception!!
-            }
-            newVersion.setWorkspace(workspace);
-            
-        }
-                
+        CloneFile newVersion = new CloneFile(root, file);        
         newVersion.setVersion(1);
         newVersion.setStatus(Status.NEW);        
         
