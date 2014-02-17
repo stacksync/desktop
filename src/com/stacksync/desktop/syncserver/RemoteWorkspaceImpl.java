@@ -56,7 +56,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         List<Update> ul = new ArrayList<Update>();
 
         for (CommitInfo obj : listObjects) {
-             metaLog.info(received, "RemoteWorkspaceImpl", "notifyCommit", obj.getMetadata().getFilePath(), obj.getMetadata().getFileName(), obj.getMetadata().isFolder(), MyLogger.ACTION.STOP, "Committed = " + obj.isCommitted() + "\t" + "Status = "+obj.getMetadata().getStatus());
+            metaLog.info(received, "RemoteWorkspaceImpl", "notifyCommit", obj.getMetadata().getFilePath(), obj.getMetadata().getFileName(), obj.getMetadata().isFolder(), MyLogger.ACTION.STOP, obj.getMetadata().getStatus());
             
             boolean committed = obj.isCommitted();
             Update update;

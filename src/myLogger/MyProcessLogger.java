@@ -10,7 +10,7 @@ package myLogger;
  */
 public class MyProcessLogger extends MyLogger{
 
-    private final static String LOG_NAME = "/home/milax/Escriptori/proccess.log";
+    private final static String LOG_NAME = "/home/milax/Escriptori/process.log";
     private static MyProcessLogger instance;
     
     /**
