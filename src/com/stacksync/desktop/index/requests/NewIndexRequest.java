@@ -33,6 +33,8 @@ import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
+import myLogger.MyLogger;
+import myLogger.MyProcessLogger;
 
 /**
  *
@@ -118,6 +120,9 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         } else if (file.isFile()) {
             processFile(newVersion);
         }
+        
+         // When the file is processed and queued (if necessary) the process action ends
+        MyProcessLogger.getInstance().info(System.currentTimeMillis(), "NewIndexRequest", "process", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "NEW");
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }

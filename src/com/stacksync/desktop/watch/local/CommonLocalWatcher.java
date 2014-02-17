@@ -30,6 +30,8 @@ import name.pachler.nio.file.impl.PathWatchEvent;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.logging.RemoteLogs;
+import myLogger.MyLogger;
+import myLogger.MyProcessLogger;
 
 /**
  *
@@ -67,10 +69,10 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
                 WatchKey rootKey = watcher.addWatch(folder.getLocalFile(), true, this);
                 keyRootMap.put(rootKey, folder);
             } catch (IOException ex) {
-                logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
+                logger.error("Unable to add log to profile folder " + folder.getLocalFile(), ex);
                 RemoteLogs.getInstance().sendLog(ex);
             } catch (UnsupportedOperationException ex) {
-                logger.error("Unable to add log to profile folder "+folder.getLocalFile(), ex);
+                logger.error("Unable to add log to profile folder " + folder.getLocalFile(), ex);
                 RemoteLogs.getInstance().sendLog(ex);
             }
         }
@@ -109,10 +111,14 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
                     || event.kind() == ExtendedWatchEventKind.ENTRY_RENAME_TO
                     || event.kind() == StandardWatchEventKind.ENTRY_MODIFY) {
 
+                MyProcessLogger.getInstance().info(System.currentTimeMillis(), "CommonLocalWatcher", "watchEventOccurred", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.START, "CREATED | CHANGE");
+
                 queueCheckFile(root, file);
             } // DELETE
             else if (event.kind() == StandardWatchEventKind.ENTRY_DELETE
                     || event.kind() == ExtendedWatchEventKind.ENTRY_RENAME_FROM) {
+
+                MyProcessLogger.getInstance().info(System.currentTimeMillis(), "CommonLocalWatcher", "watchEventOccurred", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.START, "DELETE");
 
                 queueDeleteFile(root, file);
             }
@@ -136,8 +142,8 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
             Folder toRoot = keyRootMap.get(toRootKey);
 
             //linux editor's do move .goutputstream to file when the file is modified.
-            if(fromFile.getParent().compareTo(toFile.getParent()) == 0 && 
-                    fromFile.getName().startsWith(".") && fromFile.getName().contains("out")){
+            if (fromFile.getParent().compareTo(toFile.getParent()) == 0
+                    && fromFile.getName().startsWith(".") && fromFile.getName().contains("out")) {
                 queueCheckFile(toRoot, toFile);
             } else {
                 queueMoveFile(fromRoot, fromFile, toRoot, toFile);

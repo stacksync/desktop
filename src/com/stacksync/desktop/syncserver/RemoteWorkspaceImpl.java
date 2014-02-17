@@ -18,6 +18,8 @@ import com.stacksync.syncservice.models.ObjectMetadata;
 import com.stacksync.syncservice.models.CommitInfo;
 import java.util.ArrayList;
 import java.util.List;
+import myLogger.MyControlLogger;
+import myLogger.MyLogger;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
@@ -42,6 +44,10 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
 
     @Override
     public void notifyCommit(CommitResult cr) {
+        //Save time
+        long received = System.currentTimeMillis();
+        MyControlLogger metaLog = MyControlLogger.getInstance();
+        
         List<CommitInfo> listObjects = cr.getObjects();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
@@ -50,6 +56,8 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         List<Update> ul = new ArrayList<Update>();
 
         for (CommitInfo obj : listObjects) {
+             metaLog.info(received, "RemoteWorkspaceImpl", "notifyCommit", obj.getMetadata().getFilePath(), obj.getMetadata().getFileName(), obj.getMetadata().isFolder(), MyLogger.ACTION.STOP, "Committed = " + obj.isCommitted() + "\t" + "Status = "+obj.getMetadata().getStatus());
+            
             boolean committed = obj.isCommitted();
             Update update;
             try {

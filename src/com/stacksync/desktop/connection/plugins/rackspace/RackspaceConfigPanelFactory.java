@@ -17,7 +17,7 @@ public class RackspaceConfigPanelFactory {
     public static final String DEV = "dev";
     public static final String COMERCIAL = "comercial";
     //Default values for comercial wizard
-    public static final String AUTH_URL = "AUTH_SERVER_URL";
+    public static final String AUTH_URL = "http://cloudspaces.urv.cat:5000/v2.0/tokens";
     public static final String CONTAINER = "stacksync";
     
     public static ConfigPanel getRackspaceConfigPanel(String type, RackspaceConnection connection) {

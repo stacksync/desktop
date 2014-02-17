@@ -26,6 +26,8 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.util.FileUtil;
+import myLogger.MyLogger;
+import myLogger.MyProcessLogger;
 
 /**
  *
@@ -130,6 +132,8 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
                 Indexer.getInstance().queueDeleted(root, child);
             }
         }
+        
+        MyProcessLogger.getInstance().info(System.currentTimeMillis(), "DeleteIndexRequest", "process",file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "DELETE");
 
     }
 }
