@@ -133,7 +133,7 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
             }
         }
         
-        MyProcessLogger.getInstance().info(System.currentTimeMillis(), "DeleteIndexRequest", "process",file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "DELETE");
+        MyProcessLogger.getInstance().info(System.currentTimeMillis(), "DeleteIndexRequest", "process",file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "DELETED");
 
     }
 }

@@ -118,7 +118,7 @@ public class CommonLocalWatcher extends LocalWatcher implements WatchListener {
             else if (event.kind() == StandardWatchEventKind.ENTRY_DELETE
                     || event.kind() == ExtendedWatchEventKind.ENTRY_RENAME_FROM) {
 
-                MyProcessLogger.getInstance().info(System.currentTimeMillis(), "CommonLocalWatcher", "watchEventOccurred", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.START, "DELETE");
+                MyProcessLogger.getInstance().info(System.currentTimeMillis(), "CommonLocalWatcher", "watchEventOccurred", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.START, "DELETED");
 
                 queueDeleteFile(root, file);
             }
