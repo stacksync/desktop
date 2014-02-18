@@ -59,6 +59,7 @@ public class EncryptionPanel extends SettingsPanel {
         cmbCipher.addItem(resourceBundle.getString("encryp_disabled"));
         cmbCipher.addItem("AES");
 
+        
         setDefaultsValues();
     }
 
