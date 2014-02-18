@@ -57,7 +57,7 @@ public class EncryptionPanel extends SettingsPanel {
         lblChunkSize.setText(resourceBundle.getString("encryp_chunk_size"));
 
         cmbCipher.addItem(resourceBundle.getString("encryp_disabled"));
-        cmbCipher.addItem(resourceBundle.getString("encryp_enabled") + " (AES 128)");
+        cmbCipher.addItem("AES");
 
         setDefaultsValues();
     }
