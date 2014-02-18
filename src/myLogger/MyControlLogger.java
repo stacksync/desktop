@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class MyControlLogger extends MyLogger {
 
-    private final static String LOG_NAME = "/home/milax/Escriptori/control.log";
+    private final static String LOG_NAME = "/home/lab144/Desktop/control.log";
     private static MyControlLogger instance;
 
     /**

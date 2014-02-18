@@ -200,7 +200,7 @@ public class Uploader {
 
         private void processRequest(CloneFile file) throws StorageException, StorageQuotaExcedeedException {
 
-            MyStorageLogger.getInstance().info(System.currentTimeMillis(), "Uploader", "processRequest", file.getName(), MyLogger.ACTION.START, "");
+            MyStorageLogger.getInstance().info(System.currentTimeMillis(), "Uploader", "processRequest", file.getPath(), file.getName(), file.isFolder(), MyLogger.ACTION.START, file.getStatus().toString());
 
 
             logger.info("UploadManager: Uploading file " + file.getFileName() + " ...");
@@ -268,7 +268,7 @@ public class Uploader {
             file.setSyncStatus(SyncStatus.UPTODATE);
             file.merge();
 
-            MyStorageLogger.getInstance().info(System.currentTimeMillis(), "", "processRequest", file.getName(), MyLogger.ACTION.STOP, "");
+            MyStorageLogger.getInstance().info(System.currentTimeMillis(), "Uploader", "processRequest", file.getPath(), file.getName(), file.isFolder(), MyLogger.ACTION.START, file.getStatus().toString());
             
             touch(file, SyncStatus.UPTODATE);
         }

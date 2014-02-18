@@ -154,7 +154,7 @@ public class Application implements ConnectionController, ApplicationController 
         desktop = Desktop.getInstance();
         indexer = Indexer.getInstance();
         localWatcher = LocalWatcher.getInstance();
-        periodic = new TreeSearch();
+        //periodic = new TreeSearch();
         cache = new CacheCleaner();
         tray = Tray.getInstance();
         
@@ -165,7 +165,7 @@ public class Application implements ConnectionController, ApplicationController 
         // Start the rest
         indexer.start();
         localWatcher.start();
-        periodic.start();
+        //periodic.start();
         cache.start();
         RemoteLogs.getInstance().setActive(config.isRemoteLogs());
     }
@@ -176,7 +176,7 @@ public class Application implements ConnectionController, ApplicationController 
         tray.destroy();
         indexer.stop();
         localWatcher.stop();
-        periodic.stop();
+        //periodic.stop();
         cache.stop();
 
         for (Profile profile : config.getProfiles().list()) {
@@ -344,7 +344,7 @@ public class Application implements ConnectionController, ApplicationController 
         
         indexer.stop();
         localWatcher.stop();
-        periodic.stop();
+        //periodic.stop();
         cache.stop();
         desktop.stop(config.isDaemonMode());
 
@@ -379,7 +379,7 @@ public class Application implements ConnectionController, ApplicationController 
         
         indexer.start();
         localWatcher.start();
-        periodic.start();
+        //periodic.start();
         cache.start();
     }
     

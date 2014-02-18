@@ -44,6 +44,7 @@ public abstract class MyLogger {
         }
     }
     
+    /*
     public synchronized void info(long time, String clazz, String method, String fileName, ACTION action, String info) {
         try {
             String message = time + "\t" + clazz + "\t" + method + "\t" + fileName + "\t" + action + "\t" + info + "\n";
@@ -54,6 +55,7 @@ public abstract class MyLogger {
             Logger.getLogger(MyLogger.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    */
     
     public void closeWriter(){
         try {
