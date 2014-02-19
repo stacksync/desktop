@@ -62,6 +62,20 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
         newVersion.setParent(db.getFolder(root, parentFile));
         
+        String folderName = file.getName();
+        String[] info = folderName.split("_");
+        if (info.length != 3) {
+            // Throw exception or queue as a new index request.
+        }
+
+        Long workspaceId = Long.parseLong(info[1]);
+        CloneWorkspace workspace = db.getWorkspaces().get(workspaceId);
+        if (workspace == null) {
+            // Throw exception or queue as a new index request.
+        }
+        
+        newVersion.setWorkspace(workspace);
+        
         // This will check if the file is inside a folder that isn't created.
         if (newVersion.getParent() == null && !newVersion.getPath().equals("/")) {
             Indexer.getInstance().queueNewIndex(root, file, null, checksum);
@@ -86,19 +100,6 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
     private CloneFile addNewVersion() {
         CloneFile newVersion = new CloneFile(root, file);
         
-        String folderName = file.getName();
-        String[] info = folderName.split("_");
-        if (info.length != 3) {
-            // Throw exception or queue as a new index request.
-        }
-
-        Long workspaceId = Long.parseLong(info[1]);
-        CloneWorkspace workspace = db.getWorkspaces().get(workspaceId);
-        if (workspace == null) {
-            // Throw exception or queue as a new index request.
-        }
-        
-        newVersion.setWorkspace(workspace);
         newVersion.setVersion(1);
         newVersion.setStatus(CloneFile.Status.NEW);        
         

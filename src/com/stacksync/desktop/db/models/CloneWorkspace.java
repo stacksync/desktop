@@ -42,7 +42,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="swift_url")
     private String swiftStorageURL;
-            
+          
     @OneToMany
     private List<CloneFile> files;
     
@@ -51,7 +51,10 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     public CloneWorkspace(Workspace r){
         this.id = r.getId();
         //this.pathWorkspace = r.getPath();
-        this.pathWorkspace = "/";
+        this.pathWorkspace = "/"+r.getName();
+        if (r.getName().equals("default") && r.getSwiftContainer() == null) {
+            this.pathWorkspace = "/";
+        }
         this.localLastUpdate = r.getLatestRevision();
         this.remoteLastUpdate = r.getLatestRevision();
         this.swiftContainer = r.getSwiftContainer();
@@ -64,6 +67,10 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     public String getPathWorkspace(){
         return pathWorkspace;
+    }
+    
+    public void setPathWorkspace(String pathWorkspace){
+        this.pathWorkspace = pathWorkspace;
     }
 
     public Integer getLocalLastUpdate() {

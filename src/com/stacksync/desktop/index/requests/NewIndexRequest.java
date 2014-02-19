@@ -95,12 +95,19 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();                      
 
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
-        newVersion.setParent(db.getFolder(root, parentFile));
+        CloneFile parentCF = db.getFolder(root, parentFile);
+        newVersion.setParent(parentCF);
         
         // This will check if the file is inside a folder that isn't created.
-        if (newVersion.getParent() == null && !newVersion.getPath().equals("/")) {
+        if (parentCF == null && !newVersion.getPath().equals("/")) {
             Indexer.getInstance().queueNewIndex(root, file, previousVersion, checksum);
             return;
+        } else if (parentCF == null) {
+            // File is in root folder. Set workspace to default workspace
+            newVersion.setToDefaultWorkspace();
+        } else {
+            // File has a parent, so it could be different from the default wsp.
+            newVersion.setWorkspace(parentCF.getWorkspace());
         }
         
         newVersion.setFolder(file.isDirectory());

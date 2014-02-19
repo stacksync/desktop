@@ -32,6 +32,7 @@ import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
 import com.stacksync.desktop.gui.server.Desktop;
@@ -244,7 +245,13 @@ public class Uploader {
                 // Upload it!
                 try {
                     logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
-                    transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName));
+                    
+                    CloneWorkspace workspace = file.getWorkspace();
+                    if (workspace.getSwiftStorageURL() != null) {
+                        transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
+                    } else {
+                        transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName));
+                    }
                 } catch (StorageException ex) {
                     logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
                     throw ex;

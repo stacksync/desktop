@@ -14,7 +14,6 @@ import com.stacksync.commons.requests.ShareProposalRequest;
 import com.stacksync.commons.requests.UpdateDeviceRequest;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
@@ -28,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import omq.common.broker.Broker;
 import omq.common.util.Serializers.JavaImp;
 import org.apache.commons.io.IOUtils;
@@ -150,6 +148,7 @@ public class Server {
         Workspace newWorkspace = new Workspace(newWorkspaceId);
         newWorkspace.setSwiftContainer(container);
         newWorkspace.setSwiftURL(storageURL);
+        newWorkspace.setName(folderName);
         
         logger.info("Proposal accepted. New workspace: "+ newWorkspace.getId());
         rWorkspaces.put(newWorkspace.getId(), newWorkspace);

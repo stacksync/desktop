@@ -286,7 +286,37 @@ public class RackspaceTransferManager extends AbstractTransferManager {
 
     @Override
     public void download(RemoteFile remoteFile, File localFile, CloneWorkspace workspace) throws RemoteFileNotFoundException, StorageException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        connect();
+        File tempFile = null;
+        InputStream is = null;
+        
+        try {
+            is = client.getObjectAsStream(workspace.getSwiftContainer(), remoteFile.getName());
+
+            // Save to temp file
+            tempFile = config.getCache().createTempFile(remoteFile.getName());
+            FileUtil.writeFile(is, tempFile);
+
+            FileUtil.copy(tempFile, localFile);
+
+        } catch (Exception ex) {
+            logger.error(ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            throw new StorageException("Unable to download file '" + remoteFile.getName(), ex);
+        } finally {
+            try {
+                if (is != null){
+                    is.close();
+                }
+            } catch (IOException ex) {
+                logger.error("I/O Excdeption: ", ex);
+                RemoteLogs.getInstance().sendLog(ex);
+            } 
+            
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
     }
 
     @Override

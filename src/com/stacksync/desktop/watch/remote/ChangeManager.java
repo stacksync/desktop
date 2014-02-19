@@ -43,6 +43,7 @@ import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.Chunker;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
@@ -700,7 +701,12 @@ public class ChangeManager {
                 logger.info("- Downloading chunk (" + chunkNum + "/" + file.getChunks().size() + ") " + chunk + " ...");
 
                 String fileName = chunk.getFileName();
-                transfer.download(new RemoteFile(fileName), chunkCacheFile);                
+                CloneWorkspace workspace = file.getWorkspace();
+                if (workspace.getSwiftStorageURL() != null) {
+                    transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);
+                } else {
+                    transfer.download(new RemoteFile(fileName), chunkCacheFile);
+                }            
 
                 // Change DB state of chunk
                 chunk.setCacheStatus(CacheStatus.CACHED);
