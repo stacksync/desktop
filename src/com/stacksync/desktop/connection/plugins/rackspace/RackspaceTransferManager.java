@@ -285,13 +285,17 @@ public class RackspaceTransferManager extends AbstractTransferManager {
     }
 
     @Override
-    public void download(RemoteFile remoteFile, File localFile, CloneWorkspace workspace) throws RemoteFileNotFoundException, StorageException {
+    public void download(RemoteFile remoteFile, File localFile, CloneWorkspace workspace) 
+            throws RemoteFileNotFoundException, StorageException {
+        
         connect();
         File tempFile = null;
         InputStream is = null;
         
         try {
-            is = client.getObjectAsStream(workspace.getSwiftContainer(), remoteFile.getName());
+            String storageURL = workspace.getSwiftStorageURL();
+            String container = workspace.getSwiftContainer();
+            is = client.getSharedObjectAsStream(storageURL, container, remoteFile.getName());
 
             // Save to temp file
             tempFile = config.getCache().createTempFile(remoteFile.getName());
@@ -334,7 +338,8 @@ public class RackspaceTransferManager extends AbstractTransferManager {
         
         try {
             // Upload
-            client.storeObjectAs(workspace.getSwiftContainer(), localFile, "application/x-Stacksync", remoteFile.getName());
+            client.storeSharedObjectAs(workspace.getSwiftStorageURL(), workspace.getSwiftContainer(), localFile,
+                    "application/x-Stacksync", remoteFile.getName());
         } catch (OverQuotaException ex) {
             logger.error("Quota limit exceeded. Could not upload file "+localFile.getName(), ex);
             throw new StorageQuotaExcedeedException(ex);

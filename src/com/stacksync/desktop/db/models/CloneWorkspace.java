@@ -33,7 +33,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="local_revision", nullable=false)
     private Integer localLastUpdate;
-        
+    
     @Column(name="remote_revision", nullable=false)
     private Integer remoteLastUpdate;
     
