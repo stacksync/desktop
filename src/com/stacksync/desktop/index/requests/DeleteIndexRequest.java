@@ -26,6 +26,7 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.util.FileUtil;
+import myLogger.MyFunctionProcessLogger;
 import myLogger.MyLogger;
 import myLogger.MyProcessLogger;
 
@@ -60,6 +61,7 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
     @Override
     public void process() {
         logger.info("Indexer: Deleting file  "+file.getAbsolutePath());
+        MyFunctionProcessLogger.getInstance().info(System.currentTimeMillis(), "DeleteIndexRequest", "process",file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.START, "DELETED");
         
         // ignore file
         if (FileUtil.checkIgnoreFile(root, file)) {
@@ -133,7 +135,9 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
             }
         }
         
-        MyProcessLogger.getInstance().info(System.currentTimeMillis(), "DeleteIndexRequest", "process",file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "DELETED");
-
+        
+        long stop = System.currentTimeMillis();
+        MyProcessLogger.getInstance().info(stop, "DeleteIndexRequest", "process",file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "DELETED");
+        MyFunctionProcessLogger.getInstance().info(stop, "DeleteIndexRequest", "process",file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "DELETED");
     }
 }

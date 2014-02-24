@@ -24,6 +24,8 @@ public abstract class MyLogger {
     protected File logFile;
     protected BufferedWriter buff;
 
+    protected final static String PATH = "/home/lab144/Desktop/";
+    
     public MyLogger(String name){
         try {
             logFile = new File(name); 

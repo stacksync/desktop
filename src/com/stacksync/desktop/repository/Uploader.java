@@ -268,7 +268,7 @@ public class Uploader {
             file.setSyncStatus(SyncStatus.UPTODATE);
             file.merge();
 
-            MyStorageLogger.getInstance().info(System.currentTimeMillis(), "Uploader", "processRequest", file.getPath(), file.getName(), file.isFolder(), MyLogger.ACTION.START, file.getStatus().toString());
+            MyStorageLogger.getInstance().info(System.currentTimeMillis(), "Uploader", "processRequest", file.getPath(), file.getName(), file.isFolder(), MyLogger.ACTION.STOP, file.getStatus().toString());
             
             touch(file, SyncStatus.UPTODATE);
         }

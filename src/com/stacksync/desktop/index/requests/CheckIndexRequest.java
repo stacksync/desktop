@@ -36,6 +36,10 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
     
     private File file;
 
+    public File getFile(){
+        return file;
+    }
+    
     public CheckIndexRequest(Folder root, File file) {
         super(root);    
         this.file = file;

@@ -10,7 +10,7 @@ package myLogger;
  */
 public class MyStorageLogger extends MyLogger{
     
-    private final static String LOG_NAME = "/home/lab144/Desktop/storage.log";
+    private final static String LOG_NAME = PATH + "storage.log";
     private static MyStorageLogger instance;
     
     /**

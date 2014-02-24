@@ -33,6 +33,7 @@ import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
+import myLogger.MyFunctionProcessLogger;
 import myLogger.MyLogger;
 import myLogger.MyProcessLogger;
 
@@ -48,6 +49,10 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     private CloneFile previousVersion;    
     private long checksum;
 
+    public File getFile(){
+        return file;
+    }
+    
     public NewIndexRequest(Folder root, File file, CloneFile previousVersion, long checksum) {
         super(root);
   
@@ -59,6 +64,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     @Override
     public void process() {                
         logger.info("Indexer: Indexing new file "+file+" ...");
+        MyFunctionProcessLogger.getInstance().info(System.currentTimeMillis(), "NewIndexRequest", "process", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.START, "NEW");
         
         // ignore file        
         if (FileUtil.checkIgnoreFile(root, file)) {
@@ -121,8 +127,11 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             processFile(newVersion);
         }
         
+        
+        long stop = System.currentTimeMillis();
          // When the file is processed and queued (if necessary) the process action ends
-        MyProcessLogger.getInstance().info(System.currentTimeMillis(), "NewIndexRequest", "process", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "NEW");
+        MyProcessLogger.getInstance().info(stop, "NewIndexRequest", "process", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "NEW");
+        MyFunctionProcessLogger.getInstance().info(stop, "NewIndexRequest", "process", file.getPath(), file.getName(), file.isDirectory(), MyLogger.ACTION.STOP, "NEW");
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
