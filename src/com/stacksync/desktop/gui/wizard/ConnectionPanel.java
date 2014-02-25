@@ -44,9 +44,9 @@ public class ConnectionPanel extends SettingsPanel {
         
         // setting text //  
         jLabel9.setText(resourceBundle.getString("cp_simple_title"));
-        jLabel10.setText(resourceBundle.getString("cp_simple_intro1"));               
-        jLabel11.setText(resourceBundle.getString("cp_simple_intro2"));                
-        lblConnectionTitle.setText(resourceBundle.getString("cp_simple_user_credentials"));        
+        jLabel10.setText(resourceBundle.getString("cp_simple_intro1"));
+        jLabel11.setText(resourceBundle.getString("cp_simple_intro2"));
+        lblConnectionTitle.setText(resourceBundle.getString("cp_simple_user_credentials"));
     }
 
     @Override

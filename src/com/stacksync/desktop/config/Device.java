@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.stacksync.desktop.config;
 
 import com.stacksync.desktop.config.profile.Profile;
@@ -49,13 +45,11 @@ public class Device implements Configurable {
             return;
         }
         
-        //setId(Long.parseLong(node.getProperty("id")));
         setName(node.getProperty("name").replace("-", "_"));
     }
 
     @Override
     public void save(ConfigNode node) {
-        //node.setProperty("id", id);
         node.setProperty("name", name);
     }
     

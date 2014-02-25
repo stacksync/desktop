@@ -6,7 +6,7 @@ import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.exceptions.InitializationException;
-import com.stacksync.desktop.gui.wizard.RepositoryTestPanel.TestListener;
+import com.stacksync.desktop.gui.wizard.TestListener;
 import com.stacksync.desktop.syncserver.Server;
 import java.io.Serializable;
 import java.util.ArrayList;

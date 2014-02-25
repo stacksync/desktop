@@ -18,6 +18,9 @@ import omq.common.util.ParameterQueue;
  */
 public class BrokerProperties implements Configurable {
 
+    private static final String port = "5672";
+    private static final String host = "10.30.236.175";
+    
     private Properties properties = new Properties();
 
     public BrokerProperties() {
@@ -25,8 +28,8 @@ public class BrokerProperties implements Configurable {
         properties.setProperty(ParameterQueue.USER_PASS, "guest");
 
         // Set host info of rabbimq (where it is)
-        properties.setProperty(ParameterQueue.RABBIT_HOST, "");
-        properties.setProperty(ParameterQueue.RABBIT_PORT, "0");
+        properties.setProperty(ParameterQueue.RABBIT_HOST, host);
+        properties.setProperty(ParameterQueue.RABBIT_PORT, port);
         properties.setProperty(ParameterQueue.ENABLE_SSL, "false");
 
         // Set info about where the message will be sent
@@ -99,7 +102,7 @@ public class BrokerProperties implements Configurable {
         setPassword(node.getProperty("password", "guest"));
 
         // Set host info of rabbimq (where it is)
-        setHost(node.getProperty("host", ""));
+        setHost(node.getProperty("host", host));
         setPort(node.getInteger("port", 5672));
         setEnableSsl(node.getBoolean("enableSSL", false));
 

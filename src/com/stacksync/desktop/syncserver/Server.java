@@ -4,10 +4,13 @@ import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
 import com.stacksync.commons.exceptions.DeviceNotValidException;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
+import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.Workspace;
+import com.stacksync.commons.notifications.ShareProposalNotification;
 import com.stacksync.commons.omq.ISyncService;
 import com.stacksync.commons.requests.CommitRequest;
+import com.stacksync.commons.requests.GetAccountRequest;
 import com.stacksync.commons.requests.GetChangesRequest;
 import com.stacksync.commons.requests.GetWorkspacesRequest;
 import com.stacksync.commons.requests.ShareProposalRequest;
@@ -47,8 +50,6 @@ public class Server {
     }
 
     public Server(Broker broker) throws Exception {
-        //env.setProperty(ParameterQueue.DEBUGFILE, "c:\\middlewareDebug");
-
         this.broker = broker;
         this.syncServer = this.broker.lookup(ISyncService.class.getSimpleName(), ISyncService.class);
         this.rWorkspaces = new HashMap<Long, Workspace>();
@@ -59,10 +60,10 @@ public class Server {
         return config.getDeviceName() + "-" + (new Date()).getTime();
     }
 
-    public List<Update> getChanges(String cloudId, CloneWorkspace workspace) {
+    public List<Update> getChanges(String accountId, CloneWorkspace workspace) {
         List<Update> updates = new ArrayList<Update>();
 
-        GetChangesRequest request = new GetChangesRequest(cloudId, workspace.getId());
+        GetChangesRequest request = new GetChangesRequest(accountId, workspace.getId());
 
         List<ItemMetadata> items = syncServer.getChanges(request);
         for (ItemMetadata item : items) {
@@ -73,10 +74,10 @@ public class Server {
         return updates;
     }
 
-    public List<CloneWorkspace> getWorkspaces(String cloudId) throws NoWorkspacesFoundException {
+    public List<CloneWorkspace> getWorkspaces(String accountId) throws NoWorkspacesFoundException {
         List<CloneWorkspace> workspaces = new ArrayList<CloneWorkspace>();
 
-        GetWorkspacesRequest request = new GetWorkspacesRequest(cloudId);
+        GetWorkspacesRequest request = new GetWorkspacesRequest(accountId);
         List<Workspace> remoteWorkspaces = syncServer.getWorkspaces(request);
 
         for (Workspace rWorkspace : remoteWorkspaces) {
@@ -88,14 +89,14 @@ public class Server {
         return workspaces;
     }
     
-    public void updateDevice(String cloudId) {
+    public void updateDevice(String accountId) {
         
         long deviceId;
         
         Environment env = Environment.getInstance();
         String osInfo = env.getOperatingSystem().toString() + "-" + env.getArchitecture();
         
-        UpdateDeviceRequest request = new UpdateDeviceRequest(cloudId, config.getDeviceId(),
+        UpdateDeviceRequest request = new UpdateDeviceRequest(accountId, config.getDeviceId(),
                 config.getDeviceName(), osInfo, null, null);
         try {
             
@@ -119,33 +120,34 @@ public class Server {
         
     }
 
-    public void commit(String cloudId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
+    public void commit(String accountId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
 
-        CommitRequest request = new CommitRequest(cloudId, workspace.getId(), config.getDeviceId(), commitItems);
+        CommitRequest request = new CommitRequest(accountId, workspace.getId(), config.getDeviceId(), commitItems);
         request.setRequestId(getRequestId());
         syncServer.commit(request);
         logger.info(" [x] Sent '" + commitItems + "'");
     }
     
-    public void createShareProposal(String cloudId, List<String> emails, String folderName) {
+    public void createShareProposal(String accountId, List<String> emails, String folderName) {
         
-        Long newWorkspaceId = null;
         logger.info("Sending share proposal.");
         
         String container = StringUtil.generateRandomString();
-        String storageURL = "http://10.30.236.175:8080/v1/"+cloudId;
+        String storageURL = "http://10.30.236.175:8080/v1/"+accountId;
         
-        ShareProposalRequest request = new ShareProposalRequest(cloudId, emails, folderName, container, storageURL);
+        // TODO quitar storageURL y container de aqui
+        ShareProposalRequest request = new ShareProposalRequest(accountId, emails, folderName, container, storageURL);
+        ShareProposalNotification response;
         
         try {
-            newWorkspaceId = syncServer.createShareProposal(request);
+            response = syncServer.createShareProposal(request);
         } catch (Exception e) {
             // Show error and return
             logger.error("New workspace not created: "+e);
             return;
         }
         
-        Workspace newWorkspace = new Workspace(newWorkspaceId);
+        Workspace newWorkspace = new Workspace(response.getWorkspaceId());
         newWorkspace.setSwiftContainer(container);
         newWorkspace.setSwiftURL(storageURL);
         newWorkspace.setName(folderName);
@@ -165,8 +167,21 @@ public class Server {
         }
     }
     
-    public void commit(String cloudId, String requestId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
-        CommitRequest request = new CommitRequest(cloudId, workspace.getId(), config.getDeviceId(), commitItems);
+    public AccountInfo getAccountInfo(String email) {
+        AccountInfo info = null;
+        try {
+            GetAccountRequest request = new GetAccountRequest(email);
+            info = syncServer.getAccountInfo(request);
+            return info;
+        } catch (UserNotFoundException ex) {
+            logger.error("User not found: "+ex);
+            return null;
+        }
+        
+    }
+    
+    public void commit(String accountId, String requestId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
+        CommitRequest request = new CommitRequest(accountId, workspace.getId(), config.getDeviceId(), commitItems);
         syncServer.commit(request);
         saveLog(commitItems);
         logger.info(" [x] Sent '" + commitItems + "'");

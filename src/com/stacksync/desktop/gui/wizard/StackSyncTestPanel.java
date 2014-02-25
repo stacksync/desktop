@@ -1,13 +1,11 @@
-/*
- * RepositoryTestPanel2.java
- *
- * Created on May 4, 2011, 6:27:37 PM
- */
 package com.stacksync.desktop.gui.wizard;
 
+import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.desktop.config.Repository;
+import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
+import com.stacksync.desktop.connection.plugins.rackspace.RackspaceConnection;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CacheException;
 import com.stacksync.desktop.exceptions.InitializationException;
@@ -15,42 +13,75 @@ import com.stacksync.desktop.exceptions.NoRepositoryFoundException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
+import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.desktop.util.StringUtil;
-import org.apache.log4j.Logger;
 
-/**
- *
- * @author pheckel
- */
-public class RepositoryTestPanel extends SettingsPanel {    
+public class StackSyncTestPanel extends SettingsPanel {    
     
     private class TestWorker extends Thread{
 
         private TestListener callbackListener;
-        private Repository repository;
         
-        public TestWorker(String name, Repository repository, TestListener callbackListener){
+        public TestWorker(String name, TestListener callbackListener){
             super(name);
             
-            this.repository = repository;
             this.callbackListener = callbackListener;
         }
 
         private void doProcess() throws CacheException, StorageConnectException,
                 NoRepositoryFoundException, StorageException, InitializationException{
-            
-            TransferManager transfer = repository.getConnection().createTransferManager();
+                 
+            progress.setValue(1);
+            setStatus("Connecting to StackSync server...");
+            profile.setFactory();
             
             progress.setValue(2);
-            transfer.initStorage(); 
-
-          
+            setStatus("Getting acocunt info...");
+            /*Server server = profile.getServer();
+            AccountInfo info = server.getAccountInfo(profile.getAccount().getEmail());
+            if (info == null) {
+                throw new InitializationException("Unable to get account info.");
+            }
+            
+            RackspaceConnection connection = new RackspaceConnection();
+            connection.setUser(info.getSwiftUser());
+            connection.setApiKey(profile.getAccount().getPassword());
+            connection.setTenant(info.getSwiftTenant());
+            connection.setAuthUrl(info.getSwiftAuthUrl());
+            connection.setUsername(info.getSwiftTenant()+":"+info.getSwiftUser());
+            connection.setContainer("");
+            
+            Repository repository = new Repository();
+            repository.setConnection(connection);
+            profile.setRepository(repository);*/
+            
+            
+            // TODO just to test. Remove
+            RackspaceConnection connection = new RackspaceConnection();
+            connection.setUser("tester1");
+            connection.setApiKey(profile.getAccount().getPassword());
+            connection.setTenant("tester1");
+            connection.setAuthUrl("http://10.30.236.175:5000/v2.0/tokens");
+            connection.setUsername("tester1:tester1");
+            connection.setContainer("");
+            
+            Repository repository = new Repository();
+            repository.setConnection(connection);
+            profile.setRepository(repository);
+            
+            progress.setValue(3);
+            setStatus("Validating user...");
+            TransferManager transfer = connection.createTransferManager();
+            try {           
+                transfer.connect();
+            } catch (StorageConnectException ex) {
+                throw new StorageConnectException(ex);
+            }
+            
             progress.setValue(4);   
-            setStatus("Initializing workspaces...");
-            //profile.setCloudId(transfer.getUser());
-            profile.setFactory();
+            setStatus("Obtaining workspaces...");
             CloneWorkspace.InitializeWorkspaces(profile, callbackListener);
-            progress.setValue(progress.getMaximum());            
+            progress.setValue(progress.getMaximum());
         }
         
         
@@ -89,10 +120,10 @@ public class RepositoryTestPanel extends SettingsPanel {
     
     }
     
-    private final Logger logger = Logger.getLogger(RepositoryTestPanel.class.getName());
+    private final Logger logger = Logger.getLogger(StackSyncTestPanel.class.getName());
     
     /** Creates new form RepositoryTestPanel2 */
-    public RepositoryTestPanel(Profile profile) {    	
+    public StackSyncTestPanel(Profile profile) {    	
         initComponents();
 	
         this.profile = profile;	
@@ -116,13 +147,11 @@ public class RepositoryTestPanel extends SettingsPanel {
     
     public void doRepoAction(final TestListener callbackListener) {
         progress.setMinimum(0);
-        progress.setMaximum(5);
+        progress.setMaximum(4);
 
         progress.setValue(1);      
         
-        Repository repository = profile.getRepository();                
-
-        TestWorker repositoryTest = new TestWorker("RepositoryTest", repository, callbackListener);
+        TestWorker repositoryTest = new TestWorker("RepositoryTest", callbackListener);
         repositoryTest.start();
     }
 

@@ -66,7 +66,6 @@ public class Profile implements Configurable {
     private boolean enabled;
     private boolean initialized;
     private String name;
-    private String cloudId;
     private Repository repository;
     private Folder folder;
     private Uploader uploader;
@@ -74,6 +73,7 @@ public class Profile implements Configurable {
     private BrokerProperties brokerProps;
     private Broker broker;
     private Server server;
+    private Account account;
 
     public Profile() {
         active = false;
@@ -81,6 +81,7 @@ public class Profile implements Configurable {
         
         enabled = true;
         name = "(unknown)";
+        account = new Account();
 
     }
     
@@ -134,9 +135,9 @@ public class Profile implements Configurable {
 
         // Activate
         if (active) {
-            File folder = getFolder().getLocalFile();
-            if (!folder.exists()) {
-                folder.mkdirs();
+            File localFolder = getFolder().getLocalFile();
+            if (!localFolder.exists()) {
+                localFolder.mkdirs();
             }
 
             TransferManager transferManager = repository.getConnection().createTransferManager();
@@ -150,11 +151,9 @@ public class Profile implements Configurable {
             } catch (StorageException ex) {
                 throw new InitializationException(ex);
             }
-            
-            cloudId = transferManager.getUser();
 
             setFactory();
-            server.updateDevice(cloudId);
+            server.updateDevice(getCloudId());
             Map<Long, CloneWorkspace> workspaces = CloneWorkspace.InitializeWorkspaces(this);
 
             // Start threads 1/2
@@ -163,9 +162,9 @@ public class Profile implements Configurable {
             changeManager.start();
             
             try {
-                broker.bind(cloudId, new RemoteClientImpl());
+                broker.bind(getCloudId(), new RemoteClientImpl());
             } catch (Exception ex) {
-                logger.error("TONTO!");
+                logger.error("Error binding RemoteClient implementation: ", ex);
                 throw new InitializationException(ex);
             } 
                     
@@ -178,7 +177,7 @@ public class Profile implements Configurable {
                 }
 
                 // Get changes
-                List<Update> changes = server.getChanges(cloudId, w);
+                List<Update> changes = server.getChanges(getCloudId(), w);
                 changeManager.queueUpdates(changes);
             }
 
@@ -226,7 +225,7 @@ public class Profile implements Configurable {
         }
         
         // Get changes
-        List<Update> changes = server.getChanges(cloudId, cloneWorkspace);
+        List<Update> changes = server.getChanges(getCloudId(), cloneWorkspace);
         changeManager.queueUpdates(changes);
         
     }
@@ -252,11 +251,7 @@ public class Profile implements Configurable {
     }
     
     public String getCloudId() {
-        return cloudId;
-    }
-    
-    public void setCloudId(String cloudId) {
-        this.cloudId = cloudId;
+        return this.account.getId();
     }
 
     public void setRepository(Repository repository) {
@@ -282,6 +277,14 @@ public class Profile implements Configurable {
     public void setFolder(Folder folder) {
         this.folder = folder;
     }
+    
+    public Account getAccount(){
+        return this.account;
+    }
+    
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 
     @Override
     public void load(ConfigNode node) throws ConfigException {
@@ -295,7 +298,6 @@ public class Profile implements Configurable {
         try {
             enabled = node.getBoolean("enabled");
             name = node.getProperty("name");
-            cloudId = node.getProperty("cloudid");
 
             // Repo
             repository = new Repository();
@@ -304,13 +306,9 @@ public class Profile implements Configurable {
             // Folder
             folder = new Folder(this);
             folder.load(node.findChildByXPath("folder"));
-            //folders = new Folders(this);
-            //folders.load(node.findChildByXPath("folders"));
-
-            // Remote IDs
-            /*for (Folder folder : folders.list()) {
-                repository.getAvailableRemoteIds().add(folder.getRemoteId());
-            }*/
+            
+            account = new Account();
+            account.load(node.findChildByName("account"));
 
         } catch (Exception e) {
             throw new ConfigException("Unable to load profile: " + e, e);
@@ -321,14 +319,10 @@ public class Profile implements Configurable {
     public void save(ConfigNode node) {
         node.setProperty("enabled", enabled);
         node.setProperty("name", name);
-        node.setProperty("cloudid", cloudId);
-
-        // Repo
+        
         repository.save(node.findOrCreateChildByXpath("repository", "repository"));
-
-        // Folders
         folder.save(node.findOrCreateChildByXpath("folder", "folder"));
-
+        account.save(node.findOrCreateChildByXpath("account", "account"));
     }
 
     public void stop() {

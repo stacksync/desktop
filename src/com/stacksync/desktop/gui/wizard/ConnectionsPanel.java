@@ -94,11 +94,20 @@ public class ConnectionsPanel extends SettingsPanel {
     }
 
     @Override
-    public void clean() { }
+    public void clean() {
+        if(pnlConnection != null){
+            pnlConnection.clean();
+        }
+    }
 
     @Override
     public boolean check() {        
-        return true;
+        boolean check = false;
+        if(pnlConnection != null){
+            check = pnlConnection.check();
+        }
+        
+        return check;
     }
     
     private class ComboBoxItem {

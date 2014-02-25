@@ -107,50 +107,12 @@ public class SimpleFolderSelectionPanel extends SettingsPanel {
 
     @Override
     public void load() {
-        // If repository defined, i.g. this is not in the "New Profile" wizard,
-        // to try to retrieve the available remoteIds
-        if (profile.getRepository().isConnected()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {                    
-                    logger.info("Retrieving available remoteIds from repository.");
-                    
-                    //lblLoading.setVisible(true);
-                    //lblLoading.setText(resourceBundle.getString("ftp_loading"));
 
-                    try {
+        Folder folder = new Folder(profile);
+        folder.setLocalFile(new File(env.getDefaultUserHome() + "stacksync_folder"));
 
-                        if (profile.getFolder() == null) {
-
-                            Folder folder = new Folder(profile);
-                            folder.setLocalFile(new File(env.getDefaultUserHome() + "stacksync_folder"));
-
-                            profile.setFolder(folder);
-                        }
-
-                        txtFolderPath.setText(env.getDefaultUserHome() + "stacksync_folder");
-                        //tblFolders.updateUI();
-                        //lblLoading.setVisible(false);
-                        
-                        //if(profile.getFolders().list().size() > 0){
-                        //    btnAdd.setVisible(false);
-                        //}
-                    } catch (Exception ex) {
-                        logger.error("Could not load repository infos: ", ex);
-                        RemoteLogs.getInstance().sendLog(ex);
-                       //lblLoading.setText(resourceBundle.getString("ftp_err_loading_repository_folders"));
-                    } 
-                }
-            }, "UpdateRepo").start();
-        } else { //repository is not connected
-            
-            Folder folder = new Folder(profile);
-            folder.setLocalFile(new File(env.getDefaultUserHome() + "stacksync_folder"));
-
-            profile.setFolder(folder);
-            txtFolderPath.setText(env.getDefaultUserHome() + "stacksync_folder");
-            //tblFolders.updateUI();
-        }
+        profile.setFolder(folder);
+        txtFolderPath.setText(env.getDefaultUserHome() + "stacksync_folder");
     }
 
     @Override

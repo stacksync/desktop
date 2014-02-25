@@ -45,6 +45,8 @@ public class RackspaceConnection implements Connection {
     private String apiKey;
     private String container;
     private String authUrl;
+    private String tenant;
+    private String user;
     private ResourceBundle resourceBundle;
     
     public RackspaceConnection() {
@@ -112,6 +114,22 @@ public class RackspaceConnection implements Connection {
 
     public void setAuthUrl(String authUrl) {
         this.authUrl = authUrl;
+    }
+
+    public String getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(String tenant) {
+        this.tenant = tenant;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
     
     @Override

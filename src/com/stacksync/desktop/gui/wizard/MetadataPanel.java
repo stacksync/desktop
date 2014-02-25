@@ -1,20 +1,3 @@
-/*
- * Syncany, www.syncany.org
- * Copyright (C) 2011 Philipp C. Heckel <philipp.heckel@gmail.com> 
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.stacksync.desktop.gui.wizard;
 
 import com.stacksync.desktop.Environment;
@@ -24,16 +7,11 @@ import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
 
-/**
- *
- * @author pheckel
- */
 public class MetadataPanel extends SettingsPanel {
     
     private final Environment env = Environment.getInstance();
     private BrokerProperties rabbitConnection;
     
-    /** Creates new form ProfileBasicsPanel2 */
     public MetadataPanel(Profile profile) {
         this.profile = profile;   
         initComponents();
@@ -49,10 +27,22 @@ public class MetadataPanel extends SettingsPanel {
         
         chkAuthenticated.setSelected(false);
         chkUseSSL.setSelected(false);
+
         txtUsername.setText("guest");
         txtPassword.setText("guest");
+
+        rabbitConnection = config.getBrokerProps();
         
-        rabbitConnection = config.getBrokerProps();        
+        hideFields();
+    }
+    
+    private void hideFields() {
+        chkAuthenticated.setVisible(false);
+        chkUseSSL.setVisible(false);
+        txtUsername.setVisible(false);
+        txtPassword.setVisible(false);
+        lblPassword.setVisible(false);
+        lblUsername.setVisible(false);
     }
 
     @Override
@@ -154,8 +144,8 @@ public class MetadataPanel extends SettingsPanel {
         txtMachineName = new javax.swing.JTextField();
         lblPort = new javax.swing.JLabel();
         spnPort = new javax.swing.JSpinner();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        lblUsername = new javax.swing.JLabel();
+        lblPassword = new javax.swing.JLabel();
         txtUsername = new javax.swing.JTextField();
         txtPassword = new javax.swing.JPasswordField();
         chkAuthenticated = new javax.swing.JCheckBox();
@@ -187,11 +177,11 @@ public class MetadataPanel extends SettingsPanel {
         spnPort.setName("spnPort"); // NOI18N
         spnPort.setValue(5672);
 
-        jLabel1.setText("Username:");
-        jLabel1.setName("jLabel1"); // NOI18N
+        lblUsername.setText("Username:");
+        lblUsername.setName("lblUsername"); // NOI18N
 
-        jLabel2.setText("Password:");
-        jLabel2.setName("jLabel2"); // NOI18N
+        lblPassword.setText("Password:");
+        lblPassword.setName("lblPassword"); // NOI18N
 
         txtUsername.setEnabled(false);
         txtUsername.setName("txtUsername"); // NOI18N
@@ -231,8 +221,8 @@ public class MetadataPanel extends SettingsPanel {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblMachineName)
                             .addComponent(lblServerIp)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2))
+                            .addComponent(lblUsername)
+                            .addComponent(lblPassword))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkAuthenticated)
@@ -268,12 +258,12 @@ public class MetadataPanel extends SettingsPanel {
                 .addComponent(chkAuthenticated)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
+                    .addComponent(lblUsername)
                     .addComponent(txtUsername, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(lblPassword))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblMachineName)
@@ -304,13 +294,13 @@ public class MetadataPanel extends SettingsPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkAuthenticated;
     private javax.swing.JCheckBox chkUseSSL;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel lblConnectionTitle;
     private javax.swing.JLabel lblMachineName;
+    private javax.swing.JLabel lblPassword;
     private javax.swing.JLabel lblPort;
     private javax.swing.JLabel lblServerIp;
     private javax.swing.JLabel lblTitle;
+    private javax.swing.JLabel lblUsername;
     private javax.swing.JSpinner spnPort;
     private javax.swing.JTextField txtMachineName;
     private javax.swing.JPasswordField txtPassword;
