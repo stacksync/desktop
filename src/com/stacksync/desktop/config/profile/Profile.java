@@ -23,13 +23,10 @@ import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.Repository;
-import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
-import com.stacksync.desktop.exceptions.StorageException;
-import com.stacksync.desktop.exceptions.StorageUnauthorizeException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.syncserver.RemoteClientImpl;
@@ -140,21 +137,9 @@ public class Profile implements Configurable {
                 localFolder.mkdirs();
             }
 
-            TransferManager transferManager = repository.getConnection().createTransferManager();
-            try {
-                transferManager.initStorage();
-            } catch (StorageUnauthorizeException ex) {
-                // Is this possible?? Password changed??
-                throw new InitializationException(ex);
-            } catch (StorageConnectException ex) {
-                throw ex;
-            } catch (StorageException ex) {
-                throw new InitializationException(ex);
-            }
-
             setFactory();
-            server.updateDevice(getCloudId());
-            Map<Long, CloneWorkspace> workspaces = CloneWorkspace.InitializeWorkspaces(this);
+            server.updateDevice(getAccountId());
+            Map<String, CloneWorkspace> workspaces = CloneWorkspace.InitializeWorkspaces(this);
 
             // Start threads 1/2
             uploader.start();
@@ -162,7 +147,7 @@ public class Profile implements Configurable {
             changeManager.start();
             
             try {
-                broker.bind(getCloudId(), new RemoteClientImpl());
+                broker.bind(getAccountId(), new RemoteClientImpl());
             } catch (Exception ex) {
                 logger.error("Error binding RemoteClient implementation: ", ex);
                 throw new InitializationException(ex);
@@ -177,7 +162,7 @@ public class Profile implements Configurable {
                 }
 
                 // Get changes
-                List<Update> changes = server.getChanges(getCloudId(), w);
+                List<Update> changes = server.getChanges(getAccountId(), w);
                 changeManager.queueUpdates(changes);
             }
 
@@ -225,7 +210,7 @@ public class Profile implements Configurable {
         }
         
         // Get changes
-        List<Update> changes = server.getChanges(getCloudId(), cloneWorkspace);
+        List<Update> changes = server.getChanges(getAccountId(), cloneWorkspace);
         changeManager.queueUpdates(changes);
         
     }
@@ -250,7 +235,7 @@ public class Profile implements Configurable {
         this.name = name;
     }
     
-    public String getCloudId() {
+    public String getAccountId() {
         return this.account.getId();
     }
 

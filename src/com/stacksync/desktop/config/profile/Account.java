@@ -9,8 +9,8 @@ public class Account implements Configurable {
     private String id;
     private String email;
     private String password;
-    private Long quota;
-    private Long quotaUsed;
+    private Integer quotaLimit;
+    private Integer quotaUsed;
     
     public Account() {
         this(null);
@@ -28,11 +28,11 @@ public class Account implements Configurable {
         this(id, email, password, null, null);
     }
     
-    public Account(String id, String email, String password, Long quota, Long quotaUsed) {
+    public Account(String id, String email, String password, Integer quotaLimit, Integer quotaUsed) {
         this.id = id;
         this.email = email;
         this.password = password;
-        this.quota = quota;
+        this.quotaLimit = quotaLimit;
         this.quotaUsed = quotaUsed;
     }
 
@@ -60,19 +60,19 @@ public class Account implements Configurable {
         this.password = password;
     }
 
-    public Long getQuota() {
-        return quota;
+    public Integer getQuota() {
+        return quotaLimit;
     }
 
-    public void setQuota(Long quota) {
-        this.quota = quota;
+    public void setQuota(Integer quota) {
+        this.quotaLimit = quota;
     }
 
-    public Long getQuotaUsed() {
+    public Integer getQuotaUsed() {
         return quotaUsed;
     }
 
-    public void setQuotaUsed(Long quotaUsed) {
+    public void setQuotaUsed(Integer quotaUsed) {
         this.quotaUsed = quotaUsed;
     }
 

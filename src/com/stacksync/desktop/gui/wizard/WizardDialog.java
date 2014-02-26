@@ -104,8 +104,8 @@ public class WizardDialog extends JDialog {
                                           //panelMetadataServer,
                                           panelStackSyncTest,
                                           panelEncryption,
-                                          panelFolders,
-                                          panelRepositoryTest
+                                          panelFolders
+                                          //panelRepositoryTest
             };
 
         } else{
@@ -114,8 +114,8 @@ public class WizardDialog extends JDialog {
                                           //panelMetadataServer,
                                           panelStackSyncTest,
                                           panelEncryption,
-                                          panelFolders,
-                                          panelRepositoryTest
+                                          panelFolders
+                                          //panelRepositoryTest
             };
 
         }

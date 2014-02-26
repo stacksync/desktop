@@ -163,7 +163,7 @@ public class RemoteWatcher {
         try {
             logger.info("Commit new changes.");
             
-            Map<Long, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
+            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
             // This hashmap contains a list of files changed in each workspace.
             HashMap<CloneWorkspace, List<ItemMetadata>> workspaces = new HashMap<CloneWorkspace, List<ItemMetadata>>();
@@ -189,12 +189,12 @@ public class RemoteWatcher {
                 }
             }
             
-            String cloudId = transfer.getUser();
+            String accountId = profile.getAccountId();
             
             // Commit all files modified in each workspace
             for (CloneWorkspace workspace : workspaces.keySet()) {
                 List<ItemMetadata> commitItems = workspaces.get(workspace);
-                server.commit(cloudId, workspace, commitItems);
+                server.commit(accountId, workspace, commitItems);
             }
             
         } catch (IOException ex) {

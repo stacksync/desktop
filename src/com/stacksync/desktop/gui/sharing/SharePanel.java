@@ -107,7 +107,7 @@ public class SharePanel extends javax.swing.JPanel {
         Server server = profile.getServer();
         List<String> mails = new ArrayList<String>();
         mails.add(this.emailField.getText());
-        server.createShareProposal(profile.getCloudId(), mails, this.folderNameField.getText());
+        server.createShareProposal(profile.getAccountId(), mails, this.folderNameField.getText());
     }//GEN-LAST:event_shareButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed

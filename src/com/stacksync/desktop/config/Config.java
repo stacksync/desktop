@@ -42,6 +42,7 @@ import com.stacksync.desktop.util.FileUtil;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
+import java.util.UUID;
 import org.w3c.dom.Document;
 
 /**
@@ -156,11 +157,11 @@ public class Config {
         this.device.setName(deviceName.replace("-", "_"));
     }
     
-    public Long getDeviceId() {
+    public UUID getDeviceId() {
         return this.device.getId();
     }
         
-    public void setDeviceId(Long id) {
+    public void setDeviceId(UUID id) {
         this.device.setId(id);
     }
     
@@ -498,6 +499,9 @@ public class Config {
 
         // Complex subvalues
         device.load(node.findChildByName("device"));
+        if (device.getName() == null || device.getName().isEmpty()) {
+            device.setName(env.getDeviceName());
+        }
         brokerProps.load(node.findChildByName("rabbitMQ"));
         database.load(node.findChildByName("database"));
         cache.load(node.findChildByName("cache"));

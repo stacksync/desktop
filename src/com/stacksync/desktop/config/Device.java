@@ -3,22 +3,23 @@ package com.stacksync.desktop.config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
+import java.util.UUID;
 
 public class Device implements Configurable {
     
-    private Long id;
+    private UUID id;
     private String name;
     
     public Device() {
         
     }
     
-    public Device(Long id, String name) {
+    public Device(UUID id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -26,7 +27,7 @@ public class Device implements Configurable {
         return name;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

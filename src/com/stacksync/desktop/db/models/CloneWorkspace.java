@@ -26,7 +26,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
 
     @Id
     @Column(name="id", nullable=false)
-    private Long id;
+    private String id;
     
     @Column(name="path_workspace", nullable=false)
     private String pathWorkspace;
@@ -42,6 +42,9 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="swift_url")
     private String swiftStorageURL;
+    
+    @Column(name="owner", nullable=false)
+    private String owner;
           
     @OneToMany
     private List<CloneFile> files;
@@ -59,9 +62,10 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.remoteLastUpdate = r.getLatestRevision();
         this.swiftContainer = r.getSwiftContainer();
         this.swiftStorageURL = r.getSwiftURL();
+        this.owner = r.getOwner().getId();
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
     
@@ -105,6 +109,14 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.swiftStorageURL = swiftStorageURL;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
     @Override
     public int hashCode() {
         return id.hashCode();
@@ -129,14 +141,14 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         return this.files;
     }
     
-    public static Map<Long, CloneWorkspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener)
+    public static Map<String, CloneWorkspace> InitializeWorkspaces(Profile profile, final TestListener callbackListener)
             throws InitializationException{
                   
         List<CloneWorkspace> remoteWorkspaces = new ArrayList<CloneWorkspace>();
                                             
         try {
             Server server = profile.getServer();
-            remoteWorkspaces = server.getWorkspaces(profile.getCloudId());
+            remoteWorkspaces = server.getWorkspaces(profile.getAccountId());
         } catch (NoWorkspacesFoundException ex) {
             if(callbackListener != null){
                 callbackListener.setStatus("Can't load the workspaces from syncserver. ");
@@ -148,7 +160,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         }
 
         DatabaseHelper db = DatabaseHelper.getInstance();
-        Map<Long, CloneWorkspace> localWorkspaces = db.getWorkspaces();
+        Map<String, CloneWorkspace> localWorkspaces = db.getWorkspaces();
 
         for(CloneWorkspace w: remoteWorkspaces){                
             if(localWorkspaces.containsKey(w.getId())){
@@ -168,7 +180,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         return localWorkspaces;
     }
     
-    public static Map<Long, CloneWorkspace> InitializeWorkspaces(Profile profile) 
+    public static Map<String, CloneWorkspace> InitializeWorkspaces(Profile profile) 
         throws InitializationException{
         
         return InitializeWorkspaces(profile, null);

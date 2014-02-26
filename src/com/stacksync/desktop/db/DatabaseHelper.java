@@ -464,7 +464,7 @@ public class DatabaseHelper {
         return cal.get(Calendar.MINUTE) - 1;
     }
     
-    public Map<Long, List<CloneFile>> getHistoryUptoDate() {
+    public Map<String, List<CloneFile>> getHistoryUptoDate() {
         Calendar cal = Calendar.getInstance();  
         cal.set(getFieldTimeout(), getValueTimeout(cal)); 
         Date time = cal.getTime();        
@@ -483,7 +483,7 @@ public class DatabaseHelper {
         query.setParameter("statusSync", CloneFile.SyncStatus.UPTODATE);       
         query.setParameter("timeNow", time);
         
-        Map<Long, List<CloneFile>> workspaces = new HashMap<Long, List<CloneFile>>();
+        Map<String, List<CloneFile>> workspaces = new HashMap<String, List<CloneFile>>();
         List<CloneFile> clonefiles = query.getResultList();
         for(CloneFile cf: clonefiles){
             if(!workspaces.containsKey(cf.getWorkspace().getId())){
@@ -496,7 +496,7 @@ public class DatabaseHelper {
         return workspaces;
     }
     
-    public Map<Long, CloneWorkspace> getWorkspaces() {        
+    public Map<String, CloneWorkspace> getWorkspaces() {        
         String queryStr = "select w from CloneWorkspace w";        
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
@@ -504,7 +504,7 @@ public class DatabaseHelper {
         
         
         List<CloneWorkspace> workspaces = query.getResultList();
-        Map<Long, CloneWorkspace> localWorkspaces = new HashMap<Long, CloneWorkspace>();
+        Map<String, CloneWorkspace> localWorkspaces = new HashMap<String, CloneWorkspace>();
         
         for (CloneWorkspace w: workspaces){
             localWorkspaces.put(w.getId(), w);

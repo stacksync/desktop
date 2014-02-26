@@ -2,7 +2,7 @@ package com.stacksync.desktop.gui.wizard;
 
 import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.desktop.config.Repository;
-import org.apache.log4j.Logger;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.connection.plugins.rackspace.RackspaceConnection;
@@ -15,6 +15,7 @@ import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
 import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.desktop.util.StringUtil;
+import org.apache.log4j.Logger;
 
 public class StackSyncTestPanel extends SettingsPanel {    
     
@@ -37,7 +38,7 @@ public class StackSyncTestPanel extends SettingsPanel {
             
             progress.setValue(2);
             setStatus("Getting acocunt info...");
-            /*Server server = profile.getServer();
+            Server server = profile.getServer();
             AccountInfo info = server.getAccountInfo(profile.getAccount().getEmail());
             if (info == null) {
                 throw new InitializationException("Unable to get account info.");
@@ -53,11 +54,16 @@ public class StackSyncTestPanel extends SettingsPanel {
             
             Repository repository = new Repository();
             repository.setConnection(connection);
-            profile.setRepository(repository);*/
+            profile.setRepository(repository);
+            
+            Account account = profile.getAccount();
+            account.setId(info.getUserId());
+            account.setQuota(info.getQuotaLimit());
+            account.setQuotaUsed(info.getQuotaUsed());
             
             
             // TODO just to test. Remove
-            RackspaceConnection connection = new RackspaceConnection();
+            /*RackspaceConnection connection = new RackspaceConnection();
             connection.setUser("tester1");
             connection.setApiKey(profile.getAccount().getPassword());
             connection.setTenant("tester1");
@@ -67,7 +73,7 @@ public class StackSyncTestPanel extends SettingsPanel {
             
             Repository repository = new Repository();
             repository.setConnection(connection);
-            profile.setRepository(repository);
+            profile.setRepository(repository);*/
             
             progress.setValue(3);
             setStatus("Validating user...");

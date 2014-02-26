@@ -22,17 +22,14 @@ import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.sharing.SharingController;
 import com.stacksync.desktop.util.StringUtil;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import omq.common.broker.Broker;
-import omq.common.util.Serializers.JavaImp;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 public class Server {
@@ -42,7 +39,7 @@ public class Server {
     private final SharingController sharingController = SharingController.getInstance();
     private ISyncService syncServer;
     private Broker broker;
-    private Map<Long, Workspace> rWorkspaces;
+    private Map<String, Workspace> rWorkspaces;
     private int i;
 
     public ISyncService getSyncServer() {
@@ -52,7 +49,7 @@ public class Server {
     public Server(Broker broker) throws Exception {
         this.broker = broker;
         this.syncServer = this.broker.lookup(ISyncService.class.getSimpleName(), ISyncService.class);
-        this.rWorkspaces = new HashMap<Long, Workspace>();
+        this.rWorkspaces = new HashMap<String, Workspace>();
         this.i = 0;
     }
 
@@ -91,7 +88,7 @@ public class Server {
     
     public void updateDevice(String accountId) {
         
-        long deviceId;
+        UUID deviceId;
         
         Environment env = Environment.getInstance();
         String osInfo = env.getOperatingSystem().toString() + "-" + env.getArchitecture();
@@ -178,34 +175,5 @@ public class Server {
             return null;
         }
         
-    }
-    
-    public void commit(String accountId, String requestId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
-        CommitRequest request = new CommitRequest(accountId, workspace.getId(), config.getDeviceId(), commitItems);
-        syncServer.commit(request);
-        saveLog(commitItems);
-        logger.info(" [x] Sent '" + commitItems + "'");
-    }
-
-    private void saveLog(List<ItemMetadata> commitItems) {
-        String debugPath = "test";
-        if (debugPath.length() > 0) {
-            try {
-
-                File outputFolder = new File(debugPath + File.separator + "Client");
-                outputFolder.mkdirs();
-
-                JavaImp serializer = new JavaImp();
-                byte[] bytes = serializer.serialize(commitItems);
-
-                File outputFileContent = new File(outputFolder.getAbsoluteFile() + File.separator + "client-files-" + i);
-                FileOutputStream outputStream = new FileOutputStream(outputFileContent);
-                IOUtils.write(bytes, outputStream);
-                outputStream.close();
-                this.i++;
-            } catch (Exception ex) {
-                //java.util.logging.Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 }
