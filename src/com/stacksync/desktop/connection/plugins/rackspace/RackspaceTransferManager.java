@@ -330,14 +330,15 @@ public class RackspaceTransferManager extends AbstractTransferManager {
         connect();
 
         // Check if exists
-        Collection<RemoteFile> obj = list(remoteFile.getName()).values();
+        /*Collection<RemoteFile> obj = list(remoteFile.getName()).values();
 
         if (obj != null && !obj.isEmpty()) {
             return;
-        }
+        }*/
         
         try {
             // Upload
+            //client.storeObjectAs(workspace.getSwiftContainer(), localFile, "application/x-Stacksync", remoteFile.getName());
             client.storeSharedObjectAs(workspace.getSwiftStorageURL(), workspace.getSwiftContainer(), localFile,
                     "application/x-Stacksync", remoteFile.getName());
         } catch (OverQuotaException ex) {

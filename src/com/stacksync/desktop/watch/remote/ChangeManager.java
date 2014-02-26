@@ -702,11 +702,7 @@ public class ChangeManager {
 
                 String fileName = chunk.getFileName();
                 CloneWorkspace workspace = file.getWorkspace();
-                if (workspace.getSwiftStorageURL() != null) {
-                    transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);
-                } else {
-                    transfer.download(new RemoteFile(fileName), chunkCacheFile);
-                }            
+                transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);     
 
                 // Change DB state of chunk
                 chunk.setCacheStatus(CacheStatus.CACHED);

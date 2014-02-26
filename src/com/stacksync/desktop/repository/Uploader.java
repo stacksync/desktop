@@ -211,14 +211,14 @@ public class Uploader {
 
             // TODO IMPORTANT What about the DB to check the cunks!!!??
             // Get file list (to check if chunks already exist)
-            if (cacheLastUpdate == null || fileList == null || System.currentTimeMillis()-cacheLastUpdate.getTime() > CACHE_FILE_LIST) {                
+            /*if (cacheLastUpdate == null || fileList == null || System.currentTimeMillis()-cacheLastUpdate.getTime() > CACHE_FILE_LIST) {                
                 try {
                     fileList = transfer.list();
                 } catch (StorageException ex) {
                     logger.error("UploadManager: List FAILED!!", ex);
                     RemoteLogs.getInstance().sendLog(ex);
                 }
-            }
+            }*/
 
             int numChunk = 0;
             for (CloneChunk chunk: file.getChunks()) {
@@ -247,11 +247,7 @@ public class Uploader {
                     logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
                     
                     CloneWorkspace workspace = file.getWorkspace();
-                    if (workspace.getSwiftStorageURL() != null) {
-                        transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
-                    } else {
-                        transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName));
-                    }
+                    transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
                 } catch (StorageException ex) {
                     logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
                     throw ex;

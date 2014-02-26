@@ -6,6 +6,7 @@ import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.Workspace;
 import com.stacksync.commons.notifications.ShareProposalNotification;
 import com.stacksync.commons.omq.ISyncService;
@@ -21,7 +22,6 @@ import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.sharing.SharingController;
-import com.stacksync.desktop.util.StringUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,7 +60,7 @@ public class Server {
     public List<Update> getChanges(String accountId, CloneWorkspace workspace) {
         List<Update> updates = new ArrayList<Update>();
 
-        GetChangesRequest request = new GetChangesRequest(accountId, workspace.getId());
+        GetChangesRequest request = new GetChangesRequest(UUID.fromString(accountId), UUID.fromString(workspace.getId()));
 
         List<ItemMetadata> items = syncServer.getChanges(request);
         for (ItemMetadata item : items) {
@@ -74,7 +74,7 @@ public class Server {
     public List<CloneWorkspace> getWorkspaces(String accountId) throws NoWorkspacesFoundException {
         List<CloneWorkspace> workspaces = new ArrayList<CloneWorkspace>();
 
-        GetWorkspacesRequest request = new GetWorkspacesRequest(accountId);
+        GetWorkspacesRequest request = new GetWorkspacesRequest(UUID.fromString(accountId));
         List<Workspace> remoteWorkspaces = syncServer.getWorkspaces(request);
 
         for (Workspace rWorkspace : remoteWorkspaces) {
@@ -93,7 +93,7 @@ public class Server {
         Environment env = Environment.getInstance();
         String osInfo = env.getOperatingSystem().toString() + "-" + env.getArchitecture();
         
-        UpdateDeviceRequest request = new UpdateDeviceRequest(accountId, config.getDeviceId(),
+        UpdateDeviceRequest request = new UpdateDeviceRequest(UUID.fromString(accountId), config.getDeviceId(),
                 config.getDeviceName(), osInfo, null, null);
         try {
             
@@ -119,7 +119,9 @@ public class Server {
 
     public void commit(String accountId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
 
-        CommitRequest request = new CommitRequest(accountId, workspace.getId(), config.getDeviceId(), commitItems);
+        CommitRequest request = new CommitRequest(UUID.fromString(accountId), UUID.fromString(workspace.getId()),
+                config.getDeviceId(), commitItems);
+        
         request.setRequestId(getRequestId());
         syncServer.commit(request);
         logger.info(" [x] Sent '" + commitItems + "'");
@@ -129,11 +131,7 @@ public class Server {
         
         logger.info("Sending share proposal.");
         
-        String container = StringUtil.generateRandomString();
-        String storageURL = "http://10.30.236.175:8080/v1/"+accountId;
-        
-        // TODO quitar storageURL y container de aqui
-        ShareProposalRequest request = new ShareProposalRequest(accountId, emails, folderName, container, storageURL);
+        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderName);
         ShareProposalNotification response;
         
         try {
@@ -145,12 +143,16 @@ public class Server {
         }
         
         Workspace newWorkspace = new Workspace(response.getWorkspaceId());
-        newWorkspace.setSwiftContainer(container);
-        newWorkspace.setSwiftURL(storageURL);
+        newWorkspace.setSwiftContainer(response.getSwiftContainer());
+        newWorkspace.setSwiftUrl(response.getSwiftURL());
         newWorkspace.setName(folderName);
+        newWorkspace.setLatestRevision(0);
+        User owner = new User(response.getOwnerId());
+        owner.setName(response.getOwnerName());
+        newWorkspace.setOwner(owner);
         
         logger.info("Proposal accepted. New workspace: "+ newWorkspace.getId());
-        rWorkspaces.put(newWorkspace.getId(), newWorkspace);
+        rWorkspaces.put(newWorkspace.getId().toString(), newWorkspace);
         
         // Save new workspace in DB
         CloneWorkspace cloneWorkspace = new CloneWorkspace(newWorkspace);

@@ -338,6 +338,7 @@ public class DatabaseHelper {
         newFile.setStatus(update.getStatus());
         newFile.setSyncStatus(syncStatus);
         newFile.setFolder(update.isFolder());
+        newFile.setUsingTempId(false);
 
         if (update.getParentFileId() != 0) {
             CloneFile parentCF = getFileOrFolder(update.getParentFileId(), update.getParentFileVersion());

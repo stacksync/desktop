@@ -3,10 +3,11 @@ package com.stacksync.desktop.config.profile;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
 import com.stacksync.desktop.exceptions.ConfigException;
+import java.util.UUID;
 
 public class Account implements Configurable {
     
-    private String id;
+    private UUID id;
     private String email;
     private String password;
     private Integer quotaLimit;
@@ -16,19 +17,19 @@ public class Account implements Configurable {
         this(null);
     }
     
-    public Account(String id) {
+    public Account(UUID id) {
         this(id, null);
     }
     
-    public Account(String id, String email) {
+    public Account(UUID id, String email) {
         this(id, email, null);
     }
     
-    public Account(String id, String email, String password) {
+    public Account(UUID id, String email, String password) {
         this(id, email, password, null, null);
     }
     
-    public Account(String id, String email, String password, Integer quotaLimit, Integer quotaUsed) {
+    public Account(UUID id, String email, String password, Integer quotaLimit, Integer quotaUsed) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -36,11 +37,11 @@ public class Account implements Configurable {
         this.quotaUsed = quotaUsed;
     }
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -83,7 +84,7 @@ public class Account implements Configurable {
         }
         
         try {
-            id = node.getProperty("id");
+            id = UUID.fromString(node.getProperty("id"));
             email = node.getProperty("email");
             password = node.getProperty("password");
             

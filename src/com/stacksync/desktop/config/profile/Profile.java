@@ -236,7 +236,7 @@ public class Profile implements Configurable {
     }
     
     public String getAccountId() {
-        return this.account.getId();
+        return this.account.getId().toString();
     }
 
     public void setRepository(Repository repository) {
