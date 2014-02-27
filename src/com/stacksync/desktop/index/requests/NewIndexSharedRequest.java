@@ -68,7 +68,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
             // Throw exception or queue as a new index request.
         }
 
-        Long workspaceId = Long.parseLong(info[1]);
+        String workspaceId = info[1];
         CloneWorkspace workspace = db.getWorkspaces().get(workspaceId);
         if (workspace == null) {
             // Throw exception or queue as a new index request.
