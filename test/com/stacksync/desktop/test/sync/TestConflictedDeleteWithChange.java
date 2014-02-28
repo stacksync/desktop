@@ -31,12 +31,12 @@ public class TestConflictedDeleteWithChange {
        
     public static void main(String[] args) throws Exception {
         Folder root = staticFunctionsTest.initConfig(config);
-        Profile profile = config.getProfiles().get(1);
+        Profile profile = config.getProfile();
                 
         //create v1
         File f1 = staticFunctionsTest.createFile(root.getLocalFile().getPath() + staticFunctionsTest.fileName1, "content1");
         CloneFile dbFile = staticFunctionsTest.indexNewRequest(root, f1, null);        
-        Long fileId = dbFile.getFileId();
+        Long fileId = dbFile.getId();
                 
         dbFile.setSyncStatus(SyncStatus.UPTODATE);
         dbFile.setServerUploadedAck(true);
@@ -45,11 +45,11 @@ public class TestConflictedDeleteWithChange {
         dbFile.merge();
                 
         //delete v2
-        DeleteIndexRequest deleteIndex = new DeleteIndexRequest(root, dbFile);        
+        DeleteIndexRequest deleteIndex = new DeleteIndexRequest(root, dbFile, null);        
         deleteIndex.process();        
         
         Thread.sleep(1000); 
-        dbFile = db.getFileOrFolder(profile, fileId, 2);
+        dbFile = db.getFileOrFolder(fileId, 2);
         
         if(f1.exists()){
             f1.delete();

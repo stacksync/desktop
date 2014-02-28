@@ -271,5 +271,5 @@ public class FtpTransferManager extends AbstractTransferManager {
     public String getStorageIp() {
         return getConnection().getHost();        
     }
-    
+
 }

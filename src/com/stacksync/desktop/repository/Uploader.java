@@ -32,6 +32,7 @@ import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
 import com.stacksync.desktop.gui.server.Desktop;
@@ -93,9 +94,9 @@ public class Uploader {
             for (CloneFile file2 : queue) {
                 if (file.getName().compareTo(file2.getName()) == 0
                         && file.getChecksum() == file2.getChecksum()
-                        && file.getFileId() == file2.getFileId()
+                        && file.getId() == file2.getId()
                         && file.getVersion() == file2.getVersion()
-                        && file.getFileSize() == file2.getFileSize()) {
+                        && file.getSize() == file2.getSize()) {
 
                     found = true;
                     break;
@@ -110,10 +111,10 @@ public class Uploader {
     
     public synchronized void queuePendingFiles() {
         //Queue the pending Syncing and Local files if networks goes down and after ups.
-        List<CloneFile> filesSyncing = db.getFiles(profile.getFolders().list().get(0), env.getMachineName(), CloneFile.SyncStatus.SYNCING);
+        List<CloneFile> filesSyncing = db.getFiles(profile.getFolder(), CloneFile.SyncStatus.SYNCING);
         queuePendingList(filesSyncing);
         
-        filesSyncing = db.getFiles(profile.getFolders().list().get(0), env.getMachineName(), CloneFile.SyncStatus.LOCAL);
+        filesSyncing = db.getFiles(profile.getFolder(), CloneFile.SyncStatus.LOCAL);
         queuePendingList(filesSyncing);
     }
 
@@ -129,7 +130,7 @@ public class Uploader {
     private void searchAddInQueue(CloneFile file) throws InterruptedException{
         boolean found = false;
         for(CloneFile cf: queue){
-            if(cf.getFileId() == file.getFileId() && cf.getVersion() == file.getVersion()){                        
+            if(cf.getId() == file.getId() && cf.getVersion() == file.getVersion()){                        
                 found = true;
                 break;
             }
@@ -145,7 +146,7 @@ public class Uploader {
             if(workingFile == null){                
                 searchAddInQueue(file);
             } else{            
-                if(workingFile.getFileId() != file.getFileId() || workingFile.getVersion() != file.getVersion()){
+                if(workingFile.getId() != file.getId() || workingFile.getVersion() != file.getVersion()){
                     searchAddInQueue(file);
                 }                
             }
@@ -202,7 +203,7 @@ public class Uploader {
 
             // Update DB sync status                
             //now do this the newIndexRequest
-            file = db.getFileOrFolder(profile, file.getFileId(), file.getVersion());
+            file = db.getFileOrFolder(file.getId(), file.getVersion());
             file.setSyncStatus(CloneFile.SyncStatus.SYNCING);
             file.merge();
 
@@ -210,19 +211,20 @@ public class Uploader {
 
             // TODO IMPORTANT What about the DB to check the cunks!!!??
             // Get file list (to check if chunks already exist)
-            if (cacheLastUpdate == null || fileList == null || System.currentTimeMillis()-cacheLastUpdate.getTime() > CACHE_FILE_LIST) {                
+            /*if (cacheLastUpdate == null || fileList == null || System.currentTimeMillis()-cacheLastUpdate.getTime() > CACHE_FILE_LIST) {                
                 try {
                     fileList = transfer.list();
                 } catch (StorageException ex) {
                     logger.error("UploadManager: List FAILED!!", ex);
                     RemoteLogs.getInstance().sendLog(ex);
                 }
-            }
+            }*/
 
+            int numChunk = 0;
             for (CloneChunk chunk: file.getChunks()) {
                 // Chunk has been uploaded before
 
-                if(chunk.getOrder() % 10 == 0){
+                if(numChunk % 10 == 0){
                     tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "Uploading " + (queue.size() + 1) +  " files...");
                 }
                 
@@ -235,28 +237,37 @@ public class Uploader {
                     long remoteSize = rFile.getSize();
 
                     if (localSize == remoteSize) {
-                        logger.info("UploadManager: Chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
+                        logger.info("UploadManager: Chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
                         continue;
                     }
                 }
 
                 // Upload it!
                 try {
-                    logger.info("UploadManager: Uploading chunk (" + chunk.getOrder() + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
-                    transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName));
+                    logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
+                    
+                    CloneWorkspace workspace = file.getWorkspace();
+                    transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
                 } catch (StorageException ex) {
-                    logger.error("UploadManager: Uploading chunk ("+chunk.getOrder()+File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
-                    //LogConfig.sendLog();              
+                    logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
                     throw ex;
                 } catch (StorageQuotaExcedeedException ex) {
                     logger.error("UploaderManager: Quota excedeed.", ex);
                     throw ex;
                 }
+                
+                numChunk++;
             }
             logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
 
-            //config.getDatabase().getEntityManager().refresh(file);
-            file = db.getFileOrFolder(profile, file.getFileId(), file.getVersion());
+            /**
+             * Test this code:
+            file.setSyncStatus(SyncStatus.UPTODATE);
+            file.merge();
+             * Is it necessary to get again the file from the DB???
+             */
+            
+            file = db.getFileOrFolder(file.getId(), file.getVersion());
             
             // Update DB sync status
             file.setSyncStatus(SyncStatus.UPTODATE);

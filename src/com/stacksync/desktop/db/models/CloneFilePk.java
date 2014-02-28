@@ -10,36 +10,13 @@ public class CloneFilePk implements Serializable {
 
     @Id
     @Column(name = "file_id", nullable = false)
-    private Long fileId;
+    private Long id;
     @Id
     @Column(name = "file_version", nullable = false)
     private long version;
-    @Id
-    @Column(name = "profile_id", nullable = false)
-    private int profileId;
-    @Id
-    @Column(name = "root_id", nullable = false)
-    private String rootId;
     
     
     public CloneFilePk() { }
-
-
-    public int getProfileId() {
-        return profileId;
-    }
-
-    public void setProfileId(int profileId) {
-        this.profileId = profileId;
-    }
-
-    public String getRootId() {
-        return rootId;
-    }
-
-    public void setRootId(String rootId) {
-        this.rootId = rootId;
-    }
 
     public long getVersion() {
         return version;
@@ -50,18 +27,18 @@ public class CloneFilePk implements Serializable {
     }
 
     public Long getFileId() {
-        return fileId;
+        return id;
     }
 
     public void setFileId(Long fileId) {
-        this.fileId = fileId;
+        this.id = fileId;
     }
 
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (fileId != null ? fileId.hashCode() : 0);
+        hash += (id != null ? id.hashCode() : 0);
         hash += version;
         return hash;
     }   
@@ -75,16 +52,10 @@ public class CloneFilePk implements Serializable {
             return false;
         }
         final CloneFilePk other = (CloneFilePk) obj;
-        if (this.fileId != other.fileId && (this.fileId == null || !this.fileId.equals(other.fileId))) {
+        if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) {
             return false;
         }
         if (this.version != other.version) {
-            return false;
-        }
-        if (this.profileId != other.profileId) {
-            return false;
-        }
-        if ((this.rootId == null) ? (other.rootId != null) : !this.rootId.equals(other.rootId)) {
             return false;
         }
         return true;
@@ -92,6 +63,6 @@ public class CloneFilePk implements Serializable {
 
     @Override
     public String toString() {
-        return "CloneFile[id=" + fileId + ", version=" + version + "]";
+        return "CloneFile[id=" + id + ", version=" + version + "]";
     }
 }

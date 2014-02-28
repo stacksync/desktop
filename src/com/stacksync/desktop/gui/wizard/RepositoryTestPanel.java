@@ -1,20 +1,14 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * RepositoryTestPanel2.java
  *
  * Created on May 4, 2011, 6:27:37 PM
  */
 package com.stacksync.desktop.gui.wizard;
 
-import org.apache.log4j.Logger;
-import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.config.Repository;
+import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CacheException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.NoRepositoryFoundException;
@@ -22,6 +16,7 @@ import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
 import com.stacksync.desktop.util.StringUtil;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -41,17 +36,20 @@ public class RepositoryTestPanel extends SettingsPanel {
             this.callbackListener = callbackListener;
         }
 
-        private void doProcess() throws CacheException, StorageConnectException, NoRepositoryFoundException, StorageException, InitializationException{
+        private void doProcess() throws CacheException, StorageConnectException,
+                NoRepositoryFoundException, StorageException, InitializationException{
+            
             TransferManager transfer = repository.getConnection().createTransferManager();
             
+            progress.setValue(2);
             transfer.initStorage(); 
 
-            progress.setValue(4);                            
-            setStatus(resourceBundle.getString("reptest_created_status_ok"));
-
+          
+            progress.setValue(4);   
             setStatus("Initializing workspaces...");
+            //profile.setCloudId(transfer.getUser());
             profile.setFactory();
-            Workspace.InitializeWorkspaces(profile, callbackListener);
+            CloneWorkspace.InitializeWorkspaces(profile, callbackListener);
             progress.setValue(progress.getMaximum());            
         }
         
@@ -268,9 +266,4 @@ public class RepositoryTestPanel extends SettingsPanel {
         return true;
     }
     
-    public interface TestListener {
-        public void actionCompleted(boolean success);
-        public void setError(Throwable e);
-        public void setStatus(String s);
-    }
 }

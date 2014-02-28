@@ -63,27 +63,23 @@ public class Folder implements Configurable {
     public void setLocalFile(File localFile) {
         this.localFile = localFile;
     }
-
-    public void setRemoteId(String remoteId) {
-        this.remoteId = remoteId;
-    }
     
     public File getLocalFile() {
         return localFile;
     }
 
-    public String getRemoteId() {
-        return remoteId;
-    }
-
     @Override
     public void load(ConfigNode node) throws ConfigException {
+        
+        if (node == null) {
+            return;
+        }
+        
         try {
             if (node.hasProperty("active")) {
                 active = node.getBoolean("active");
             }
 
-            remoteId = node.getProperty("remote");
             localFile = node.getFile("local");
             
             if(!localFile.exists()){
@@ -100,7 +96,6 @@ public class Folder implements Configurable {
     @Override
     public void save(ConfigNode node) {
         node.setProperty("active", active);
-        node.setProperty("remote", remoteId);
         node.setProperty("local", localFile.getAbsolutePath());
     }
     

@@ -4,8 +4,8 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <class>com.stacksync.desktop.db.models.CloneClient</class>
     <class>com.stacksync.desktop.db.models.CloneChunk</class>
-    <class>com.stacksync.desktop.db.models.Workspace</class>
     <class>com.stacksync.desktop.db.models.CloneFile</class>
+    <class>com.stacksync.desktop.db.models.CloneWorkspace</class>
     <shared-cache-mode>NONE</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="REPLACED_BY_APPLICATION"/>

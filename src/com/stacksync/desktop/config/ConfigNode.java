@@ -66,7 +66,8 @@ public class ConfigNode {
     public String getProperty(String name, String defaultValue) {
         ConfigNode property = findChildByName(name);
 
-        if (property == null || property.getNode().getTextContent() == null) {
+        if (property == null || property.getNode().getTextContent() == null || 
+                property.getNode().getTextContent().equals("")) {
             return defaultValue;
         }
 

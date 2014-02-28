@@ -34,10 +34,6 @@ import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 
 /**
  * Cleans the local cache by deleting unused files.
- *
- * TODO Implement this.
- *
- * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class CacheCleaner {
 

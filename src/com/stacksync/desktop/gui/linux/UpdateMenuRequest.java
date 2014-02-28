@@ -29,22 +29,26 @@ import com.stacksync.desktop.config.profile.Profile;
 public class UpdateMenuRequest implements Request {
     private List<ProfileProxy> profiles;
 
-    public UpdateMenuRequest(List<Profile> profiles) {
+    public UpdateMenuRequest(Profile profile) {
         this.profiles = new ArrayList<ProfileProxy>();
-
-        for (Profile profile : profiles) {
-            ProfileProxy profileProxy = new ProfileProxy();	    
-            profileProxy.setName(profile.getName());
-
-            List<FolderProxy> folderProxies = new ArrayList<FolderProxy>();
-
-            for (Folder folder : profile.getFolders().list()) {
-                folderProxies.add(new FolderProxy(folder.getRemoteId(), folder.getLocalFile()));
-            }
-
-            profileProxy.setFolders(folderProxies);
-            this.profiles.add(profileProxy);
+        
+        if (profile == null) {
+            return;
         }
+
+        ProfileProxy profileProxy = new ProfileProxy();	    
+        profileProxy.setName(profile.getName());
+
+        List<FolderProxy> folderProxies = new ArrayList<FolderProxy>();
+
+        Folder folder = profile.getFolder();
+        
+        if (folder != null) {
+            folderProxies.add(new FolderProxy(folder.getLocalFile()));
+        }
+
+        profileProxy.setFolders(folderProxies);
+        this.profiles.add(profileProxy);
     }
 
     public List<ProfileProxy> getProfiles() {

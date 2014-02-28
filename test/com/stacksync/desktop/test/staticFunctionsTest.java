@@ -65,12 +65,12 @@ public class staticFunctionsTest {
         config.load(is);
         is.close();
         
-        if(config.getProfiles().list().isEmpty()){
+        if(config.getProfile() == null){
             throw new ConfigException("Error can't load the profile!");
         }
         
-        Profile profile = config.getProfiles().get(1);
-        if(profile.getFolders().list().isEmpty()){
+        Profile profile = config.getProfile();
+        if(profile.getFolder() == null){
             throw new ConfigException("The profile hasn't the folder configuration!");
         }
         
@@ -83,7 +83,7 @@ public class staticFunctionsTest {
         Tray tray = Tray.getInstance(); 
         tray.setStartDemonOnly(true);
         
-        Folder root = profile.getFolders().list().get(0);
+        Folder root = profile.getFolder();
         return root;
     }
     

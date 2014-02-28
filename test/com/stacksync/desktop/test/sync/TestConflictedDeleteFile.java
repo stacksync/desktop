@@ -53,7 +53,7 @@ public class TestConflictedDeleteFile {
         
         
         //Delete v3
-        DeleteIndexRequest delete = new DeleteIndexRequest(root, dbFile);
+        DeleteIndexRequest delete = new DeleteIndexRequest(root, dbFile, null);
         delete.process();
         
         
@@ -68,7 +68,7 @@ public class TestConflictedDeleteFile {
         list.add(update);
         
         
-        Profile profile = config.getProfiles().get(1);
+        Profile profile = config.getProfile();
         ChangeManager cm = profile.getRemoteWatcher().getChangeManager();
         cm.queueUpdates(list);
                 

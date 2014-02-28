@@ -18,7 +18,6 @@
 package com.stacksync.desktop.config;
 
 import com.stacksync.desktop.config.profile.BrokerProperties;
-import com.stacksync.desktop.config.profile.Profiles;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,12 +36,13 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
+import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
-import java.util.logging.Level;
+import java.util.UUID;
 import org.w3c.dom.Document;
 
 /**
@@ -63,8 +63,8 @@ public class Config {
     private String logApiRestUrl;
     // Config values
     private String userName;
-    private String machineName;
-    private boolean serviceEnabled;
+    private Device device;
+    private String queueName;
     private boolean autostart;
     private boolean notificationsEnabled;
     private ResourceBundle resourceBundle;
@@ -72,7 +72,7 @@ public class Config {
     private File resDir;
     private Database database;
     private Cache cache;
-    private Profiles profiles;
+    private Profile profile;
     private BrokerProperties brokerProps;
     private boolean extendedMode;
     private boolean daemonMode;
@@ -83,8 +83,7 @@ public class Config {
         configFile = null;
         logApiRestUrl = null;
         userName = null;
-        machineName = null;
-        serviceEnabled = true;
+        queueName = null;
         extendedMode = false;
         daemonMode = false;
 
@@ -105,10 +104,10 @@ public class Config {
          *          is created in the Config constructor, Config.getInstance()
          *          will return NULL. 	
          */
+        device = new Device();
         brokerProps = new BrokerProperties();
         database = new Database();
         cache = new Cache();
-        profiles = new Profiles();
 
         encryption = getEncryption();
     }
@@ -150,22 +149,30 @@ public class Config {
         this.userName = userName;
     }
 
-    public String getMachineName() {
-        return (machineName != null) ? machineName : env.getMachineName();
+    public String getDeviceName() {
+        return (device != null) ? device.getName() : env.getDeviceName();
     }
 
-    public void setMachineName(String machineName) {
-        this.machineName = machineName.replace("-", "_");
+    public void setDeviceName(String deviceName) {
+        this.device.setName(deviceName.replace("-", "_"));
     }
-
-    public void setServiceEnabled(boolean serviceEnabled) {
-        this.serviceEnabled = serviceEnabled;
+    
+    public UUID getDeviceId() {
+        return this.device.getId();
     }
-
-    public boolean isServiceEnabled() {
-        return serviceEnabled;
+        
+    public void setDeviceId(UUID id) {
+        this.device.setId(id);
     }
-
+    
+    public String getQueueName() {
+        return this.queueName;
+    }
+    
+    public void setQueueName(String queueName) {
+        this.queueName = queueName;
+    }
+    
     public boolean isAutostart() {
 
         return autostart;
@@ -218,9 +225,13 @@ public class Config {
     public Cache getCache() {
         return cache;
     }
-
-    public Profiles getProfiles() {
-        return profiles;
+    
+    public Profile getProfile(){
+        return profile;
+    }
+    
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     public ResourceBundle getResourceBundle() {
@@ -308,7 +319,7 @@ public class Config {
             stream = new FileInputStream(configFile);
             load(stream);
         } catch (FileNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Config.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         } finally {
             try {
                 if (stream != null) {
@@ -358,6 +369,18 @@ public class Config {
         doc.getDocumentElement().normalize();
 
         try {
+            // This prints a correct formated XML file, but functions are
+            // deprecated.
+            /*OutputFormat format = new OutputFormat(doc);
+            format.setLineWidth(100);
+            format.setIndenting(true);
+            format.setIndent(4);
+            Writer writer = new StringWriter();
+            XMLSerializer serializer = new XMLSerializer(writer, format);
+            serializer.serialize(doc);
+            
+            FileUtil.writeFile(writer.toString(), configFile);*/
+
             out = new FileOutputStream(configFile);
             DOMSource ds = new DOMSource(doc);
             outputStream = new OutputStreamWriter(out, "utf-8");
@@ -435,8 +458,7 @@ public class Config {
     private void loadDOM(ConfigNode node) throws ConfigException {
         // Flat values
         userName = node.getProperty("username", env.getUserName());
-        machineName = node.getProperty("machinename", env.getMachineName()).replace("-", "_");
-        serviceEnabled = node.getBoolean("service-enabled", true);
+        queueName = node.getProperty("queuename", env.getDeviceNameWithTimestamp());
         autostart = node.getBoolean("autostart", Constants.DEFAULT_AUTOSTART_ENABLED);
         notificationsEnabled = node.getBoolean("notifications", Constants.DEFAULT_NOTIFICATIONS_ENABLED);
 
@@ -446,9 +468,9 @@ public class Config {
         if (userName.isEmpty()) {
             userName = env.getUserName();
         }
-
-        if (machineName.isEmpty()) {
-            machineName = env.getMachineName();
+        
+        if (queueName.isEmpty()) {
+            queueName = env.getDeviceNameWithTimestamp();
         }
 
         // Resource bundle
@@ -475,18 +497,22 @@ public class Config {
             throw new ConfigException("Cannot read resource directory '" + resDir + "'.");
         }
 
-        // Complex subvalues    
+        // Complex subvalues
+        device.load(node.findChildByName("device"));
+        if (device.getName() == null || device.getName().isEmpty()) {
+            device.setName(env.getDeviceName());
+        }
         brokerProps.load(node.findChildByName("rabbitMQ"));
         database.load(node.findChildByName("database"));
         cache.load(node.findChildByName("cache"));
-        profiles.load(node.findOrCreateChildByXpath("profiles", "profiles"));
+        profile = new Profile();
+        profile.load(node.findChildByName("profile"));
     }
 
     private void saveDOM(ConfigNode node) {
         // Flat values
         node.setProperty("username", userName);
-        node.setProperty("machinename", machineName);
-        node.setProperty("service-enabled", serviceEnabled);
+        node.setProperty("queuename", queueName);
         node.setProperty("autostart", autostart);
         node.setProperty("notifications", notificationsEnabled);
         node.setProperty("apiLogUrl", logApiRestUrl);
@@ -494,8 +520,9 @@ public class Config {
 
         // Complex
         // DO NOT SAVE "database"
+        device.save(node.findOrCreateChildByXpath("device", "device"));
         brokerProps.save(node.findOrCreateChildByXpath("rabbitMQ", "rabbitMQ"));
         cache.save(node.findOrCreateChildByXpath("cache", "cache"));
-        profiles.save(node.findOrCreateChildByXpath("profiles", "profiles"));
+        profile.save(node.findOrCreateChildByXpath("profile", "profile"));
     }
 }

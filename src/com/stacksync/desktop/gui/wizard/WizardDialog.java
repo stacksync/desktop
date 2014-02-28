@@ -17,6 +17,10 @@
  */
 package com.stacksync.desktop.gui.wizard;
 
+import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.exceptions.ConfigException;
+import com.stacksync.desktop.gui.settings.SettingsPanel;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -29,16 +33,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.config.profile.Profile;
-import com.stacksync.desktop.exceptions.ConfigException;
-import com.stacksync.desktop.gui.settings.SettingsPanel;
 
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-//public class WizardDialog extends javax.swing.JDialog {
 public class WizardDialog extends JDialog {
     private static final Config config = Config.getInstance();
     private final ResourceBundle resourceBundle = config.getResourceBundle();
@@ -48,7 +47,8 @@ public class WizardDialog extends JDialog {
     private int currentPanelIndex;
     private SettingsPanel[] panels;
     
-    private NewOrExistingPanel panelNewOrExisting;
+    private StackSyncServerPanel panelStackSyncServer;
+    private StackSyncTestPanel panelStackSyncTest;
     private ConnectionPanel panelProfileBasic;
     private ConnectionsPanel panelProfileBasics;
     private MetadataPanel panelMetadataServer;
@@ -67,16 +67,12 @@ public class WizardDialog extends JDialog {
         initComponents();
         initWizard();
         
-        /// GGIPART ///
         String title = getTitle();
         if(title == null || title.isEmpty()){
             setTitle("Stacksync");
         }
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        
-        //TODO setting text        
-        /// ENDGGIPART ///
     }    
 
 
@@ -89,34 +85,37 @@ public class WizardDialog extends JDialog {
         lblLeftImage.setIcon(new ImageIcon(config.getResDir()+File.separator+"logo48.png"));
         
         // Profile
-        //newRepository = true;
         profile = new Profile(); // set if successfully created!
 
         // Panels
         currentPanelIndex = 0;
-        panelNewOrExisting = new NewOrExistingPanel();
+        panelStackSyncServer = new StackSyncServerPanel(profile);
         panelProfileBasic = new ConnectionPanel(profile);
         panelProfileBasics = new ConnectionsPanel(profile);
         panelMetadataServer = new MetadataPanel(profile);
         panelEncryption = new EncryptionPanel(profile);
         panelRepositoryTest = new RepositoryTestPanel(profile);
-        panelFolders = new FoldersPanel(profile); 
+        panelFolders = new FoldersPanel(profile);
+        panelStackSyncTest = new StackSyncTestPanel(profile);
         
         if(Config.getInstance().isExtendedMode()){
-            panels = new SettingsPanel[] {panelNewOrExisting,
-                                          panelProfileBasics,
-                                          panelMetadataServer,
+            panels = new SettingsPanel[] {panelStackSyncServer,
+                                          //panelProfileBasics,
+                                          //panelMetadataServer,
+                                          panelStackSyncTest,
                                           panelEncryption,
-                                          panelFolders,
-                                          panelRepositoryTest
+                                          panelFolders
+                                          //panelRepositoryTest
             };
 
         } else{
-            panels = new SettingsPanel[] {panelProfileBasic,
-                                      panelMetadataServer,
-                                      panelEncryption,
-                                      panelFolders,
-                                      panelRepositoryTest
+            panels = new SettingsPanel[] {panelStackSyncServer,
+                                          //panelProfileBasic,
+                                          //panelMetadataServer,
+                                          panelStackSyncTest,
+                                          panelEncryption,
+                                          panelFolders
+                                          //panelRepositoryTest
             };
 
         }
@@ -260,13 +259,13 @@ public class WizardDialog extends JDialog {
         
         if(lastPanel.check()){
             lastPanel.save();
-            if (lastPanel == panelFolders){
+            if (lastPanel == panelStackSyncServer){
 
                 currentPanelIndex++;
                 showCurrentPanel(false);
                 
                 if(Config.getInstance().isExtendedMode()){                    
-                    panelRepositoryTest.doRepoAction(new RepositoryTestPanel.TestListener() {
+                    panelStackSyncTest.doRepoAction(new TestListener() {
                         @Override
                         public void actionCompleted(boolean success) {
                             if (success) {
@@ -279,12 +278,12 @@ public class WizardDialog extends JDialog {
                         }
 
                         @Override
-                        public void setError(Throwable e) { panelRepositoryTest.setError(e); }
+                        public void setError(Throwable e) { panelStackSyncTest.setError(e); }
                         @Override
-                        public void setStatus(String s) { panelRepositoryTest.setStatus(s); }
+                        public void setStatus(String s) { panelStackSyncTest.setStatus(s); }
                     });                           
                 } else {
-                    panelRepositoryTest.doRepoAction(new RepositoryTestPanel.TestListener() {
+                    panelStackSyncTest.doRepoAction(new TestListener() {
                         @Override
                         public void actionCompleted(boolean success) {
                             if (success) {
@@ -297,16 +296,16 @@ public class WizardDialog extends JDialog {
                         }
 
                         @Override
-                        public void setError(Throwable e) { panelRepositoryTest.setError(e); }
+                        public void setError(Throwable e) { panelStackSyncTest.setError(e); }
                         @Override
-                        public void setStatus(String s) { panelRepositoryTest.setStatus(s); }
+                        public void setStatus(String s) { panelStackSyncTest.setStatus(s); }
                     });
                 }
 
                 return;
             } else if (currentPanelIndex == panels.length-1) { // Last panel done!
                 
-                logger.info("profiles = " + config.getProfiles() + " -- profile = " +  profile);
+                logger.info("profile = " + profile);
                 setVisible(false);
                 dispose();
                 

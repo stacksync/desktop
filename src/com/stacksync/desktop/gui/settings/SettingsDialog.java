@@ -31,7 +31,6 @@ import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.gui.tray.Tray;
-import com.stacksync.desktop.gui.wizard.WizardDialog;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 
@@ -107,7 +106,8 @@ public class SettingsDialog extends javax.swing.JFrame {
         // - Create new profile
         //Icon customOpenIcon = new ImageIcon(config.getResDir() + File.separator + "settings-profile.png");
         
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(new ActionTreeItem(resourceBundle.getString("sd_create_new_profile"), "profile", ActionTreeItem.ActionTreeItemEvent.DOUBLE_CLICKED) {
+        // This code actives the option to create a new profile
+        /*DefaultMutableTreeNode node = new DefaultMutableTreeNode(new ActionTreeItem(resourceBundle.getString("sd_create_new_profile"), "profile", ActionTreeItem.ActionTreeItemEvent.DOUBLE_CLICKED) {
 
             @Override
             public void doAction() {
@@ -132,7 +132,7 @@ public class SettingsDialog extends javax.swing.JFrame {
             }
         });
         
-        root.add(node);
+        root.add(node);*/
 
         // Set it!
         tree.setModel(new DefaultTreeModel(root));
@@ -486,16 +486,16 @@ public class SettingsDialog extends javax.swing.JFrame {
         new Thread(new Runnable() {
             @Override
             public void run() {
-               for (Profile p : config.getProfiles().list()) {                    
-                   try {
-                       p.setActive(p.isEnabled());
-                   } catch (InitializationException ex) {
-                       logger.warn("Exception: ", ex);
-                   } catch (StorageConnectException ex) {
-                       logger.warn("Exception: ", ex);
-                   }
+               Profile p = config.getProfile()  ;                  
+                try {
+                    p.setActive(p.isEnabled());
+                } catch (InitializationException ex) {
+                    logger.warn("Exception: ", ex);
+                } catch (StorageConnectException ex) {
+                    logger.warn("Exception: ", ex);
                 }
-            }
+             }
+            
         },"UpdateProfiles").start();
                 
         // Update tray menu

@@ -17,27 +17,30 @@
  */
 package com.stacksync.desktop.util;
 
-import com.stacksync.syncservice.models.ObjectMetadata;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import com.stacksync.desktop.db.models.CloneChunk;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.Workspace;
-import com.stacksync.desktop.repository.Update;
-
+import java.util.Random;
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class StringUtil {
+    
+    private static final char[] symbols = new char[36];
+
+    static {
+      for (int idx = 0; idx < 10; ++idx)
+        symbols[idx] = (char) ('0' + idx);
+      for (int idx = 10; idx < 36; ++idx)
+        symbols[idx] = (char) ('a' + idx - 10);
+    }
+    
+    private static final Random random = new Random();
+
+    private static final char[] buf = new char[6];
 
     private static int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
@@ -163,135 +166,12 @@ public class StringUtil {
 
         return hash;
     }
-
-    public static Update parseJson2Update(JsonObject objMetadata, Workspace workspace) throws NullPointerException {
-        Update update = new Update();
-
-        update.setServerUploaded(true);
-        update.setServerUploadedAck(true);
-        update.setServerUploadedTime(new Date());
-
-        update.setRootId(objMetadata.get("rootId").getAsString());
-        update.setFileId(objMetadata.get("fileId").getAsLong());
-        update.setVersion(objMetadata.get("version").getAsLong());
-
-        update.setUpdated(new Date(objMetadata.get("serverDateModified").getAsLong()));
-        update.setLastModified(new Date(objMetadata.get("clientDateModified").getAsLong()));
-
-        update.setStatus(CloneFile.Status.valueOf(objMetadata.get("status").getAsString()));
-        update.setChecksum(objMetadata.get("checksum").getAsLong());
-        update.setMimeType(objMetadata.get("mimetype").getAsString());
-        //update.setClientName(objMetadata.get("clientName").getAsString());
-        update.setFileSize(objMetadata.get("fileSize").getAsLong());
-        update.setFolder(objMetadata.get("isFolder").getAsBoolean());
-
-        update.setName(objMetadata.get("fileName").getAsString());
-        update.setPath(objMetadata.get("filePath").getAsString());
-
-        // Parent
-        if (objMetadata.get("parentFileId").getAsString() != null && !objMetadata.get("parentFileId").getAsString().isEmpty()) {
-            update.setParentRootId(objMetadata.get("parentRootId").getAsString());
-            update.setParentFileId(objMetadata.get("parentFileId").getAsLong());
-            update.setParentFileVersion(objMetadata.get("parentFileVersion").getAsLong());
+    
+    public static String generateRandomString() {
+        
+        for (int idx = 0; idx < buf.length; ++idx) {
+            buf[idx] = symbols[random.nextInt(symbols.length)];
         }
-
-        // Parse chunks-value{
-        JsonArray chunksCsv = objMetadata.get("chunks").getAsJsonArray();
-
-        List<String> chunks = new ArrayList<String>();
-        for (int j = 0; j < chunksCsv.size(); j++) {
-            String chunk = chunksCsv.get(j).getAsString();
-            if (chunk.isEmpty()) {
-                continue;
-            }
-
-            chunks.add(chunk);
-        }
-
-        update.setChunks(chunks);
-        update.setWorkpace(workspace);
-
-        return update;
-    }
-
-    public static Update parseUpdate(ObjectMetadata objMetadata, Workspace workspace) throws NullPointerException {
-        Update update = new Update();
-
-        update.setServerUploaded(true);
-        update.setServerUploadedAck(true);
-        update.setServerUploadedTime(new Date());
-
-        update.setRootId(objMetadata.getRootId());
-        update.setFileId(objMetadata.getFileId());
-        update.setVersion(objMetadata.getVersion());
-
-        update.setUpdated(objMetadata.getServerDateModified());
-        update.setLastModified(objMetadata.getClientDateModified());
-
-        update.setStatus(CloneFile.Status.valueOf(objMetadata.getStatus()));
-        update.setChecksum(objMetadata.getChecksum());
-        update.setMimeType(objMetadata.getMimetype());
-        update.setClientName(objMetadata.getClientName());
-        update.setFileSize(objMetadata.getFileSize());
-        update.setFolder(objMetadata.isFolder());
-
-        update.setName(objMetadata.getFileName());
-        update.setPath(objMetadata.getFilePath());
-
-        // Parent
-        if (objMetadata.getParentFileId() != null && !objMetadata.getParentFileId().toString().isEmpty()) {
-            update.setParentRootId(objMetadata.getParentRootId());
-            update.setParentFileId(objMetadata.getParentFileId());
-            if (objMetadata.getParentFileVersion() != null) {
-                update.setParentFileVersion(objMetadata.getParentFileVersion());
-            }
-        }
-
-        update.setChunks(objMetadata.getChunks());
-        update.setWorkpace(workspace);
-
-        return update;
-    }
-
-    public static ObjectMetadata parseJson2Update(CloneFile cloneFile) throws NullPointerException {
-        ObjectMetadata object = new ObjectMetadata();
-
-        object.setRootId(cloneFile.getRootId());
-        object.setFileId(cloneFile.getFileId());
-        object.setVersion(cloneFile.getVersion());
-        
-        object.setServerDateModified(cloneFile.getUpdated());
-        object.setClientDateModified(cloneFile.getLastModified());
-
-        
-        object.setStatus(cloneFile.getStatus().toString());
-        object.setChecksum(cloneFile.getChecksum());
-        object.setMimetype(cloneFile.getMimetype());
-        object.setClientName(cloneFile.getClientName());
-        
-        object.setFileSize(cloneFile.getFileSize());
-        object.setFolder(cloneFile.isFolder());
-        
-        object.setFileName(cloneFile.getName());
-        object.setFilePath(cloneFile.getPath());
-
-        // Parent
-        if (cloneFile.getParent() != null) {
-            object.setParentFileId(cloneFile.getParent().getFileId());            
-            object.setParentFileVersion(cloneFile.getParent().getVersion());
-            object.setParentRootId(cloneFile.getParent().getRootId());            
-        } else{
-            object.setParentFileId(null);            
-            object.setParentFileVersion(null);
-            object.setParentRootId(null);
-        }
-        
-        List<String> chunks = new ArrayList<String>();        
-        for(CloneChunk chunk: cloneFile.getChunks()){
-            chunks.add(chunk.getChecksum());
-        }
-        
-        object.setChunks(chunks);        
-        return object;
+        return new String(buf);
     }
 }

@@ -17,22 +17,20 @@
  */
 package com.stacksync.desktop;
 
-import java.awt.EventQueue;
-import org.apache.log4j.Logger;
+import com.stacksync.desktop.chunker.TTTD.RollingChecksum;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.ConnectionController;
+import com.stacksync.desktop.config.ConnectionTester;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
+import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.settings.SettingsDialog;
 import com.stacksync.desktop.gui.tray.Tray;
+import com.stacksync.desktop.gui.tray.TrayEventListenerImpl;
 import com.stacksync.desktop.gui.wizard.WizardDialog;
 import com.stacksync.desktop.index.Indexer;
-import com.stacksync.desktop.chunker.TTTD.RollingChecksum;
-import com.stacksync.desktop.config.ConnectionController;
-import com.stacksync.desktop.config.ConnectionTester;
-import com.stacksync.desktop.exceptions.StorageConnectException;
-import com.stacksync.desktop.gui.tray.TrayEventListenerImpl;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.periodic.CacheCleaner;
 import com.stacksync.desktop.periodic.TreeSearch;
@@ -40,6 +38,7 @@ import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.watch.local.LocalWatcher;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import java.util.ResourceBundle;
+import org.apache.log4j.Logger;
 
 /**
  * Represents the application.
@@ -102,6 +101,7 @@ public class Application implements ConnectionController, ApplicationController 
     private CacheCleaner cache;
     private SettingsDialog settingsDialog;
     private ConnectionTester connectionTester;
+    private Profile profile;
 
     public Application() {
         this.connectionTester = new ConnectionTester(this);
@@ -122,12 +122,9 @@ public class Application implements ConnectionController, ApplicationController 
 
         tray.setStartDemonOnly(deamonMode);
         // Desktop integration
-        if (config.isServiceEnabled()) {
-            desktop.start(deamonMode); // must be started before indexer!
-        }
+        desktop.start(deamonMode); // must be started before indexer!
         
-        boolean success = loadProfiles();
-        
+        boolean success = loadProfile();
         
         if (success) {
             startThreads();
@@ -157,6 +154,7 @@ public class Application implements ConnectionController, ApplicationController 
         periodic = new TreeSearch();
         cache = new CacheCleaner();
         tray = Tray.getInstance();
+        profile = config.getProfile();
         
         tray.registerProcess("StackSync");
     }
@@ -179,8 +177,8 @@ public class Application implements ConnectionController, ApplicationController 
         periodic.stop();
         cache.stop();
 
-        for (Profile profile : config.getProfiles().list()) {
-            profile.stop();
+        if (config.getProfile() != null) {
+            config.getProfile().stop();
         }
 
         System.exit(0);
@@ -218,18 +216,17 @@ public class Application implements ConnectionController, ApplicationController 
 
         /*
          // Desktop integration
-         if (config.isServiceEnabled()) {
          desktop.start(); // must be started before indexer!
-         } */
+        */
     }
     
-    private boolean loadProfiles() throws InitializationException {
+    private boolean loadProfile() throws InitializationException {
         
         boolean success = true;
+        Profile profile = config.getProfile();
         // a. Launch first time wizard                
-        if (config.getProfiles().list().isEmpty()) {
+        if (!profile.isInitialized()) {
 
-            Profile profile = null;
             if (!config.isDaemonMode()) {
                 profile = initFirstTimeWizard();
             } else {
@@ -241,7 +238,7 @@ public class Application implements ConnectionController, ApplicationController 
             }
         } else { // b. Activate profiles (Index files, then start local/remote watcher)
             try {
-                initProfiles();
+                initProfile();
             } catch (StorageConnectException ex) {
                 logger.error(ex);
                 success = false;
@@ -251,22 +248,24 @@ public class Application implements ConnectionController, ApplicationController 
         return success;
     }
 
-    private void initProfiles() throws InitializationException, StorageConnectException {
+    private void initProfile() throws InitializationException, StorageConnectException {
 
-        for (Profile profile : config.getProfiles().list()) {
-            if (!profile.isEnabled()) {
-                continue;
-            }
-            
-            profile.savePathToRegistry();
+        if (profile == null) {
+            throw new InitializationException("No profile found!");
+        }
+        
+        if (!profile.isEnabled()) {
+            return;
+        }
 
-            try {
-                profile.setActive(true);
-            } catch (InitializationException ex) {
-                logger.error("Can't load the profile.", ex);
-                RemoteLogs.getInstance().sendLog(ex);
-                throw ex;
-            }           
+        profile.savePathToRegistry();
+
+        try {
+            profile.setActive(true);
+        } catch (InitializationException ex) {
+            logger.error("Can't load the profile.", ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            throw ex;
         }
 
     }
@@ -276,7 +275,7 @@ public class Application implements ConnectionController, ApplicationController 
 
         // Ok clicked
         if (profile != null) {
-            config.getProfiles().add(profile);
+            config.setProfile(profile);
             //settingsDialog.addProfileToTree(profile, false);
             tray.updateUI();
 
@@ -312,7 +311,7 @@ public class Application implements ConnectionController, ApplicationController 
         
         boolean success = false;
         try {
-            success = loadProfiles();
+            success = loadProfile();
         } catch (InitializationException ex) {
             logger.error(ex);
             System.exit(2);
@@ -332,14 +331,16 @@ public class Application implements ConnectionController, ApplicationController 
         
         logger.info("Pausing syncing.");
 
-        for (Profile profile : config.getProfiles().list()) {
-            try {
-                profile.setActive(false);
-            } catch (Exception ex) {
-               logger.error("Could not pause synchronization: ", ex);
-               RemoteLogs.getInstance().sendLog(ex);
-               return;
-            }
+        if (profile == null) {
+            return;
+        }
+        
+        try {
+            profile.setActive(false);
+        } catch (Exception ex) {
+           logger.error("Could not pause synchronization: ", ex);
+           RemoteLogs.getInstance().sendLog(ex);
+           return;
         }
         
         indexer.stop();
@@ -359,7 +360,7 @@ public class Application implements ConnectionController, ApplicationController 
         logger.info("Resume syncing.");
         
         try {
-            initProfiles();
+            initProfile();
         } catch (InitializationException ex) {
             // Error logged in initProfiles function.
             return;
@@ -373,9 +374,7 @@ public class Application implements ConnectionController, ApplicationController 
         tray.updateUI();
         tray.setStatusText("StackSync", "");
         
-        if (config.isServiceEnabled()) {
-            desktop.start(config.isDaemonMode()); // must be started before indexer!
-        }
+        desktop.start(config.isDaemonMode()); // must be started before indexer!
         
         indexer.start();
         localWatcher.start();

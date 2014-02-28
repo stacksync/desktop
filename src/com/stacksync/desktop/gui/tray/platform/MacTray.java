@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.List;
 import javax.swing.*;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
@@ -162,60 +161,28 @@ public class MacTray extends Tray {
 
         menu.add(itemStatus);
 
-        // Profiles and folders
-        List<Profile> profiles = config.getProfiles().list();
+        // Profile and folders
         menu.addSeparator();
 
-        if (profiles.size() == 1) {
-            Profile profile = profiles.get(0);
+        Profile profile = config.getProfile();
 
-            for (final Folder folder : profile.getFolders().list()) {
-                if (!folder.isActive() || folder.getLocalFile() == null) {
-                    continue;
+        final Folder folder = profile.getFolder();
+        if (folder != null && folder.isActive() && folder.getLocalFile() != null) {
+
+            MenuItem itemFolder = new MenuItem(folder.getLocalFile().getName());
+
+            itemFolder.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
                 }
-                
-                MenuItem itemFolder = new MenuItem(folder.getLocalFile().getName());
+            });
 
-                itemFolder.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent ae) {
-                        fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
-                    }
-                });
-
-                menu.add(itemFolder);
-            }
-
-            menu.addSeparator();
+            menu.add(itemFolder);
         }
-        else if (profiles.size() > 1) {
-            for (Profile profile : profiles) {
-                Menu itemProfile = new Menu(profile.getName());
 
-                for (final Folder folder : profile.getFolders().list()) {
-                    if (!folder.isActive() || folder.getLocalFile() == null) {
-                        continue;
-                    }
-                    
-                    MenuItem itemFolder = new MenuItem(folder.getLocalFile().getName());
-
-                    itemFolder.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent ae) {
-                            fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
-                        }
-                    });
-
-                    itemProfile.add(itemFolder);
-                }
-
-                menu.add(itemProfile);
-            }
-
-            menu.addSeparator();
-        }
+        menu.addSeparator();
 
         // Preferences
         //itemPreferences = new MenuItem("Preferencias ...");

@@ -18,7 +18,6 @@
 package com.stacksync.desktop.index.requests;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
@@ -37,6 +36,7 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
     
     private CloneFile dbFile;
     private File file;
+    private CloneFile deleteParent;
 
     public DeleteIndexRequest(Folder root, File file) {
         super(root);
@@ -45,10 +45,11 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         this.file = file;
     }
     
-    public DeleteIndexRequest(Folder root, CloneFile dbFile) {
+    public DeleteIndexRequest(Folder root, CloneFile dbFile, CloneFile deletedParent) {
         super(root);
         this.dbFile = dbFile;
         this.file = dbFile.getFile();
+        this.deleteParent = deletedParent;
     }    
 
     public File getFile() {
@@ -89,12 +90,12 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
                 // Use next version and forget about the UNSYNC versions.
                 deletedVersion = (CloneFile) lastSynced.clone();
                 deletedVersion.setVersion(lastSynced.getVersion()+1);
-
+                if (deleteParent != null) {
+                    deletedVersion.setParent(deleteParent);
+                }
                 // Updated changes
-                deletedVersion.setUpdated(new Date());
                 deletedVersion.setStatus(Status.DELETED);
                 deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-                deletedVersion.setClientName(config.getMachineName());
 
                 deletedVersion.merge();
                 
@@ -106,11 +107,11 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
 
             // Updated changes
             deletedVersion.setVersion(deletedVersion.getVersion()+1);
-            deletedVersion.setUpdated(new Date());
+            if (deleteParent != null) {
+                deletedVersion.setParent(deleteParent);
+            }
             deletedVersion.setStatus(Status.DELETED);
-            //deletedVersion.setSyncStatus(CloneFile.SyncStatus.LOCAL);
             deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-            deletedVersion.setClientName(config.getMachineName());
 
             deletedVersion.merge();
         }
@@ -126,8 +127,7 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
             for (CloneFile child : children) {
                 logger.info("Indexer: Delete CHILD "+child.getAbsolutePath()+" ...");
                 // Do it!
-                //new DeleteIndexRequest(root, child).process();
-                Indexer.getInstance().queueDeleted(root, child);
+                Indexer.getInstance().queueDeleted(root, child, deletedVersion);
             }
         }
 

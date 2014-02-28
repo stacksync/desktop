@@ -88,7 +88,7 @@ public class Cache implements Configurable {
     public File createTempFile(String name) throws CacheException {
        try {
            return File.createTempFile(
-                String.format("ac-%1$s-temp-%s-", Config.getInstance().getMachineName(), name),
+                String.format("ac-%1$s-temp-%s-", Config.getInstance().getDeviceName(), name),
                 ".tmp",
                 folder);
        }

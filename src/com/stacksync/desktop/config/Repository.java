@@ -19,8 +19,6 @@ package com.stacksync.desktop.config;
 
 import com.stacksync.desktop.exceptions.ConfigException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.connection.plugins.PluginInfo;
@@ -33,7 +31,6 @@ public final class Repository implements Configurable {
 
     private Connection connection;
     private Encryption encryption;
-    private Set<String> availableRemoteIds;
 
     /**
      * Maximum size of each (unencrypted) chunk in bytes. After encrypting
@@ -44,8 +41,7 @@ public final class Repository implements Configurable {
      */
     private int chunkSize;
     
-    private Date lastUpdate;
-    private boolean changed;    
+    private Date lastUpdate;   
     private boolean connected;
 
     // New
@@ -53,10 +49,8 @@ public final class Repository implements Configurable {
         // Fressen
         connection = null; // Loaded or set dynamically!
         encryption = new Encryption();
-        availableRemoteIds = new HashSet<String>();
         
         lastUpdate = null;
-        changed = false;
         connected = false;
     }
  
@@ -88,20 +82,8 @@ public final class Repository implements Configurable {
         this.encryption = encryption;
     }
 
-    public Set<String> getAvailableRemoteIds() {
-        return availableRemoteIds;
-    }
-
     public boolean isConnected() {
         return connected;
-    }
-
-    public boolean isChanged() {
-        return changed;
-    }
-
-    public void setChanged(boolean changed) {
-        this.changed = changed;
     }
 
     public Date getLastUpdate() {

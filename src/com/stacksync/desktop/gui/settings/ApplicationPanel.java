@@ -52,7 +52,7 @@ public class ApplicationPanel extends SettingsPanel {
         chkStartup.setSelected(config.isAutostart());
         chkShowNotifications.setSelected(config.isNotificationsEnabled());
         txtName.setText(config.getUserName());
-        txtMachineName.setText(config.getMachineName());
+        txtMachineName.setText(config.getDeviceName());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ApplicationPanel extends SettingsPanel {
         config.setAutostart(chkStartup.isSelected());
         config.setNotificationsEnabled(chkShowNotifications.isSelected());
         config.setUserName(txtName.getText());
-        config.setMachineName(txtMachineName.getText());
+        config.setDeviceName(txtMachineName.getText());
     }
 
     /** This method is called from within the constructor to

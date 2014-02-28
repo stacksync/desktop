@@ -95,20 +95,25 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();                      
 
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
-        newVersion.setParent(db.getFolder(root, parentFile));
+        CloneFile parentCF = db.getFolder(root, parentFile);
+        newVersion.setParent(parentCF);
         
         // This will check if the file is inside a folder that isn't created.
-        if (newVersion.getParent() == null && !newVersion.getPath().equals("/")) {
+        if (parentCF == null && !newVersion.getPath().equals("/")) {
             Indexer.getInstance().queueNewIndex(root, file, previousVersion, checksum);
             return;
+        } else if (parentCF == null) {
+            // File is in root folder. Set workspace to default workspace
+            newVersion.setToDefaultWorkspace();
+        } else {
+            // File has a parent, so it could be different from the default wsp.
+            newVersion.setWorkspace(parentCF.getWorkspace());
         }
         
         newVersion.setFolder(file.isDirectory());
-        newVersion.setFileSize(file.length());
+        newVersion.setSize(file.length());
         
         newVersion.setLastModified(new Date(file.lastModified()));
-        newVersion.setClientName(config.getMachineName());
-        newVersion.setUpdated(new Date());
         newVersion.setSyncStatus(SyncStatus.LOCAL);
         newVersion.merge();
         
@@ -124,7 +129,6 @@ public class NewIndexRequest extends SingleRootIndexRequest {
 
     private CloneFile addNewVersion() {
         CloneFile newVersion = new CloneFile(root, file);        
-                
         newVersion.setVersion(1);
         newVersion.setStatus(Status.NEW);        
         
@@ -177,7 +181,6 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             
             // Do it!
             logger.info("Indexer: Parent: "+file+" / CHILD "+child+" ...");
-            //new NewIndexRequest(root, child, null).process();
             Indexer.getInstance().queueNewIndex(root, child, null, -1);
         }
     }
@@ -186,19 +189,14 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         try {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
-                        
-            Folder folderProfile = cf.getProfile().getFolders().get(cf.getRootId()); 
-            String path = file.getParent().replace(folderProfile.getLocalFile().getPath(), "");
-            path = path.replace('\\', '/');
 
             //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
             while (chunks.hasMoreElements()) {
                 chunkInfo = chunks.nextElement();                
-                int chunkOrder = Integer.parseInt(Long.toString(chunkInfo.getNumber()));
 
                 // create chunk in DB (or retrieve it)
-                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), path, chunkOrder, CacheStatus.CACHED);                         
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED);
                 
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);

@@ -27,7 +27,7 @@ import com.stacksync.desktop.exceptions.ConfigException;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class Folders implements Configurable {
+/*public class Folders implements Configurable {
     public static final String TAG_NAME = "folders";
 
     private Profile profile;
@@ -99,4 +99,4 @@ public class Folders implements Configurable {
     public void clear() {
         folders.clear();
     }
-}
+}*/

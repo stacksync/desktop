@@ -74,12 +74,12 @@ public class ConnectionsPanel extends SettingsPanel {
     public void save() {
         // Get name
         String newProfileName = resourceBundle.getString("cp_new_profile_name");
-        String newProfileNameSyntax = resourceBundle.getString("cp_new_profile_name").concat(" %d");
+        /*String newProfileNameSyntax = resourceBundle.getString("cp_new_profile_name").concat(" %d");
         int newProfileCount = 1;
 
         while (config.getProfiles().get(newProfileName) != null) {
             newProfileName = String.format(newProfileNameSyntax, newProfileCount++);
-        }
+        }*/
 
         profile.setName(newProfileName);
         
@@ -94,11 +94,20 @@ public class ConnectionsPanel extends SettingsPanel {
     }
 
     @Override
-    public void clean() { }
+    public void clean() {
+        if(pnlConnection != null){
+            pnlConnection.clean();
+        }
+    }
 
     @Override
     public boolean check() {        
-        return true;
+        boolean check = false;
+        if(pnlConnection != null){
+            check = pnlConnection.check();
+        }
+        
+        return check;
     }
     
     private class ComboBoxItem {

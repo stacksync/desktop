@@ -105,7 +105,7 @@ public class Stacksync {
                     }
                 }
                 
-                if (config.getProfiles().list().isEmpty()) {
+                if (config.getProfile() == null) {
                     throw new ConfigException("Could not load a profile, check the configuration file.");
                 }                
             } else {
@@ -113,7 +113,7 @@ public class Stacksync {
                 File configurationDir = env.getAppConfDir();                
                 if(configurationDir.exists()){
                     config.load();
-                    if (config.getProfiles().list().isEmpty()) {
+                    if (config.getProfile() == null) {
                         File folder = new File(config.getConfDir()+File.separator+Constants.CONFIG_DATABASE_DIRNAME);                    
                         File configFile = new File(config.getConfDir()+File.separator+Constants.CONFIG_FILENAME);
 

@@ -17,21 +17,20 @@
  */
 package com.stacksync.desktop.watch.remote;
 
-import com.stacksync.syncservice.models.ObjectMetadata;
-import java.io.IOException;
-import java.util.*;
-import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.syncserver.Server;
-import com.stacksync.desktop.util.StringUtil;
+import com.stacksync.commons.models.ItemMetadata;
+import java.io.IOException;
+import java.util.*;
+import org.apache.log4j.Logger;
 
 /**
  * Does periodical checks on the online storage, and applies them locally.
@@ -155,7 +154,7 @@ public class RemoteWatcher {
         Date lastUpdateFileDate = new Date();
         
         // Check if new update file needs to be created/uploaded
-        Long fileVersionCount = db.getFileVersionCount(profile);
+        Long fileVersionCount = db.getFileVersionCount();
         if (fileVersionCount == 0) {
             logger.debug("No local changes. Skipping step upload.");
             return;
@@ -164,28 +163,40 @@ public class RemoteWatcher {
         try {
             logger.info("Commit new changes.");
             
-            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate(profile);
+            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
-            // Upload
-            Workspace workspace = null;
-            List<ObjectMetadata> commitObjects = new ArrayList<ObjectMetadata>();
+            // This hashmap contains a list of files changed in each workspace.
+            HashMap<CloneWorkspace, List<ItemMetadata>> workspaces = new HashMap<CloneWorkspace, List<ItemMetadata>>();
             
             for(List<CloneFile> w: updatedFiles.values()){
                 for(CloneFile c: w){
-                    //c.setServerUploaded(true);
+                    
                     c.setServerUploadedTime(lastUpdateFileDate);
                     c.merge(); 
-                    workspace = c.getWorkspace();
                     
-                    ObjectMetadata obj = StringUtil.parseJson2Update(c);
-                    commitObjects.add(obj);
+                    CloneWorkspace workspace = c.getWorkspace();
+                    ItemMetadata obj = c.mapToItemMetadata();
+                    
+                    List<ItemMetadata> itemsToCommit;
+                    if (workspaces.containsKey(workspace)) {
+                        itemsToCommit = workspaces.get(workspace);
+                    } else {
+                        itemsToCommit = new ArrayList<ItemMetadata>();
+                    }
+                    
+                    itemsToCommit.add(obj);
+                    workspaces.put(workspace, itemsToCommit);
                 }
             }
             
-            //String message = FileUtils.readFileToString(localUpdateFile);
-            String cloudId = transfer.getUser();
+            String accountId = profile.getAccountId();
             
-            server.commit(cloudId, workspace, commitObjects);
+            // Commit all files modified in each workspace
+            for (CloneWorkspace workspace : workspaces.keySet()) {
+                List<ItemMetadata> commitItems = workspaces.get(workspace);
+                server.commit(accountId, workspace, commitItems);
+            }
+            
         } catch (IOException ex) {
             logger.error("Failed to write file.", ex);
             RemoteLogs.getInstance().sendLog(ex);

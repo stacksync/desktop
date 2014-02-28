@@ -17,13 +17,14 @@
  */
 package com.stacksync.desktop.repository;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
-import com.stacksync.desktop.db.models.Workspace;
+import com.stacksync.desktop.db.models.CloneWorkspace;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -32,25 +33,20 @@ import com.stacksync.desktop.db.models.Workspace;
 public class Update {
 
     private String mimeType;
-    private String clientName; // This is just a helper field, NOT saved in the update file!
     private long fileId;
     private long version;
-    private String rootId;
-    private String parentRootId;
-    private long parentFileId;
-    private long parentFileVersion;
+    private Long parentFileId;
+    private Long parentFileVersion;
 
     private Date updated;
     private Status status;
-    private Date lastModified;
+    private Date modifiedAt;
     private long checksum;
     private long fileSize;
     private boolean folder;
     private String name;
-    private String path;
     
-    private String updateFilePath;
-    private Workspace workspace;
+    private CloneWorkspace workspace;
     
     private boolean serverUploaded;        
     private boolean serverUploadedAck;    
@@ -61,8 +57,6 @@ public class Update {
     private List<String> chunks;   
 
     public Update() {
-        // Fressen
-        updateFilePath = "";
         
         serverUploaded = false;
         serverUploadedAck = false;
@@ -76,14 +70,6 @@ public class Update {
     
     public void setConflicted(boolean conflicted){
         this.conflicted = conflicted;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
     }
 
     public long getChecksum() {
@@ -110,12 +96,12 @@ public class Update {
         this.fileId = fileId;
     }
 
-    public Date getLastModified() {
-        return lastModified;
+    public Date getModifiedAt() {
+        return modifiedAt;
     }
 
-    public void setLastModified(Date lastModified) {
-        this.lastModified = lastModified;
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 
     public String getName() {
@@ -124,14 +110,6 @@ public class Update {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     public boolean isFolder() {
@@ -158,14 +136,6 @@ public class Update {
         this.version = version;
     }
 
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
     public List<String> getChunks() {
         return chunks;
     }
@@ -174,36 +144,20 @@ public class Update {
         this.chunks = chunks;
     }
 
-    public String getRootId() {
-        return rootId;
-    }
-
-    public void setRootId(String rootId) {
-        this.rootId = rootId;
-    }
-
-    public long getParentFileId() {
+    public Long getParentFileId() {
         return parentFileId;
     }
 
-    public void setParentFileId(long parentFileId) {
+    public void setParentFileId(Long parentFileId) {
         this.parentFileId = parentFileId;
     }
 
-    public long getParentFileVersion() {
+    public Long getParentFileVersion() {
         return parentFileVersion;
     }
 
-    public void setParentFileVersion(long parentFileVersion) {
+    public void setParentFileVersion(Long parentFileVersion) {
         this.parentFileVersion = parentFileVersion;
-    }
-
-    public String getParentRootId() {
-        return parentRootId;
-    }
-
-    public void setParentRootId(String parentRootId) {
-        this.parentRootId = parentRootId;
     }
 
     @Override
@@ -238,17 +192,7 @@ public class Update {
     
     @Override
     public String toString() {
-        String strPath = getPath();
-        if(!strPath.endsWith("/")){
-            strPath = strPath + "/";
-        }
-        strPath = strPath + getName();
-        
-        return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + ", file=" + strPath + ", updatePath = " + updateFilePath + "]";
-    }
-    
-    public void setUpdateFilePath(String path){
-        this.updateFilePath = path;
+        return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + "]";
     }
     
     public void setServerUploaded(boolean serverUploaded){
@@ -274,16 +218,12 @@ public class Update {
     public Date getServerUploadedTime(){
         return this.serverUploadedTime;
     }
-    
-    public String getUpdateFilePath(){
-        return updateFilePath;
-    }
 
-    public void setWorkpace(Workspace workspace) {
+    public void setWorkpace(CloneWorkspace workspace) {
         this.workspace = workspace;
     }
     
-    public Workspace getWorkspace(){
+    public CloneWorkspace getWorkspace(){
         return this.workspace;                
     }
     
@@ -299,27 +239,22 @@ public class Update {
         
         Update update = new Update();
         
-        update.setClientName(cf.getClientName());
-        update.setFileId(cf.getFileId());
+        update.setFileId(cf.getId());
         update.setVersion(cf.getVersion());
-        update.setRootId(cf.getRootId());
         
         if(cf.getParent() != null){
-            update.setParentRootId(cf.getParent().getRootId());
-            update.setParentFileId(cf.getParent().getFileId());
+            update.setParentFileId(cf.getParent().getId());
             update.setParentFileVersion(cf.getParent().getVersion());
         }
         
-        update.setUpdated(cf.getUpdated());
         update.setStatus(cf.getStatus());
         
-        update.setLastModified(cf.getLastModified());
+        update.setModifiedAt(cf.getLastModified());
         update.setChecksum(cf.getChecksum());
         
-        update.setFileSize(cf.getFileSize());
+        update.setFileSize(cf.getSize());
         update.setFolder(cf.isFolder());
         update.setName(cf.getName());
-        update.setPath(cf.getPath());
         update.setMimeType(cf.getMimetype());
         
         List<String> chunksAdded = new ArrayList<String>();
@@ -331,6 +266,42 @@ public class Update {
         update.setServerUploadedAck(cf.getServerUploadedAck());
         
         return update;
+    }
+    
+    public static Update parse(ItemMetadata itemMetadata, CloneWorkspace workspace) 
+        throws NullPointerException {
+        
+        Update update = new Update();
+
+        update.setServerUploaded(true);
+        update.setServerUploadedAck(true);
+        update.setServerUploadedTime(new Date());
+
+        update.setFileId(itemMetadata.getId());
+        update.setVersion(itemMetadata.getVersion());
+        
+        update.setModifiedAt(itemMetadata.getModifiedAt());
+        update.setStatus(CloneFile.Status.valueOf(itemMetadata.getStatus()));
+        update.setChecksum(itemMetadata.getChecksum());
+        update.setMimeType(itemMetadata.getMimetype());
+        update.setFileSize(itemMetadata.getSize());
+        update.setFolder(itemMetadata.isFolder());
+
+        update.setName(itemMetadata.getFilename());
+
+        // Parent
+        if (itemMetadata.getParentId() != null && !itemMetadata.getParentId().toString().isEmpty()) {
+            update.setParentFileId(itemMetadata.getParentId());
+            if (itemMetadata.getParentVersion() != null) {
+                update.setParentFileVersion(itemMetadata.getParentVersion());
+            }
+        }
+
+        update.setChunks(itemMetadata.getChunks());
+        update.setWorkpace(workspace);
+
+        return update;
+        
     }
     
 }

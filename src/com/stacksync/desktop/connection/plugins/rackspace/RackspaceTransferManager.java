@@ -28,6 +28,9 @@ import java.util.*;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.connection.plugins.AbstractTransferManager;
+import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.exceptions.LocalFileNotFoundException;
+import com.stacksync.desktop.exceptions.RemoteFileNotFoundException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
@@ -55,10 +58,8 @@ public class RackspaceTransferManager extends AbstractTransferManager {
     public RackspaceTransferManager(RackspaceConnection connection) {
         super(connection);
 
-        client = new FilesClient(connection.getUsername(), connection.getApiKey());
         AUTH_URL = connection.getAuthUrl();
-        client.setAuthenticationURL(AUTH_URL);
-        client.setConnectionTimeOut(CONNECTION_TIMEOUT);
+        client = new FilesClient(connection.getUsername(), connection.getApiKey(), AUTH_URL, null, CONNECTION_TIMEOUT);
     }
 
     @Override
@@ -281,5 +282,76 @@ public class RackspaceTransferManager extends AbstractTransferManager {
     public void initStorage() throws StorageException {        
         String container = getConnection().getContainer();
         createContainer(container);
+    }
+
+    @Override
+    public void download(RemoteFile remoteFile, File localFile, CloneWorkspace workspace) 
+            throws RemoteFileNotFoundException, StorageException {
+        
+        connect();
+        File tempFile = null;
+        InputStream is = null;
+        
+        try {
+            String storageURL = workspace.getSwiftStorageURL();
+            String container = workspace.getSwiftContainer();
+            is = client.getSharedObjectAsStream(storageURL, container, remoteFile.getName());
+
+            // Save to temp file
+            tempFile = config.getCache().createTempFile(remoteFile.getName());
+            FileUtil.writeFile(is, tempFile);
+
+            FileUtil.copy(tempFile, localFile);
+
+        } catch (Exception ex) {
+            logger.error(ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            throw new StorageException("Unable to download file '" + remoteFile.getName(), ex);
+        } finally {
+            try {
+                if (is != null){
+                    is.close();
+                }
+            } catch (IOException ex) {
+                logger.error("I/O Excdeption: ", ex);
+                RemoteLogs.getInstance().sendLog(ex);
+            } 
+            
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
+        }
+    }
+
+    @Override
+    public void upload(File localFile, RemoteFile remoteFile, CloneWorkspace workspace)
+            throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException {
+        
+        connect();
+
+        // Check if exists
+        /*Collection<RemoteFile> obj = list(remoteFile.getName()).values();
+
+        if (obj != null && !obj.isEmpty()) {
+            return;
+        }*/
+        
+        try {
+            // Upload
+            //client.storeObjectAs(workspace.getSwiftContainer(), localFile, "application/x-Stacksync", remoteFile.getName());
+            client.storeSharedObjectAs(workspace.getSwiftStorageURL(), workspace.getSwiftContainer(), localFile,
+                    "application/x-Stacksync", remoteFile.getName());
+        } catch (OverQuotaException ex) {
+            logger.error("Quota limit exceeded. Could not upload file "+localFile.getName(), ex);
+            throw new StorageQuotaExcedeedException(ex);
+        } catch (Exception ex) {
+            logger.error(ex);
+            throw new StorageException(ex);
+        }
+    }
+
+    @Override
+    public Map<String, RemoteFile> list(String namePrefix, CloneWorkspace workspace) throws StorageException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -33,6 +33,7 @@ import com.stacksync.desktop.index.requests.DeleteIndexRequest;
 import com.stacksync.desktop.index.requests.IndexRequest;
 import com.stacksync.desktop.index.requests.MoveIndexRequest;
 import com.stacksync.desktop.index.requests.NewIndexRequest;
+import com.stacksync.desktop.index.requests.NewIndexSharedRequest;
 import com.stacksync.desktop.util.FileLister;
 
 /**
@@ -97,11 +98,9 @@ public class Indexer {
 
     public void index(Profile profile) { 
         logger.debug("Reading folders in profile "+profile.getName()+" ...");
-                
-        for (Folder folder : profile.getFolders().list()) {
-            if (!folder.isActive() || folder.getLocalFile() == null) {
-                continue;
-            }
+        
+        final Folder folder = profile.getFolder();
+        if (folder != null && folder.isActive() && folder.getLocalFile() != null) {
             logger.debug("- Folder "+folder.getLocalFile()+" ...");
             
             // Check for files that do NOT exist anymore
@@ -148,8 +147,8 @@ public class Indexer {
         queue.add(new DeleteIndexRequest(root, file));
     }
     
-    public void queueDeleted(Folder root, CloneFile file) {
-        queue.add(new DeleteIndexRequest(root, file));
+    public void queueDeleted(Folder root, CloneFile file, CloneFile deletedParent) {
+        queue.add(new DeleteIndexRequest(root, file, deletedParent));
     }    
     
     public void queueNewIndex(Folder root, File file, CloneFile previousVersion, long checksum){
@@ -158,6 +157,10 @@ public class Indexer {
     
     public void queueNewIndex(NewIndexRequest newRequest) {
         queue.add(newRequest);
+    }
+
+    public void queueNewIndexShared(Folder root, File sharedFolder, long checksum) {
+        queue.add(new NewIndexSharedRequest(root, sharedFolder, checksum));
     }
 
     private class IndexWorker implements Runnable {

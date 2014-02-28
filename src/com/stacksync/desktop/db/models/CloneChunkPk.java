@@ -12,29 +12,8 @@ public class CloneChunkPk implements Serializable {
     @Column(name="checksum")
     private String checksum;
     
-    @Id
-    @Column(name="chunkpath", nullable=false)
-    private String chunkpath = "";
-
-
-    @Id
-    @Column(name="chunk_ORDER", nullable=false)
-    private int chunkOrder;     
-    
     public String getChecksum() {
         return checksum;
-    }
-
-    public void setPath(String path){
-        this.chunkpath = path;
-    }
-
-    public String getFileName() {
-        if(chunkpath.compareTo("/") == 0){
-            return String.format("%schk-%s", chunkpath, getChecksum());
-        } else{
-            return String.format("%s/chk-%s", chunkpath, getChecksum());
-        }
     }
 
     @Override
@@ -54,6 +33,6 @@ public class CloneChunkPk implements Serializable {
 
     @Override
     public String toString() {
-        return "CloneChunk[path=" + chunkpath + ", checksum=" + checksum + "]";
+        return "CloneChunk[ checksum=" + checksum + "]";
     }
 }

@@ -20,8 +20,13 @@ package com.stacksync.desktop.connection.plugins;
 import java.util.HashMap;
 import java.util.Map;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.exceptions.LocalFileNotFoundException;
+import com.stacksync.desktop.exceptions.RemoteFileNotFoundException;
 import com.stacksync.desktop.exceptions.StorageException;
+import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
 import com.stacksync.desktop.repository.files.RemoteFile;
+import java.io.File;
 
 /**
  *
@@ -64,4 +69,19 @@ public abstract class AbstractTransferManager implements TransferManager {
         
         throw new UnsupportedOperationException("clean() not implemented yet.");
     }    
+
+    @Override
+    public void download(RemoteFile remoteFile, File localFile, CloneWorkspace workspace) throws RemoteFileNotFoundException, StorageException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void upload(File localFile, RemoteFile remoteFile, CloneWorkspace workspace) throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Map<String, RemoteFile> list(String namePrefix, CloneWorkspace workspace) throws StorageException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

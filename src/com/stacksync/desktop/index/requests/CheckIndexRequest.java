@@ -75,7 +75,11 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
         } else {           
             // Add as new
             logger.info("Folder " + file.toString() + " NOT found in DB. Adding as new file.");
-            Indexer.getInstance().queueNewIndex(root, file, null, -1);
+            if (file.getName().startsWith(".nw_")){
+                Indexer.getInstance().queueNewIndexShared(root, file, -1);
+            } else {
+                Indexer.getInstance().queueNewIndex(root, file, null, -1);
+            }
         }
     }
 
@@ -105,7 +109,7 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
             }
             
             boolean isSameFile = Math.abs(file.lastModified() - dbFile.getLastModified().getTime()) < 500
-                && file.length() == dbFile.getFileSize();            
+                && file.length() == dbFile.getSize();            
             
             if (isSameFile || fileCheckSum == dbFile.getChecksum()) {
                 logger.debug("File " + dbFile.getFile().toString() + " found in DB. Same modified date, same size. Nothing to do!");    
@@ -113,7 +117,7 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
             }
             
             logger.info("File " + dbFile.getFile().toString() + " found, but modified date or size differs. Indexing as CHANGED file.");
-            logger.info("-> fs = ("+file.lastModified()+", "+file.length()+"), db = ( "+dbFile.getLastModified().getTime()+", "+dbFile.getFileSize()+")");
+            logger.info("-> fs = ("+file.lastModified()+", "+file.length()+"), db = ( "+dbFile.getLastModified().getTime()+", "+dbFile.getSize()+")");
             
             //new NewIndexRequest(root, file, dbFile).process();
             Indexer.getInstance().queueNewIndex(root, file, dbFile, fileCheckSum);

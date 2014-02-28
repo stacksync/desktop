@@ -42,14 +42,6 @@ public class CloneChunk extends PersistentObject implements Serializable {
     @Column(name="checksum")
     private String checksum;
     
-    @Id
-    @Column(name="chunkpath", nullable=false)
-    private String chunkpath = "";
-    
-    @Id
-    @Column(name="chunk_ORDER", nullable=false)
-    private int chunkOrder;
-    
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private CacheStatus status;
@@ -58,9 +50,8 @@ public class CloneChunk extends PersistentObject implements Serializable {
         this.status = CacheStatus.CACHED;
     }
 
-    public CloneChunk(String checksum, int chunkNumber, CacheStatus status) {
+    public CloneChunk(String checksum, CacheStatus status) {
         this.checksum = checksum;
-        this.chunkOrder = chunkNumber;
         this.status = status;
     }
 
@@ -68,20 +59,7 @@ public class CloneChunk extends PersistentObject implements Serializable {
         return checksum;
     }
 
-    public void setPath(String path){
-        this.chunkpath = path;
-    }
-        
-    public int getOrder() {
-        return chunkOrder;
-    }
-
     public String getFileName() {
-        /*if(chunkpath.compareTo("/") == 0){
-            return String.format("%schk-%s", chunkpath, getChecksum());
-        } else{
-            return String.format("%s/chk-%s", chunkpath, getChecksum());
-        }*/
         return String.format("chk-%s", getChecksum());
     }
     
@@ -110,6 +88,6 @@ public class CloneChunk extends PersistentObject implements Serializable {
 
     @Override
     public String toString() {
-        return "CloneChunk[path=" + chunkpath + ", checksum=" + checksum + ", chunkOrder=" + chunkOrder + "]";
+        return "CloneChunk[ checksum=" + checksum + "]";
     }
 }

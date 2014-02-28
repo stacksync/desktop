@@ -42,7 +42,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
-import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.gui.linux.BrowseFileRequest;
@@ -60,7 +59,6 @@ public class FileUtil {
     private static final MagicMimeTypeIdentifier mimeTypesMap = new MagicMimeTypeIdentifier();
     private static final Logger logger = Logger.getLogger(FileUtil.class.getName());    
     private static final Environment env = Environment.getInstance();
-    private static final Config config = Config.getInstance();
     
     private static final double BASE = 1024, KB = BASE, MB = KB * BASE, GB = MB * BASE;
     private static final DecimalFormat df = new DecimalFormat("#.##");
@@ -544,7 +542,13 @@ public class FileUtil {
     public static boolean checkIgnoreFile(Folder root, File file){    
         String fileNameLower = file.getName().toLowerCase();
         
-        if(checkStackSyncTemporalFile(root, file)) {
+        /* This case is a special one. It will check if the file
+           has the structure .nw_111_aaa meaning it is a new wp. */
+        if (isSpecialFileToProcess(root, file)) {
+            return false;
+        }
+        
+        if (isStackSyncTemporalFile(root, file)) {
             return true;
         }
         
@@ -553,7 +557,7 @@ public class FileUtil {
             return true;
         }
         
-        //.ds_store
+        //.thumbs.db
         if (fileNameLower.compareTo("thumbs.db") == 0) {
             return true;
         }        
@@ -577,11 +581,22 @@ public class FileUtil {
         return false;
     }
     
-    public static boolean checkStackSyncTemporalFile(Folder root, File file) {
+    public static boolean isStackSyncTemporalFile(Folder root, File file) {
         String fileNameLower = file.getName().toLowerCase();
         
         // .ignore file
         if (fileNameLower.startsWith(Constants.FILE_IGNORE_PREFIX)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static boolean isSpecialFileToProcess(Folder root, File file) {
+        String fileNameLower = file.getName().toLowerCase();
+        
+        // .nw_111_aaa file means: folder name = aaa, workspace id = 111
+        if (fileNameLower.startsWith(".nw_")) {
             return true;
         }
         

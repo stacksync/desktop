@@ -63,7 +63,7 @@ public class LogsTests {
         File configurationDir = env.getAppConfDir();                
         if(configurationDir.exists()){
             config.load();
-            if (config.getProfiles().list().isEmpty()) {
+            if (config.getProfile() == null) {
                 File folder = new File(config.getConfDir()+File.separator+Constants.CONFIG_DATABASE_DIRNAME);                    
                 File configFile = new File(config.getConfDir()+File.separator+Constants.CONFIG_FILENAME);
 

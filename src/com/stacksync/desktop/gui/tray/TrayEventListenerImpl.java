@@ -6,8 +6,10 @@ package com.stacksync.desktop.gui.tray;
 
 import com.stacksync.desktop.ApplicationController;
 import com.stacksync.desktop.Constants;
+import com.stacksync.desktop.gui.sharing.SharePanel;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
+import javax.swing.JFrame;
 import org.apache.log4j.Logger;
 
 /**
@@ -50,7 +52,17 @@ public class TrayEventListenerImpl implements TrayEventListener {
             case RESUME_SYNC:
                 this.controller.resumeSync();
                 break;
-
+            case SHARE:
+                //Show share panel
+                JFrame frame = new JFrame("Share a folder");
+                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                
+                SharePanel panel = new SharePanel();
+                
+                frame.setContentPane(panel);
+                frame.pack();
+                frame.setVisible(true);
+                break;
             case QUIT:
                 this.controller.doShutdownTray();
                 break;
