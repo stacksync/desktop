@@ -19,8 +19,6 @@ package com.stacksync.desktop.config;
 
 import com.stacksync.desktop.exceptions.ConfigException;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.connection.plugins.PluginInfo;

@@ -340,7 +340,7 @@ public class DatabaseHelper {
         newFile.setFolder(update.isFolder());
         newFile.setUsingTempId(false);
 
-        if (update.getParentFileId() != 0) {
+        if (update.getParentFileId() != null) {
             CloneFile parentCF = getFileOrFolder(update.getParentFileId(), update.getParentFileVersion());
             newFile.setParent(parentCF);
         }

@@ -197,7 +197,7 @@ public class ChangeManager {
                 root = profile.getFolder();
 
                 String path = root.getLocalFile().getAbsolutePath() + File.separator;
-                if (update.getParentFileId() != 0) {
+                if (update.getParentFileId() != null) {
                     CloneFile parentCF = db.getFileOrFolder(update.getParentFileId());
                     path += parentCF.getPath() + File.separator;
                     path += parentCF.getName() + File.separator;
@@ -771,8 +771,15 @@ public class ChangeManager {
             return false;
         }
         
-        Long evParentId = existingVersion.getParent().getId();
-        Long updateParentId = update.getParentFileId();
+        Long evParentId = null;
+        if (existingVersion.getParent() != null) {
+            evParentId = existingVersion.getParent().getId();
+        }
+        
+        Long updateParentId = null;
+        if (update.getParentFileId() != null){
+            updateParentId = update.getParentFileId();
+        }
         
         if (existingVersion.getStatus() == Status.RENAMED && update.getStatus() == Status.RENAMED
                 && isSameParent(evParentId, updateParentId)
@@ -780,6 +787,7 @@ public class ChangeManager {
 
             return false;
         }
+        
 
         if (existingVersion.getStatus() == Status.NEW && update.getStatus() == Status.NEW
                 && existingVersion.getSize() == update.getFileSize()
@@ -818,7 +826,7 @@ public class ChangeManager {
             return false;
         }
         
-        if ( parentId1 == parentId2 ) {
+        if ( parentId1.equals(parentId2) ) {
             return true;
         }
         

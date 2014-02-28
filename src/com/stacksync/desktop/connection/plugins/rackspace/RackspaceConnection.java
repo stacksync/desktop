@@ -17,19 +17,19 @@
  */
 package com.stacksync.desktop.connection.plugins.rackspace;
 
-import com.stacksync.desktop.connection.plugins.ConfigPanel;
-import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.connection.plugins.PluginInfo;
-import com.stacksync.desktop.connection.plugins.Connection;
-import com.stacksync.desktop.connection.plugins.Plugins;
-import java.util.ResourceBundle;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
+import com.stacksync.desktop.config.cipher.PasswordCipher;
+import com.stacksync.desktop.config.cipher.PasswordCipherFactory;
+import com.stacksync.desktop.connection.plugins.ConfigPanel;
+import com.stacksync.desktop.connection.plugins.Connection;
+import com.stacksync.desktop.connection.plugins.PluginInfo;
+import com.stacksync.desktop.connection.plugins.Plugins;
+import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.connection.plugins.rackspace_comercial.RackspaceComercialPluginInfo;
 import com.stacksync.desktop.connection.plugins.rackspace_dev.RackspaceDevPluginInfo;
 import com.stacksync.desktop.exceptions.ConfigException;
-import com.stacksync.desktop.config.cipher.PasswordCipher;
-import com.stacksync.desktop.config.cipher.PasswordCipherFactory;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -140,11 +140,10 @@ public class RackspaceConnection implements Connection {
         PasswordCipher cipher = PasswordCipherFactory.getPasswordEncrypter(encrypType);
         apiKey = cipher.decrypt(node.getProperty("apikey"));
         
-        container = node.getProperty("container");
         authUrl = node.getProperty("authurl");
 
-        if (username == null || apiKey == null || container == null) {
-            throw new ConfigException("Rackspace connection properties must at least contain the parameters 'username', 'apikey' and 'container'.");
+        if (username == null || apiKey == null) {
+            throw new ConfigException("Rackspace connection properties must at least contain the parameters 'username' and 'apikey'.");
         }
     }
 
@@ -156,7 +155,6 @@ public class RackspaceConnection implements Connection {
         PasswordCipher cipher = PasswordCipherFactory.getPasswordEncrypter(encrypType);
         String encryptedApiKey = cipher.encrypt(apiKey);
         node.setProperty("apikey", encryptedApiKey);
-        node.setProperty("container", container);
         node.setProperty("authurl", authUrl);
     }
     
@@ -164,7 +162,6 @@ public class RackspaceConnection implements Connection {
     public String toString() {
         return RackspaceConnection.class.getSimpleName()
             + "[" + resourceBundle.getString("rackspace_username")  + "=" + username +
-            ", " + resourceBundle.getString("rackspace_container") + "=" + container + 
             ", Auth url=" + authUrl + "]";
     }
 

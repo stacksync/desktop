@@ -140,17 +140,16 @@ public class Encryption implements Configurable {
     @Override
     public void load(ConfigNode node) throws ConfigException {
         password = node.getProperty("password");
-        cipherStr = node.getProperty("cipher");
-        keylength = node.getInteger("keylength");
-
         if (password == null) {
-            throw new ConfigException("Password must be specified in encryption.");
+            password = "";
         }
 
+        cipherStr = node.getProperty("cipher");
         if (cipherStr == null) {
             cipherStr = Constants.DEFAULT_ENCRYPTION_CIPHER;
         }
 
+        keylength = node.getInteger("keylength");
         if (keylength == null) {
             keylength = Constants.DEFAULT_ENCRYPTION_KEYLENGTH;
         }

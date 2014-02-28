@@ -35,8 +35,8 @@ public class Update {
     private String mimeType;
     private long fileId;
     private long version;
-    private long parentFileId;
-    private long parentFileVersion;
+    private Long parentFileId;
+    private Long parentFileVersion;
 
     private Date updated;
     private Status status;
@@ -144,19 +144,19 @@ public class Update {
         this.chunks = chunks;
     }
 
-    public long getParentFileId() {
+    public Long getParentFileId() {
         return parentFileId;
     }
 
-    public void setParentFileId(long parentFileId) {
+    public void setParentFileId(Long parentFileId) {
         this.parentFileId = parentFileId;
     }
 
-    public long getParentFileVersion() {
+    public Long getParentFileVersion() {
         return parentFileVersion;
     }
 
-    public void setParentFileVersion(long parentFileVersion) {
+    public void setParentFileVersion(Long parentFileVersion) {
         this.parentFileVersion = parentFileVersion;
     }
 
