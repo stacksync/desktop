@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.stacksync.desktop.connection.plugins.rackspace_comercial;
+package com.stacksync.desktop.connection.plugins.swift_dev;
 
-import com.stacksync.desktop.connection.plugins.rackspace.*;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConnection;
 import java.util.ResourceBundle;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.connection.plugins.Connection;
@@ -27,13 +27,13 @@ import com.stacksync.desktop.connection.plugins.PluginInfo;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class RackspaceComercialPluginInfo extends PluginInfo {
+public class SwiftDevPluginInfo extends PluginInfo {
     private final Config config = Config.getInstance();
     
-    public static final String ID = "rackspace_comercial";
+    public static final String ID = "swift_dev";
     private ResourceBundle resourceBundle;
 
-    public RackspaceComercialPluginInfo() {
+    public SwiftDevPluginInfo() {
          resourceBundle = config.getResourceBundle();
     }        
     
@@ -44,7 +44,7 @@ public class RackspaceComercialPluginInfo extends PluginInfo {
     
     @Override
     public String getName() {
-        return resourceBundle.getString("rackspace_plugin_name");
+        return resourceBundle.getString("swift_plugin_name");
     }
 
     @Override
@@ -54,11 +54,11 @@ public class RackspaceComercialPluginInfo extends PluginInfo {
 
     @Override
     public String getDescripton() {
-        return resourceBundle.getString("rackspace_plugin_description");
+        return resourceBundle.getString("swift_plugin_description");
     }
 
     @Override
     public Connection createConnection() {
-        return new RackspaceConnection();
+        return new SwiftConnection();
     }
 }

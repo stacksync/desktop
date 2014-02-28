@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.stacksync.desktop.connection.plugins.rackspace_comercial;
+package com.stacksync.desktop.connection.plugins.swift_comercial;
 
-import com.stacksync.desktop.connection.plugins.rackspace.*;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConnection;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConfigPanelFactory;
 import com.stacksync.desktop.connection.plugins.ConfigPanel;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.exceptions.StorageConnectException;
@@ -27,9 +28,9 @@ import com.stacksync.desktop.gui.error.ErrorMessage;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class RackspaceComercialConfigPanel extends ConfigPanel {
+public class SwiftComercialConfigPanel extends ConfigPanel {
 	
-    public RackspaceComercialConfigPanel(RackspaceConnection connection) {
+    public SwiftComercialConfigPanel(SwiftConnection connection) {
         super(connection);
         initComponents();	
         
@@ -37,8 +38,8 @@ public class RackspaceComercialConfigPanel extends ConfigPanel {
         lblUsername.setText(resourceBundle.getString("cp_simple_username"));
         lblPassword.setText(resourceBundle.getString("cp_simple_password"));  
         
-        txtAuthUrl.setText(RackspaceConfigPanelFactory.AUTH_URL);
-        txtContainerName.setText(RackspaceConfigPanelFactory.CONTAINER);
+        txtAuthUrl.setText(SwiftConfigPanelFactory.AUTH_URL);
+        txtContainerName.setText(SwiftConfigPanelFactory.CONTAINER);
         txtAuthUrl.setVisible(false);
         lblAuthUrl.setVisible(false);
         txtContainerName.setVisible(false);
@@ -72,8 +73,8 @@ public class RackspaceComercialConfigPanel extends ConfigPanel {
     }
 
     @Override
-    public RackspaceConnection getConnection() {
-        return (RackspaceConnection) super.getConnection();
+    public SwiftConnection getConnection() {
+        return (SwiftConnection) super.getConnection();
     }       
     
     /** This method is called from within the constructor to
@@ -187,8 +188,8 @@ public class RackspaceComercialConfigPanel extends ConfigPanel {
     public void clean() {
         txtUsername.setText("");
         txtPassword.setText("");
-        txtContainerName.setText(RackspaceConfigPanelFactory.CONTAINER);
-        txtAuthUrl.setText(RackspaceConfigPanelFactory.AUTH_URL);
+        txtContainerName.setText(SwiftConfigPanelFactory.CONTAINER);
+        txtAuthUrl.setText(SwiftConfigPanelFactory.AUTH_URL);
     }
 
     private String getUserName(){
@@ -244,7 +245,7 @@ public class RackspaceComercialConfigPanel extends ConfigPanel {
             return false;
         } else {            
             //ping to host
-            RackspaceConnection connection = new RackspaceConnection();
+            SwiftConnection connection = new SwiftConnection();
             connection.setApiKey(password);
             connection.setAuthUrl(authUrl);
             connection.setContainer("");

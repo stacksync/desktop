@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.stacksync.desktop.connection.plugins.rackspace;
+package com.stacksync.desktop.connection.plugins.swift;
 
 import com.rackspacecloud.client.cloudfiles.FilesClient;
 import com.rackspacecloud.client.cloudfiles.FilesObject;
@@ -47,15 +47,15 @@ import java.net.UnknownHostException;
  *
  * @author oubou68, pheckel
  */
-public class RackspaceTransferManager extends AbstractTransferManager {
+public class SwiftTransferManager extends AbstractTransferManager {
 
-    private final Logger logger = Logger.getLogger(RackspaceTransferManager.class.getName());
+    private final Logger logger = Logger.getLogger(SwiftTransferManager.class.getName());
     private final int CONNECTION_TIMEOUT = 60 * 1000;
     
     private String AUTH_URL;    
     private FilesClient client;
 
-    public RackspaceTransferManager(RackspaceConnection connection) {
+    public SwiftTransferManager(SwiftConnection connection) {
         super(connection);
 
         AUTH_URL = connection.getAuthUrl();
@@ -63,8 +63,8 @@ public class RackspaceTransferManager extends AbstractTransferManager {
     }
 
     @Override
-    public RackspaceConnection getConnection() {
-        return (RackspaceConnection) super.getConnection();
+    public SwiftConnection getConnection() {
+        return (SwiftConnection) super.getConnection();
     }
 
     @Override
@@ -338,7 +338,6 @@ public class RackspaceTransferManager extends AbstractTransferManager {
         
         try {
             // Upload
-            //client.storeObjectAs(workspace.getSwiftContainer(), localFile, "application/x-Stacksync", remoteFile.getName());
             client.storeSharedObjectAs(workspace.getSwiftStorageURL(), workspace.getSwiftContainer(), localFile,
                     "application/x-Stacksync", remoteFile.getName());
         } catch (OverQuotaException ex) {

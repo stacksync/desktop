@@ -23,7 +23,7 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.connection.plugins.PluginInfo;
 import com.stacksync.desktop.connection.plugins.Plugins;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.connection.plugins.rackspace.RackspaceConnection;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConnection;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.LocalFileNotFoundException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
@@ -39,7 +39,7 @@ public class TestPlugin {
         Config.getInstance().load();
         
         PluginInfo plugin = Plugins.get("box");
-        RackspaceConnection c = (RackspaceConnection) plugin.createConnection();
+        SwiftConnection c = (SwiftConnection) plugin.createConnection();
         
         c.setApiKey("...");
         

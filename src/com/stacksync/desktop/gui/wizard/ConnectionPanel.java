@@ -69,7 +69,7 @@ public class ConnectionPanel extends SettingsPanel {
     @Override
     public void load() {        
         if(pnlConnection == null){
-            PluginInfo pluginInfo = Plugins.get("rackspace_comercial");
+            PluginInfo pluginInfo = Plugins.get("swift_comercial");
             connection = pluginInfo.createConnection();
             pnlConnection = connection.createConfigPanel();
             scrConnection.setViewportView(pnlConnection);

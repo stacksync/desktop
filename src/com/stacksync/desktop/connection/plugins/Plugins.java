@@ -75,7 +75,7 @@ public class Plugins {
         //plugins.add("local");
         //plugins.add("picasa");
         //plugins.add("pop3_smtp");
-        pluginsToLoad.add("rackspace_dev");
+        pluginsToLoad.add("swift_dev");
         pluginsToLoad.add("s3");
         //pluginsToLoad.add("samba");
         pluginsToLoad.add("sftp");

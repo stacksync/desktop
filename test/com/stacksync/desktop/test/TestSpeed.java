@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.connection.plugins.rackspace.RackspaceConnection;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConnection;
 import com.stacksync.desktop.exceptions.LocalFileNotFoundException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
@@ -115,12 +115,12 @@ public class TestSpeed {
         c.setPort(21);
         c.setPath("/syncany");*/
         /*
-        final RackspaceConnection c = new RackspaceConnection();
+        final SwiftConnection c = new SwiftConnection();
         c.setUsername("binwiederhier");    
         c.setApiKey("...");
         c.setContainer("syncany-test");
          */
-        final RackspaceConnection c = new RackspaceConnection();
+        final SwiftConnection c = new SwiftConnection();
 
         /*final SambaConnection c = new SambaConnection();
         c.setRoot("smb://localhost/share/private/");*/

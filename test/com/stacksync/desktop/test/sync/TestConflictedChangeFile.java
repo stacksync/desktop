@@ -70,7 +70,7 @@ public class TestConflictedChangeFile {
         
         staticFunctionsTest.createFile(root.getLocalFile().getPath() + fileName, "content4");
         //create a conflicted modification v2
-        Update update = Update.parse(dbFile);        
+        /*Update update = Update.parse(dbFile);        
         update.setVersion(2);
         update.setServerUploadedAck(true);
         update.setServerUploadedTime(new Date());  
@@ -84,7 +84,7 @@ public class TestConflictedChangeFile {
         
         System.out.println("FINISH!!!!\n\n");        
         System.out.println("The result is: \n file1 with content5. \n file1 conflicted with content4. \n 5 rows in database File1 New ACK, Changed ACK | File1 conflicted New, Changed, Changed.");
-        while(true) { }
+        while(true) { }*/
     }
     
     

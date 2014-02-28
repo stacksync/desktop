@@ -5,7 +5,7 @@ import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.connection.plugins.rackspace.RackspaceConnection;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConnection;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CacheException;
 import com.stacksync.desktop.exceptions.InitializationException;
@@ -44,7 +44,7 @@ public class StackSyncTestPanel extends SettingsPanel {
                 throw new InitializationException("Unable to get account info.");
             }
             
-            RackspaceConnection connection = new RackspaceConnection();
+            SwiftConnection connection = new SwiftConnection();
             connection.setUser(info.getSwiftUser());
             connection.setApiKey(profile.getAccount().getPassword());
             connection.setTenant(info.getSwiftTenant());
@@ -63,7 +63,7 @@ public class StackSyncTestPanel extends SettingsPanel {
             
             
             // TODO just to test. Remove
-            /*RackspaceConnection connection = new RackspaceConnection();
+            /*SwiftConnection connection = new SwiftConnection();
             connection.setUser("tester1");
             connection.setApiKey(profile.getAccount().getPassword());
             connection.setTenant("tester1");

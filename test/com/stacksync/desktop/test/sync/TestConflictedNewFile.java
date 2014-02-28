@@ -55,7 +55,7 @@ public class TestConflictedNewFile {
         
         staticFunctionsTest.createFile(root.getLocalFile().getPath() + staticFunctionsTest.fileName1, "content1");
         //create a conflicted modification v2
-        Update update = Update.parse(dbFile);
+        /*Update update = Update.parse(dbFile);
         update.setVersion(1);
         update.setStatus(Status.NEW);
         update.setServerUploadedAck(true);
@@ -69,6 +69,6 @@ public class TestConflictedNewFile {
         cm.queueUpdates(list);                
         System.out.println("FINISH!!!!\n\n");        
         System.out.println("The result is: \n file1 exist with content2. \n file1 conflicted with content1. \n 2 rows in database New ACK, New conflicted.");
-        while(true) { }
+        while(true) { }*/
     }
 }

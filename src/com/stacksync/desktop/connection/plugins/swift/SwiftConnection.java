@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.stacksync.desktop.connection.plugins.rackspace;
+package com.stacksync.desktop.connection.plugins.swift;
 
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
@@ -26,8 +26,8 @@ import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.connection.plugins.PluginInfo;
 import com.stacksync.desktop.connection.plugins.Plugins;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.connection.plugins.rackspace_comercial.RackspaceComercialPluginInfo;
-import com.stacksync.desktop.connection.plugins.rackspace_dev.RackspaceDevPluginInfo;
+import com.stacksync.desktop.connection.plugins.swift_comercial.SwiftComercialPluginInfo;
+import com.stacksync.desktop.connection.plugins.swift_dev.SwiftDevPluginInfo;
 import com.stacksync.desktop.exceptions.ConfigException;
 import java.util.ResourceBundle;
 
@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
  *
  * @author pheckel
  */
-public class RackspaceConnection implements Connection {
+public class SwiftConnection implements Connection {
     private final Config config = Config.getInstance();
     // By default we use the DUMMY cipher to avoid problems with
     // old versions.
@@ -49,7 +49,7 @@ public class RackspaceConnection implements Connection {
     private String user;
     private ResourceBundle resourceBundle;
     
-    public RackspaceConnection() {
+    public SwiftConnection() {
         resourceBundle = config.getResourceBundle();
     }
     
@@ -58,16 +58,16 @@ public class RackspaceConnection implements Connection {
     public PluginInfo getPluginInfo() {
         
         if (config.isExtendedMode()) {
-            return Plugins.get(RackspaceDevPluginInfo.ID);
+            return Plugins.get(SwiftDevPluginInfo.ID);
         } else {
-            return Plugins.get(RackspaceComercialPluginInfo.ID);
+            return Plugins.get(SwiftComercialPluginInfo.ID);
         }
         
     }
         
     @Override
     public TransferManager createTransferManager() {
-        return new RackspaceTransferManager(this);
+        return new SwiftTransferManager(this);
     }
 
     @Override
@@ -75,9 +75,9 @@ public class RackspaceConnection implements Connection {
         ConfigPanel panel;
         
         if (config.isExtendedMode()) {
-            panel = RackspaceConfigPanelFactory.getRackspaceConfigPanel(RackspaceConfigPanelFactory.DEV, this);
+            panel = SwiftConfigPanelFactory.getSwiftConfigPanel(SwiftConfigPanelFactory.DEV, this);
         } else {
-            panel = RackspaceConfigPanelFactory.getRackspaceConfigPanel(RackspaceConfigPanelFactory.COMERCIAL, this);
+            panel = SwiftConfigPanelFactory.getSwiftConfigPanel(SwiftConfigPanelFactory.COMERCIAL, this);
         }
         
         return panel;
@@ -143,7 +143,7 @@ public class RackspaceConnection implements Connection {
         authUrl = node.getProperty("authurl");
 
         if (username == null || apiKey == null) {
-            throw new ConfigException("Rackspace connection properties must at least contain the parameters 'username' and 'apikey'.");
+            throw new ConfigException("Swift connection properties must at least contain the parameters 'username' and 'apikey'.");
         }
     }
 
@@ -160,8 +160,8 @@ public class RackspaceConnection implements Connection {
     
     @Override
     public String toString() {
-        return RackspaceConnection.class.getSimpleName()
-            + "[" + resourceBundle.getString("rackspace_username")  + "=" + username +
+        return SwiftConnection.class.getSimpleName()
+            + "[" + resourceBundle.getString("swift_username")  + "=" + username +
             ", Auth url=" + authUrl + "]";
     }
 
@@ -172,7 +172,7 @@ public class RackspaceConnection implements Connection {
 
     @Override
     public String getHost() {
-        RackspaceTransferManager trans = (RackspaceTransferManager) createTransferManager();
+        SwiftTransferManager trans = (SwiftTransferManager) createTransferManager();
         return trans.getStorageIp();
     }
 }

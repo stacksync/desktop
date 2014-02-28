@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.stacksync.desktop.connection.plugins.rackspace_dev;
+package com.stacksync.desktop.connection.plugins.swift_dev;
 
-import com.stacksync.desktop.connection.plugins.rackspace.*;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConnection;
+import com.stacksync.desktop.connection.plugins.swift.SwiftConfigPanelFactory;
 import com.stacksync.desktop.connection.plugins.ConfigPanel;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.exceptions.StorageConnectException;
@@ -27,9 +28,9 @@ import com.stacksync.desktop.gui.error.ErrorMessage;
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
-public class RackspaceDevConfigPanel extends ConfigPanel {
+public class SwiftDevConfigPanel extends ConfigPanel {
 	
-    public RackspaceDevConfigPanel(RackspaceConnection connection) {
+    public SwiftDevConfigPanel(SwiftConnection connection) {
         super(connection);
         initComponents();	
         
@@ -37,7 +38,7 @@ public class RackspaceDevConfigPanel extends ConfigPanel {
         jLabel1.setText(resourceBundle.getString("ftpc_username"));
         jLabel2.setText(resourceBundle.getString("ftpc_password"));  
         
-        txtAuthUrl.setText(RackspaceConfigPanelFactory.AUTH_URL);
+        txtAuthUrl.setText(SwiftConfigPanelFactory.AUTH_URL);
     }
 
     @Override
@@ -65,8 +66,8 @@ public class RackspaceDevConfigPanel extends ConfigPanel {
     }
 
     @Override
-    public RackspaceConnection getConnection() {
-        return (RackspaceConnection) super.getConnection();
+    public SwiftConnection getConnection() {
+        return (SwiftConnection) super.getConnection();
     }       
     
     /** This method is called from within the constructor to
@@ -166,8 +167,8 @@ public class RackspaceDevConfigPanel extends ConfigPanel {
     public void clean() {
         txtUsername.setText("");
         txtApiKey.setText("");
-        txtContainerName.setText(RackspaceConfigPanelFactory.CONTAINER);
-        txtAuthUrl.setText(RackspaceConfigPanelFactory.AUTH_URL);
+        txtContainerName.setText(SwiftConfigPanelFactory.CONTAINER);
+        txtAuthUrl.setText(SwiftConfigPanelFactory.AUTH_URL);
     }
 
     private String getUserName(){
@@ -223,7 +224,7 @@ public class RackspaceDevConfigPanel extends ConfigPanel {
             return false;
         } else {            
             //ping to host
-            RackspaceConnection connection = new RackspaceConnection();
+            SwiftConnection connection = new SwiftConnection();
             connection.setApiKey(password);
             connection.setAuthUrl(authUrl);
             connection.setContainer("");

@@ -58,7 +58,7 @@ public class TestConflictedDeleteFile {
         
         
         //create a conflicted delete v3
-        Update update = Update.parse(dbFile);        
+        /*Update update = Update.parse(dbFile);        
         update.setVersion(3);
         update.setStatus(Status.DELETED);
         update.setServerUploadedAck(true);
@@ -78,6 +78,6 @@ public class TestConflictedDeleteFile {
         
         System.out.println("FINISH!!!!\n\n");
         System.out.println("The result is: \n no file. \n 3 rows in database New ACK, Changed ACK, Deleted ACK.");
-        while(true) { }
+        while(true) { }*/
     }
 }

@@ -18,11 +18,9 @@
 package com.stacksync.desktop.repository;
 
 import com.stacksync.commons.models.ItemMetadata;
-import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,7 +36,6 @@ public class Update {
     private Long parentFileId;
     private Long parentFileVersion;
 
-    private Date updated;
     private Status status;
     private Date modifiedAt;
     private long checksum;
@@ -233,39 +230,6 @@ public class Update {
     
     public void setMimeType(String mimeType){
         this.mimeType = mimeType;
-    }
-    
-    public static Update parse(CloneFile cf){
-        
-        Update update = new Update();
-        
-        update.setFileId(cf.getId());
-        update.setVersion(cf.getVersion());
-        
-        if(cf.getParent() != null){
-            update.setParentFileId(cf.getParent().getId());
-            update.setParentFileVersion(cf.getParent().getVersion());
-        }
-        
-        update.setStatus(cf.getStatus());
-        
-        update.setModifiedAt(cf.getLastModified());
-        update.setChecksum(cf.getChecksum());
-        
-        update.setFileSize(cf.getSize());
-        update.setFolder(cf.isFolder());
-        update.setName(cf.getName());
-        update.setMimeType(cf.getMimetype());
-        
-        List<String> chunksAdded = new ArrayList<String>();
-        for(CloneChunk chunk: cf.getChunks()){
-            chunksAdded.add(chunk.getChecksum());
-        }
-                
-        update.setChunks(chunksAdded);
-        update.setServerUploadedAck(cf.getServerUploadedAck());
-        
-        return update;
     }
     
     public static Update parse(ItemMetadata itemMetadata, CloneWorkspace workspace) 
