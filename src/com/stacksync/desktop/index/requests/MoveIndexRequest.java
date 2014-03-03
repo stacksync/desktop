@@ -29,6 +29,7 @@ import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
@@ -65,10 +66,6 @@ public class MoveIndexRequest extends IndexRequest {
         this.dbFromFile = dbFromFile;
     }
     
-    /*
-     * TODO moving a file from one ROOT to another does not work (cp. database!)
-     * 
-     */
     @Override
     public void process() {
         logger.info("Indexer: Updating moved file "+fromFile.getAbsolutePath()+" TO "+toFile.getAbsolutePath()+"");
@@ -93,17 +90,25 @@ public class MoveIndexRequest extends IndexRequest {
             if (dbFromFile == null) {
                 logger.warn("Indexer: Source file not found in DB ("+fromFile.getAbsolutePath()+"). Indexing "+toFile.getAbsolutePath()+" as new file.");
                 
-                //new CheckIndexRequest(toRoot, toFile).process();
                 Indexer.getInstance().queueChecked(toRoot, toFile);
                 return;
             }            
         }
-        
-        this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
 
         // Parent 
         String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
         CloneFile cToParentFolder = db.getFolder(toRoot, new File(absToParentFolder));
+        
+        // Check if the movement is between different workspaces
+        CloneWorkspace fromWorkspace = dbFromFile.getWorkspace();
+        CloneWorkspace toWorkspace = (cToParentFolder == null) ? null : cToParentFolder.getWorkspace();
+        if (movementBetweenWorkspaces(fromWorkspace, toWorkspace)) {
+            Indexer.getInstance().queueDeleted(fromRoot, fromFile);
+            Indexer.getInstance().queueNewIndex(toRoot, toFile, null, -1);
+            return;
+        }
+                
+        this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
 
         // File found in DB.
         CloneFile dbToFile = (CloneFile) dbFromFile.clone();
@@ -266,5 +271,19 @@ public class MoveIndexRequest extends IndexRequest {
         cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
         cf.merge();
         
+    }
+
+    private boolean movementBetweenWorkspaces(CloneWorkspace fromWorkspace, CloneWorkspace toWorkspace) {
+        boolean differentWorkspaces = false;
+        
+        if (toWorkspace != null && !fromWorkspace.getId().equals(toWorkspace.getId())) {
+            differentWorkspaces = true;
+        }
+        
+        if (toWorkspace == null && !fromWorkspace.getPathWorkspace().equals("/")) { 
+            differentWorkspaces = true;
+        }
+        
+        return differentWorkspaces;
     }
 }
