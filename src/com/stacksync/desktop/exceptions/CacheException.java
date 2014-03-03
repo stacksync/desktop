@@ -24,17 +24,9 @@ import java.io.IOException;
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class CacheException extends IOException {
-
-    public CacheException(Throwable cause) {
-        super(cause);
-    }
-
+    
     public CacheException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    public CacheException(String message) {
-        super(message);
     }
 
     public CacheException() {

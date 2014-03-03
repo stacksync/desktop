@@ -9,7 +9,6 @@ import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.gui.error.ErrorMessage;
-import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import java.util.Locale;

@@ -167,7 +167,7 @@ public class Server {
     }
     
     public AccountInfo getAccountInfo(String email) {
-        AccountInfo info = null;
+        AccountInfo info;
         try {
             GetAccountRequest request = new GetAccountRequest(email);
             info = syncServer.getAccountInfo(request);

@@ -63,11 +63,7 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
             return new CommandWorkerLinux(clientSocket);
         }
     }
-
-    public boolean inQueryCache(File file) {
-        return queryCache.containsKey(file);
-    }
-
+    
     private class CommandWorkerWindows extends AbstractWorker {
 
         public CommandWorkerWindows(Socket clientSocket) {

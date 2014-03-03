@@ -28,7 +28,6 @@ import com.stacksync.desktop.gui.linux.UpdateStatusIconRequest;
 import com.stacksync.desktop.gui.linux.UpdateStatusTextRequest;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
-import com.stacksync.desktop.gui.tray.TrayEventListener;
 import com.stacksync.desktop.gui.tray.TrayEventListenerImpl;
 import java.io.File;
 

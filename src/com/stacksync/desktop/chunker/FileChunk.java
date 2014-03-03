@@ -15,10 +15,6 @@ public class FileChunk {
     private long fileChecksum;
     private long size;
 
-    public FileChunk(String checksum, byte[] contents, long number) {
-        this(checksum, contents, number, 0);
-    }
-
     public FileChunk(String checksum, byte[] contents, long number, long fileChecksum) {
         this.checksum = checksum;
         this.contents = contents;

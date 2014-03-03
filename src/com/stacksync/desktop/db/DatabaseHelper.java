@@ -163,24 +163,6 @@ public class DatabaseHelper {
         return query.getResultList();
     }
 
-    public List<CloneFile> getAllChildren(CloneFile parentFile) {
-        // First, check by full file path
-        String queryStr = "select f from CloneFile f where "
-                + "      f.status <> :notStatus1 and "
-                + "      f.path like :pathPrefix and "
-                + "      f.version = (select max(ff.version) from CloneFile ff where "
-                + "                                         f.id = ff.id) ";
-        
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
-        
-        query.setParameter("notStatus1", Status.DELETED);
-        query.setParameter("pathPrefix", FileUtil.getRelativePath(parentFile.getRoot().getLocalFile(), parentFile.getFile()));
-
-        return query.getResultList();
-    }
-
     /**
      * Get file in exact version.
      *

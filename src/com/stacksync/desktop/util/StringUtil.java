@@ -18,29 +18,14 @@
 package com.stacksync.desktop.util;
 
 import java.io.*;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
-import java.util.Random;
+
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class StringUtil {
     
-    private static final char[] symbols = new char[36];
-
-    static {
-      for (int idx = 0; idx < 10; ++idx)
-        symbols[idx] = (char) ('0' + idx);
-      for (int idx = 10; idx < 36; ++idx)
-        symbols[idx] = (char) ('a' + idx - 10);
-    }
-    
-    private static final Random random = new Random();
-
-    private static final char[] buf = new char[6];
 
     private static int minimum(int a, int b, int c) {
         return Math.min(Math.min(a, b), c);
@@ -115,63 +100,5 @@ public class StringUtil {
 
         return result.toString();
     }
-
-    public static String toHex(byte[] bytes) {
-        BigInteger bi = new BigInteger(1, bytes);
-        return String.format("%0" + (bytes.length << 1) + "x", bi);
-    }
-
-    public static String readStream(InputStream in, String charsetName) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-        // Performance tests say 4K is the fastest (sschellh)
-        byte[] buf = new byte[4096];
-
-        int len;
-        while ((len = in.read(buf)) > 0) {
-            bos.write(buf, 0, len);
-        }
-        String result = bos.toString(charsetName);
-        bos.close();
-
-        return result;
-    }
-
-    public static Integer parseInt(String value, Integer defaultValue) {
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            return defaultValue;
-        }
-    }
-
-    public static String getSHA1Hash(String message) {
-        String hash = "";
-        byte[] buffer = message.getBytes();
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
-            md.update(buffer);
-            byte[] digest = md.digest();
-
-            for (byte aux : digest) {
-                int b = aux & 0xff;
-                if (Integer.toHexString(b).length() == 1) {
-                    hash += "0";
-                }
-                hash += Integer.toHexString(b);
-            }
-        } catch (NoSuchAlgorithmException ex) {
-            hash = message;
-        }
-
-        return hash;
-    }
     
-    public static String generateRandomString() {
-        
-        for (int idx = 0; idx < buf.length; ++idx) {
-            buf[idx] = symbols[random.nextInt(symbols.length)];
-        }
-        return new String(buf);
-    }
 }

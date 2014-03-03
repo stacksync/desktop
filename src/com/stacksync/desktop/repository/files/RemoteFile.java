@@ -26,20 +26,8 @@ public class RemoteFile {
     private long size;
     private Object source;
 
-    protected RemoteFile() {
-        // Fressen.
-    }
-
-    public RemoteFile(RemoteFile remoteFile) {
-        this(remoteFile.getName(), remoteFile.getSize(), remoteFile.getSource());
-    }
-
     public RemoteFile(String name) {
         this(name, 0, null);
-    }
-
-    public RemoteFile(String name, long size) {
-        this(name, size, null);
     }
 
     public RemoteFile(String name, long size, Object source) {

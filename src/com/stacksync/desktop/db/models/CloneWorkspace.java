@@ -51,17 +51,6 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     public CloneWorkspace(){}
     
-    public CloneWorkspace(String id, String path, Integer remoteLastUpdate, String container,
-            String storageURL, String owner) {
-        this.id = id;
-        this.pathWorkspace = path;
-        this.localLastUpdate = 0;
-        this.remoteLastUpdate = remoteLastUpdate;
-        this.swiftContainer = container;
-        this.swiftStorageURL = storageURL;
-        
-    }
-    
     public CloneWorkspace(Workspace r){
         this.id = r.getId().toString();
         //this.pathWorkspace = r.getPath();

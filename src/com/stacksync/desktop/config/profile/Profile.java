@@ -48,13 +48,6 @@ import org.apache.log4j.Logger;
  */
 public class Profile implements Configurable {
 
-    public static String tagName() {
-        return "profile";
-    }
-
-    public static String xpath(int id) {
-        return "profile[@id='" + id + "']";
-    }
     private static final Logger logger = Logger.getLogger(Profile.class.getName());
     private static final LocalWatcher localWatcher = LocalWatcher.getInstance();
     private Environment env = Environment.getInstance();

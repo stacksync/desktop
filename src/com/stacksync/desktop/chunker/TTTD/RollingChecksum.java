@@ -189,64 +189,6 @@ public class RollingChecksum {
         }
       
   }
-  
-
-  /**
-   * Update the checksum by trimming off a byte only, not adding
-   * anything.
-   */
-  public void trim()
-  {
-    a -= block[k % block.length] + char_offset;
-    b -= l * (block[k % block.length] + char_offset);
-    k++;
-    l--;
-  }
-
-  /**
-   * Update the checksum with an entirely different block, and
-   * potentially a different block length.
-   *
-   * @param buf The byte array that holds the new block.
-   * @param off From whence to begin reading.
-   * @param len The length of the block to read.
-   * @since 1.1
-   */
-  /*public void check(byte[] buf, int off, int len)
-  {
-    block = new byte[len];
-    System.arraycopy(buf, off, block, 0, len);
-    reset();
-    l = block.length;
-    int i;
-
-    for (i = 0; i < block.length - 4; i += 4)
-      {
-        b += 4 * (a + block[i]) + 3 * block[i+1] +
-             2 * block[i+2] + block[i+3] + 10 * char_offset;
-        a += block[i] + block[i+1] + block[i+2]
-           + block[i+3] + 4 * char_offset;
-      }
-    for (; i < block.length; i++)
-      {
-        a += block[i] + char_offset;
-        b += a;
-      }
-  }*/
-  
-  /*public void check(byte[] buf, int off, int len)
-  {
-    block = new byte[len];
-    System.arraycopy(buf, off, block, 0, len);
-    reset();
-    l = block.length;
-    int i;
-
-    for (i = 0; i < block.length; i++) {
-        a += (long) block[i];
-        b += (block.length-i) * (long) block[i];
-    }
-  }*/
 
     @Override
   public Object clone()

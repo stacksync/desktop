@@ -18,6 +18,14 @@
 package com.stacksync.desktop.util;
 
 import com.oogly.mime.identifier.magic.MagicMimeTypeIdentifier;
+import com.stacksync.desktop.Constants;
+import com.stacksync.desktop.Environment;
+import com.stacksync.desktop.config.Encryption;
+import com.stacksync.desktop.config.Folder;
+import com.stacksync.desktop.gui.linux.BrowseFileRequest;
+import com.stacksync.desktop.gui.linux.BrowseFileRequest.BrowseType;
+import com.stacksync.desktop.gui.linux.LinuxNativeClient;
+import com.stacksync.desktop.logging.RemoteLogs;
 import java.awt.Desktop;
 import java.awt.FileDialog;
 import java.awt.Frame;
@@ -33,6 +41,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import javax.crypto.BadPaddingException;
@@ -40,16 +50,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.swing.JFileChooser;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.Constants;
-import com.stacksync.desktop.Environment;
-import com.stacksync.desktop.config.Encryption;
-import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.gui.linux.BrowseFileRequest;
-import com.stacksync.desktop.gui.linux.BrowseFileRequest.BrowseType;
-import com.stacksync.desktop.gui.linux.LinuxNativeClient;
-import com.stacksync.desktop.logging.RemoteLogs;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -94,18 +94,8 @@ public class FileUtil {
         return file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf(File.separator));
     }
 
-    public static String getAbsoluteParentDirectory(String absFilePath) {
-        return absFilePath.substring(0, absFilePath.lastIndexOf(File.separator));
-    }
-
     public static String getRelativeParentDirectory(File base, File file) {
-        //System.out.println(new File(getAbsoluteParentDirectory(file)));
-        //System.err.println("reldir -> base = "+base.getAbsolutePath() + " - file: "+file.getAbsolutePath()+" ---> "+getRelativePath(base, new File(getAbsoluteParentDirectory(file))));
         return getRelativePath(base, new File(getAbsoluteParentDirectory(file)));
-    }
-
-    public static List<File> getRecursiveFileList(File root) throws FileNotFoundException {
-        return getRecursiveFileList(root, false);
     }
 
     public static List<File> getRecursiveFileList(File root, boolean includeDirectories) throws FileNotFoundException {
@@ -135,21 +125,6 @@ public class FileUtil {
         }
 
         return result;
-    }
-
-    /**
-     * Retrieves the extension of a file. Example: "html" in the case of
-     * "/htdocs/index.html"
-     *
-     * @param file
-     * @return
-     */
-    public static String getExtension(File file) {
-        return getExtension(file.getName(), false);
-    }
-
-    public static String getExtension(File file, boolean includeDot) {
-        return getExtension(file.getName(), includeDot);
     }
 
     public static String getExtension(String filename, boolean includeDot) {

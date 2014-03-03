@@ -533,51 +533,12 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         return chunks;
     }
 
-    public List<CloneChunk> getChunks(int fromIndex, int toIndex) {
-        if (chunks.isEmpty()) {
-            return new ArrayList<CloneChunk>();
-        }
-
-        if (fromIndex < 0) {
-            fromIndex = 0;
-        }
-        if (toIndex > chunks.size() - 1) {
-            toIndex = chunks.size() - 1;
-        }
-
-        return chunks.subList(fromIndex, toIndex);
-    }
-
-    public CloneChunk getChunk(int index) {
-        return chunks.get(index);
-    }
-
     public void setChunks(List<CloneChunk> chunks) {
         this.chunks = new ArrayList<CloneChunk>(chunks);
     }
 
-    public void setChunk(int index, CloneChunk chunk) {
-        chunks.remove(index);
-        chunks.add(index, chunk);
-    }
-
     public void addChunk(CloneChunk chunk) {
         chunks.add(chunk);
-    }
-
-    public void addChunks(List<CloneChunk> chunkList) {
-        for (CloneChunk chunk : chunkList) {
-            chunks.add(chunk);
-        }
-    }
-
-    public synchronized void removeChunks(int count) {
-        int minIndex = (chunks.size() - count - 1 < 0) ? 0 : chunks.size() - count - 1;
-        int maxIndex = (chunks.size() - 1 < 0) ? 0 : chunks.size() - 1;
-
-        for (int i = maxIndex; i == minIndex; i--) {
-            chunks.remove(i);
-        }
     }
 
     @Override
@@ -605,9 +566,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             clone.chunks = getChunks(); // POINTER; No Copy!
             clone.status = getStatus(); //TODO: is this ok?
             clone.syncStatus = getSyncStatus(); //TODO: is this ok?
-            clone.parent = getParent(); // POINTER
-            
-            //clone.addChunks(getChunks()); // TODO is this ok??            
+            clone.parent = getParent(); // POINTER      
                       
             clone.serverUploadedAck = false;
             clone.serverUploadedTime = null;

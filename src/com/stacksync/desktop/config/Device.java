@@ -9,15 +9,6 @@ public class Device implements Configurable {
     
     private UUID id;
     private String name;
-    
-    public Device() {
-        
-    }
-    
-    public Device(UUID id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
     public UUID getId() {
         return id;

@@ -210,10 +210,6 @@ public class Config {
         return (resDir != null) ? resDir : env.getAppResDir();
     }
 
-    public File getResImage(String imageFilename) {
-        return new File(getResDir().getAbsoluteFile() + File.separator + imageFilename);
-    }
-
     public void setResDir(File resDir) {
         this.resDir = resDir;
     }

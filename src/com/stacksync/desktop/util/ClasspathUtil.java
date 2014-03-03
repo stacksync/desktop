@@ -140,7 +140,7 @@ public class ClasspathUtil {
             return;
         }
 
-        if (jar == null || jarURL == null) {
+        if (jar == null) {
             return;
         }        
 

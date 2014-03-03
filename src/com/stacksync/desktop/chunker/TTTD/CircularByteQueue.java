@@ -44,32 +44,6 @@ public class CircularByteQueue {
 		return b;
 	}
 
-	/**
-	 * Resets the queue to its original state but DOES NOT clear the array of
-	 * bytes.
-	 */
-	public void clear() {
-		head = 0;
-		tail = 0;
-		size = 0;
-	}
-
-	/**
-	 * Returns the number of elements that have been added to this queue minus
-	 * those that have been removed.
-	 */
-	public int size() {
-		return size;
-	}
-
-	/**
-	 * Returns the capacity of this queue -- i.e. the total number of bytes that
-	 * can be stored without overflowing.
-	 */
-	public int capacity() {
-		return capacity;
-	}
-
 	public boolean isFull() {
 		return size >= capacity;
 	}

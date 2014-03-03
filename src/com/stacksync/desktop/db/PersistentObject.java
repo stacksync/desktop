@@ -28,7 +28,7 @@ public abstract class PersistentObject {
     
     public void persist() {
         DatabaseHelper.getInstance().persist(this);
-    }         
+    }
     
     public void remove() {
         DatabaseHelper.getInstance().remove(this);
