@@ -3,12 +3,11 @@ package com.stacksync.desktop.syncserver;
 import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
 import com.stacksync.commons.exceptions.DeviceNotValidException;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
+import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.commons.models.ItemMetadata;
-import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.Workspace;
-import com.stacksync.commons.notifications.ShareProposalNotification;
 import com.stacksync.commons.omq.ISyncService;
 import com.stacksync.commons.requests.CommitRequest;
 import com.stacksync.commons.requests.GetAccountRequest;
@@ -21,7 +20,6 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
-import com.stacksync.desktop.sharing.SharingController;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,7 +34,6 @@ public class Server {
 
     private final Logger logger = Logger.getLogger(Server.class.getName());
     private final Config config = Config.getInstance();
-    private final SharingController sharingController = SharingController.getInstance();
     private ISyncService syncServer;
     private Broker broker;
     private Map<String, Workspace> rWorkspaces;
@@ -127,43 +124,14 @@ public class Server {
         logger.info(" [x] Sent '" + commitItems + "'");
     }
     
-    public void createShareProposal(String accountId, List<String> emails, String folderName) {
+    public void createShareProposal(String accountId, List<String> emails, String folderName)
+            throws ShareProposalNotCreatedException, UserNotFoundException {
         
         logger.info("Sending share proposal.");
         
         ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderName);
-        ShareProposalNotification response;
-        
-        try {
-            response = syncServer.createShareProposal(request);
-        } catch (Exception e) {
-            // Show error and return
-            logger.error("New workspace not created: "+e);
-            return;
-        }
-        
-        Workspace newWorkspace = new Workspace(response.getWorkspaceId());
-        newWorkspace.setSwiftContainer(response.getSwiftContainer());
-        newWorkspace.setSwiftUrl(response.getSwiftURL());
-        newWorkspace.setName(folderName);
-        newWorkspace.setLatestRevision(0);
-        User owner = new User(response.getOwnerId());
-        owner.setName(response.getOwnerName());
-        newWorkspace.setOwner(owner);
-        
-        logger.info("Proposal accepted. New workspace: "+ newWorkspace.getId());
-        rWorkspaces.put(newWorkspace.getId().toString(), newWorkspace);
-        
-        // Save new workspace in DB
-        CloneWorkspace cloneWorkspace = new CloneWorkspace(newWorkspace);
-        cloneWorkspace.merge();
-        
-        try {
-            config.getProfile().addNewWorkspace(cloneWorkspace);
-            sharingController.createNewWorkspace(cloneWorkspace, folderName);
-        } catch (Exception e) {
-            logger.error("Error trying to listen new workspace: "+e);
-        }
+        request.setRequestId(getRequestId());
+        syncServer.createShareProposal(request);
     }
     
     public AccountInfo getAccountInfo(String email) {

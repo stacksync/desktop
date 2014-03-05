@@ -29,6 +29,7 @@ import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
+import com.stacksync.desktop.sharing.WorkspaceController;
 import com.stacksync.desktop.syncserver.RemoteClientImpl;
 import com.stacksync.desktop.syncserver.RemoteWorkspaceImpl;
 import com.stacksync.desktop.syncserver.Server;
@@ -132,7 +133,7 @@ public class Profile implements Configurable {
 
             setFactory();
             server.updateDevice(getAccountId());
-            Map<String, CloneWorkspace> workspaces = CloneWorkspace.InitializeWorkspaces(this);
+            Map<String, CloneWorkspace> workspaces = WorkspaceController.getInstance().initializeWorkspaces(this);
 
             // Start threads 1/2
             uploader.start();

@@ -34,12 +34,21 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         
         try {
             config.getProfile().addNewWorkspace(cloneWorkspace);
-            sharingController.createNewWorkspace(cloneWorkspace, spn.getFolderName());
         } catch (Exception e) {
             logger.error("Error trying to listen new workspace: "+e);
         }
         
-        System.out.println(spn.toString());
+        String fullReqId = spn.getRequestId();
+        String deviceName = fullReqId.split("-")[0];
+        
+        if (isMyRequest(deviceName)) {
+            sharingController.createNewWorkspace(cloneWorkspace, spn.getFolderName());
+        }
+        
+    }
+    
+    private boolean isMyRequest(String deviceName) {
+        return config.getDeviceName().equals(deviceName);
     }
 
 }

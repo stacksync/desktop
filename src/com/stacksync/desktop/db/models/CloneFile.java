@@ -130,6 +130,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     
     @Column(name="is_temp_id", nullable= false)
     private boolean usingTempId;
+    
+    @Column(name="is_workspace_root", nullable=false)
+    private boolean workspaceRoot;
 
     public CloneFile() {
         this.id = new Random().nextLong();
@@ -146,6 +149,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.serverUploadedAck = false;
         this.serverUploadedTime = null;
         this.usingTempId = true;
+        this.workspaceRoot = false; // By default
     }
 
     public CloneFile(Folder root, File file) {
@@ -164,6 +168,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.folder = file.isDirectory();       
               
         this.mimetype = FileUtil.getMimeType(file);
+        this.workspaceRoot = false; // By default
         
     }
 
@@ -320,6 +325,14 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setChecksum(long checksum) {
         this.checksum = checksum;
+    }
+
+    public boolean isWorkspaceRoot() {
+        return workspaceRoot;
+    }
+
+    public void setWorkspaceRoot(boolean workspaceRoot) {
+        this.workspaceRoot = workspaceRoot;
     }
 
     public CloneFile getPreviousVersion() {
@@ -571,6 +584,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             clone.serverUploadedAck = false;
             clone.serverUploadedTime = null;
             clone.usingTempId = isUsingTempId();
+            clone.setWorkspaceRoot(isWorkspaceRoot());
             
             return clone;
         } catch (Exception ex) {

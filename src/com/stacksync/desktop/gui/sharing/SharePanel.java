@@ -1,7 +1,10 @@
 package com.stacksync.desktop.gui.sharing;
 
+import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
+import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.syncserver.Server;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +110,13 @@ public class SharePanel extends javax.swing.JPanel {
         Server server = profile.getServer();
         List<String> mails = new ArrayList<String>();
         mails.add(this.emailField.getText());
-        server.createShareProposal(profile.getAccountId(), mails, this.folderNameField.getText());
+        try {
+            server.createShareProposal(profile.getAccountId(), mails, this.folderNameField.getText());
+        } catch (ShareProposalNotCreatedException ex) {
+            ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
+        } catch (UserNotFoundException ex) {
+            ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.");
+        }
     }//GEN-LAST:event_shareButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed

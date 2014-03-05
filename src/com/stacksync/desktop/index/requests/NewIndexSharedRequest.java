@@ -89,7 +89,6 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         newVersion.setSyncStatus(CloneFile.SyncStatus.LOCAL);
         newVersion.merge();
         
-        // Process folder and files differently
         processFolder(newVersion);
         
         renameSharedFolder();
@@ -101,7 +100,9 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         CloneFile newVersion = new CloneFile(root, file);
         
         newVersion.setVersion(1);
-        newVersion.setStatus(CloneFile.Status.NEW);        
+        newVersion.setStatus(CloneFile.Status.NEW);   
+        newVersion.setWorkspaceRoot(true);
+        newVersion.setServerUploadedAck(true);
         
         return newVersion;
     }

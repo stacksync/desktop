@@ -63,7 +63,7 @@ public abstract class LocalWatcher {
 
         // Add to queue    
         logger.info("Watcher: Checking new/modified file "+file);
-        indexer.queueChecked(root, file);            
+        indexer.queueChecked(root, file);
     }
 
     public void queueMoveFile(Folder fromRoot, File fromFile, Folder toRoot, File toFile) {

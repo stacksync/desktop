@@ -8,7 +8,6 @@ package com.stacksync.desktop.gui.wizard;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
-import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CacheException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.NoRepositoryFoundException;
@@ -49,7 +48,7 @@ public class RepositoryTestPanel extends SettingsPanel {
             setStatus("Initializing workspaces...");
             //profile.setCloudId(transfer.getUser());
             profile.setFactory();
-            CloneWorkspace.InitializeWorkspaces(profile, callbackListener);
+            /*WorkspaceController.getInstance().initializeWorkspaces(profile, callbackListener);*/
             progress.setValue(progress.getMaximum());            
         }
         

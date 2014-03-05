@@ -94,15 +94,23 @@ public class MoveIndexRequest extends IndexRequest {
                 return;
             }            
         }
+        
+        if (dbFromFile.isWorkspaceRoot()) {
+            // Apply special process
+            Indexer.getInstance().queueMovedWorkspace(dbFromFile, toRoot, toFile);
+            return;
+        }
 
         // Parent 
         String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
         CloneFile cToParentFolder = db.getFolder(toRoot, new File(absToParentFolder));
         
         // Check if the movement is between different workspaces
-        CloneWorkspace fromWorkspace = dbFromFile.getWorkspace();
-        CloneWorkspace toWorkspace = (cToParentFolder == null) ? null : cToParentFolder.getWorkspace();
-        if (movementBetweenWorkspaces(fromWorkspace, toWorkspace)) {
+        CloneFile fromFileParent = dbFromFile.getParent();
+        CloneWorkspace fromWorkspace = (fromFileParent == null) ? dbFromFile.getWorkspace() : fromFileParent.getWorkspace();
+        CloneWorkspace toWorkspace = (cToParentFolder == null) ? db.getDefaultWorkspace() : cToParentFolder.getWorkspace();
+        if (isWorkspaceChanged(fromWorkspace, toWorkspace)) {
+            logger.info("Item workspace changed. Queueing delete and new requests.");
             Indexer.getInstance().queueDeleted(fromRoot, fromFile);
             Indexer.getInstance().queueNewIndex(toRoot, toFile, null, -1);
             return;
@@ -285,5 +293,16 @@ public class MoveIndexRequest extends IndexRequest {
         }
         
         return differentWorkspaces;
+    }
+    
+    private boolean isWorkspaceChanged(CloneWorkspace fromWorkspace, CloneWorkspace toWorkspace) {
+        
+        boolean workspaceChanged = true;
+        
+        if (fromWorkspace.getId().equals(toWorkspace.getId())) {
+            workspaceChanged = false;
+        }
+        
+        return workspaceChanged;
     }
 }

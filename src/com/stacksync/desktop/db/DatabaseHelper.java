@@ -532,5 +532,43 @@ public class DatabaseHelper {
         query.executeUpdate();
         config.getDatabase().getEntityManager().getTransaction().commit();
     }
+    
+    public CloneWorkspace getDefaultWorkspace() {
+        
+        CloneWorkspace defaultWorkspace;
+        
+        String queryStr = "select wp from CloneWorkspace wp where "
+                + "     wp.pathWorkspace = :path";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
+        query.setParameter("path", "/");
+
+        defaultWorkspace = (CloneWorkspace) query.getSingleResult();
+        
+        return defaultWorkspace;
+    }
+
+    public CloneFile getWorkspaceRoot(String id) {
+        CloneFile workspaceRoot;
+        
+        String queryStr = "select cf from CloneFile cf where "
+                + "        cf.workspaceRoot = :isRoot and"
+                + "        cf.workspace = ("
+                + "           select wp from CloneWorkspace where "
+                + "           wp.id = :workspaceId"
+                + "        )";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
+        query.setParameter("isRoot", true);
+        query.setParameter("workspaceId", id);
+
+        workspaceRoot = (CloneFile) query.getSingleResult();
+        
+        return workspaceRoot;
+    }
 
 }

@@ -24,10 +24,6 @@ import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 
-/**
- *
- * @author Philipp C. Heckel <philipp.heckel@gmail.com>
- */
 public class SwiftComercialConfigPanel extends ConfigPanel {
 	
     public SwiftComercialConfigPanel(SwiftConnection connection) {

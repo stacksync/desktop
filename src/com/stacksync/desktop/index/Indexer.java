@@ -32,6 +32,7 @@ import com.stacksync.desktop.index.requests.CheckIndexRequest;
 import com.stacksync.desktop.index.requests.DeleteIndexRequest;
 import com.stacksync.desktop.index.requests.IndexRequest;
 import com.stacksync.desktop.index.requests.MoveIndexRequest;
+import com.stacksync.desktop.index.requests.MoveIndexWorkspaceRequest;
 import com.stacksync.desktop.index.requests.NewIndexRequest;
 import com.stacksync.desktop.index.requests.NewIndexSharedRequest;
 import com.stacksync.desktop.util.FileLister;
@@ -142,6 +143,10 @@ public class Indexer {
     public void queueMoved(CloneFile guessedPreviousVersion, Folder toRoot, File toFile) {
         queue.add(new MoveIndexRequest(guessedPreviousVersion, toRoot, toFile));
     }    
+    
+    public void queueMovedWorkspace(CloneFile guessedPreviousVersion, Folder toRoot, File toFile) {
+        queue.add(new MoveIndexWorkspaceRequest(guessedPreviousVersion, toRoot, toFile));
+    }
 
     public void queueDeleted(Folder root, File file) {
         queue.add(new DeleteIndexRequest(root, file));

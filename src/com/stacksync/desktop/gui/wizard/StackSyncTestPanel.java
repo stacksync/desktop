@@ -4,9 +4,9 @@ import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.connection.plugins.swift.SwiftConnection;
-import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CacheException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.NoRepositoryFoundException;
@@ -28,74 +28,13 @@ public class StackSyncTestPanel extends SettingsPanel {
             
             this.callbackListener = callbackListener;
         }
-
-        private void doProcess() throws CacheException, StorageConnectException,
-                NoRepositoryFoundException, StorageException, InitializationException{
-                 
-            progress.setValue(1);
-            setStatus("Connecting to StackSync server...");
-            profile.setFactory();
-            
-            progress.setValue(2);
-            setStatus("Getting acocunt info...");
-            Server server = profile.getServer();
-            AccountInfo info = server.getAccountInfo(profile.getAccount().getEmail());
-            if (info == null) {
-                throw new InitializationException("Unable to get account info.");
-            }
-            
-            SwiftConnection connection = new SwiftConnection();
-            connection.setUser(info.getSwiftUser());
-            connection.setApiKey(profile.getAccount().getPassword());
-            connection.setTenant(info.getSwiftTenant());
-            connection.setAuthUrl(info.getSwiftAuthUrl());
-            connection.setUsername(info.getSwiftTenant()+":"+info.getSwiftUser());
-            connection.setContainer("");
-            
-            Repository repository = new Repository();
-            repository.setConnection(connection);
-            profile.setRepository(repository);
-            
-            Account account = profile.getAccount();
-            account.setId(info.getUserId());
-            account.setQuota(info.getQuotaLimit());
-            account.setQuotaUsed(info.getQuotaUsed());
-            
-            
-            // TODO just to test. Remove
-            /*SwiftConnection connection = new SwiftConnection();
-            connection.setUser("tester1");
-            connection.setApiKey(profile.getAccount().getPassword());
-            connection.setTenant("tester1");
-            connection.setAuthUrl("http://10.30.236.175:5000/v2.0/tokens");
-            connection.setUsername("tester1:tester1");
-            connection.setContainer("");
-            
-            Repository repository = new Repository();
-            repository.setConnection(connection);
-            profile.setRepository(repository);*/
-            
-            progress.setValue(3);
-            setStatus("Validating user...");
-            TransferManager transfer = connection.createTransferManager();
-            try {           
-                transfer.connect();
-            } catch (StorageConnectException ex) {
-                throw new StorageConnectException(ex);
-            }
-            
-            progress.setValue(4);   
-            setStatus("Obtaining workspaces...");
-            CloneWorkspace.InitializeWorkspaces(profile, callbackListener);
-            progress.setValue(progress.getMaximum());
-        }
-        
         
         @Override
         public void run() {
                         
             try{
                 doProcess();
+                callbackListener.actionCompleted(true);
             } catch (InitializationException ex) {
                 logger.error("Exception: ", ex);
                 setStatus(ex.getMessage());
@@ -123,7 +62,67 @@ public class StackSyncTestPanel extends SettingsPanel {
                 callbackListener.actionCompleted(false);
             }            
         }
-    
+
+        private void doProcess() throws CacheException, StorageConnectException,
+                NoRepositoryFoundException, StorageException, InitializationException{
+                 
+            progress.setValue(1);
+            setStatus("Connecting to StackSync server...");
+            profile.setFactory();
+            
+            progress.setValue(2);
+            setStatus("Getting acocunt info...");
+            Server server = profile.getServer();
+            AccountInfo info = server.getAccountInfo(profile.getAccount().getEmail());
+            if (info == null) {
+                throw new InitializationException("Unable to get account info.");
+            }
+            
+            Connection connection = createConnection(info);
+            createRepository(connection);
+            createAccount(info);
+            
+            progress.setValue(3);
+            setStatus("Validating user...");
+            TransferManager transfer = connection.createTransferManager();
+            try {           
+                transfer.connect();
+            } catch (StorageConnectException ex) {
+                throw new StorageConnectException(ex);
+            }
+            
+            progress.setValue(progress.getMaximum());
+        }
+        
+        private Connection createConnection(AccountInfo info) {
+            
+            // Create swift connection
+            SwiftConnection connection = new SwiftConnection();
+            connection.setUser(info.getSwiftUser());
+            connection.setApiKey(profile.getAccount().getPassword());
+            connection.setTenant(info.getSwiftTenant());
+            connection.setAuthUrl(info.getSwiftAuthUrl());
+            connection.setUsername(info.getSwiftTenant()+":"+info.getSwiftUser());
+            connection.setContainer("");
+
+            return connection;
+        }
+
+        private void createRepository(Connection connection) {
+            // Create repository
+            Repository repository = new Repository();
+            repository.setConnection(connection);
+            profile.setRepository(repository);
+        }
+
+        private void createAccount(AccountInfo info) {
+            // Create account
+            Account account = profile.getAccount();
+            account.setId(info.getUserId());
+            account.setQuota(info.getQuotaLimit());
+            account.setQuotaUsed(info.getQuotaUsed());
+        }
+
     }
     
     private final Logger logger = Logger.getLogger(StackSyncTestPanel.class.getName());
@@ -153,7 +152,7 @@ public class StackSyncTestPanel extends SettingsPanel {
     
     public void doRepoAction(final TestListener callbackListener) {
         progress.setMinimum(0);
-        progress.setMaximum(4);
+        progress.setMaximum(5);
 
         progress.setValue(1);      
         
