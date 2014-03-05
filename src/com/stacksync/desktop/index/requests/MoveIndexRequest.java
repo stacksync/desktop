@@ -97,7 +97,12 @@ public class MoveIndexRequest extends IndexRequest {
         
         if (dbFromFile.isWorkspaceRoot()) {
             // Apply special process
-            Indexer.getInstance().queueMovedWorkspace(dbFromFile, toRoot, toFile);
+            
+            if (!fromFile.getName().equals(toFile.getName())) { // Check rename
+                Indexer.getInstance().queueRenamedWorkspace(dbFromFile, toFile);
+            } else { // Check move
+                Indexer.getInstance().queueMovedWorkspace(dbFromFile, toRoot, toFile);
+            }
             return;
         }
 

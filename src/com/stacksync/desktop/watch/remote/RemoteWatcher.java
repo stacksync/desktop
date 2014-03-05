@@ -197,12 +197,32 @@ public class RemoteWatcher {
                 server.commit(accountId, workspace, commitItems);
             }
             
+            commitWorkspacesUpdates();
+            
         } catch (IOException ex) {
             logger.error("Failed to write file.", ex);
             RemoteLogs.getInstance().sendLog(ex);
         }
     }
 
+    private void commitWorkspacesUpdates() {
+        
+        List<CloneFile> workspaces = db.getWorkspacesUpdates();
+        
+        String accountId = profile.getAccountId();
+        
+        for (CloneFile workspaceFile : workspaces) {
+            CloneWorkspace w = workspaceFile.getWorkspace();
+            switch(workspaceFile.getStatus()) {
+                case RENAMED:
+                    this.server.updateWorkspace(accountId, w.getId(), w.getName(), w.getParentId());
+                    break;
+                default:
+            }
+        }
+        
+    }
+    
     public void restoreVersion(CloneFile restoringVersion) throws CouldNotApplyUpdateException {
         changeManager.restoreVersion(restoringVersion);
     }

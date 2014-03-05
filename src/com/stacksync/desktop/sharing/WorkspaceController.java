@@ -110,7 +110,7 @@ public class WorkspaceController {
         
     }
     
-    private void createNewWorkspace(CloneWorkspace newWorkspace) {
+    public void createNewWorkspace(CloneWorkspace newWorkspace) {
         
         if (newWorkspace.getName().equals("default")) {
             // Don't create default wp
@@ -128,9 +128,12 @@ public class WorkspaceController {
         File folder = new File(config.getProfile().getFolder().getLocalFile().getAbsolutePath()
                 + "/" + folderName);
         
+        // Create "dummy" clone file in DB
+        saveWorkspaceRootFolder(newWorkspace, folder);
+        
+        // Finally create the FS folder
         folder.mkdir();
         
-        saveWorkspaceRootFolder(newWorkspace, folder);
     }
 
     private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder) {

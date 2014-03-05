@@ -5,6 +5,7 @@ import com.stacksync.commons.exceptions.DeviceNotValidException;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
+import com.stacksync.commons.exceptions.WorkspaceNotUpdatedException;
 import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.Workspace;
@@ -15,6 +16,7 @@ import com.stacksync.commons.requests.GetChangesRequest;
 import com.stacksync.commons.requests.GetWorkspacesRequest;
 import com.stacksync.commons.requests.ShareProposalRequest;
 import com.stacksync.commons.requests.UpdateDeviceRequest;
+import com.stacksync.commons.requests.UpdateWorkspaceRequest;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.models.CloneWorkspace;
@@ -132,6 +134,19 @@ public class Server {
         ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderName);
         request.setRequestId(getRequestId());
         syncServer.createShareProposal(request);
+    }
+    
+    public void updateWorkspace(String accountId, String workspaceId, String workspaceName, Long parent) {
+        
+        UpdateWorkspaceRequest request = new UpdateWorkspaceRequest(UUID.fromString(accountId), 
+                UUID.fromString(workspaceId), workspaceName, parent);
+        try {
+            syncServer.updateWorkspace(request);
+        } catch (UserNotFoundException ex) {
+            
+        } catch (WorkspaceNotUpdatedException ex) {
+            
+        }
     }
     
     public AccountInfo getAccountInfo(String email) {
