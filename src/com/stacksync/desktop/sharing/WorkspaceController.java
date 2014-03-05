@@ -45,12 +45,13 @@ public class WorkspaceController {
 
         Map<String, CloneWorkspace> localWorkspaces = db.getWorkspaces();
         
-        
-        for(CloneWorkspace w: remoteWorkspaces){                
+        for(CloneWorkspace w: remoteWorkspaces){
             if(localWorkspaces.containsKey(w.getId())){
                 // search for changes in workspaces
-                applyChangesInWorkspace(localWorkspaces.get(w.getId()), w);
-                localWorkspaces.put(w.getId(), w);
+                boolean changed = applyChangesInWorkspace(localWorkspaces.get(w.getId()), w);
+                if (changed) {
+                    localWorkspaces.put(w.getId(), w);
+                }
             }else{
                 // new workspace, let's create the workspace folder
                 createNewWorkspace(w);
@@ -59,8 +60,6 @@ public class WorkspaceController {
                 localWorkspaces.put(w.getId(), w);
             }
 
-            //save changes
-            localWorkspaces.get(w.getId()).merge();
         }
 
         return localWorkspaces;
@@ -68,35 +67,47 @@ public class WorkspaceController {
     
 
     
-    private void applyChangesInWorkspace(CloneWorkspace local, CloneWorkspace remote) {
+    private boolean applyChangesInWorkspace(CloneWorkspace local, CloneWorkspace remote) {
+        
+        boolean changed = false;
         
         if (!local.getRemoteRevision().equals(remote.getRemoteRevision())) {
             logger.info("New remote revision in workspace.");
+            changed = true;
         }
         
         if (!local.getName().equals(remote.getName())) {
             logger.info("New name in workspace. Renaming...");
-            changeWorkspaceName(local.getId(), local.getName(), remote.getName());
+            changeWorkspaceName(local.getId(), remote.getName());
+            local.setPathWorkspace(remote.getPathWorkspace());
+            local.setName(remote.getName());
+            local.merge();
+            changed = true;
         }
         
         /*
         if (local.getParentId().equals(remote.getParentId())) {
             logger.info("New parent in workspace. Moving...");
             // TODO
+            * changed = true;
         }
         */
+        
+        return changed;
     }
     
-    private void changeWorkspaceName(String id, String from, String to) {
+    private void changeWorkspaceName(String id, String newName) {
         
         CloneFile workspaceRootFolder = db.getWorkspaceRoot(id);
         
-        String parentDir = workspaceRootFolder.getAbsoluteParentDirectory();
-        parentDir = workspaceRootFolder.getAbsolutePath();
-        File folder = new File(parentDir);
-        File newFolder = new File(folder.getParentFile()+File.separator+to);
+        String dir = workspaceRootFolder.getAbsolutePath();
+        File folder = new File(dir);
+        File newFolder = new File(folder.getParentFile()+File.separator+newName);
         
         folder.renameTo(newFolder);
+        
+        updateWorkspaceName(workspaceRootFolder, newName);
+        
     }
     
     private void createNewWorkspace(CloneWorkspace newWorkspace) {
@@ -123,11 +134,15 @@ public class WorkspaceController {
     }
 
     private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder) {
+        saveWorkspaceRootFolder(newWorkspace, folder, 1, CloneFile.Status.NEW);
+    }
+    
+    private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder, int version, CloneFile.Status status) {
         
         Folder root = config.getProfile().getFolder();
         CloneFile rootFolder = new CloneFile(root, folder);
-        rootFolder.setVersion(1);
-        rootFolder.setStatus(CloneFile.Status.NEW);
+        rootFolder.setVersion(version);
+        rootFolder.setStatus(status);
         rootFolder.setWorkspaceRoot(true);
         rootFolder.setServerUploadedAck(true);   // Don't commit this!!
         
@@ -143,6 +158,18 @@ public class WorkspaceController {
         rootFolder.setChecksum(0);
         
         rootFolder.merge();
+    }
+
+    private void updateWorkspaceName(CloneFile workspaceRootFolder, String newName) {
+        CloneFile newVersion = (CloneFile)workspaceRootFolder.clone();
+        
+        newVersion.setServerUploadedAck(true);
+        newVersion.setServerUploadedTime(workspaceRootFolder.getServerUploadedTime());
+        newVersion.setVersion(workspaceRootFolder.getVersion()+1);
+        newVersion.setStatus(CloneFile.Status.RENAMED);
+        newVersion.setName(newName);
+        
+        newVersion.merge();
     }
     
 }

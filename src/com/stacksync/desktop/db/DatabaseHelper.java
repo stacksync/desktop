@@ -555,8 +555,10 @@ public class DatabaseHelper {
         
         String queryStr = "select cf from CloneFile cf where "
                 + "        cf.workspaceRoot = :isRoot and"
+                + "        cf.version = ("
+                + "            select max(cf2.version) from CloneFile cf2 where cf.id = cf2.id) and "
                 + "        cf.workspace = ("
-                + "           select wp from CloneWorkspace where "
+                + "           select wp from CloneWorkspace wp where "
                 + "           wp.id = :workspaceId"
                 + "        )";
 
