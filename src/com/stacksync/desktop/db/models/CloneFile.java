@@ -32,6 +32,7 @@ import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.desktop.db.DatabaseHelper;
 
 @Entity
 @Cacheable(false)
@@ -244,19 +245,44 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     }
     
     public void generatePath() {
-        /*if (path != null && !path.equals("(unknown)")) {
-            return;
-        }*/
-        
+
         if (parent == null) {
-            path = "/";
-        } else {
-            String parentPath = parent.getPath();
-            if (parentPath.equals("/")) {
-                path = parentPath+parent.getName();
+            // Check if I'm in the default wp
+            DatabaseHelper db = DatabaseHelper.getInstance();
+            CloneWorkspace defaultWorkspace = db.getDefaultWorkspace();
+            if (defaultWorkspace.getId().equals(getWorkspace().getId())) {
+                path = "/";
+            } else if (isWorkspaceRoot()) {
+                if (parent == null) {
+                    // If I'm the root workspace and my parent is null means I'm in the
+                    // default root folder (stacksync_folder)
+                    path = "/";
+                } else {
+                    // Otherwise I'm in a subfolder of the default workspace
+                    setPath();
+                }
             } else {
-                path = parentPath+"/"+parent.getName();
+                // Not in the default wp, I have to continue
+                CloneFile rootCloneFile = db.getWorkspaceRoot(getWorkspace().getId());
+                String parentPath = rootCloneFile.getPath();
+                if (parentPath.equals("/")) {
+                    path = parentPath+rootCloneFile.getName();
+                } else {
+                    path = parentPath+"/"+rootCloneFile.getName();
+                }
             }
+            
+        } else {
+            setPath();
+        }
+    }
+    
+    private void setPath() {
+        String parentPath = parent.getPath();
+        if (parentPath.equals("/")) {
+            path = parentPath+parent.getName();
+        } else {
+            path = parentPath+"/"+parent.getName();
         }
     }
 
@@ -613,7 +639,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Override
     public String toString() {
 
-        return "CloneFile[id=" + id + ", version=" + version + ", name=" + getPath() 
+        return "CloneFile[id=" + id + ", version=" + version + ", name="  
                 + name + " checksum=" + checksum + ", chunks=" + chunks.size() 
                 + ", status=" + status + ", syncStatus=" + syncStatus + ", workspace=" 
                 + workspace + "]";
@@ -637,35 +663,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     
     public String getMimetype(){
         return this.mimetype;
-    }
-    
-    private void setWorkspaceByPath(String path){
-        
-        while(this.workspace == null && path.length() > 0){
-            try{                
-                String queryStr = "select w from CloneWorkspace w where "
-                      + "     w.pathWorkspace = :path";
-
-                Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
-                query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-                query.setHint("eclipselink.cache-usage", "DoNotCheckCache");                
-                
-                query.setMaxResults(1);
-                query.setParameter("path", path);
-
-                CloneWorkspace fileWorkspace = (CloneWorkspace) query.getSingleResult();
-                this.workspace = fileWorkspace;
-            } catch (NoResultException e){
-                if(path.compareTo("/") != 0){
-                    path = path.substring(0, path.lastIndexOf("/"));
-                    if(path.isEmpty()){
-                        path = "/";
-                    }
-                }else{
-                    path = "";
-                }                
-            }
-        }
     }
     
     public void setToDefaultWorkspace() {

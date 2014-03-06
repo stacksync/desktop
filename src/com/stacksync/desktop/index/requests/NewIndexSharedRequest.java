@@ -1,10 +1,13 @@
 package com.stacksync.desktop.index.requests;
 
+import com.stacksync.desktop.chunker.ChunkEnumeration;
+import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.config.Folder;
+import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.tray.Tray;
-import com.stacksync.desktop.index.Indexer;
+import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import java.util.Date;
@@ -26,19 +29,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
 
     @Override
     public void process() {                
-        logger.info("Indexer: Indexing new file "+file+" ...");
-        
-        // ignore file        
-        if (FileUtil.checkIgnoreFile(root, file)) {
-            logger.info("#ndexer: Ignore file "+file+" ...");
-            return;
-        }
-        
-        // File vanished
-        if (!file.exists()) {
-            logger.warn("Indexer: Error indexing file "+file+": File does NOT exist. Ignoring.");            
-            return;
-        }
+        logger.info("Indexer: Indexing new share file "+file+" ...");
         
         // Find file in DB
         CloneFile dbFile = db.getFileOrFolder(root, file);
@@ -60,27 +51,23 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         CloneFile newVersion = addNewVersion();                      
 
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
-        newVersion.setParent(db.getFolder(root, parentFile));
-        
-        String folderName = file.getName();
-        String[] info = folderName.split("_");
-        if (info.length != 3) {
-            // Throw exception or queue as a new index request.
-        }
-
-        String workspaceId = info[1];
-        CloneWorkspace workspace = db.getWorkspaces().get(workspaceId);
-        if (workspace == null) {
-            // Throw exception or queue as a new index request.
+        CloneFile parentCF = db.getFolder(root, parentFile);
+        if (parentCF.isWorkspaceRoot()) {
+            newVersion.setParent(null);
+        } else {
+            newVersion.setParent(parentCF);
         }
         
+        CloneWorkspace workspace = parentCF.getWorkspace();
         newVersion.setWorkspace(workspace);
         
+        // IMPORTANT Since a shared folder is created without using watcher+indexer
+        // it should always exist a parent.
         // This will check if the file is inside a folder that isn't created.
-        if (newVersion.getParent() == null && !newVersion.getPath().equals("/")) {
+        /*if (newVersion.getParent() == null && !newVersion.getPath().equals("/")) {
             Indexer.getInstance().queueNewIndex(root, file, null, checksum);
             return;
-        }
+        }*/
         
         newVersion.setFolder(file.isDirectory());
         newVersion.setSize(file.length());
@@ -89,9 +76,11 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         newVersion.setSyncStatus(CloneFile.SyncStatus.LOCAL);
         newVersion.merge();
         
-        processFolder(newVersion);
-        
-        renameSharedFolder();
+        if (newVersion.isFolder())
+            processFolder(newVersion);
+        else {
+            processFile(newVersion);
+        }
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
@@ -100,9 +89,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         CloneFile newVersion = new CloneFile(root, file);
         
         newVersion.setVersion(1);
-        newVersion.setStatus(CloneFile.Status.NEW);   
-        newVersion.setWorkspaceRoot(true);
-        newVersion.setServerUploadedAck(true);
+        newVersion.setStatus(CloneFile.Status.NEW);
         
         return newVersion;
     }
@@ -134,13 +121,62 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         }*/
     }
     
-    private void renameSharedFolder() {
-        
-        String folderName = file.getName();
-        String[] info = folderName.split("_");
-        File newFolder = new File(file.getParentFile()+File.separator+info[2]);
-        
-        file.renameTo(newFolder);
+    private void processFile(CloneFile cf) {
+        try {
+            // 1. Chunk it!
+            FileChunk chunkInfo = null;
+
+            //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
+            ChunkEnumeration chunks = chunker.createChunks(file);
+            while (chunks.hasMoreElements()) {
+                chunkInfo = chunks.nextElement();                
+
+                // create chunk in DB (or retrieve it)
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CloneChunk.CacheStatus.CACHED);
+                
+                // write encrypted chunk (if it does not exist)
+                File chunkCacheFile = config.getCache().getCacheChunk(chunk);
+
+                byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getRepository().getEncryption());
+                if (!chunkCacheFile.exists()) {
+                    FileUtil.writeFile(packed, chunkCacheFile);
+                } else{
+                    if(chunkCacheFile.length() != packed.length){
+                        FileUtil.writeFile(packed, chunkCacheFile);
+                    }
+                }
+                
+                cf.addChunk(chunk);
+            }      
+            
+            logger.info("Indexer: saving chunks...");
+            cf.merge();
+            logger.info("Indexer: chunks saved...");
+            
+            // 2. Add the rest to the DB, and persist it
+            if (chunkInfo != null) { // The last chunk holds the file checksum                
+                cf.setChecksum(chunkInfo.getFileChecksum()); 
+            } else {
+                cf.setChecksum(checksum);
+            }
+            cf.merge();
+            chunks.closeStream();
+            
+            // 3. Upload it
+            if (FileUtil.checkIllegalName(cf.getName())
+                    || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
+                logger.info("This filename contains illegal characters.");
+                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+                cf.merge();
+            } else {
+                logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
+                root.getProfile().getUploader().queue(cf);
+            }
+            
+        } catch (Exception ex) {
+            logger.error("Could not index new file "+file+". IGNORING.", ex);
+            RemoteLogs.getInstance().sendLog(ex);
+        } 
     }
     
     @Override

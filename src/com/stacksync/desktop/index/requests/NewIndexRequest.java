@@ -30,6 +30,7 @@ import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
@@ -58,58 +59,42 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     public void process() {                
         logger.info("Indexer: Indexing new file "+file+" ...");
         
-        // ignore file        
-        if (FileUtil.checkIgnoreFile(root, file)) {
-            logger.info("#ndexer: Ignore file "+file+" ...");
-            return;
-        }
-        
-        // File vanished
-        if (!file.exists()) {
-            logger.warn("Indexer: Error indexing file "+file+": File does NOT exist. Ignoring.");            
-            return;
-        }
+        // Check ignore and if file exists
+        boolean allCorrect = doChecks();
+        if (!allCorrect) { return; }
         
         // Find file in DB
         CloneFile dbFile = db.getFileOrFolder(root, file);
-        if(dbFile != null){
-            if (previousVersion == null){
-                logger.warn("Indexer: Error already NewIndexRequest proccessed. Ignoring.");
-                return;
-            } else {
-                if(dbFile.getChecksum() == checksum){
-                    logger.warn("Indexer: Error already Indexed this version. Ignoring.");
-                    return;
-                }
-            }
-            
-            if(dbFile.isFolder()){
-                logger.warn("Indexer: Error already NewIndexRequest this folder. Ignoring.");
-                return;
-            }
+        if(dbFile != null && alreadyProcessed(dbFile)){
+            return;
         }
         
+        // Check workspace
+        CloneWorkspace defaultWorkspace = db.getDefaultWorkspace();
+        File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
+        CloneFile parentCF = db.getFolder(root, parentFile);
+        // If parent is null means the file is in the root folder (stacksync_folder).
+        // A shared folder will never arrive here!!
+        if (parentCF != null && !parentCF.getWorkspace().getId().equals(defaultWorkspace.getId())) {
+            // File inside a shared workspace
+            Indexer.getInstance().queueNewIndexShared(root, file, checksum);
+            return;
+        }
+        
+        // If arrives here means the file is in the default workspace! Apply normal process...
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
         
         // Create DB entry
-        CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();                      
-
-        File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
-        CloneFile parentCF = db.getFolder(root, parentFile);
+        CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();      
         newVersion.setParent(parentCF);
         
         // This will check if the file is inside a folder that isn't created.
         if (parentCF == null && !newVersion.getPath().equals("/")) {
             Indexer.getInstance().queueNewIndex(root, file, previousVersion, checksum);
             return;
-        } else if (parentCF == null) {
-            // File is in root folder. Set workspace to default workspace
-            newVersion.setToDefaultWorkspace();
-        } else {
-            // File has a parent, so it could be different from the default wsp.
-            newVersion.setWorkspace(parentCF.getWorkspace());
         }
         
+        newVersion.setWorkspace(defaultWorkspace);
         newVersion.setFolder(file.isDirectory());
         newVersion.setSize(file.length());
         
@@ -126,6 +111,43 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
+        
+    private boolean doChecks() {
+        // ignore file        
+        if (FileUtil.checkIgnoreFile(root, file)) {
+            logger.info("#ndexer: Ignore file "+file+" ...");
+            return false;
+        }
+        
+        // File vanished
+        if (!file.exists()) {
+            logger.warn("Indexer: Error indexing file "+file+": File does NOT exist. Ignoring.");            
+            return false;
+        }
+        
+        return true;
+    }
+    
+    private boolean alreadyProcessed(CloneFile fileToProcess) {
+        
+        if (previousVersion == null){
+            logger.warn("Indexer: Error already NewIndexRequest processed. Ignoring.");
+            return true;
+        } else {
+            if(fileToProcess.getChecksum() == checksum){
+                logger.warn("Indexer: Error already Indexed this version. Ignoring.");
+                return true;
+            }
+        }
+
+        if(fileToProcess.isFolder()){
+            logger.warn("Indexer: Error already NewIndexRequest this folder. Ignoring.");
+            return true;
+        }
+ 
+        return false;
+    }
+    
 
     private CloneFile addNewVersion() {
         CloneFile newVersion = new CloneFile(root, file);        
@@ -246,5 +268,5 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     @Override
     public String toString() {
         return NewIndexRequest.class.getSimpleName() + "[" + "file=" + file + "]";
-    }    
+    }
 }

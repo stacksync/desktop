@@ -169,8 +169,8 @@ public class Indexer {
         queue.add(newRequest);
     }
 
-    public void queueNewIndexShared(Folder root, File sharedFolder, long checksum) {
-        queue.add(new NewIndexSharedRequest(root, sharedFolder, checksum));
+    public void queueNewIndexShared(Folder root, File file, long checksum) {
+        queue.add(new NewIndexSharedRequest(root, file, checksum));
     }
 
     private class IndexWorker implements Runnable {
