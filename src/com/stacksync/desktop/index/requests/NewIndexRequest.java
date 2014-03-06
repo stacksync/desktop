@@ -77,7 +77,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         // A shared folder will never arrive here!!
         if (parentCF != null && !parentCF.getWorkspace().getId().equals(defaultWorkspace.getId())) {
             // File inside a shared workspace
-            Indexer.getInstance().queueNewIndexShared(root, file, checksum);
+            Indexer.getInstance().queueNewIndexShared(root, file, previousVersion, checksum);
             return;
         }
         
@@ -85,7 +85,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
         
         // Create DB entry
-        CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();      
+        CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();
         newVersion.setParent(parentCF);
         
         // This will check if the file is inside a folder that isn't created.

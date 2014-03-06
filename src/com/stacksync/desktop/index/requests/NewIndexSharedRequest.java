@@ -10,6 +10,7 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import org.apache.log4j.Logger;
 
@@ -19,12 +20,14 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
     
     private File file;
     private long checksum;
+    private CloneFile previousVersion;
 
-    public NewIndexSharedRequest(Folder root, File file, long checksum) {
+    public NewIndexSharedRequest(Folder root, File file, CloneFile previousVersion, long checksum) {
         super(root);
   
         this.file = file;        
         this.checksum = checksum;
+        this.previousVersion = previousVersion;
     }
 
     @Override
@@ -48,7 +51,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
         
         // Create DB entry
-        CloneFile newVersion = addNewVersion();                      
+        CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();
 
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
         CloneFile parentCF = db.getFolder(root, parentFile);
@@ -91,6 +94,30 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         newVersion.setVersion(1);
         newVersion.setStatus(CloneFile.Status.NEW);
         
+        return newVersion;
+    }
+    
+    private CloneFile addChangedVersion() {        
+        CloneFile newVersion = (CloneFile) previousVersion.clone();
+        
+        if (newVersion.getSyncStatus() == CloneFile.SyncStatus.UNSYNC
+                && previousVersion.getStatus() != CloneFile.Status.RENAMED) {
+            if (previousVersion.getVersion() == 1) {
+                previousVersion.remove();
+                newVersion = this.addNewVersion();
+            } else {
+                newVersion.setStatus(CloneFile.Status.CHANGED);
+                newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
+                newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
+                previousVersion.remove();
+            }
+        } else {
+            newVersion.setVersion(previousVersion.getVersion()+1);
+            newVersion.setStatus(CloneFile.Status.CHANGED);
+            newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
+            newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
+        }
+
         return newVersion;
     }
     

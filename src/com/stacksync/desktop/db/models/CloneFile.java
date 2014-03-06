@@ -665,28 +665,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         return this.mimetype;
     }
     
-    public void setToDefaultWorkspace() {
-        
-        String defaultWorkspacePath = "/";
-        try{                
-            String queryStr = "select w from CloneWorkspace w where "
-                  + "     w.pathWorkspace = :path";
-
-            Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
-            query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-            query.setHint("eclipselink.cache-usage", "DoNotCheckCache");                
-
-            query.setMaxResults(1);
-            query.setParameter("path", defaultWorkspacePath);
-
-            CloneWorkspace fileWorkspace = (CloneWorkspace) query.getSingleResult();
-            this.workspace = fileWorkspace;
-        } catch (NoResultException e){
-            // TODO Important error!! What to do here??
-            logger.error(e);
-        }
-    }
-    
     public ItemMetadata mapToItemMetadata() throws NullPointerException {
         ItemMetadata object = new ItemMetadata();
 

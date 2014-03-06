@@ -75,14 +75,12 @@ public class ChangeManager {
     private EntityManager em;
     
     // deps
-        
     private Desktop desktop;
     private Uploader uploader;
 
     public ChangeManager(Profile profile) {
 
         this.profile = profile;
-        //this.queue = new DependencyQueue();
         this.queue = new LinkedBlockingQueue<Update>();
         this.processingFiles = false;
 
@@ -199,6 +197,10 @@ public class ChangeManager {
                 String path = root.getLocalFile().getAbsolutePath() + File.separator;
                 if (update.getParentFileId() != null) {
                     CloneFile parentCF = db.getFileOrFolder(update.getParentFileId());
+                    path += parentCF.getPath() + File.separator;
+                    path += parentCF.getName() + File.separator;
+                } else if (!update.getWorkspace().getId().equals(db.getDefaultWorkspace().getId())) {
+                    CloneFile parentCF = db.getWorkspaceRoot(update.getWorkspace().getId());
                     path += parentCF.getPath() + File.separator;
                     path += parentCF.getName() + File.separator;
                 }
