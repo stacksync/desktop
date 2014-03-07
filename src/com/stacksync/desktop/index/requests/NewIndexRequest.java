@@ -87,14 +87,14 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         // Create DB entry
         CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();
         newVersion.setParent(parentCF);
+        newVersion.setWorkspace(defaultWorkspace);
         
         // This will check if the file is inside a folder that isn't created.
         if (parentCF == null && !newVersion.getPath().equals("/")) {
             Indexer.getInstance().queueNewIndex(root, file, previousVersion, checksum);
             return;
         }
-        
-        newVersion.setWorkspace(defaultWorkspace);
+
         newVersion.setFolder(file.isDirectory());
         newVersion.setSize(file.length());
         

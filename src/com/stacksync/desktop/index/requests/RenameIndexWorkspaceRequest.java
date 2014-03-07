@@ -2,14 +2,11 @@ package com.stacksync.desktop.index.requests;
 
 import com.stacksync.desktop.config.Folder;
 import java.io.File;
-import java.util.Date;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.tray.Tray;
-import com.stacksync.desktop.syncserver.Server;
-import com.stacksync.desktop.util.FileUtil;
+import com.stacksync.desktop.sharing.WorkspaceController;
 
 public class RenameIndexWorkspaceRequest extends IndexRequest {
     
@@ -41,43 +38,17 @@ public class RenameIndexWorkspaceRequest extends IndexRequest {
             logger.error("Indexer: file must be a folder -> NOT INDEXING!");
             return;
         }
-
-        // Parent 
-        String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
-        CloneFile cToParentFolder = db.getFolder(root, new File(absToParentFolder));
-                
+        
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
+        
+        CloneWorkspace local = db.getWorkspace(dbFromFile.getWorkspace().getId());
+        
+        CloneWorkspace remote = local.clone();
+        remote.setName(toFile.getName());
+        remote.setPathWorkspace("/"+toFile.getName());
+        
+        WorkspaceController.getInstance().applyChangesInWorkspace(local, remote, false);
 
-        // File found in DB.
-        CloneFile dbToFile = (CloneFile) dbFromFile.clone();
-
-        // Updated changes
-        dbToFile.setRoot(root);
-        dbToFile.setLastModified(new Date(toFile.lastModified()));
-        dbToFile.setName(toFile.getName());
-        dbToFile.setSize((toFile.isDirectory()) ? 0 : toFile.length());
-        dbToFile.setVersion(dbToFile.getVersion()+1);
-        dbToFile.setStatus(Status.RENAMED);
-        dbToFile.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-
-        dbToFile.setParent(cToParentFolder);
-        dbToFile.setMimetype(FileUtil.getMimeType(dbToFile.getFile()));
-        dbToFile.generatePath();
-        
-        dbToFile.setServerUploadedAck(false);
-        dbToFile.setServerUploadedTime(new Date(toFile.lastModified()));
-        
-        // Update workspace
-        CloneWorkspace workspace = dbToFile.getWorkspace();
-        workspace.setName(dbToFile.getName());
-        workspace.merge();
-        
-        // Save new version to DB
-        dbToFile.merge();
-	    
-        // Notify file manager
-        desktop.touch(dbToFile.getFile());
-        
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
     

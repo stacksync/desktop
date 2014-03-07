@@ -75,6 +75,10 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         return id;
     }
     
+    public void setId(String id) {
+        this.id = id;
+    }
+    
     public String getPathWorkspace(){
         return pathWorkspace;
     }
@@ -163,4 +167,18 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         return this.files;
     }
     
+    @Override
+    public CloneWorkspace clone() {
+        CloneWorkspace workspace = new CloneWorkspace();
+        workspace.setId(getId());
+        workspace.setName(getName());
+        workspace.setOwner(getOwner());
+        workspace.setParentId(getParentId());
+        workspace.setPathWorkspace(getPathWorkspace());
+        workspace.setRemoteRevision(getRemoteRevision());
+        workspace.setLocalLastUpdate(getLocalLastUpdate());
+        workspace.setSwiftContainer(getSwiftContainer());
+        workspace.setSwiftStorageURL(getSwiftStorageURL());
+        return workspace;
+    }
 }

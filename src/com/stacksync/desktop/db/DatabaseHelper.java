@@ -590,4 +590,40 @@ public class DatabaseHelper {
 
         return query.getResultList();
     }
+
+    public CloneWorkspace getWorkspace(String id) {
+        String queryStr = "select w from CloneWorkspace w where"
+                + "            w.id = :id";        
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
+        
+        query.setParameter("id", id);
+        CloneWorkspace workspace = (CloneWorkspace)query.getSingleResult();
+        
+        return workspace;
+    }
+
+    public List<CloneFile> getWorkspaceFiles(String id) {
+        
+        String queryStr = "select f from CloneFile f where "
+                + "      f.status <> :notStatus1 and "
+                + "      f.workspace = ("
+                + "           select wp from CloneWorkspace wp where "
+                + "           wp.id = :workspaceId"
+                + "      ) and "
+                + "      f.workspaceRoot = false and "
+                + "      f.version = (select max(ff.version) from CloneFile ff where "
+                + "                                     f.id = ff.id) ";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
+        
+        query.setParameter("notStatus1", Status.DELETED);
+        query.setParameter("workspaceId", id);
+
+        return query.getResultList();
+        
+    }
 }

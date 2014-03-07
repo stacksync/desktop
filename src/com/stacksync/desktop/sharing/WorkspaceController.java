@@ -48,7 +48,7 @@ public class WorkspaceController {
         for(CloneWorkspace w: remoteWorkspaces){
             if(localWorkspaces.containsKey(w.getId())){
                 // search for changes in workspaces
-                boolean changed = applyChangesInWorkspace(localWorkspaces.get(w.getId()), w);
+                boolean changed = applyChangesInWorkspace(localWorkspaces.get(w.getId()), w, true);
                 if (changed) {
                     localWorkspaces.put(w.getId(), w);
                 }
@@ -66,8 +66,7 @@ public class WorkspaceController {
     }
     
 
-    
-    private boolean applyChangesInWorkspace(CloneWorkspace local, CloneWorkspace remote) {
+    public boolean applyChangesInWorkspace(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
         
         boolean changed = false;
         
@@ -78,10 +77,7 @@ public class WorkspaceController {
         
         if (!local.getName().equals(remote.getName())) {
             logger.info("New name in workspace. Renaming...");
-            changeWorkspaceName(local.getId(), remote.getName());
-            local.setPathWorkspace(remote.getPathWorkspace());
-            local.setName(remote.getName());
-            local.merge();
+            changeWorkspaceName(local, remote, uploaded);
             changed = true;
         }
         
@@ -96,18 +92,24 @@ public class WorkspaceController {
         return changed;
     }
     
-    private void changeWorkspaceName(String id, String newName) {
+    private void changeWorkspaceName(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
         
-        CloneFile workspaceRootFolder = db.getWorkspaceRoot(id);
+        CloneFile workspaceRootFolder = db.getWorkspaceRoot(local.getId());
         
         String dir = workspaceRootFolder.getAbsolutePath();
         File folder = new File(dir);
-        File newFolder = new File(folder.getParentFile()+File.separator+newName);
+        File newFolder = new File(folder.getParentFile()+File.separator+remote.getName());
+        
+        // Updtae workspace DB
+        logger.info("Changing name and path in local CloneWorkspace.");
+        local.setPathWorkspace(remote.getPathWorkspace());
+        local.setName(remote.getName());
+        local.merge();
+        
+        updateWorkspaceName(workspaceRootFolder, remote.getName(), uploaded);
+        updateWorkspaceFiles(workspaceRootFolder);
         
         folder.renameTo(newFolder);
-        
-        updateWorkspaceName(workspaceRootFolder, newName);
-        
     }
     
     public void createNewWorkspace(CloneWorkspace newWorkspace) {
@@ -116,11 +118,6 @@ public class WorkspaceController {
             // Don't create default wp
             return;
         }
-        
-        // This is not usefull since watcher is not activated
-        /*// craete new forlder (.nw_id_name)
-        SharingController controller = SharingController.getInstance();
-        controller.createNewWorkspace(newWorkspace, newWorkspace.getName());*/
         
         // Create workspace root folder
         String folderName = newWorkspace.getName();
@@ -163,16 +160,29 @@ public class WorkspaceController {
         rootFolder.merge();
     }
 
-    private void updateWorkspaceName(CloneFile workspaceRootFolder, String newName) {
+    private void updateWorkspaceName(CloneFile workspaceRootFolder, String newName, boolean uploaded) {
+        
         CloneFile newVersion = (CloneFile)workspaceRootFolder.clone();
         
-        newVersion.setServerUploadedAck(true);
+        newVersion.setServerUploadedAck(uploaded);
         newVersion.setServerUploadedTime(workspaceRootFolder.getServerUploadedTime());
         newVersion.setVersion(workspaceRootFolder.getVersion()+1);
         newVersion.setStatus(CloneFile.Status.RENAMED);
         newVersion.setName(newName);
         
+        logger.info("Merging new dummy CloneFile with workspace root.");
         newVersion.merge();
+    }
+
+    private void updateWorkspaceFiles(CloneFile workspaceRootFolder) {
+        
+        logger.info("Updating files path but don't upload them!");
+        List<CloneFile> files = db.getWorkspaceFiles(workspaceRootFolder.getWorkspace().getId());
+        
+        for (CloneFile file : files) {
+            file.generatePath();
+            file.merge();
+        }
     }
     
 }

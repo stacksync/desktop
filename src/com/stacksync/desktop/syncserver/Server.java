@@ -140,6 +140,7 @@ public class Server {
         
         UpdateWorkspaceRequest request = new UpdateWorkspaceRequest(UUID.fromString(accountId), 
                 UUID.fromString(workspaceId), workspaceName, parent);
+        request.setRequestId(getRequestId());
         try {
             syncServer.updateWorkspace(request);
         } catch (UserNotFoundException ex) {
