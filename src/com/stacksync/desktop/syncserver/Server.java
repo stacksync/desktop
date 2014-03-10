@@ -25,9 +25,7 @@ import com.stacksync.desktop.repository.Update;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import omq.common.broker.Broker;
 import org.apache.log4j.Logger;
@@ -38,8 +36,6 @@ public class Server {
     private final Config config = Config.getInstance();
     private ISyncService syncServer;
     private Broker broker;
-    private Map<String, Workspace> rWorkspaces;
-    private int i;
 
     public ISyncService getSyncServer() {
         return syncServer;
@@ -48,8 +44,6 @@ public class Server {
     public Server(Broker broker) throws Exception {
         this.broker = broker;
         this.syncServer = this.broker.lookup(ISyncService.class.getSimpleName(), ISyncService.class);
-        this.rWorkspaces = new HashMap<String, Workspace>();
-        this.i = 0;
     }
 
     public String getRequestId() {
@@ -79,7 +73,6 @@ public class Server {
         for (Workspace rWorkspace : remoteWorkspaces) {
             CloneWorkspace workspace = new CloneWorkspace(rWorkspace);
             workspaces.add(workspace);
-            rWorkspaces.put(workspace.getId(), rWorkspace);
         }
 
         return workspaces;

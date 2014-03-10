@@ -1,28 +1,13 @@
-/*
- * Syncany, www.syncany.org
- * Copyright (C) 2011 Philipp C. Heckel <philipp.heckel@gmail.com> 
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.stacksync.desktop.config.profile;
 
+import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.Repository;
+import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
@@ -38,21 +23,17 @@ import com.stacksync.desktop.watch.local.LocalWatcher;
 import com.stacksync.desktop.watch.remote.ChangeManager;
 import com.stacksync.desktop.watch.remote.RemoteWatcher;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import omq.common.broker.Broker;
 import org.apache.log4j.Logger;
 
-/**
- *
- * @author Philipp C. Heckel
- */
 public class Profile implements Configurable {
 
     private static final Logger logger = Logger.getLogger(Profile.class.getName());
     private static final LocalWatcher localWatcher = LocalWatcher.getInstance();
     private Environment env = Environment.getInstance();
-    //private static final Config config = Config.getInstance();
     private boolean active;
     private boolean enabled;
     private boolean initialized;
@@ -133,7 +114,6 @@ public class Profile implements Configurable {
 
             setFactory();
             server.updateDevice(getAccountId());
-            Map<String, CloneWorkspace> workspaces = WorkspaceController.getInstance().initializeWorkspaces(this);
 
             // Start threads 1/2
             uploader.start();
@@ -145,33 +125,15 @@ public class Profile implements Configurable {
             } catch (Exception ex) {
                 logger.error("Error binding RemoteClient implementation: ", ex);
                 throw new InitializationException(ex);
-            } 
-                    
-            for (CloneWorkspace w : workspaces.values()) {
-                try {
-                    // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
-                    broker.bind(w.getId().toString(), new RemoteWorkspaceImpl(w, changeManager));
-                } catch (Exception ex) {
-                    throw new InitializationException(ex);
-                }
-
-                // Get changes
-                List<Update> changes = server.getChanges(getAccountId(), w);
-                changeManager.queueUpdates(changes);
             }
-
-            while (changeManager.queuesUpdatesIsWorking()) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) { }
-            }
+            
+            initializeWorkspaces(changeManager);
 
             // Start threads 2/2            
             localWatcher.watch(this);
 
             remoteWatcher.setServer(server);
             remoteWatcher.start();
-            //indexer.index(this); --> periodictree search do this.
 
             this.active = true;
         } else { // Deactivate
@@ -189,6 +151,72 @@ public class Profile implements Configurable {
 
             this.active = active;
         }
+    }
+    
+    private void initializeWorkspaces(ChangeManager changeManager) throws InitializationException {
+        
+        // Get remote workspaces
+        List<CloneWorkspace> remoteWorkspaces = new ArrayList<CloneWorkspace>();
+        try {
+            remoteWorkspaces = server.getWorkspaces(getAccountId());
+        } catch (NoWorkspacesFoundException ex) {
+            throw new InitializationException("Can't load the workspaces from syncserver: ", ex);
+        }
+        
+        // Get local workspaces from DB
+        Map<String, CloneWorkspace> localWorkspaces = DatabaseHelper.getInstance().getWorkspaces();
+        
+        // Process workspaces individually
+        WorkspaceController controller = WorkspaceController.getInstance();
+        for(CloneWorkspace w: remoteWorkspaces){
+            processWorkspace(w, controller, localWorkspaces);
+            bindWorkspace(w, changeManager);
+            getAndQueueChanges(w, changeManager);
+            
+            while (changeManager.queuesUpdatesIsWorking()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) { }
+            }
+            
+        }
+        
+    }
+    
+    private void processWorkspace(CloneWorkspace workspace, WorkspaceController controller,
+            Map<String, CloneWorkspace> localWorkspaces) {
+        
+        // 1. Apply changes or create new workspaces
+        if(localWorkspaces.containsKey(workspace.getId())){
+            // search for changes in workspaces
+            boolean changed = controller.applyChangesInWorkspace(localWorkspaces.get(workspace.getId()), workspace, true);
+            if (changed) {
+                localWorkspaces.put(workspace.getId(), workspace);
+            }
+        }else{
+            // new workspace, let's create the workspace folder
+            controller.createNewWorkspace(workspace);
+            // save it in DB
+            workspace.merge();
+            localWorkspaces.put(workspace.getId(), workspace);
+        }
+        
+    }
+    
+    private void bindWorkspace(CloneWorkspace workspace, ChangeManager changeManager) throws InitializationException{
+        // 2. Listen to workspace queue
+        try {
+            // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
+            broker.bind(workspace.getId().toString(), new RemoteWorkspaceImpl(workspace, changeManager));
+        } catch (Exception ex) {
+            throw new InitializationException(ex);
+        }
+    }
+    
+    private void getAndQueueChanges(CloneWorkspace workspace, ChangeManager changeManager) {
+        // 3. Get changes and queue them
+        List<Update> changes = server.getChanges(getAccountId(), workspace);
+        changeManager.queueUpdates(changes);
     }
     
     public void addNewWorkspace(CloneWorkspace cloneWorkspace) throws Exception {

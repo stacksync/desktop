@@ -1,6 +1,5 @@
 package com.stacksync.desktop.index.requests;
 
-import com.stacksync.desktop.config.Folder;
 import java.io.File;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.db.models.CloneFile;
@@ -15,7 +14,6 @@ public class RenameIndexWorkspaceRequest extends IndexRequest {
     private CloneFile dbFromFile;
     private File fromFile;
     private File toFile;
-    private Folder root;
 
     public RenameIndexWorkspaceRequest(File fromFile, File toFile) {
         super();
@@ -27,7 +25,6 @@ public class RenameIndexWorkspaceRequest extends IndexRequest {
     public RenameIndexWorkspaceRequest(CloneFile dbFromFile, File toFile) {
         this(dbFromFile.getFile(), toFile);
         this.dbFromFile = dbFromFile;
-        this.root = dbFromFile.getRoot();
     }
     
     @Override
@@ -47,7 +44,7 @@ public class RenameIndexWorkspaceRequest extends IndexRequest {
         remote.setName(toFile.getName());
         remote.setPathWorkspace("/"+toFile.getName());
         
-        WorkspaceController.getInstance().applyChangesInWorkspace(local, remote, false);
+        WorkspaceController.getInstance().changeWorkspaceName(local, remote, false);
 
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }

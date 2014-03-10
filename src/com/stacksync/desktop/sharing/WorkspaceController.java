@@ -1,19 +1,13 @@
 package com.stacksync.desktop.sharing;
 
-import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
-import com.stacksync.desktop.exceptions.InitializationException;
-import com.stacksync.desktop.syncserver.Server;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.apache.log4j.Logger;
 
 public class WorkspaceController {
@@ -31,87 +25,6 @@ public class WorkspaceController {
         return instance;
     }
     
-    public Map<String, CloneWorkspace> initializeWorkspaces(Profile profile)
-            throws InitializationException{
-                  
-        List<CloneWorkspace> remoteWorkspaces = new ArrayList<CloneWorkspace>();
-                                            
-        try {
-            Server server = profile.getServer();
-            remoteWorkspaces = server.getWorkspaces(profile.getAccountId());
-        } catch (NoWorkspacesFoundException ex) {
-            throw new InitializationException("Can't load the workspaces from syncserver: ", ex);
-        }
-
-        Map<String, CloneWorkspace> localWorkspaces = db.getWorkspaces();
-        
-        for(CloneWorkspace w: remoteWorkspaces){
-            if(localWorkspaces.containsKey(w.getId())){
-                // search for changes in workspaces
-                boolean changed = applyChangesInWorkspace(localWorkspaces.get(w.getId()), w, true);
-                if (changed) {
-                    localWorkspaces.put(w.getId(), w);
-                }
-            }else{
-                // new workspace, let's create the workspace folder
-                createNewWorkspace(w);
-                // save it in DB
-                w.merge();
-                localWorkspaces.put(w.getId(), w);
-            }
-
-        }
-
-        return localWorkspaces;
-    }
-    
-
-    public boolean applyChangesInWorkspace(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
-        
-        boolean changed = false;
-        
-        if (!local.getRemoteRevision().equals(remote.getRemoteRevision())) {
-            logger.info("New remote revision in workspace.");
-            changed = true;
-        }
-        
-        if (!local.getName().equals(remote.getName())) {
-            logger.info("New name in workspace. Renaming...");
-            changeWorkspaceName(local, remote, uploaded);
-            changed = true;
-        }
-        
-        /*
-        if (local.getParentId().equals(remote.getParentId())) {
-            logger.info("New parent in workspace. Moving...");
-            // TODO
-            * changed = true;
-        }
-        */
-        
-        return changed;
-    }
-    
-    private void changeWorkspaceName(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
-        
-        CloneFile workspaceRootFolder = db.getWorkspaceRoot(local.getId());
-        
-        String dir = workspaceRootFolder.getAbsolutePath();
-        File folder = new File(dir);
-        File newFolder = new File(folder.getParentFile()+File.separator+remote.getName());
-        
-        // Updtae workspace DB
-        logger.info("Changing name and path in local CloneWorkspace.");
-        local.setPathWorkspace(remote.getPathWorkspace());
-        local.setName(remote.getName());
-        local.merge();
-        
-        updateWorkspaceName(workspaceRootFolder, remote.getName(), uploaded);
-        updateWorkspaceFiles(workspaceRootFolder);
-        
-        folder.renameTo(newFolder);
-    }
-    
     public void createNewWorkspace(CloneWorkspace newWorkspace) {
         
         if (newWorkspace.getName().equals("default")) {
@@ -120,10 +33,8 @@ public class WorkspaceController {
         }
         
         // Create workspace root folder
-        String folderName = newWorkspace.getName();
-        
         File folder = new File(config.getProfile().getFolder().getLocalFile().getAbsolutePath()
-                + "/" + folderName);
+                + newWorkspace.getPathWorkspace());
         
         // Create "dummy" clone file in DB
         saveWorkspaceRootFolder(newWorkspace, folder);
@@ -146,9 +57,9 @@ public class WorkspaceController {
         rootFolder.setWorkspaceRoot(true);
         rootFolder.setServerUploadedAck(true);   // Don't commit this!!
         
-        // TODO This is not necessary because shared folders will be on the root
-        /*File parentFile = FileUtil.getCanonicalFile(folder.getParentFile());
-        rootFolder.setParent(db.getFolder(root, parentFile));*/
+        if (newWorkspace.getParentId() != null) {
+            rootFolder.setParent(db.getFileOrFolder(newWorkspace.getParentId()));
+        }
         
         rootFolder.setWorkspace(newWorkspace);
         rootFolder.setFolder(true);
@@ -158,6 +69,75 @@ public class WorkspaceController {
         rootFolder.setChecksum(0);
         
         rootFolder.merge();
+    }
+
+    public boolean applyChangesInWorkspace(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
+        
+        boolean changed = false;
+        
+        if (!local.getRemoteRevision().equals(remote.getRemoteRevision())) {
+            logger.info("New remote revision in workspace.");
+            changed = true;
+        }
+        
+        if (workspaceIsRenamed(local, remote)) {
+            logger.info("New name in workspace. Renaming...");
+            changeWorkspaceName(local, remote, uploaded);
+            changed = true;
+        }
+        
+        if (workspaceIsMoved(local,remote)) {
+            logger.info("New parent in workspace. Moving...");
+            changeWorkspaceParent(local, remote, uploaded);
+            changed = true;
+        }
+        
+        return changed;
+    }
+    
+    private boolean workspaceIsRenamed(CloneWorkspace local, CloneWorkspace remote) {
+        return !local.getName().equals(remote.getName());
+    }
+
+    private boolean workspaceIsMoved(CloneWorkspace local, CloneWorkspace remote) {
+        
+        Long currentParent = local.getParentId();
+        Long newParent = remote.getParentId();
+        
+        if (currentParent == null && newParent == null) {
+            return false;
+        }
+        
+        if (currentParent != null && !currentParent.equals(newParent)) {
+            return true;
+        }
+        
+        if (newParent != null && !newParent.equals(currentParent)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public void changeWorkspaceName(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
+        
+        CloneFile workspaceRootFolder = db.getWorkspaceRoot(local.getId());
+        
+        String dir = workspaceRootFolder.getAbsolutePath();
+        File folder = new File(dir);
+        File newFolder = new File(folder.getParentFile()+File.separator+remote.getName());
+        
+        // Updtae workspace DB
+        logger.info("Changing name and path in local CloneWorkspace.");
+        local.setPathWorkspace(remote.getPathWorkspace());
+        local.setName(remote.getName());
+        local.merge();
+        
+        updateWorkspaceName(workspaceRootFolder, remote.getName(), uploaded);
+        updateWorkspaceFiles(workspaceRootFolder);
+        
+        if (!uploaded)
+            folder.renameTo(newFolder);
     }
 
     private void updateWorkspaceName(CloneFile workspaceRootFolder, String newName, boolean uploaded) {
@@ -183,6 +163,54 @@ public class WorkspaceController {
             file.generatePath();
             file.merge();
         }
+    }
+
+    public void changeWorkspaceParent(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
+        
+        CloneFile workspaceRootFolder = db.getWorkspaceRoot(local.getId());
+        
+        String dir = workspaceRootFolder.getAbsolutePath();
+        File folder = new File(dir);
+        File newFolder;
+        CloneFile workspaceParentFolder;
+        
+        if (remote.getParentId() == null) {
+            // Move shared folder to the root
+            workspaceParentFolder = null;
+            newFolder = new File(folder.getParentFile()+File.separator+remote.getName());
+        } else {
+            // Move shared folder to another folder
+            workspaceParentFolder = db.getFileOrFolder(remote.getParentId());
+            newFolder = new File(workspaceParentFolder.getFile().getAbsolutePath()+File.separator + remote.getName());
+        }
+        
+        // Updtae workspace DB
+        logger.info("Changing name and path in local CloneWorkspace.");
+        local.setPathWorkspace(remote.getPathWorkspace());
+        local.setName(remote.getName());
+        local.setParentId(remote.getParentId());
+        local.merge();
+        
+        updateWorkspaceParent(workspaceRootFolder, workspaceParentFolder, uploaded);
+        updateWorkspaceFiles(workspaceRootFolder);
+        
+        if (!uploaded)
+            folder.renameTo(newFolder);
+    }
+    
+    private void updateWorkspaceParent(CloneFile workspaceRootFolder, CloneFile parent, boolean uploaded) {
+        
+        CloneFile newVersion = (CloneFile)workspaceRootFolder.clone();
+        
+        newVersion.setServerUploadedAck(uploaded);
+        newVersion.setServerUploadedTime(workspaceRootFolder.getServerUploadedTime());
+        newVersion.setVersion(workspaceRootFolder.getVersion()+1);
+        newVersion.setStatus(CloneFile.Status.RENAMED);
+        newVersion.setParent(parent);
+        newVersion.generatePath();
+        
+        logger.info("Merging new dummy CloneFile with workspace root.");
+        newVersion.merge();
     }
     
 }

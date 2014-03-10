@@ -1,6 +1,7 @@
 package com.stacksync.desktop.db.models;
 
 import com.stacksync.commons.models.Workspace;
+import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.PersistentObject;
 import java.io.Serializable;
 import java.util.List;
@@ -51,17 +52,15 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     public CloneWorkspace(Workspace r){
         this.id = r.getId().toString();
-
-        this.pathWorkspace = "/"+r.getName();
-        if (r.getName().equals("default")) {
-            this.pathWorkspace = "/";
-        }
-        
         this.name = r.getName();
         
         this.parentId = null;
-        if (r.getParentItem() != null) {
+        if (r.getParentItem().getId() != null) {
             this.parentId = r.getParentItem().getId();
+        } else {
+            if (r.getName().equals("default")) {
+                this.pathWorkspace = "/";
+            }
         }
         
         this.localLastUpdate = r.getLatestRevision();
@@ -80,6 +79,22 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     }
     
     public String getPathWorkspace(){
+        
+        if (this.parentId != null) {
+            CloneFile parent = DatabaseHelper.getInstance().getFileOrFolder(this.parentId);
+            String path = parent.getPath();
+            if (!path.endsWith("/")) {
+                path += "/";
+            }
+            this.pathWorkspace = path + parent.getName()+ "/" + this.name;
+        } else {
+            if (this.name.equals("default")) {
+                this.pathWorkspace = "/";
+            } else {
+                this.pathWorkspace = "/" + this.name;
+            }
+        }
+        
         return pathWorkspace;
     }
     
