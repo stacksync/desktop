@@ -10,6 +10,7 @@ import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.sharing.WorkspaceController;
+import java.io.File;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
@@ -63,7 +64,12 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         CloneWorkspace remote = local.clone();
         remote.setName(uwn.getFolderName());
         remote.setParentId(uwn.getParentItemId());
-        remote.setPathWorkspace("/"+uwn.getFolderName());
+        if (remote.getParentId() != null) {
+            CloneFile parentCF = db.getFileOrFolder(remote.getParentId());
+            remote.setPathWorkspace(parentCF.getFile().getAbsolutePath()+ File.separator + uwn.getFolderName());
+        } else {
+            remote.setPathWorkspace("/"+uwn.getFolderName());
+        }
         
         WorkspaceController.getInstance().applyChangesInWorkspace(local, remote, true);
         

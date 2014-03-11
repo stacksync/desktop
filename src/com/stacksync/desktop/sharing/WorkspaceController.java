@@ -136,7 +136,7 @@ public class WorkspaceController {
         updateWorkspaceName(workspaceRootFolder, remote.getName(), uploaded);
         updateWorkspaceFiles(workspaceRootFolder);
         
-        if (!uploaded)
+        if (uploaded)
             folder.renameTo(newFolder);
     }
 
@@ -194,7 +194,7 @@ public class WorkspaceController {
         updateWorkspaceParent(workspaceRootFolder, workspaceParentFolder, uploaded);
         updateWorkspaceFiles(workspaceRootFolder);
         
-        if (!uploaded)
+        if (uploaded)
             folder.renameTo(newFolder);
     }
     
