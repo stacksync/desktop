@@ -212,7 +212,9 @@ public class RemoteWatcher {
         String accountId = profile.getAccountId();
         
         for (CloneFile workspaceFile : workspaces) {
-            CloneWorkspace w = workspaceFile.getWorkspace();
+            // Do the query to the DB. workspaceFile could have and old workspace instance
+            // if you do -> CloneWorkspace w = workspaceFile.getWorkspace();
+            CloneWorkspace w = db.getWorkspace(workspaceFile.getWorkspace().getId());
             switch(workspaceFile.getStatus()) {
                 case RENAMED:
                     this.server.updateWorkspace(accountId, w.getId(), w.getName(), w.getParentId());

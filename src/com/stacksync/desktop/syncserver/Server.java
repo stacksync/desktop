@@ -137,9 +137,9 @@ public class Server {
         try {
             syncServer.updateWorkspace(request);
         } catch (UserNotFoundException ex) {
-            
+            logger.error("Cannot update workspace due to: ", ex);
         } catch (WorkspaceNotUpdatedException ex) {
-            
+            logger.error("Cannot update workspace due to: ", ex);
         }
     }
     

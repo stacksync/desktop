@@ -177,7 +177,7 @@ public class WorkspaceController {
         if (remote.getParentId() == null) {
             // Move shared folder to the root
             workspaceParentFolder = null;
-            newFolder = new File(folder.getParentFile()+File.separator+remote.getName());
+            newFolder = new File(workspaceRootFolder.getRoot().getLocalFile().getAbsoluteFile()+File.separator+remote.getName());
         } else {
             // Move shared folder to another folder
             workspaceParentFolder = db.getFileOrFolder(remote.getParentId());
