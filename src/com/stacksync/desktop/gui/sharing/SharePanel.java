@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.swing.JFrame;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-public class SharePanel extends javax.swing.JPanel {
+public class SharePanel extends javax.swing.JPanel implements DocumentListener{
 
     private static final Config config = Config.getInstance();
     private ResourceBundle resourceBundle;
@@ -28,10 +30,14 @@ public class SharePanel extends javax.swing.JPanel {
         this.frame = frame;
         initComponents();
         
-        lblMail.setText(resourceBundle.getString("share_panel_email"));
-        lblFolder.setText(resourceBundle.getString("share_panel_folder"));
-        cancelButton.setText(resourceBundle.getString("wizard_cancel"));
-        shareButton.setText(resourceBundle.getString("share_button_share"));
+        this.lblMail.setText(resourceBundle.getString("share_panel_email"));
+        this.lblFolder.setText(resourceBundle.getString("share_panel_folder"));
+        this.cancelButton.setText(resourceBundle.getString("wizard_cancel"));
+        this.shareButton.setText(resourceBundle.getString("share_button_share"));
+        this.shareButton.setEnabled(false);
+        
+        this.emailField.getDocument().addDocumentListener(this);
+        this.folderNameField.getDocument().addDocumentListener(this);
     }
 
     /**
@@ -130,8 +136,6 @@ public class SharePanel extends javax.swing.JPanel {
     }//GEN-LAST:event_shareButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        //this.emailField.setText("");
-        //this.folderNameField.setText("");
         this.frame.setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
@@ -143,4 +147,32 @@ public class SharePanel extends javax.swing.JPanel {
     private javax.swing.JLabel lblMail;
     private javax.swing.JButton shareButton;
     // End of variables declaration//GEN-END:variables
+
+    /*
+     * Functions to enable/disable dynamically the share button
+     */
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        setEnableShareButton();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        setEnableShareButton();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        setEnableShareButton();
+    }
+    
+    private void setEnableShareButton() {
+        if (this.emailField.getText().equals("") ||
+                this.folderNameField.getText().equals("")) {
+            this.shareButton.setEnabled(false);
+        } else {
+            this.shareButton.setEnabled(true);
+            getRootPane().setDefaultButton(this.shareButton);
+        }
+    }
 }

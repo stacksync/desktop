@@ -2,9 +2,12 @@ package com.stacksync.desktop.gui.tray;
 
 import com.stacksync.desktop.ApplicationController;
 import com.stacksync.desktop.Constants;
+import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.gui.sharing.SharePanel;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
+import java.util.ResourceBundle;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import org.apache.log4j.Logger;
 
@@ -50,8 +53,8 @@ public class TrayEventListenerImpl implements TrayEventListener {
                 break;
             case SHARE:
                 //Show share panel
-                JFrame frame = new JFrame("Share a folder");
-                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                JFrame frame = createSharingFrame();
+                
                 
                 SharePanel panel = new SharePanel(frame);
                 
@@ -68,5 +71,20 @@ public class TrayEventListenerImpl implements TrayEventListener {
                 logger.warn("Unknown tray event type: " + event);
             // Fressen.
         }
+    }
+    
+    private JFrame createSharingFrame() {
+        
+        Config config = Config.getInstance();
+        ResourceBundle resourceBundle = config.getResourceBundle();
+        
+        String title = resourceBundle.getString("share_panel_title");
+        JFrame frame = new JFrame(title);
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
+        frame.setIconImage(new ImageIcon(config.getResDir()+File.separator+"logo48.png").getImage());
+        
+        return frame;
     }
 }
