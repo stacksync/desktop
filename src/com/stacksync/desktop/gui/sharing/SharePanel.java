@@ -23,6 +23,11 @@ public class SharePanel extends javax.swing.JPanel {
         super();
         this.resourceBundle = config.getResourceBundle();
         initComponents();
+        
+        lblMail.setText(resourceBundle.getString("share_panel_email"));
+        lblFolder.setText(resourceBundle.getString("share_panel_folder"));
+        cancelButton.setText(resourceBundle.getString("wizard_cancel"));
+        shareButton.setText(resourceBundle.getString("share_button_share"));
     }
 
     /**
@@ -35,24 +40,19 @@ public class SharePanel extends javax.swing.JPanel {
     private void initComponents() {
 
         emailField = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        lblMail = new javax.swing.JLabel();
+        lblFolder = new javax.swing.JLabel();
         folderNameField = new javax.swing.JTextField();
         cancelButton = new javax.swing.JButton();
         shareButton = new javax.swing.JButton();
 
-        jLabel1.setText("E-mail:");
+        lblMail.setText("__E-mail:");
 
-        jLabel2.setText("Folder name:");
+        lblFolder.setText("__Folder name:");
 
-        cancelButton.setText("Cancel");
-        cancelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelButtonActionPerformed(evt);
-            }
-        });
+        cancelButton.setText("__Cancel");
 
-        shareButton.setText("Share");
+        shareButton.setText("__Share");
         shareButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 shareButtonActionPerformed(evt);
@@ -68,8 +68,8 @@ public class SharePanel extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(73, 73, 73)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
+                            .addComponent(lblFolder)
+                            .addComponent(lblMail))
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(folderNameField)
@@ -79,7 +79,7 @@ public class SharePanel extends javax.swing.JPanel {
                         .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(41, 41, 41)
                         .addComponent(shareButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(74, Short.MAX_VALUE))
+                .addContainerGap(58, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -87,11 +87,11 @@ public class SharePanel extends javax.swing.JPanel {
                 .addGap(31, 31, 31)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(emailField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(lblMail))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(folderNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
+                    .addComponent(lblFolder))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(shareButton)
@@ -119,16 +119,12 @@ public class SharePanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_shareButtonActionPerformed
 
-    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cancelButtonActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JTextField emailField;
     private javax.swing.JTextField folderNameField;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel lblFolder;
+    private javax.swing.JLabel lblMail;
     private javax.swing.JButton shareButton;
     // End of variables declaration//GEN-END:variables
 }
