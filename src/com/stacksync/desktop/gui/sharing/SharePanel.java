@@ -9,19 +9,23 @@ import com.stacksync.desktop.syncserver.Server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import javax.swing.JFrame;
 
 public class SharePanel extends javax.swing.JPanel {
 
     private static final Config config = Config.getInstance();
     private ResourceBundle resourceBundle;
     
+    private JFrame frame;
+    
     /**
      * Creates new form SharePanel
      */
-    public SharePanel() {
+    public SharePanel(JFrame frame) {
         
         super();
         this.resourceBundle = config.getResourceBundle();
+        this.frame = frame;
         initComponents();
         
         lblMail.setText(resourceBundle.getString("share_panel_email"));
@@ -51,6 +55,11 @@ public class SharePanel extends javax.swing.JPanel {
         lblFolder.setText("__Folder name:");
 
         cancelButton.setText("__Cancel");
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
 
         shareButton.setText("__Share");
         shareButton.addActionListener(new java.awt.event.ActionListener() {
@@ -112,12 +121,19 @@ public class SharePanel extends javax.swing.JPanel {
         mails.add(this.emailField.getText());
         try {
             server.createShareProposal(profile.getAccountId(), mails, this.folderNameField.getText());
+            this.frame.setVisible(false);
         } catch (ShareProposalNotCreatedException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
         } catch (UserNotFoundException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.");
         }
     }//GEN-LAST:event_shareButtonActionPerformed
+
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        //this.emailField.setText("");
+        //this.folderNameField.setText("");
+        this.frame.setVisible(false);
+    }//GEN-LAST:event_cancelButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;

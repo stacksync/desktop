@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.stacksync.desktop.gui.tray;
 
 import com.stacksync.desktop.ApplicationController;
@@ -57,7 +53,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                 JFrame frame = new JFrame("Share a folder");
                 frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
                 
-                SharePanel panel = new SharePanel();
+                SharePanel panel = new SharePanel(frame);
                 
                 frame.setContentPane(panel);
                 frame.pack();
