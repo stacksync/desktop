@@ -55,12 +55,8 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.name = r.getName();
         
         this.parentId = null;
-        if (r.getParentItem().getId() != null) {
+        if (r.getParentItem() != null && r.getParentItem().getId() != null) {
             this.parentId = r.getParentItem().getId();
-        } else {
-            if (r.getName().equals("default")) {
-                this.pathWorkspace = "/";
-            }
         }
         
         this.localLastUpdate = r.getLatestRevision();
@@ -68,6 +64,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.swiftContainer = r.getSwiftContainer();
         this.swiftStorageURL = r.getSwiftUrl();
         this.owner = r.getOwner().getId().toString();
+        getPathWorkspace();
     }
 
     public String getId() {
