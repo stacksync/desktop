@@ -6,7 +6,8 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.syncserver.Server;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.swing.JFrame;
@@ -123,10 +124,17 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
         
         Profile profile = config.getProfile();
         Server server = profile.getServer();
-        List<String> mails = new ArrayList<String>();
-        mails.add(this.emailField.getText());
+        
+        List<String> emails;
         try {
-            server.createShareProposal(profile.getAccountId(), mails, this.folderNameField.getText());
+            emails = getEmails();
+        } catch (IOException ex) {
+            ErrorMessage.showMessage(this, "Error", "Verify email accounts.");
+            return;
+        }
+        
+        try {
+            server.createShareProposal(profile.getAccountId(), emails, this.folderNameField.getText());
             this.frame.setVisible(false);
         } catch (ShareProposalNotCreatedException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
@@ -135,6 +143,34 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
         }
     }//GEN-LAST:event_shareButtonActionPerformed
 
+    private List<String> getEmails() throws IOException {
+        
+        String emailsStr = this.emailField.getText();
+        emailsStr = emailsStr.replaceAll("\\s", "");    // Remove whitespaces
+        List<String> emails = Arrays.asList(emailsStr.split(","));   // Split it
+        
+        for (String email : emails) {
+            // Check if email is correct
+            if (!isCorrect(email)) {
+                throw new IOException("Incorrect mail.");
+            }
+        }
+        
+        // All mails are correct! =)
+        return emails;
+    }
+    
+    private boolean isCorrect(String mail) {
+        
+        if (!mail.contains("@") || !mail.contains(".")) {
+            return false;
+        }
+        
+        // Add here other filters (special characters...)
+        
+        return true;
+    }
+    
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         this.frame.setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
