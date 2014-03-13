@@ -23,6 +23,9 @@
 
 package name.pachler.nio.file.contrib;
 
+import com.stacksync.desktop.Environment;
+import com.stacksync.desktop.Environment.OperatingSystem;
+import com.stacksync.desktop.config.Config;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -33,9 +36,6 @@ import name.pachler.nio.file.ext.ExtendedWatchEventKind;
 import name.pachler.nio.file.ext.ExtendedWatchEventModifier;
 import name.pachler.nio.file.impl.LinuxMovePathWatchEvent;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.Environment;
-import com.stacksync.desktop.Environment.OperatingSystem;
-import com.stacksync.desktop.config.Config;
 
 
 /**
@@ -196,7 +196,41 @@ public class BufferedWatcher {
                         eventQueue.add(e);                    
                         continue;
                     }
-                }               
+                } else if (env.getOperatingSystem() != OperatingSystem.Linux 
+                        && e.getEvent().kind() == StandardWatchEventKind.ENTRY_DELETE) {
+                    
+                    TimedWatchEvent movedFromEvent = e;                    
+                    TimedWatchEvent movedToEvent = null;
+                    
+                    // Search for a new with the same file name:
+                    File fromFile = getEventFile(movedFromEvent.getEvent(), movedFromEvent.getParentKey());
+                    
+                    cookieSearch: for (TimedWatchEvent potentialMovedToEvent : eventQueue) {
+                        if (potentialMovedToEvent.getEvent().kind() == StandardWatchEventKind.ENTRY_CREATE) {
+                            File toFile = getEventFile(potentialMovedToEvent.getEvent(), potentialMovedToEvent.getParentKey());
+                            if (fromFile.getName().equals(toFile.getName())) {
+                                movedToEvent = potentialMovedToEvent;
+                                break cookieSearch;
+                            }
+                        }
+                    }
+                    
+                    // 'moved to'-event found
+                    if (movedToEvent != null) {
+                        eventQueue.remove(movedToEvent);
+
+                        // Fire source events
+                        if (!killSourceEvents) {
+                            processEvent(movedFromEvent);
+                            processEvent(movedToEvent);
+                        }
+
+                        // Fire artificial from/to event
+                        processEvent(new ExtendedWatchEvent(e.getParentKey(), new RenameWatchEvent(movedFromEvent, movedToEvent)));                        
+                        continue;
+                    }
+                    
+                }
 
                 // If is 'moved from', look for a matching 'moved to' event (via cookie)
                 // Note: this assumes that the FROM event always comes before the TO event
