@@ -250,6 +250,10 @@ public class Application implements ConnectionController, ApplicationController 
 
     private void initProfile() throws InitializationException, StorageConnectException {
 
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.UPDATING);
+        tray.updateUI();    // This is only necessary in Linux...
+        tray.setStatusText("StackSync", resourceBundle.getString("tray_initializing"));
+        
         if (profile == null) {
             throw new InitializationException("No profile found!");
         }
@@ -267,6 +271,10 @@ public class Application implements ConnectionController, ApplicationController 
             RemoteLogs.getInstance().sendLog(ex);
             throw ex;
         }
+        
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.UPTODATE);
+        tray.updateUI();    // This is only necessary in Linux...
+        tray.setStatusText("StackSync", "");
 
     }
 
@@ -358,6 +366,10 @@ public class Application implements ConnectionController, ApplicationController 
     public void resumeSync() {
         
         logger.info("Resume syncing.");
+        
+        tray.setStatusIcon("StackSync", Tray.StatusIcon.UPDATING);
+        tray.updateUI();    // This is only necessary in Linux...
+        tray.setStatusText("StackSync", resourceBundle.getString("tray_initializing"));
         
         try {
             initProfile();
