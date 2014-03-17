@@ -285,20 +285,6 @@ public class MoveIndexRequest extends IndexRequest {
         cf.merge();
         
     }
-
-    private boolean movementBetweenWorkspaces(CloneWorkspace fromWorkspace, CloneWorkspace toWorkspace) {
-        boolean differentWorkspaces = false;
-        
-        if (toWorkspace != null && !fromWorkspace.getId().equals(toWorkspace.getId())) {
-            differentWorkspaces = true;
-        }
-        
-        if (toWorkspace == null && !fromWorkspace.getPathWorkspace().equals("/")) { 
-            differentWorkspaces = true;
-        }
-        
-        return differentWorkspaces;
-    }
     
     private boolean isWorkspaceChanged(CloneWorkspace fromWorkspace, CloneWorkspace toWorkspace) {
         

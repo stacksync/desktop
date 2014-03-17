@@ -576,17 +576,24 @@ public class DatabaseHelper {
     
     public List<CloneFile> getWorkspacesUpdates() {
         
+        Calendar cal = Calendar.getInstance();  
+        cal.set(getFieldTimeout(), getValueTimeout(cal)); 
+        Date time = cal.getTime();     
+        
         String queryStr = "select c from CloneFile c where "
                 + "     c.syncStatus = :statusSync and "                
                 + "     c.serverUploadedAck = false and "
-                + "     c.workspaceRoot = true order by "
-                + "         c.path asc, c.version asc";    
+                + "     c.workspaceRoot = true and "
+                + "     (c.serverUploadedTime < :timeNow or "
+                + "     c.serverUploadedTime is null) order by "
+                + "         c.path asc, c.version asc";
         
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("statusSync", CloneFile.SyncStatus.UPTODATE);
+        query.setParameter("timeNow", time);
 
         return query.getResultList();
     }
