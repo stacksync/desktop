@@ -164,7 +164,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
-                byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getRepository().getEncryption());
+                byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(cf.getWorkspace().getId()));
                 if (!chunkCacheFile.exists()) {
                     FileUtil.writeFile(packed, chunkCacheFile);
                 } else{

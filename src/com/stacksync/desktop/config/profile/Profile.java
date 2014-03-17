@@ -5,6 +5,7 @@ import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
+import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.db.DatabaseHelper;
@@ -24,8 +25,10 @@ import com.stacksync.desktop.watch.remote.ChangeManager;
 import com.stacksync.desktop.watch.remote.RemoteWatcher;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import omq.common.broker.Broker;
 import org.apache.log4j.Logger;
 
@@ -46,6 +49,7 @@ public class Profile implements Configurable {
     private Broker broker;
     private Server server;
     private Account account;
+    private HashMap<String, Encryption> workspaceEncryption;
 
     public Profile() {
         active = false;
@@ -63,6 +67,7 @@ public class Profile implements Configurable {
             return;
         }
         
+        workspaceEncryption = new HashMap<String, Encryption>();
         uploader = new Uploader(this);
         remoteWatcher = new RemoteWatcher(this);
         initialized = true;
@@ -184,7 +189,7 @@ public class Profile implements Configurable {
     }
     
     private void processWorkspace(CloneWorkspace workspace, WorkspaceController controller,
-            Map<String, CloneWorkspace> localWorkspaces) {
+            Map<String, CloneWorkspace> localWorkspaces) throws InitializationException {
         
         // 1. Apply changes or create new workspaces
         if(localWorkspaces.containsKey(workspace.getId())){
@@ -193,7 +198,28 @@ public class Profile implements Configurable {
             if (changed) {
                 localWorkspaces.put(workspace.getId(), workspace);
             }
+            try {
+                // Create workspace encryption
+                Encryption encryption = new Encryption(workspace.getPassword());
+                this.workspaceEncryption.put(workspace.getId(), encryption);
+            } catch (ConfigException ex) {
+                throw new InitializationException(ex);
+            }
+            
         }else{
+            
+            if (workspace.isEncrypted()) {
+                // TODO ask for the password!!
+                String password = "";
+                Encryption encryption;
+                try {
+                    encryption = new Encryption(password);
+                    this.workspaceEncryption.put(workspace.getId(), encryption);
+                } catch (ConfigException ex) {
+                    throw new InitializationException(ex);
+                }
+            }
+            
             // new workspace, let's create the workspace folder
             controller.createNewWorkspace(workspace);
             // save it in DB
@@ -291,6 +317,10 @@ public class Profile implements Configurable {
     
     public void setAccount(Account account) {
         this.account = account;
+    }
+    
+    public Encryption getEncryption(String workspaceId) {
+        return this.workspaceEncryption.get(workspaceId);
     }
 
     @Override

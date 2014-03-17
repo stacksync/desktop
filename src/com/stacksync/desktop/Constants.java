@@ -52,16 +52,6 @@ public abstract class Constants {
      */
     public static final int DEFAULT_CACHE_SIZE = 1024;
 
-    /**
-     * Default cipher to encrypt the chunks.
-     */
-    public static final String DEFAULT_ENCRYPTION_CIPHER = "AES";
-
-    /**
-     * Default keylength for the given cipher in bit.
-     */
-    public static final int DEFAULT_ENCRYPTION_KEYLENGTH = 128;
-
     public static final boolean DEFAULT_AUTOSTART_ENABLED = true;
 
     public static final boolean DEFAULT_NOTIFICATIONS_ENABLED = true;

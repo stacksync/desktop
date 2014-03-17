@@ -735,7 +735,7 @@ public class ChangeManager {
                 File chunkFile = config.getCache().getCacheChunk(chunk);
 
                 byte[] packed = FileUtil.readFileToByteArray(chunkFile);
-                byte[] unpacked = FileUtil.unpack(packed, cf.getProfile().getRepository().getEncryption());
+                byte[] unpacked = FileUtil.unpack(packed, cf.getProfile().getEncryption(cf.getWorkspace().getId()));
 
                 // Write decrypted chunk to file
                 fos.write(unpacked);

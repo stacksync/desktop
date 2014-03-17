@@ -312,18 +312,10 @@ public class EncryptionPanel extends SettingsPanel {
     @Override
     public void save() {
         // Encryption
-        Encryption encryption = new Encryption();
-
-        encryption.setPassword(new String(txtPassword.getPassword()));
-        encryption.setKeylength(Integer.parseInt(cmbKeylength.getSelectedItem().toString()));
-        String cipherStr = "none";
-        if (cmbCipher.getSelectedIndex() != 0) {
-            cipherStr = "aes";
-        }
-        encryption.setCipherStr(cipherStr);
+        Encryption encryption;
 
         try {
-            encryption.init(); // TODO do this differently
+            encryption = new Encryption(new String(txtPassword.getPassword())); // TODO do this differently
         } catch (ConfigException ex) {
             logger.error(ex);
             RemoteLogs.getInstance().sendLog(ex);
@@ -333,7 +325,8 @@ public class EncryptionPanel extends SettingsPanel {
         Repository repository = profile.getRepository();
 
         repository.setChunkSize((Integer) spnChunksize.getValue());
-        repository.setEncryption(encryption);
+        
+        // TODO save in workspace ¿?
     }
 
     @Override
@@ -361,14 +354,8 @@ public class EncryptionPanel extends SettingsPanel {
             }
 
             // TODO check the password length
-
-            Encryption encryption = new Encryption();
-            encryption.setPassword(new String(txtPassword.getPassword()));
-            encryption.setKeylength(Integer.parseInt(cmbKeylength.getSelectedItem().toString()));
-            encryption.setCipherStr(cmbCipher.getSelectedItem().toString());
-
             try {
-                encryption.init(); // TODO do this differently
+                Encryption encryption = new Encryption(new String(txtPassword.getPassword()));
             } catch (ConfigException ex) {
                 ErrorMessage.showMessage(this, "Error", ex.getMessage());
                 check = false;

@@ -53,7 +53,7 @@ public class RepositoryPanel extends SettingsPanel {
         jLabel3.setText(resourceBundle.getString("reposp_connection_type"));                
         jLabel4.setText(resourceBundle.getString("reposp_encryption"));
         lblStorageType.setText(resourceBundle.getString("reposp_temp_type"));
-        lblEncryption.setText(resourceBundle.getString("reposp_temp_encryption"));
+        //lblEncryption.setText(resourceBundle.getString("reposp_temp_encryption"));
         lblStorageDescription.setText(resourceBundle.getString("reposp_temp_description"));
         
     }
@@ -65,7 +65,7 @@ public class RepositoryPanel extends SettingsPanel {
 
         lblStorageType.setText(connection.getPluginInfo().getName() + ", " + resourceBundle.getString("reposp_version") + "  " + repo.getConnection().getPluginInfo().getVersionStr());
         lblStorageDescription.setText(connection.getPluginInfo().getDescripton());
-        lblEncryption.setText(repo.getEncryption().toString());
+        //lblEncryption.setText(repo.getEncryption().toString());
 
         lblConnection.setText(connection.getPluginInfo().getName() + " -> " + resourceBundle.getString("reposp_connection_details"));
         pnlConnection.load();

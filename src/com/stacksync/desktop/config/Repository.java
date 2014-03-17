@@ -30,7 +30,6 @@ import com.stacksync.desktop.connection.plugins.Plugins;
 public final class Repository implements Configurable {
 
     private Connection connection;
-    private Encryption encryption;
 
     /**
      * Maximum size of each (unencrypted) chunk in bytes. After encrypting
@@ -48,7 +47,6 @@ public final class Repository implements Configurable {
     public Repository() {
         // Fressen
         connection = null; // Loaded or set dynamically!
-        encryption = new Encryption();
         
         lastUpdate = null;
         connected = false;
@@ -70,16 +68,8 @@ public final class Repository implements Configurable {
         this.connection = connection;
     }
 
-    public Encryption getEncryption() {
-        return encryption;
-    }
-
     public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
-    }
-
-    public void setEncryption(Encryption encryption) {
-        this.encryption = encryption;
     }
 
     public boolean isConnected() {
@@ -117,13 +107,6 @@ public final class Repository implements Configurable {
             connection = connectionPlugin.createConnection();
             connection.load(connectionNode);
 
-            // Encryption
-            ConfigNode encNode = node.findChildByXPath("encryption");
-            if (encNode == null) {
-                throw new ConfigException("No encryption found in repository");
-            }
-
-            encryption.load(encNode);
         } catch (Exception e) {
             throw new ConfigException("Unable to load repository: "+node+", error: "+e, e);
         }
@@ -134,6 +117,5 @@ public final class Repository implements Configurable {
         node.setProperty("chunksize", chunkSize);
 
         connection.save(node.findOrCreateChildByXpath("connection", "connection"));
-        encryption.save(node.findOrCreateChildByXpath("encryption", "encryption"));
     }
 }
