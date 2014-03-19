@@ -2,7 +2,6 @@ package com.stacksync.desktop.sharing;
 
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
