@@ -50,7 +50,10 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="password")
     private String password;
-          
+    
+    @Column(name="is_default")
+    private boolean defaultWorkspace;
+    
     @OneToMany
     private List<CloneFile> files;
     
@@ -65,13 +68,17 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
             this.parentId = r.getParentItem().getId();
         }
         
+        this.defaultWorkspace = !r.isShared();
         this.localLastUpdate = r.getLatestRevision();
         this.remoteLastUpdate = r.getLatestRevision();
         this.swiftContainer = r.getSwiftContainer();
         this.swiftStorageURL = r.getSwiftUrl();
         this.owner = r.getOwner().getId().toString();
         this.pathWorkspace = generatePath();
-        this.encrypted = r.isEncrypted();
+        this.encrypted = true;
+        
+        if (!defaultWorkspace)
+            this.encrypted = r.isEncrypted();
     }
 
     public String getId() {
@@ -99,7 +106,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
             }
             path += parent.getName()+ "/" + this.name;
         } else {
-            if (this.name.equals("default")) {
+            if (isDefaultWorkspace()) {
                 path = "/";
             } else {
                 path = "/" + this.name;
@@ -185,6 +192,14 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.encrypted = encrypted;
     }
 
+    public boolean isDefaultWorkspace() {
+        return defaultWorkspace;
+    }
+
+    public void setDefaultWorkspace(boolean defaultWorkspace) {
+        this.defaultWorkspace = defaultWorkspace;
+    }
+
     @Override
     public int hashCode() {
         return id.hashCode();
@@ -223,6 +238,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         workspace.setSwiftStorageURL(getSwiftStorageURL());
         workspace.setPassword(getPassword());
         workspace.setEncrypted(isEncrypted());
+        workspace.setDefaultWorkspace(isDefaultWorkspace());
         return workspace;
     }
 }

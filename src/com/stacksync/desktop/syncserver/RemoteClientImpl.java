@@ -28,6 +28,7 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         newWorkspace.setSwiftUrl(spn.getSwiftURL());
         newWorkspace.setName(spn.getFolderName());
         newWorkspace.setLatestRevision(0);
+        newWorkspace.setEncrypted(spn.isEncrypted());
         User owner = new User(spn.getOwnerId());
         owner.setName(spn.getOwnerName());
         newWorkspace.setOwner(owner);

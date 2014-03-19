@@ -318,15 +318,20 @@ public class FileUtil {
     public static byte[] unpack(byte[] packed, Encryption enc)
             throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
-        byte[] decrypted = enc.decrypt(packed);
-        return FileUtil.gunzip(decrypted);
+        if (enc != null) {
+            packed = enc.decrypt(packed);
+        }
+        return FileUtil.gunzip(packed);
     }
 
     public static byte[] pack(byte[] raw, Encryption enc)
             throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         byte[] gzipped = FileUtil.gzip(raw);
-        return enc.encrypt(gzipped);
+        if (enc != null) {
+            gzipped = enc.encrypt(gzipped);
+        }
+        return gzipped;
     }
 
     public static void main(String[] a) throws IOException {

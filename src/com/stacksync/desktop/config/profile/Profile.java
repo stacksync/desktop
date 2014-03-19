@@ -26,9 +26,10 @@ import com.stacksync.desktop.watch.remote.RemoteWatcher;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import javax.persistence.NoResultException;
 import omq.common.broker.Broker;
 import org.apache.log4j.Logger;
 
@@ -50,6 +51,7 @@ public class Profile implements Configurable {
     private Server server;
     private Account account;
     private HashMap<String, Encryption> workspaceEncryption;
+    private String defaultWorkspacePassword;
 
     public Profile() {
         active = false;
@@ -168,6 +170,49 @@ public class Profile implements Configurable {
             throw new InitializationException("Can't load the workspaces from syncserver: ", ex);
         }
         
+        processDefaultWorkspace(changeManager, remoteWorkspaces);
+        processSharedWorkspaces(changeManager, remoteWorkspaces);
+    }
+    
+    private void processDefaultWorkspace(ChangeManager changeManager, List<CloneWorkspace> remoteWorkspaces)
+            throws InitializationException {
+        
+        CloneWorkspace defaultWorkspace;
+        try {
+            defaultWorkspace = DatabaseHelper.getInstance().getDefaultWorkspace();
+        } catch (NoResultException ex ){
+            defaultWorkspace = null;
+        }
+        // Process default workspace
+        boolean processedDefault = false;
+        Iterator<CloneWorkspace> iterator = remoteWorkspaces.iterator();
+        while (iterator.hasNext() && !processedDefault) {
+            CloneWorkspace workspace = iterator.next();
+            if (!workspace.isDefaultWorkspace()) {
+                continue;
+            }
+            
+            // TODO we don't know if default workspace is encrypted or not
+            if (defaultWorkspace == null && !defaultWorkspacePassword.isEmpty()) {
+                // Workspace encrypted
+                workspace.setPassword(defaultWorkspacePassword);
+                generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
+                workspace.merge();
+            } else if (defaultWorkspace != null && defaultWorkspace.getPassword() != null) {
+                // Workspace encrypted
+                generateAndSaveEncryption(workspace.getId(), defaultWorkspace.getPassword());
+            }
+            
+            bindWorkspace(workspace, changeManager);
+            getAndQueueChanges(workspace, changeManager);
+            iterator.remove();      // Remove it to avoid further process
+            processedDefault = true;
+        }
+    }
+    
+    private void processSharedWorkspaces(ChangeManager changeManager, List<CloneWorkspace> remoteWorkspaces)
+            throws InitializationException {
+        
         // Get local workspaces from DB
         Map<String, CloneWorkspace> localWorkspaces = DatabaseHelper.getInstance().getWorkspaces();
         
@@ -185,7 +230,6 @@ public class Profile implements Configurable {
             }
             
         }
-        
     }
     
     private void processWorkspace(CloneWorkspace workspace, WorkspaceController controller,
@@ -198,26 +242,16 @@ public class Profile implements Configurable {
             if (changed) {
                 localWorkspaces.put(workspace.getId(), workspace);
             }
-            try {
-                // Create workspace encryption
-                Encryption encryption = new Encryption(workspace.getPassword());
-                this.workspaceEncryption.put(workspace.getId(), encryption);
-            } catch (ConfigException ex) {
-                throw new InitializationException(ex);
-            }
             
+            if (workspace.isEncrypted()) {
+                generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
+            }
         }else{
             
             if (workspace.isEncrypted()) {
                 // TODO ask for the password!!
                 String password = "";
-                Encryption encryption;
-                try {
-                    encryption = new Encryption(password);
-                    this.workspaceEncryption.put(workspace.getId(), encryption);
-                } catch (ConfigException ex) {
-                    throw new InitializationException(ex);
-                }
+                generateAndSaveEncryption(workspace.getId(), password);
             }
             
             // new workspace, let's create the workspace folder
@@ -227,6 +261,16 @@ public class Profile implements Configurable {
             localWorkspaces.put(workspace.getId(), workspace);
         }
         
+    }
+    
+    private void generateAndSaveEncryption(String id, String password) throws InitializationException {
+        try {
+            // Create workspace encryption
+            Encryption encryption = new Encryption(password);
+            this.workspaceEncryption.put(id, encryption);
+        } catch (ConfigException ex) {
+            throw new InitializationException(ex);
+        }
     }
     
     private void bindWorkspace(CloneWorkspace workspace, ChangeManager changeManager) throws InitializationException{
@@ -321,6 +365,14 @@ public class Profile implements Configurable {
     
     public Encryption getEncryption(String workspaceId) {
         return this.workspaceEncryption.get(workspaceId);
+    }
+
+    public String getDefaultWorkspacePassword() {
+        return defaultWorkspacePassword;
+    }
+
+    public void setDefaultWorkspacePassword(String defaultWorkspacePassword) {
+        this.defaultWorkspacePassword = defaultWorkspacePassword;
     }
 
     @Override

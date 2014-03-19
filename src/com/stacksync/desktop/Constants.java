@@ -37,12 +37,6 @@ public abstract class Constants {
     public static final int PERIODIC_CACHE_INTERVAL = 300000;//five minutes
     
     /**
-     * Clonebox divides bigger files in chunks. This value defines the kilobytes (KB) of
-     * how big one (unencrypted) chunk might become (1024 = 1 MB).
-     */
-    public static final int DEFAULT_CHUNK_SIZE = 512;
-
-    /**
      * Minimum size of one chunk in kilobytes (KB).
      */
     public static final int MINIMUM_CHUNK_SIZE = 128;

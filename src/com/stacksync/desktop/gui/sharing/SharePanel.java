@@ -134,7 +134,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
         }
         
         try {
-            server.createShareProposal(profile.getAccountId(), emails, this.folderNameField.getText());
+            server.createShareProposal(profile.getAccountId(), emails, this.folderNameField.getText(), false);
             this.frame.setVisible(false);
         } catch (ShareProposalNotCreatedException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");

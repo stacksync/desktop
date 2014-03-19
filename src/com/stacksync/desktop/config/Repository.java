@@ -28,6 +28,12 @@ import com.stacksync.desktop.connection.plugins.Plugins;
  * @author Philipp C. Heckel
  */
 public final class Repository implements Configurable {
+    
+    /**
+     * Clonebox divides bigger files in chunks. This value defines the kilobytes (KB) of
+     * how big one (unencrypted) chunk might become (1024 = 1 MB).
+     */
+    public static final int DEFAULT_CHUNK_SIZE = 512;
 
     private Connection connection;
 
@@ -50,6 +56,7 @@ public final class Repository implements Configurable {
         
         lastUpdate = null;
         connected = false;
+        chunkSize = DEFAULT_CHUNK_SIZE;
     }
  
     /**
@@ -91,7 +98,7 @@ public final class Repository implements Configurable {
         }
 
         try {            
-            chunkSize = node.getInteger("chunksize", Constants.DEFAULT_CHUNK_SIZE);
+            chunkSize = node.getInteger("chunksize", DEFAULT_CHUNK_SIZE);
 
             // Connection
             ConfigNode connectionNode = node.findChildByXPath("connection");
