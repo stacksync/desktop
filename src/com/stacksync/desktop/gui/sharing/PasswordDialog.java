@@ -1,5 +1,7 @@
 package com.stacksync.desktop.gui.sharing;
 
+import java.awt.Frame;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -23,10 +25,11 @@ public class PasswordDialog extends java.awt.Dialog implements DocumentListener 
         this.passwordLabel.setText("Password:");
         this.confirmationLabel.setText("Confirm:");
         this.acceptButton.setText("Accept");
-        this.cancelButton.setText("Cancel");
         this.acceptButton.setEnabled(false);
         this.passwordField.getDocument().addDocumentListener(this);
         this.confirmationField.getDocument().addDocumentListener(this);
+        
+        setLocationRelativeTo(this);
     }
 
     /**
@@ -41,7 +44,6 @@ public class PasswordDialog extends java.awt.Dialog implements DocumentListener 
         confirmationLabel = new javax.swing.JLabel();
         passwordField = new javax.swing.JPasswordField();
         confirmationField = new javax.swing.JPasswordField();
-        cancelButton = new javax.swing.JButton();
         acceptButton = new javax.swing.JButton();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -58,13 +60,6 @@ public class PasswordDialog extends java.awt.Dialog implements DocumentListener 
 
         confirmationField.setText("jPasswordField4");
 
-        cancelButton.setText("jButton1");
-        cancelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cancelButtonActionPerformed(evt);
-            }
-        });
-
         acceptButton.setText("jButton2");
         acceptButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -77,22 +72,19 @@ public class PasswordDialog extends java.awt.Dialog implements DocumentListener 
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(49, 49, 49)
+                .addGap(61, 61, 61)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(passwordLabel)
+                    .addComponent(confirmationLabel))
+                .addGap(33, 33, 33)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(confirmationLabel)
-                            .addComponent(passwordLabel))
-                        .addGap(45, 45, 45)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(passwordField)
-                            .addComponent(confirmationField)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(30, 30, 30)
-                        .addComponent(cancelButton)
-                        .addGap(44, 44, 44)
-                        .addComponent(acceptButton)))
+                    .addComponent(passwordField)
+                    .addComponent(confirmationField))
                 .addGap(56, 56, 56))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(130, 130, 130)
+                .addComponent(acceptButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -105,11 +97,9 @@ public class PasswordDialog extends java.awt.Dialog implements DocumentListener 
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(confirmationLabel)
                     .addComponent(confirmationField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cancelButton)
-                    .addComponent(acceptButton))
-                .addGap(22, 22, 22))
+                .addGap(18, 18, 18)
+                .addComponent(acceptButton)
+                .addGap(16, 16, 16))
         );
 
         pack();
@@ -119,15 +109,15 @@ public class PasswordDialog extends java.awt.Dialog implements DocumentListener 
      * Closes the dialog
      */
     private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
-        setVisible(false);
-        dispose();
+        
+        int result = JOptionPane.showConfirmDialog(new Frame(), "Seguro?", "Pass", JOptionPane.YES_NO_OPTION);
+        if (result == 0) {
+            this.password = null;
+            setVisible(false);
+            dispose();
+        }
+        
     }//GEN-LAST:event_closeDialog
-
-    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        this.password = null;
-        setVisible(false);
-        dispose();
-    }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void acceptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_acceptButtonActionPerformed
         this.password = new String(this.passwordField.getPassword());
@@ -166,10 +156,14 @@ public class PasswordDialog extends java.awt.Dialog implements DocumentListener 
             this.acceptButton.setEnabled(true);
         }
     }
+    
+    public static void main(String[] args) {
+        PasswordDialog dialog = new PasswordDialog(new Frame(), true);
+        dialog.setVisible(true);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton acceptButton;
-    private javax.swing.JButton cancelButton;
     private javax.swing.JPasswordField confirmationField;
     private javax.swing.JLabel confirmationLabel;
     private javax.swing.JPasswordField passwordField;

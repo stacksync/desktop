@@ -13,6 +13,7 @@ import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
+import com.stacksync.desktop.gui.sharing.PasswordDialog;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.sharing.WorkspaceController;
@@ -250,7 +251,10 @@ public class Profile implements Configurable {
             
             if (workspace.isEncrypted()) {
                 // TODO ask for the password!!
-                String password = "a";
+                PasswordDialog dialog = new PasswordDialog(new java.awt.Frame(), true);
+                dialog.setVisible(true);
+                String password = dialog.getPassword();
+                workspace.setPassword(password);
                 generateAndSaveEncryption(workspace.getId(), password);
             }
             
