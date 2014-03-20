@@ -3,9 +3,13 @@ package com.stacksync.desktop.gui.sharing;
 import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.syncserver.Server;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-public class SharePanel extends javax.swing.JPanel implements DocumentListener{
+public class SharePanel extends javax.swing.JPanel implements DocumentListener, ItemListener {
 
     private static final Config config = Config.getInstance();
     private ResourceBundle resourceBundle;
@@ -37,8 +41,15 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
         this.shareButton.setText(resourceBundle.getString("share_button_share"));
         this.shareButton.setEnabled(false);
         
+        this.lblPassword.setText(resourceBundle.getString("encryp_password"));
+        this.lblPasswordConfirm.setText(resourceBundle.getString("encryp_password_confirm"));
+        this.txtPassword.setEnabled(false);
+        this.txtPassword1.setEnabled(false);
+        
         this.emailField.getDocument().addDocumentListener(this);
         this.folderNameField.getDocument().addDocumentListener(this);
+        
+        this.encryptCheckBox.addItemListener(this);
     }
 
     /**
@@ -56,6 +67,11 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
         folderNameField = new javax.swing.JTextField();
         cancelButton = new javax.swing.JButton();
         shareButton = new javax.swing.JButton();
+        lblPassword = new javax.swing.JLabel();
+        lblPasswordConfirm = new javax.swing.JLabel();
+        encryptCheckBox = new javax.swing.JCheckBox();
+        txtPassword = new javax.swing.JPasswordField();
+        txtPassword1 = new javax.swing.JPasswordField();
 
         lblMail.setText("__E-mail:");
 
@@ -75,6 +91,12 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
             }
         });
 
+        lblPassword.setText("__Password:");
+
+        lblPasswordConfirm.setText("__Confirm:");
+
+        encryptCheckBox.setText("__Encrypt");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -82,20 +104,27 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(135, 135, 135)
+                        .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(44, 44, 44)
+                        .addComponent(shareButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGap(73, 73, 73)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(lblFolder)
-                            .addComponent(lblMail))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(folderNameField)
-                            .addComponent(emailField, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(138, 138, 138)
-                        .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(41, 41, 41)
-                        .addComponent(shareButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(58, Short.MAX_VALUE))
+                            .addComponent(encryptCheckBox)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(lblFolder)
+                                    .addComponent(lblMail)
+                                    .addComponent(lblPassword)
+                                    .addComponent(lblPasswordConfirm))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(folderNameField)
+                                    .addComponent(emailField, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
+                                    .addComponent(txtPassword)
+                                    .addComponent(txtPassword1))))))
+                .addGap(58, 58, 58))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -108,11 +137,25 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(folderNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblFolder))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(encryptCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addComponent(lblPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(8, 8, 8)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtPassword1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addComponent(lblPasswordConfirm, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(14, 14, 14)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(shareButton)
-                    .addComponent(cancelButton))
-                .addContainerGap(36, Short.MAX_VALUE))
+                    .addComponent(cancelButton)
+                    .addComponent(shareButton))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -133,8 +176,17 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
             return;
         }
         
+        boolean correct = check();
+        if (!correct) {
+            return;
+        }
+        
         try {
-            server.createShareProposal(profile.getAccountId(), emails, this.folderNameField.getText(), false);
+            boolean encrypted = false;
+            if (this.encryptCheckBox.isSelected()) {
+                encrypted = true;
+            }
+            server.createShareProposal(profile.getAccountId(), emails, this.folderNameField.getText(), encrypted);
             this.frame.setVisible(false);
         } catch (ShareProposalNotCreatedException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
@@ -178,10 +230,15 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JTextField emailField;
+    private javax.swing.JCheckBox encryptCheckBox;
     private javax.swing.JTextField folderNameField;
     private javax.swing.JLabel lblFolder;
     private javax.swing.JLabel lblMail;
+    private javax.swing.JLabel lblPassword;
+    private javax.swing.JLabel lblPasswordConfirm;
     private javax.swing.JButton shareButton;
+    private javax.swing.JPasswordField txtPassword;
+    private javax.swing.JPasswordField txtPassword1;
     // End of variables declaration//GEN-END:variables
 
     /*
@@ -210,5 +267,47 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener{
             this.shareButton.setEnabled(true);
             getRootPane().setDefaultButton(this.shareButton);
         }
+    }
+    
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        
+        if (this.encryptCheckBox.isSelected()) {
+            this.txtPassword.setEnabled(true);
+            this.txtPassword1.setEnabled(true);
+        } else {
+            this.txtPassword.setEnabled(false);
+            this.txtPassword1.setEnabled(false);
+        }
+    }
+    
+    private boolean check() {
+        boolean check = true;
+
+        if (this.encryptCheckBox.isSelected()) {
+
+            String password = new String(txtPassword.getPassword());
+            String password1 = new String(txtPassword1.getPassword());
+
+            if (password.isEmpty() || password1.isEmpty()) {
+                ErrorMessage.showMessage(this, "Error", "The password is empty.");
+                check = false;
+            }
+
+            if (password.compareTo(password1) != 0) {
+                ErrorMessage.showMessage(this, "Error", "The passwords do not match.");
+                check = false;
+            }
+
+            // TODO check the password length
+            try {
+                Encryption encryption = new Encryption(new String(txtPassword.getPassword()));
+            } catch (ConfigException ex) {
+                ErrorMessage.showMessage(this, "Error", ex.getMessage());
+                check = false;
+            }
+        }
+
+        return check;
     }
 }

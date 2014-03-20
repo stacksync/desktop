@@ -17,21 +17,17 @@
  */
 package com.stacksync.desktop.gui.wizard;
 
-import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
-import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  *
  * @author pheckel
  */
 public class EncryptionPanel extends SettingsPanel {
-
-    private final Logger logger = Logger.getLogger(EncryptionPanel.class.getName());
 
     /**
      * Creates new form EncryptionPanel

@@ -250,7 +250,7 @@ public class Profile implements Configurable {
             
             if (workspace.isEncrypted()) {
                 // TODO ask for the password!!
-                String password = "";
+                String password = "a";
                 generateAndSaveEncryption(workspace.getId(), password);
             }
             
@@ -290,6 +290,11 @@ public class Profile implements Configurable {
     }
     
     public void addNewWorkspace(CloneWorkspace cloneWorkspace) throws Exception {
+        
+        if (cloneWorkspace.isEncrypted()) {
+            Encryption encryption = new Encryption(cloneWorkspace.getPassword());
+            this.workspaceEncryption.put(cloneWorkspace.getId(), encryption);
+        }
         
         ChangeManager changeManager = remoteWatcher.getChangeManager();
         changeManager.start();
