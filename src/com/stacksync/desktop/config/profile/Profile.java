@@ -12,6 +12,7 @@ import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
+import com.stacksync.desktop.exceptions.NoPasswordException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.gui.sharing.PasswordDialog;
 import com.stacksync.desktop.repository.Update;
@@ -220,7 +221,14 @@ public class Profile implements Configurable {
         // Process workspaces individually
         WorkspaceController controller = WorkspaceController.getInstance();
         for(CloneWorkspace w: remoteWorkspaces){
-            processWorkspace(w, controller, localWorkspaces);
+            
+            try {
+                processWorkspace(w, controller, localWorkspaces);
+            } catch (NoPasswordException ex) {
+                logger.warn("No password for workspace "+w.toString());
+                continue;
+            }
+            
             bindWorkspace(w, changeManager);
             getAndQueueChanges(w, changeManager);
             
@@ -234,7 +242,7 @@ public class Profile implements Configurable {
     }
     
     private void processWorkspace(CloneWorkspace workspace, WorkspaceController controller,
-            Map<String, CloneWorkspace> localWorkspaces) throws InitializationException {
+            Map<String, CloneWorkspace> localWorkspaces) throws InitializationException, NoPasswordException {
         
         // 1. Apply changes or create new workspaces
         if(localWorkspaces.containsKey(workspace.getId())){
@@ -250,10 +258,12 @@ public class Profile implements Configurable {
         }else{
             
             if (workspace.isEncrypted()) {
-                // TODO ask for the password!!
-                PasswordDialog dialog = new PasswordDialog(new java.awt.Frame(), true);
+                PasswordDialog dialog = new PasswordDialog(new java.awt.Frame(), true, workspace.getName());
                 dialog.setVisible(true);
                 String password = dialog.getPassword();
+                if (password == null) {
+                    throw new NoPasswordException();
+                }
                 workspace.setPassword(password);
                 generateAndSaveEncryption(workspace.getId(), password);
             }

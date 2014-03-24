@@ -42,7 +42,12 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         // If encrypted get the password
         String password = null;
         if (spn.isEncrypted()) {
-            password = getPassword();
+            password = getPassword(spn.getFolderName());
+            
+            if (password == null) {
+                // Do not do anything
+                return;
+            }
         }
         cloneWorkspace.setPassword(password);
         cloneWorkspace.merge();
@@ -86,9 +91,9 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         
     }
     
-    private String getPassword() {
+    private String getPassword(String folderName) {
         
-        PasswordDialog dialog = new PasswordDialog(new Frame(), true);
+        PasswordDialog dialog = new PasswordDialog(new Frame(), true, folderName);
         dialog.setVisible(true);
         return dialog.getPassword();
         

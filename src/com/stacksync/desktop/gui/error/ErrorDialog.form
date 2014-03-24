@@ -28,20 +28,20 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="jScrollPane1" alignment="0" pref="660" max="32767" attributes="0"/>
-                  <Component id="jLabel1" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="titleLbl" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="descriptionLbl" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="description2Lbl" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="btnReport" min="-2" pref="121" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="lblSent" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="87" max="32767" attributes="0"/>
+                      <EmptySpace pref="72" max="32767" attributes="0"/>
                       <Component id="btnQuit" min="-2" pref="121" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnRestart" min="-2" pref="121" max="-2" attributes="0"/>
                   </Group>
                   <Component id="jScrollPane2" alignment="0" pref="660" max="32767" attributes="0"/>
-                  <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="commentsLbl" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -51,15 +51,15 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+              <Component id="titleLbl" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+              <Component id="descriptionLbl" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+              <Component id="description2Lbl" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jScrollPane1" pref="241" max="32767" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+              <Component id="commentsLbl" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jScrollPane2" min="-2" pref="84" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -96,7 +96,7 @@
     </Container>
     <Component class="javax.swing.JButton" name="btnRestart">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Restart Stacksync"/>
+        <Property name="text" type="java.lang.String" value="__Restart Stacksync"/>
         <Property name="name" type="java.lang.String" value="btnRestart" noResource="true"/>
       </Properties>
       <Events>
@@ -105,7 +105,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="btnReport">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Report Crash"/>
+        <Property name="text" type="java.lang.String" value="__Report Crash"/>
         <Property name="name" type="java.lang.String" value="btnReport" noResource="true"/>
       </Properties>
       <Events>
@@ -114,34 +114,34 @@
     </Component>
     <Component class="javax.swing.JButton" name="btnQuit">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Quit Stacksync"/>
+        <Property name="text" type="java.lang.String" value="__Quit Stacksync"/>
         <Property name="name" type="java.lang.String" value="btnQuit" noResource="true"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnQuitActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel3">
+    <Component class="javax.swing.JLabel" name="description2Lbl">
       <Properties>
-        <Property name="text" type="java.lang.String" value="You can help fixing this bug by sending us the error messge below. Just click &apos;Report Bug&apos;."/>
-        <Property name="name" type="java.lang.String" value="jLabel3" noResource="true"/>
+        <Property name="text" type="java.lang.String" value="__You can help fixing this bug by sending us the error messge below. Just click &apos;Report Bug&apos;."/>
+        <Property name="name" type="java.lang.String" value="description2Lbl" noResource="true"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel2">
+    <Component class="javax.swing.JLabel" name="descriptionLbl">
       <Properties>
-        <Property name="text" type="java.lang.String" value="We are very sorry, but it seems that Stacksync crashed. Find details below. "/>
-        <Property name="name" type="java.lang.String" value="jLabel2" noResource="true"/>
+        <Property name="text" type="java.lang.String" value="__We are very sorry, but it seems that Stacksync crashed. Find details below. "/>
+        <Property name="name" type="java.lang.String" value="descriptionLbl" noResource="true"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="jLabel1">
+    <Component class="javax.swing.JLabel" name="titleLbl">
       <Properties>
         <Property name="font" type="java.awt.Font" noResource="true" editor="org.netbeans.modules.form.editors2.FontEditor">
           <FontInfo relative="true">
-            <Font bold="true" component="jLabel1" property="font" relativeSize="true" size="2"/>
+            <Font bold="true" component="titleLbl" property="font" relativeSize="true" size="2"/>
           </FontInfo>
         </Property>
-        <Property name="text" type="java.lang.String" value="An Error occurred."/>
-        <Property name="name" type="java.lang.String" value="jLabel1" noResource="true"/>
+        <Property name="text" type="java.lang.String" value="__An Error occurred."/>
+        <Property name="name" type="java.lang.String" value="titleLbl" noResource="true"/>
       </Properties>
     </Component>
     <Container class="javax.swing.JScrollPane" name="jScrollPane2">
@@ -163,10 +163,10 @@
         </Component>
       </SubComponents>
     </Container>
-    <Component class="javax.swing.JLabel" name="jLabel4">
+    <Component class="javax.swing.JLabel" name="commentsLbl">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Your Comments:"/>
-        <Property name="name" type="java.lang.String" value="jLabel4" noResource="true"/>
+        <Property name="text" type="java.lang.String" value="__Your Comments:"/>
+        <Property name="name" type="java.lang.String" value="commentsLbl" noResource="true"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="lblSent">
@@ -176,7 +176,7 @@
             <Font bold="true" component="lblSent" property="font" relativeSize="true" size="0"/>
           </FontInfo>
         </Property>
-        <Property name="text" type="java.lang.String" value="Your report has been sent."/>
+        <Property name="text" type="java.lang.String" value="__Your report has been sent."/>
         <Property name="name" type="java.lang.String" value="lblSent" noResource="true"/>
       </Properties>
     </Component>
