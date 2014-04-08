@@ -8,14 +8,12 @@ Welcome to StackSync!
 - [Introduction](#introduction)
 - [Architecture](#architecture)
 - [Desktop](#desktop-client)
-  - [Which are the differences with Syncany?](#which-are-the-differences-with-syncany)
 - [Requirements](#requirements)
 - [Build, installation and execution](#build-installation-and-execution)
   - [Linux](#linux)
   - [Windows](#windows)
   - [Mac OS](#mac-os)
   - [General execution](#general-execution)
-- [Things you need to know](#things-you-need-to-know)
 - [Issue Tracking](#issue-tracking)
 - [Licensing](#licensing)
 - [Contact](#contact)
@@ -70,17 +68,8 @@ Some of the main features of the client are:
 StackSync is developed using NetBeans and Java 1.7.
 
 The client requires a SyncService running with the user metadata initialized. In the
-[SyncService repository](https://github.com/stacksync/sync-service) it is possible to read the installation
+[SyncService repository](https://github.com/stacksync/sync-service) you can read the installation
 instrucctions and how to add users to the system.
-
-StackSync sends error logs to a log server in order to control clients errors and 
-try to fix them as soon as possible. As it can be read in the [log-server repository](https://github.com/stacksync/log-server),
-it uses a REST API. To configure the URL in the client, it is necessary to change
-"URL_LOG_SERVER_API" from [config-default.xml](src/com/stacksync/desktop/config/config-default.xml)
-for your log-server URL.
-
-Now there isn't an easy way to enable or disable this feature, but in a future
-version we will fix it.
 
 # Build, installation and execution
 To build StackSync it is necessary Apache Ant. Build.xml gets the SVN version to use
@@ -91,10 +80,8 @@ When you build the project, the folder "dist" is created with the executable jar
 all the dependencies.
 
 ## Linux
-In the dist folder there are two scripts
-- **install.sh**: Creates a desktop shortcut, install linux overlays and autoexecute 
-StackSync when the SO starts.
-- **uninstall.sh**: It undo the install.sh actions.
+Under the folder [packaging/debian](packaging/debian) there is the Makefile to create the
+deb file.
 
 ## Windows
 We have a NSIS script that creates an installer ([here](installers/StackSyncInstallScript.nsi)).
@@ -131,37 +118,6 @@ You can add some parameters:
 - **Extended mode (-ext)**: Runs StackSync wizard and tray with more functionalities
 (SyncService panel, encryp panel, ...).
 - **Help (-h)**: Shows help menu.
-
-# Things you need to know
-We are mainly using StackSync with OpenStack Swift. For the data communication we are
-using the Rackspace plugin. As you could see there are 2 different panels:
-- **Commercial**: This is a user friendly panel only with user and password. To
-    set the auth URL it is necessary to change the value of the variable AUTH_URL
-    in the com.stacksync.desktop.connection.plugins.rackspace.RackspaceConfigPanelFactory.java
-    from:
-
-        public static final String AUTH_URL = "AUTH_SERVER_URL";
-        
-    to:
-    
-        public static final String AUTH_URL = "http://your_auth_url:5000/v2.0/tokens";
-    for example.
-    
-- **Dev**: This panel is fully configurable.
-    
-In addition, users in Swift have a tenant, but with our current implementation
-the tenant name and the user name must be the same. We know that this is not
-correct but for some reasons, long time ago, we decided to do in this way, and
-for other reasons we haven't got enough time to change it...
-
-If you create in Swift the user (testuser:testuser) the field username in the
-rackspace panel must be testuser only:
-
-<p align="center">
-  <img width="500" src="https://raw.github.com/stacksync/desktop/master/res/wizard_credentials.png">
-</p>
-
-**IMPORTANT: The container must be allways stacksync.**
 
 # Issue Tracking
 For the moment, we are going to use the github issue tracking.
