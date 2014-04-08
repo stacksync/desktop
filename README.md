@@ -22,7 +22,7 @@ Welcome to StackSync!
 
 # Introduction
 
-StackSync (<http://stacksync.com>) is a scalable open source Personal Cloud
+StackSync (<http://stacksync.com>) is an open source Personal Cloud
 that implements the basic components to create a synchronization tool.
 
 
@@ -30,7 +30,7 @@ that implements the basic components to create a synchronization tool.
 
 In general terms, StackSync can be divided into three main blocks: clients
 (desktop and mobile), synchronization service (SyncService) and storage
-service (Swift, Amazon S3, FTP...). An overview of the architecture
+service (OpenStack Swift). An overview of the architecture
 with the main components and their interaction is shown in the following image.
 
 <p align="center">
@@ -44,8 +44,6 @@ to upload and download files.
 
 As storage back-end we are using OpenStack Swift, an open source cloud storage
 software where you can store and retrieve lots of data in virtual containers.
-It's based on the Cloud Files offering from Rackspace. But it is also possible
-to use other storage back-ends, such as a FTP server or S3.
 
 # Desktop client
 
@@ -58,37 +56,25 @@ services. The first one handles metadata communication, such as time stamps or
 file names, and the second one is in charge of raw data.
 
 Some of the main features of the client are:
-* Client based encryption.
-* Optimize the storage usage.
-* Desktop integration (Linux (debian distributions) and Windows 7)
-* Push notifications to save server bandwidth.
-
-## Which are the differences with Syncany?
-### Pull vs Push
-The original Syncany uses a pulling strategy to discover changes in the repository.
-We use ObjectMQ to provide push notifications to all the clients. This change
-implies to remove all the "update" file logic, which was a bit inneficient.
-
-### Synchronization algorithm
-We have simplified the sync algorithm removing the merged files logic.
-
-### Desktop integration
-We have implemented some dll's to create Windows overlays (link needed). For
-this project we used [Liferay nativity library](https://github.com/liferay/liferay-nativity).
+* **Sharing**: Share folders with other StackSync users.
+* **Client side encryption**: Upload your files encrypted.
+* **Desktop integration**: We are using [Liferay nativity library](https://github.com/liferay/liferay-nativity).
 
 <p align="center">
   <img width="500" src="https://raw.github.com/stacksync/desktop/master/res/win_integration.png">
 </p>
+* **Push notifications**: ObjectMQ provides push notification to desktop clients.
+* **Data deduplication**: We deduplicate data across a single user in order to optimize bandwidth and storage.
 
 # Requirements
 StackSync is developed using NetBeans and Java 1.7.
 
 The client requires a SyncService running with the user metadata initialized. In the
-SyncService repository (link needed) it is possible to read the installation
+[SyncService repository](https://github.com/stacksync/sync-service) it is possible to read the installation
 instrucctions and how to add users to the system.
 
 StackSync sends error logs to a log server in order to control clients errors and 
-try to fix them as soon as possible. As it can be read in the log-server repository (link needed),
+try to fix them as soon as possible. As it can be read in the [log-server repository](https://github.com/stacksync/log-server),
 it uses a REST API. To configure the URL in the client, it is necessary to change
 "URL_LOG_SERVER_API" from [config-default.xml](src/com/stacksync/desktop/config/config-default.xml)
 for your log-server URL.
