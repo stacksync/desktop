@@ -37,12 +37,6 @@ public abstract class Constants {
     public static final int PERIODIC_CACHE_INTERVAL = 300000;//five minutes
     
     /**
-     * Clonebox divides bigger files in chunks. This value defines the kilobytes (KB) of
-     * how big one (unencrypted) chunk might become (1024 = 1 MB).
-     */
-    public static final int DEFAULT_CHUNK_SIZE = 512;
-
-    /**
      * Minimum size of one chunk in kilobytes (KB).
      */
     public static final int MINIMUM_CHUNK_SIZE = 128;
@@ -51,16 +45,6 @@ public abstract class Constants {
      * Default size of the Stacksync cache in megabytes (MB).
      */
     public static final int DEFAULT_CACHE_SIZE = 1024;
-
-    /**
-     * Default cipher to encrypt the chunks.
-     */
-    public static final String DEFAULT_ENCRYPTION_CIPHER = "AES";
-
-    /**
-     * Default keylength for the given cipher in bit.
-     */
-    public static final int DEFAULT_ENCRYPTION_KEYLENGTH = 128;
 
     public static final boolean DEFAULT_AUTOSTART_ENABLED = true;
 

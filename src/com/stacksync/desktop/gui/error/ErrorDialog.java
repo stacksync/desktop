@@ -39,9 +39,21 @@ public class ErrorDialog extends javax.swing.JDialog {
         resourceBundle = config.getResourceBundle();
         initComponents();
 
+        setTexts();
         lblSent.setVisible(false);
         getRootPane().setDefaultButton(btnReport);
         setLocationRelativeTo(null);
+    }
+    
+    private void setTexts() {
+        this.btnQuit.setText(resourceBundle.getString("errd_quit_stacksync"));
+        this.btnReport.setText(resourceBundle.getString("errd_report_crash"));
+        this.btnRestart.setText(resourceBundle.getString("errd_restart_stacksync"));
+        this.titleLbl.setText(resourceBundle.getString("errd_message"));
+        this.descriptionLbl.setText(resourceBundle.getString("errd_stacksync_crashed"));
+        this.description2Lbl.setText(resourceBundle.getString("errd_report_bug"));
+        this.commentsLbl.setText(resourceBundle.getString("errd_comments"));
+        this.lblSent.setText(resourceBundle.getString("errd_report_was_sent"));
     }
     
     private void setThrowable(Exception e) {	
@@ -80,12 +92,12 @@ public class ErrorDialog extends javax.swing.JDialog {
         btnRestart = new javax.swing.JButton();
         btnReport = new javax.swing.JButton();
         btnQuit = new javax.swing.JButton();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        description2Lbl = new javax.swing.JLabel();
+        descriptionLbl = new javax.swing.JLabel();
+        titleLbl = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         txtComments = new javax.swing.JTextArea();
-        jLabel4 = new javax.swing.JLabel();
+        commentsLbl = new javax.swing.JLabel();
         lblSent = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -98,7 +110,7 @@ public class ErrorDialog extends javax.swing.JDialog {
         txtError.setName("txtError"); // NOI18N
         jScrollPane1.setViewportView(txtError);
 
-        btnRestart.setText("Restart Stacksync");
+        btnRestart.setText("__Restart Stacksync");
         btnRestart.setName("btnRestart"); // NOI18N
         btnRestart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -106,7 +118,7 @@ public class ErrorDialog extends javax.swing.JDialog {
             }
         });
 
-        btnReport.setText("Report Crash");
+        btnReport.setText("__Report Crash");
         btnReport.setName("btnReport"); // NOI18N
         btnReport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -114,7 +126,7 @@ public class ErrorDialog extends javax.swing.JDialog {
             }
         });
 
-        btnQuit.setText("Quit Stacksync");
+        btnQuit.setText("__Quit Stacksync");
         btnQuit.setName("btnQuit"); // NOI18N
         btnQuit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -122,15 +134,15 @@ public class ErrorDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel3.setText("You can help fixing this bug by sending us the error messge below. Just click 'Report Bug'.");
-        jLabel3.setName("jLabel3"); // NOI18N
+        description2Lbl.setText("__You can help fixing this bug by sending us the error messge below. Just click 'Report Bug'.");
+        description2Lbl.setName("description2Lbl"); // NOI18N
 
-        jLabel2.setText("We are very sorry, but it seems that Stacksync crashed. Find details below. ");
-        jLabel2.setName("jLabel2"); // NOI18N
+        descriptionLbl.setText("__We are very sorry, but it seems that Stacksync crashed. Find details below. ");
+        descriptionLbl.setName("descriptionLbl"); // NOI18N
 
-        jLabel1.setFont(jLabel1.getFont().deriveFont(jLabel1.getFont().getStyle() | java.awt.Font.BOLD, jLabel1.getFont().getSize()+2));
-        jLabel1.setText("An Error occurred.");
-        jLabel1.setName("jLabel1"); // NOI18N
+        titleLbl.setFont(titleLbl.getFont().deriveFont(titleLbl.getFont().getStyle() | java.awt.Font.BOLD, titleLbl.getFont().getSize()+2));
+        titleLbl.setText("__An Error occurred.");
+        titleLbl.setName("titleLbl"); // NOI18N
 
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
@@ -139,11 +151,11 @@ public class ErrorDialog extends javax.swing.JDialog {
         txtComments.setName("txtComments"); // NOI18N
         jScrollPane2.setViewportView(txtComments);
 
-        jLabel4.setText("Your Comments:");
-        jLabel4.setName("jLabel4"); // NOI18N
+        commentsLbl.setText("__Your Comments:");
+        commentsLbl.setName("commentsLbl"); // NOI18N
 
         lblSent.setFont(lblSent.getFont().deriveFont(lblSent.getFont().getStyle() | java.awt.Font.BOLD));
-        lblSent.setText("Your report has been sent.");
+        lblSent.setText("__Your report has been sent.");
         lblSent.setName("lblSent"); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -154,34 +166,34 @@ public class ErrorDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 660, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(titleLbl, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(descriptionLbl, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(description2Lbl, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnReport, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblSent)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 72, Short.MAX_VALUE)
                         .addComponent(btnQuit, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnRestart, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 660, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(commentsLbl, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(titleLbl)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2)
+                .addComponent(descriptionLbl)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel3)
+                .addComponent(description2Lbl)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel4)
+                .addComponent(commentsLbl)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -223,13 +235,13 @@ public class ErrorDialog extends javax.swing.JDialog {
     private javax.swing.JButton btnQuit;
     private javax.swing.JButton btnReport;
     private javax.swing.JButton btnRestart;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel commentsLbl;
+    private javax.swing.JLabel description2Lbl;
+    private javax.swing.JLabel descriptionLbl;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblSent;
+    private javax.swing.JLabel titleLbl;
     private javax.swing.JTextArea txtComments;
     private javax.swing.JTextArea txtError;
     // End of variables declaration//GEN-END:variables

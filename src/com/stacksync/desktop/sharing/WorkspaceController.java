@@ -27,7 +27,7 @@ public class WorkspaceController {
     
     public void createNewWorkspace(CloneWorkspace newWorkspace) {
         
-        if (newWorkspace.getName().equals("default")) {
+        if (newWorkspace.isDefaultWorkspace()) {
             // Don't create default wp
             return;
         }

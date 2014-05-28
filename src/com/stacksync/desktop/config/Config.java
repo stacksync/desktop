@@ -128,12 +128,8 @@ public class Config {
     private Encryption getEncryption() {
         Encryption encrypt = null;
         try {
-            encrypt = new Encryption();
-            encrypt.setCipherStr("aes");
-            encrypt.setKeylength(128);
-            encrypt.setPassword("stacksync");
-            encrypt.init();
-
+            String password = "stacksync";
+            encrypt = new Encryption(password);
         } catch (ConfigException ex) {
             logger.error("Error creating config file encrypter.", ex);
         }

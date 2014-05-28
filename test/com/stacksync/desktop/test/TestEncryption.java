@@ -28,11 +28,8 @@ import com.stacksync.desktop.config.Encryption;
  */
 public class TestEncryption {
     public static void main(String[] args) throws Exception {
-        Encryption enc = new Encryption();
+        Encryption enc = new Encryption("encpass");
         enc.setPassword("encpass");
-        enc.setCipherStr("AES");
-        enc.setKeylength(128);
-        enc.init();
 
         // Encrypt
         File file = new File("/home/pheckel/.face");

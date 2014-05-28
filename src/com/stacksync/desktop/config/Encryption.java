@@ -20,6 +20,7 @@ package com.stacksync.desktop.config;
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
+ * @author Cristian Cotes
  */
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -28,10 +29,20 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
-import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.exceptions.ConfigException;
 
-public class Encryption implements Configurable {
+public class Encryption {
+    
+    /**
+     * Default cipher to encrypt the chunks.
+     */
+    public static final String DEFAULT_ENCRYPTION_CIPHER = "AES";
+
+    /**
+     * Default key length for the given cipher in bit.
+     */
+    public static final int DEFAULT_ENCRYPTION_KEYLENGTH = 128;
+    
     private String password;
     private String cipherStr;
     private Integer keylength;
@@ -40,24 +51,15 @@ public class Encryption implements Configurable {
     private SecretKeySpec keySpec;
     private Cipher cipher;
 
-    public Encryption() {
-        // All set by init()
-        password = null;
-        cipherStr = null;
-        keylength = null;
-
-        key = null;
-        keySpec = null;
-        cipher = null;
+    public Encryption(String password) throws ConfigException {
+        this.password = password;
+        cipherStr = DEFAULT_ENCRYPTION_CIPHER;
+        keylength = DEFAULT_ENCRYPTION_KEYLENGTH;
+        
+        init();
     }
 
-    /**
-     * bit must be dividable by 8.
-     *
-     * @param password
-     * @param bit
-     */
-    public void init() throws ConfigException {
+    private void init() throws ConfigException {
         if(cipherStr.toLowerCase().compareTo("none") != 0){
 
             try {
@@ -96,19 +98,8 @@ public class Encryption implements Configurable {
         return cipherStr;
     }
 
-    public void setCipherStr(String cipherStr) {         
-        this.cipherStr = cipherStr;
-        if(this.cipherStr.toLowerCase().compareTo("3des") == 0){
-            this.cipherStr = "DESede";
-        }
-    }
-
     public Integer getKeylength() {
         return keylength;
-    }
-
-    public void setKeylength(Integer keylength) {
-        this.keylength = keylength;
     }
 
     public String getPassword() {
@@ -135,33 +126,6 @@ public class Encryption implements Configurable {
         } else {
             return data;
         }        
-    }
-    
-    @Override
-    public void load(ConfigNode node) throws ConfigException {
-        password = node.getProperty("password");
-        if (password == null) {
-            password = "";
-        }
-
-        cipherStr = node.getProperty("cipher");
-        if (cipherStr == null) {
-            cipherStr = Constants.DEFAULT_ENCRYPTION_CIPHER;
-        }
-
-        keylength = node.getInteger("keylength");
-        if (keylength == null) {
-            keylength = Constants.DEFAULT_ENCRYPTION_KEYLENGTH;
-        }
-
-        init();
-    }
-
-    @Override
-    public void save(ConfigNode node) {
-        node.setProperty("password", password);
-        node.setProperty("cipher", cipherStr);
-        node.setProperty("keylength", keylength);
     }
     
     @Override

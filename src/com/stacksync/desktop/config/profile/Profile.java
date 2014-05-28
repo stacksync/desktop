@@ -5,13 +5,16 @@ import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
+import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
+import com.stacksync.desktop.exceptions.NoPasswordException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
+import com.stacksync.desktop.gui.sharing.PasswordDialog;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.sharing.WorkspaceController;
@@ -24,8 +27,11 @@ import com.stacksync.desktop.watch.remote.ChangeManager;
 import com.stacksync.desktop.watch.remote.RemoteWatcher;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.persistence.NoResultException;
 import omq.common.broker.Broker;
 import org.apache.log4j.Logger;
 
@@ -46,6 +52,8 @@ public class Profile implements Configurable {
     private Broker broker;
     private Server server;
     private Account account;
+    private HashMap<String, Encryption> workspaceEncryption;
+    private String defaultWorkspacePassword;
 
     public Profile() {
         active = false;
@@ -63,6 +71,7 @@ public class Profile implements Configurable {
             return;
         }
         
+        workspaceEncryption = new HashMap<String, Encryption>();
         uploader = new Uploader(this);
         remoteWatcher = new RemoteWatcher(this);
         initialized = true;
@@ -163,13 +172,63 @@ public class Profile implements Configurable {
             throw new InitializationException("Can't load the workspaces from syncserver: ", ex);
         }
         
+        processDefaultWorkspace(changeManager, remoteWorkspaces);
+        processSharedWorkspaces(changeManager, remoteWorkspaces);
+    }
+    
+    private void processDefaultWorkspace(ChangeManager changeManager, List<CloneWorkspace> remoteWorkspaces)
+            throws InitializationException {
+        
+        CloneWorkspace defaultWorkspace;
+        try {
+            defaultWorkspace = DatabaseHelper.getInstance().getDefaultWorkspace();
+        } catch (NoResultException ex ){
+            defaultWorkspace = null;
+        }
+        // Process default workspace
+        boolean processedDefault = false;
+        Iterator<CloneWorkspace> iterator = remoteWorkspaces.iterator();
+        while (iterator.hasNext() && !processedDefault) {
+            CloneWorkspace workspace = iterator.next();
+            if (!workspace.isDefaultWorkspace()) {
+                continue;
+            }
+            
+            // TODO we don't know if default workspace is encrypted or not
+            if (defaultWorkspace == null && !defaultWorkspacePassword.isEmpty()) {
+                // Workspace encrypted
+                workspace.setPassword(defaultWorkspacePassword);
+                generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
+                workspace.merge();
+            } else if (defaultWorkspace != null && defaultWorkspace.getPassword() != null) {
+                // Workspace encrypted
+                generateAndSaveEncryption(workspace.getId(), defaultWorkspace.getPassword());
+            }
+            
+            bindWorkspace(workspace, changeManager);
+            getAndQueueChanges(workspace, changeManager);
+            iterator.remove();      // Remove it to avoid further process
+            processedDefault = true;
+        }
+    }
+    
+    private void processSharedWorkspaces(ChangeManager changeManager, List<CloneWorkspace> remoteWorkspaces)
+            throws InitializationException {
+        
         // Get local workspaces from DB
         Map<String, CloneWorkspace> localWorkspaces = DatabaseHelper.getInstance().getWorkspaces();
         
         // Process workspaces individually
         WorkspaceController controller = WorkspaceController.getInstance();
         for(CloneWorkspace w: remoteWorkspaces){
-            processWorkspace(w, controller, localWorkspaces);
+            
+            try {
+                processWorkspace(w, controller, localWorkspaces);
+            } catch (NoPasswordException ex) {
+                logger.warn("No password for workspace "+w.toString());
+                continue;
+            }
+            
             bindWorkspace(w, changeManager);
             getAndQueueChanges(w, changeManager);
             
@@ -180,11 +239,10 @@ public class Profile implements Configurable {
             }
             
         }
-        
     }
     
     private void processWorkspace(CloneWorkspace workspace, WorkspaceController controller,
-            Map<String, CloneWorkspace> localWorkspaces) {
+            Map<String, CloneWorkspace> localWorkspaces) throws InitializationException, NoPasswordException {
         
         // 1. Apply changes or create new workspaces
         if(localWorkspaces.containsKey(workspace.getId())){
@@ -193,7 +251,23 @@ public class Profile implements Configurable {
             if (changed) {
                 localWorkspaces.put(workspace.getId(), workspace);
             }
+            
+            if (workspace.isEncrypted()) {
+                generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
+            }
         }else{
+            
+            if (workspace.isEncrypted()) {
+                PasswordDialog dialog = new PasswordDialog(new java.awt.Frame(), true, workspace.getName());
+                dialog.setVisible(true);
+                String password = dialog.getPassword();
+                if (password == null) {
+                    throw new NoPasswordException();
+                }
+                workspace.setPassword(password);
+                generateAndSaveEncryption(workspace.getId(), password);
+            }
+            
             // new workspace, let's create the workspace folder
             controller.createNewWorkspace(workspace);
             // save it in DB
@@ -201,6 +275,16 @@ public class Profile implements Configurable {
             localWorkspaces.put(workspace.getId(), workspace);
         }
         
+    }
+    
+    private void generateAndSaveEncryption(String id, String password) throws InitializationException {
+        try {
+            // Create workspace encryption
+            Encryption encryption = new Encryption(password);
+            this.workspaceEncryption.put(id, encryption);
+        } catch (ConfigException ex) {
+            throw new InitializationException(ex);
+        }
     }
     
     private void bindWorkspace(CloneWorkspace workspace, ChangeManager changeManager) throws InitializationException{
@@ -220,6 +304,11 @@ public class Profile implements Configurable {
     }
     
     public void addNewWorkspace(CloneWorkspace cloneWorkspace) throws Exception {
+        
+        if (cloneWorkspace.isEncrypted()) {
+            Encryption encryption = new Encryption(cloneWorkspace.getPassword());
+            this.workspaceEncryption.put(cloneWorkspace.getId(), encryption);
+        }
         
         ChangeManager changeManager = remoteWatcher.getChangeManager();
         changeManager.start();
@@ -291,6 +380,18 @@ public class Profile implements Configurable {
     
     public void setAccount(Account account) {
         this.account = account;
+    }
+    
+    public Encryption getEncryption(String workspaceId) {
+        return this.workspaceEncryption.get(workspaceId);
+    }
+
+    public String getDefaultWorkspacePassword() {
+        return defaultWorkspacePassword;
+    }
+
+    public void setDefaultWorkspacePassword(String defaultWorkspacePassword) {
+        this.defaultWorkspacePassword = defaultWorkspacePassword;
     }
 
     @Override

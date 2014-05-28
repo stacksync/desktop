@@ -44,7 +44,16 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="name", nullable=false)
     private String name;
-          
+    
+    @Column(name="encrypted", nullable=false)
+    private boolean encrypted;
+    
+    @Column(name="password")
+    private String password;
+    
+    @Column(name="is_default")
+    private boolean defaultWorkspace;
+    
     @OneToMany
     private List<CloneFile> files;
     
@@ -59,12 +68,17 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
             this.parentId = r.getParentItem().getId();
         }
         
+        this.defaultWorkspace = !r.isShared();
         this.localLastUpdate = r.getLatestRevision();
         this.remoteLastUpdate = r.getLatestRevision();
         this.swiftContainer = r.getSwiftContainer();
         this.swiftStorageURL = r.getSwiftUrl();
         this.owner = r.getOwner().getId().toString();
-        getPathWorkspace();
+        this.pathWorkspace = generatePath();
+        this.encrypted = true;
+        
+        if (!defaultWorkspace)
+            this.encrypted = r.isEncrypted();
     }
 
     public String getId() {
@@ -76,23 +90,30 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     }
     
     public String getPathWorkspace(){
+        this.pathWorkspace = generatePath();
+        return pathWorkspace;
+    }
+    
+    private String generatePath() {
+        
+        String path;
         
         if (this.parentId != null) {
             CloneFile parent = DatabaseHelper.getInstance().getFileOrFolder(this.parentId);
-            String path = parent.getPath();
+            path = parent.getPath();
             if (!path.endsWith("/")) {
                 path += "/";
             }
-            this.pathWorkspace = path + parent.getName()+ "/" + this.name;
+            path += parent.getName()+ "/" + this.name;
         } else {
-            if (this.name.equals("default")) {
-                this.pathWorkspace = "/";
+            if (isDefaultWorkspace()) {
+                path = "/";
             } else {
-                this.pathWorkspace = "/" + this.name;
+                path = "/" + this.name;
             }
         }
         
-        return pathWorkspace;
+        return path;
     }
     
     public void setPathWorkspace(String pathWorkspace){
@@ -154,6 +175,30 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public boolean isDefaultWorkspace() {
+        return defaultWorkspace;
+    }
+
+    public void setDefaultWorkspace(boolean defaultWorkspace) {
+        this.defaultWorkspace = defaultWorkspace;
+    }
 
     @Override
     public int hashCode() {
@@ -191,6 +236,9 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         workspace.setLocalLastUpdate(getLocalLastUpdate());
         workspace.setSwiftContainer(getSwiftContainer());
         workspace.setSwiftStorageURL(getSwiftStorageURL());
+        workspace.setPassword(getPassword());
+        workspace.setEncrypted(isEncrypted());
+        workspace.setDefaultWorkspace(isDefaultWorkspace());
         return workspace;
     }
 }

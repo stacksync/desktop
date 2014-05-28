@@ -17,22 +17,17 @@
  */
 package com.stacksync.desktop.gui.wizard;
 
-import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.profile.Profile;
-import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
-import com.stacksync.desktop.logging.RemoteLogs;
 
 /**
  *
  * @author pheckel
  */
 public class EncryptionPanel extends SettingsPanel {
-
-    private final Logger logger = Logger.getLogger(EncryptionPanel.class.getName());
 
     /**
      * Creates new form EncryptionPanel
@@ -54,7 +49,6 @@ public class EncryptionPanel extends SettingsPanel {
         lblPasswordConfirm.setText(resourceBundle.getString("encryp_password_confirm"));
         lblAdvancedSettings.setText(resourceBundle.getString("encryp_advanced_settings"));
         lblKeyLength.setText(resourceBundle.getString("encryp_key_length"));
-        lblChunkSize.setText(resourceBundle.getString("encryp_chunk_size"));
 
         cmbCipher.addItem(resourceBundle.getString("encryp_disabled"));
         cmbCipher.addItem("AES");
@@ -70,7 +64,6 @@ public class EncryptionPanel extends SettingsPanel {
         txtPassword1.setText("");
 
         cmbKeylength.setSelectedItem("128");
-        spnChunksize.setValue(512);
 
         pnlAdvancedSettings.setVisible(false);
     }
@@ -87,8 +80,6 @@ public class EncryptionPanel extends SettingsPanel {
         pnlAdvancedSettings = new javax.swing.JPanel();
         cmbKeylength = new javax.swing.JComboBox();
         lblKeyLength = new javax.swing.JLabel();
-        spnChunksize = new javax.swing.JSpinner();
-        lblChunkSize = new javax.swing.JLabel();
         lblPasswordConfirm = new javax.swing.JLabel();
         txtPassword1 = new javax.swing.JPasswordField();
         lblPassword = new javax.swing.JLabel();
@@ -110,13 +101,6 @@ public class EncryptionPanel extends SettingsPanel {
 
         lblKeyLength.setText("__Key length:");
         lblKeyLength.setName("lblKeyLength"); // NOI18N
-
-        spnChunksize.setModel(new javax.swing.SpinnerNumberModel(512, 32, 2048, 32));
-        spnChunksize.setEnabled(false);
-        spnChunksize.setName("spnChunksize"); // NOI18N
-
-        lblChunkSize.setText("__Chunk size (KB):");
-        lblChunkSize.setName("lblChunkSize"); // NOI18N
 
         lblPasswordConfirm.setText("__Confirm:");
         lblPasswordConfirm.setName("lblPasswordConfirm"); // NOI18N
@@ -140,17 +124,14 @@ public class EncryptionPanel extends SettingsPanel {
                     .addGroup(pnlAdvancedSettingsLayout.createSequentialGroup()
                         .addGroup(pnlAdvancedSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblKeyLength)
-                            .addComponent(lblChunkSize)
                             .addComponent(lblPasswordConfirm)
                             .addComponent(lblPassword))
-                        .addGap(37, 37, 37)
+                        .addGap(73, 73, 73)
                         .addGroup(pnlAdvancedSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtPassword)
                             .addComponent(txtPassword1)
                             .addGroup(pnlAdvancedSettingsLayout.createSequentialGroup()
-                                .addGroup(pnlAdvancedSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(spnChunksize, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
-                                    .addComponent(cmbKeylength, javax.swing.GroupLayout.Alignment.LEADING, 0, 90, Short.MAX_VALUE))
+                                .addComponent(cmbKeylength, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(pnlAdvancedSettingsLayout.createSequentialGroup()
                         .addComponent(lblAdvancedSettings)
@@ -174,11 +155,7 @@ public class EncryptionPanel extends SettingsPanel {
                 .addGroup(pnlAdvancedSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbKeylength, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblKeyLength))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlAdvancedSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(spnChunksize, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblChunkSize))
-                .addContainerGap())
+                .addGap(44, 44, 44))
         );
 
         lblIntro2.setText("__before it is transmitted and stored in the servers.");
@@ -289,7 +266,6 @@ public class EncryptionPanel extends SettingsPanel {
     private javax.swing.JComboBox cmbCipher;
     private javax.swing.JComboBox cmbKeylength;
     private javax.swing.JLabel lblAdvancedSettings;
-    private javax.swing.JLabel lblChunkSize;
     private javax.swing.JLabel lblEncryption;
     private javax.swing.JLabel lblIntro1;
     private javax.swing.JLabel lblIntro2;
@@ -300,7 +276,6 @@ public class EncryptionPanel extends SettingsPanel {
     private javax.swing.JLabel lblWarning1;
     private javax.swing.JLabel lblWarning2;
     private javax.swing.JPanel pnlAdvancedSettings;
-    private javax.swing.JSpinner spnChunksize;
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JPasswordField txtPassword1;
     // End of variables declaration//GEN-END:variables
@@ -311,29 +286,8 @@ public class EncryptionPanel extends SettingsPanel {
 
     @Override
     public void save() {
-        // Encryption
-        Encryption encryption = new Encryption();
-
-        encryption.setPassword(new String(txtPassword.getPassword()));
-        encryption.setKeylength(Integer.parseInt(cmbKeylength.getSelectedItem().toString()));
-        String cipherStr = "none";
-        if (cmbCipher.getSelectedIndex() != 0) {
-            cipherStr = "aes";
-        }
-        encryption.setCipherStr(cipherStr);
-
-        try {
-            encryption.init(); // TODO do this differently
-        } catch (ConfigException ex) {
-            logger.error(ex);
-            RemoteLogs.getInstance().sendLog(ex);
-        }
-
-        // Repo
-        Repository repository = profile.getRepository();
-
-        repository.setChunkSize((Integer) spnChunksize.getValue());
-        repository.setEncryption(encryption);
+        String password = new String(txtPassword.getPassword());
+        this.profile.setDefaultWorkspacePassword(password);
     }
 
     @Override
@@ -361,14 +315,8 @@ public class EncryptionPanel extends SettingsPanel {
             }
 
             // TODO check the password length
-
-            Encryption encryption = new Encryption();
-            encryption.setPassword(new String(txtPassword.getPassword()));
-            encryption.setKeylength(Integer.parseInt(cmbKeylength.getSelectedItem().toString()));
-            encryption.setCipherStr(cmbCipher.getSelectedItem().toString());
-
             try {
-                encryption.init(); // TODO do this differently
+                Encryption encryption = new Encryption(new String(txtPassword.getPassword()));
             } catch (ConfigException ex) {
                 ErrorMessage.showMessage(this, "Error", ex.getMessage());
                 check = false;

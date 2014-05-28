@@ -174,7 +174,7 @@ public class MoveIndexRequest extends IndexRequest {
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
                 if (!chunkCacheFile.exists()) {
-                    byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getRepository().getEncryption());                    
+                    byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(cf.getWorkspace().getId()));                    
                     FileUtil.writeFile(packed, chunkCacheFile);                   
                 }
                 

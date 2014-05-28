@@ -28,9 +28,14 @@ import com.stacksync.desktop.connection.plugins.Plugins;
  * @author Philipp C. Heckel
  */
 public final class Repository implements Configurable {
+    
+    /**
+     * Clonebox divides bigger files in chunks. This value defines the kilobytes (KB) of
+     * how big one (unencrypted) chunk might become (1024 = 1 MB).
+     */
+    public static final int DEFAULT_CHUNK_SIZE = 512;
 
     private Connection connection;
-    private Encryption encryption;
 
     /**
      * Maximum size of each (unencrypted) chunk in bytes. After encrypting
@@ -48,10 +53,10 @@ public final class Repository implements Configurable {
     public Repository() {
         // Fressen
         connection = null; // Loaded or set dynamically!
-        encryption = new Encryption();
         
         lastUpdate = null;
         connected = false;
+        chunkSize = DEFAULT_CHUNK_SIZE;
     }
  
     /**
@@ -70,16 +75,8 @@ public final class Repository implements Configurable {
         this.connection = connection;
     }
 
-    public Encryption getEncryption() {
-        return encryption;
-    }
-
     public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
-    }
-
-    public void setEncryption(Encryption encryption) {
-        this.encryption = encryption;
     }
 
     public boolean isConnected() {
@@ -101,7 +98,7 @@ public final class Repository implements Configurable {
         }
 
         try {            
-            chunkSize = node.getInteger("chunksize", Constants.DEFAULT_CHUNK_SIZE);
+            chunkSize = node.getInteger("chunksize", DEFAULT_CHUNK_SIZE);
 
             // Connection
             ConfigNode connectionNode = node.findChildByXPath("connection");
@@ -117,13 +114,6 @@ public final class Repository implements Configurable {
             connection = connectionPlugin.createConnection();
             connection.load(connectionNode);
 
-            // Encryption
-            ConfigNode encNode = node.findChildByXPath("encryption");
-            if (encNode == null) {
-                throw new ConfigException("No encryption found in repository");
-            }
-
-            encryption.load(encNode);
         } catch (Exception e) {
             throw new ConfigException("Unable to load repository: "+node+", error: "+e, e);
         }
@@ -134,6 +124,5 @@ public final class Repository implements Configurable {
         node.setProperty("chunksize", chunkSize);
 
         connection.save(node.findOrCreateChildByXpath("connection", "connection"));
-        encryption.save(node.findOrCreateChildByXpath("encryption", "encryption"));
     }
 }
