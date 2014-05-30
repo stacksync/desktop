@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Ant-Version: Apache Ant 1.8.4
-Created-By: 1.7.0_25-b15 (Oracle Corporation)
+Created-By: 1.7.0_51-b13 (Oracle Corporation)
 Project: Stacksync
 Version: 341
 URL: http://ast-deim.urv.cat/stacksync

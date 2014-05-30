@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -49,6 +50,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.swing.JFileChooser;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -585,19 +587,25 @@ public class FileUtil {
     
     
     public static String getMimeType(File file){
-        String mimetype = null;
-        
-        if(mimeTypesMap != null){
-            try {            
-                mimetype = mimeTypesMap.identify(file);
-            } catch (Exception ex){ }        
+        try {
+            String mimetype = null;
+            
+            byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
+            
+            if(mimeTypesMap != null){
+                try {            
+                    mimetype = mimeTypesMap.identify(bytes);        
+                } catch (Exception ex){ }        
+            }
+            
+            if(mimetype == null){
+                mimetype = "unknown";
+            }
+            
+            return mimetype;
+        } catch (IOException ex) {
+            return "unknown";
         }
-        
-        if(mimetype == null){
-            mimetype = "unknown";
-        }
-        
-        return mimetype;
     }
     
     public static String getPropertyFromManifest(String manifestPath, String property){
