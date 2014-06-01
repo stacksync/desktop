@@ -50,9 +50,7 @@ public class Environment {
     
     private File appDir;
     private File appBinDir;
-    private File appResDir;
     private File appConfDir;
-    private File appLibDir;
     
     /**
      * Local computer name / host name.
@@ -126,25 +124,11 @@ public class Environment {
 
         appDir = new File(homePath);
         appBinDir = new File(appDir.getAbsoluteFile()+File.separator+"bin");
-        appResDir = new File(appDir.getAbsoluteFile()+File.separator+"res");
         appConfDir = new File(appDir.getAbsoluteFile()+File.separator+"conf");
-        appLibDir = new File(appDir.getAbsoluteFile()+File.separator+"lib");
 
         // Errors
         if (!appDir.exists() ) {
-            throw new RuntimeException("Could not find application directory at "+appResDir);
-        }
-
-        if (!appResDir.exists() ) {
-            throw new RuntimeException("Could not find application resources directory at "+appResDir);
-        }
-
-        if (!appConfDir.exists() ) {
-            throw new RuntimeException("Could not find application config directory at "+appConfDir);
-        }
-
-        if (!appLibDir.exists() ) {
-            throw new RuntimeException("Could not find application library directory at "+appLibDir);
+            throw new RuntimeException("Could not find application directory at "+appDir);
         }
                
         String defaultDeviceName;
@@ -216,14 +200,6 @@ public class Environment {
     public File getAppBinDir() {
         return appBinDir;
     }
-
-    public File getAppResDir() {
-        return appResDir;
-    }
-
-    public File getAppLibDir() {
-        return appLibDir;
-    }        
     
     public File getDefaultUserConfigFile() {
         return defaultUserConfigFile;

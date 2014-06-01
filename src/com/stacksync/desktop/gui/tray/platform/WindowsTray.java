@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.net.URL;
 import java.util.ResourceBundle;
 import javax.swing.*;
 
@@ -41,8 +42,7 @@ public class WindowsTray extends Tray {
             @Override
             public void trayIconUpdated(String filename) {
                 if (config != null) {
-                    setIcon(new File(config.getResDir()+File.separator+
-                            Constants.TRAY_DIRNAME+File.separator+filename));
+                    setIcon(WindowsTray.class.getResource("/"+Constants.TRAY_DIRNAME+"/"+filename));
                 }
             }
         });
@@ -83,9 +83,9 @@ public class WindowsTray extends Tray {
         status.setIcon(s);
     }
     
-    private void setIcon(File file) {
+    private void setIcon(URL file) {
         if(icon != null){
-            icon.setImage(Toolkit.getDefaultToolkit().getImage(file.getAbsolutePath()));
+            icon.setImage(Toolkit.getDefaultToolkit().getImage(file));
         } else{
             logger.debug(config.getUserName()+"#Cannot update status. Tray not initialized yet."); 
         }
@@ -206,12 +206,11 @@ public class WindowsTray extends Tray {
             throw new InitializationException("Unable to set look and feel for tray icon", e);
         }
 
-        tray = SystemTray.getSystemTray();        
-        File defaultIconFile = new File(config.getResDir()+File.separator+
-                Constants.TRAY_DIRNAME+File.separator+Constants.TRAY_FILENAME_DEFAULT);
-
-        Image image = Toolkit.getDefaultToolkit().getImage(defaultIconFile.getAbsolutePath());
-
+        tray = SystemTray.getSystemTray();
+        URL defaultIconURL = WindowsTray.class.getResource("/"+Constants.TRAY_DIRNAME+"/"+Constants.TRAY_FILENAME_DEFAULT);
+        System.out.println(defaultIconURL);
+        Image image = Toolkit.getDefaultToolkit().getImage(defaultIconURL);
+        
         icon = new TrayIcon(image, "Stacksync", menu);
         icon.setImageAutoSize(true);
         icon.addMouseListener(new MouseAdapter() {
@@ -225,6 +224,7 @@ public class WindowsTray extends Tray {
             }
         });
 
+        System.out.println(icon);
         try {
             tray.add(icon);
         } catch (AWTException e) {
@@ -234,7 +234,7 @@ public class WindowsTray extends Tray {
     
     
     public static void main(String[] args) throws ConfigException, InitializationException, InterruptedException {
-        System.out.println("STARTED");
+        /*System.out.println("STARTED");
 
         config.load();
         Tray tray = Tray.getInstance();
@@ -259,7 +259,7 @@ public class WindowsTray extends Tray {
         while(true){
             Thread.sleep(1000);
         }
-	
+	*/
     }
     
     private void pauseOrResumeSync(TrayEvent event) {

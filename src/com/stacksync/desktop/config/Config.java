@@ -69,7 +69,6 @@ public class Config {
     private boolean notificationsEnabled;
     private ResourceBundle resourceBundle;
     private boolean remoteLogs;
-    private File resDir;
     private Database database;
     private Cache cache;
     private Profile profile;
@@ -200,14 +199,6 @@ public class Config {
 
     public void setConfigDir(File configDir) {
         this.configDir = configDir;
-    }
-
-    public File getResDir() {
-        return (resDir != null) ? resDir : env.getAppResDir();
-    }
-
-    public void setResDir(File resDir) {
-        this.resDir = resDir;
     }
 
     public Database getDatabase() {
@@ -479,14 +470,6 @@ public class Config {
                 logger.warn("COULD NOT LOAD resource bundle for " + language, e);
                 /* Use default; Loaded in constructor */
             }
-        }
-
-        // Directories	
-        resDir = node.getFile("resdir", env.getAppResDir());
-
-        // Tests
-        if (!resDir.exists() || !resDir.isDirectory() || !resDir.canRead()) {
-            throw new ConfigException("Cannot read resource directory '" + resDir + "'.");
         }
 
         // Complex subvalues

@@ -267,7 +267,8 @@ public class LinuxNativeClient {
             // Path to executable (python2 for arch linux bug #793524) and script
             String pythonBinary = (new File("/usr/bin/python2").exists()) ? "/usr/bin/python2" : "/usr/bin/python";
             String nativeScript = env.getAppBinDir() + File.separator + "native.py";
-            ProcessBuilder builder = new ProcessBuilder(pythonBinary, nativeScript, config.getResDir().getAbsolutePath(), initialMessage);
+            //ProcessBuilder builder = new ProcessBuilder(pythonBinary, nativeScript, config.getResDir().getAbsolutePath(), initialMessage);
+            ProcessBuilder builder = new ProcessBuilder(pythonBinary, nativeScript, "", initialMessage);
 
             builder.redirectErrorStream(true);
             logger.debug("Starting LinuxNativeService : " + builder.command());

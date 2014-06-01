@@ -4,10 +4,10 @@
  */
 package com.stacksync.desktop.test.distributed;
 
-import com.sshtools.j2ssh.SftpClient;
+/*import com.sshtools.j2ssh.SftpClient;
 import com.sshtools.j2ssh.SshClient;
 import com.sshtools.j2ssh.authentication.PasswordAuthenticationClient;
-import com.sshtools.j2ssh.sftp.SftpFile;
+import com.sshtools.j2ssh.sftp.SftpFile;*/
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -151,7 +151,7 @@ public class TestUtils {
 	}
 
 	public boolean checkRemoteChecksum(String remoteFilePath,String remoteIP, String remoteUser, String remotePass) {
-	
+	/*
 		try{
 			SshClient ssh = new SshClient();
 			ssh.connect(remoteIP, 22,new AlwaysAllowingConsoleKnownHostsKeyVerification());
@@ -179,6 +179,8 @@ public class TestUtils {
 			logg.error("Failed to check remote checksum");
 			return false;
 		}
+                */
+            return false;
 	}
 	
     public void copyFolder(File src, File dest)throws IOException{
@@ -203,7 +205,7 @@ public class TestUtils {
     }
 
 	public boolean checkRemoteFileDelete(String fileNamePath, String remoteIP, String remoteUser,String remotePass){
-    	boolean itsok = true;
+    	/*boolean itsok = true;
 		
 			SshClient ssh = new SshClient();
 			try {
@@ -230,11 +232,13 @@ public class TestUtils {
 			}
 		
 		return false;
+                * */
+            return false;
 	}
     
     public void remoteFileDelete(String fileNamePath, String remoteIP, String remoteUser,String remotePass){
-		try {
-
+		/*try {
+                    
     	SshClient ssh = new SshClient();
 		ssh.connect(remoteIP, 22,new AlwaysAllowingConsoleKnownHostsKeyVerification());
 
@@ -246,11 +250,11 @@ public class TestUtils {
 		client.rm(stacksyncFolder+"/"+ fileNamePath);
 		} catch (IOException e) {
 		}
-
+                */
     }
     
 	public String generateConflict(String simpleFileName, String remoteIP, String remoteUser,String remotePass, int compNumber) {
-		try {
+		/*try {
 			File testFile = new File(hostHomeFolderPath+"/"+simpleFileName);
 			FileOutputStream fis = new FileOutputStream(testFile);
 			String testFileText = "Testing" + compNumber;
@@ -277,11 +281,12 @@ public class TestUtils {
 			logg.error("Failed to generate conflict due to comunication errors");
 			return null;
 
-		}
+		}*/
+            return null;
 	}
 	
 	public boolean checkMd5List(String fileName,List<String> md5List,String remoteIP, String remoteUser,String remotePass) {
-		try{
+		/*try{
 			List<String> newMd5List = new LinkedList<String>();
 			SshClient ssh = new SshClient();
 			ssh.connect(remoteIP, 22,new AlwaysAllowingConsoleKnownHostsKeyVerification());
@@ -314,8 +319,8 @@ public class TestUtils {
 		}catch(IOException e){
 			logg.error("Failed to get md5 remotelist");
 			return false;
-		}
-
+		}*/
+            return false;
 	}
 	
 	public boolean compareStringLists(List<String>newMd5List, List<String>md5List){
@@ -359,7 +364,7 @@ public class TestUtils {
     }
     
 	public boolean checkRemoteFolderChecksum(String remoteFilePath,String remoteIP, String remoteUser, String remotePass) {
-		try {
+		/*try {
 
 			File testFolderr = new File(testFolder+"/"+remoteFilePath);
 			testFolderr.mkdir();
@@ -400,7 +405,8 @@ public class TestUtils {
 		} catch (IOException e) {
 			logg.error("Failed to check remote checksum");
 			return false;
-		}
+		}*/
+            return false;
 	}
     public void deleteFolder(File folder) {
 		File[] files = folder.listFiles();

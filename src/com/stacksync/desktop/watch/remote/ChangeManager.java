@@ -856,7 +856,7 @@ public class ChangeManager {
         }
 
         // TODO: Insert here special notifications
-        File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
+        File imageFile = new File(ChangeManager.class.getResource("/logo48.png").getPath());
         tray.notify(Constants.APPLICATION_NAME, appliedUpdates.size() + " file(s) updated", imageFile);
     }
 
