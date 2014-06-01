@@ -19,7 +19,7 @@ import omq.common.util.ParameterQueue;
 public class BrokerProperties implements Configurable {
 
     private static final String port = "5672";
-    private static final String host = "10.30.236.175";
+    private static final String host = "130.206.36.132";
     
     private Properties properties = new Properties();
 

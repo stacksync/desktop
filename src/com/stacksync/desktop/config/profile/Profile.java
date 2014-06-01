@@ -203,6 +203,8 @@ public class Profile implements Configurable {
             } else if (defaultWorkspace != null && defaultWorkspace.getPassword() != null) {
                 // Workspace encrypted
                 generateAndSaveEncryption(workspace.getId(), defaultWorkspace.getPassword());
+            } else {
+                workspace.merge();
             }
             
             bindWorkspace(workspace, changeManager);
