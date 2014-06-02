@@ -436,6 +436,10 @@ public class Profile implements Configurable {
     }
 
     public void stop() {
+        
+        if (!initialized){
+            return;
+        }
 
         uploader.stop();
         remoteWatcher.stop();
