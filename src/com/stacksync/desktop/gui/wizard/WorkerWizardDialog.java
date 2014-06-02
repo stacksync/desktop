@@ -38,7 +38,7 @@ public class WorkerWizardDialog extends Thread{
     public void run() {
         WizardDialog dialog = new WizardDialog(new WizardDialog.DummyFrame("Stacksync"), modal);        
         
-        dialog.setIconImage(new ImageIcon(WizardDialog.class.getResource("/logo48.png")).getImage());
+        dialog.setIconImage(new ImageIcon(config.getResDir()+File.separator+"logo48.png").getImage());
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.pack();
         

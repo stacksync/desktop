@@ -47,7 +47,7 @@ public class SettingsDialog extends javax.swing.JFrame {
         initComponents();
 
         setTitle(resourceBundle.getString("sd_form_title"));
-        setIconImage(new ImageIcon(SettingsDialog.class.getResource("/logo48.png")).getImage()); 
+        setIconImage(new ImageIcon(config.getResDir()+File.separator+"logo48.png").getImage()); 
         
         // Init dialog!
         initDialog();
@@ -71,10 +71,10 @@ public class SettingsDialog extends javax.swing.JFrame {
 
         // Load logos and buttons
         lblTopImage.setText("");
-        lblTopImage.setIcon(new ImageIcon(SettingsDialog.class.getResource("/settings-top.png")));
+        lblTopImage.setIcon(new ImageIcon(config.getResDir() + File.separator + "settings-top.png"));
 
         lblDonate.setText("");
-        lblDonate.setIcon(new ImageIcon(SettingsDialog.class.getResource("/logo-urv.png")));
+        lblDonate.setIcon(new ImageIcon(config.getResDir() + File.separator + "logo-urv.png"));
 
         // Add listeners
         addWindowListener(new WindowAdapter() {
@@ -325,7 +325,7 @@ public class SettingsDialog extends javax.swing.JFrame {
                 return origComp;
             }
 
-            setIcon(new ImageIcon(SettingsDialog.class.getResource("/settings-" + ((TreeItem) userObj).getIconFilename() + ".png")));
+            setIcon(new ImageIcon(config.getResDir() + File.separator + "settings-" + ((TreeItem) userObj).getIconFilename() + ".png"));
             return this;
         }
     }

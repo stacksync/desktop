@@ -50,6 +50,7 @@ public class Environment {
     
     private File appDir;
     private File appBinDir;
+    private File appResDir;
     private File appConfDir;
     
     /**
@@ -124,11 +125,16 @@ public class Environment {
 
         appDir = new File(homePath);
         appBinDir = new File(appDir.getAbsoluteFile()+File.separator+"bin");
+        appResDir = new File(appDir.getAbsoluteFile()+File.separator+"res");
         appConfDir = new File(appDir.getAbsoluteFile()+File.separator+"conf");
 
         // Errors
         if (!appDir.exists() ) {
             throw new RuntimeException("Could not find application directory at "+appDir);
+        }
+        
+        if (!appResDir.exists() ) {
+            throw new RuntimeException("Could not find application resources directory at "+appResDir);
         }
                
         String defaultDeviceName;
@@ -199,6 +205,10 @@ public class Environment {
 
     public File getAppBinDir() {
         return appBinDir;
+    }
+    
+    public File getAppResDir() {
+        return appResDir;
     }
     
     public File getDefaultUserConfigFile() {

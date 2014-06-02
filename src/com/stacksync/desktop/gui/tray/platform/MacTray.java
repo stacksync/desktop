@@ -16,7 +16,6 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
 import com.stacksync.desktop.gui.tray.TrayEventListener;
 import com.stacksync.desktop.gui.tray.TrayIconStatus;
-import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MacTray extends Tray {
@@ -39,7 +38,8 @@ public class MacTray extends Tray {
             @Override
             public void trayIconUpdated(String filename) {
                 if (config != null) {
-                    setIcon(MacTray.class.getResource("/"+Constants.TRAY_DIRNAME+"/"+filename));
+                    setIcon(new File(config.getResDir()+File.separator+
+                         Constants.TRAY_DIRNAME+File.separator+filename));   
                 }
             }
         });
@@ -136,8 +136,8 @@ public class MacTray extends Tray {
         status.setIcon(s);
     }
     
-    private void setIcon(URL file) {
-        icon.setImage(Toolkit.getDefaultToolkit().getImage(file));
+    private void setIcon(File file) {
+        icon.setImage(Toolkit.getDefaultToolkit().getImage(file.getAbsolutePath()));
     }    
 
     @Override
@@ -241,9 +241,10 @@ public class MacTray extends Tray {
         }
 
         tray = SystemTray.getSystemTray();        
-        URL defaultIconURL = MacTray.class.getResource("/"+Constants.TRAY_DIRNAME+"/"+Constants.TRAY_FILENAME_DEFAULT);
+        File defaultIconFile = new File(config.getResDir()+File.separator+
+                Constants.TRAY_DIRNAME+File.separator+Constants.TRAY_FILENAME_DEFAULT);
 
-        Image image = Toolkit.getDefaultToolkit().getImage(defaultIconURL);
+        Image image = Toolkit.getDefaultToolkit().getImage(defaultIconFile.getAbsolutePath());
 
         icon = new TrayIcon(image, "Stacksync", menu);
         icon.setImageAutoSize(true);        
@@ -257,7 +258,7 @@ public class MacTray extends Tray {
     
     
     public static void main(String[] args) throws ConfigException, InitializationException, InterruptedException {
-        /*System.out.println("STARTED");
+        System.out.println("STARTED");
 
         config.load();
         Tray tray = Tray.getInstance();
@@ -278,7 +279,7 @@ public class MacTray extends Tray {
         tray.setStatusIcon(tray.getClass().getSimpleName(), StatusIcon.UPDATING);
         //System.out.println(FileUtil.showBrowseDirectoryDialog());
         
-        Thread.sleep(5000);*/
+        Thread.sleep(5000);
     }
 
 }

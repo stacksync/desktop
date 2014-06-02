@@ -405,10 +405,10 @@ public class CommandServer extends AbstractServer implements Runnable /* THIS MU
 
             // TODO check status
 
-            /*out.print("ok\n");
+            out.print("ok\n");
             out.print("path	" + config.getResDir().getAbsolutePath() + File.separator + "emblems\n");
             out.print("done\n");
-            out.flush();*/
+            out.flush();
         }
 
         private void processContextActionCommand(PrintWriter out, String command, Map<String, List<String>> args) throws CommandException {

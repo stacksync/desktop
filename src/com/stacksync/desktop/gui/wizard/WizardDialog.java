@@ -25,7 +25,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -83,7 +82,7 @@ public class WizardDialog extends JDialog {
 
         // Image
         lblLeftImage.setText("");
-        lblLeftImage.setIcon(new ImageIcon(WizardDialog.class.getResource("/logo48.png")));
+        lblLeftImage.setIcon(new ImageIcon(config.getResDir()+File.separator+"logo48.png"));
         
         // Profile
         profile = new Profile(); // set if successfully created!
@@ -338,8 +337,7 @@ public class WizardDialog extends JDialog {
     static class DummyFrame extends JFrame {
         DummyFrame(String title) {
             super(title);
-            URL test = WizardDialog.class.getResource("/logo48.png");
-            super.setIconImage(new ImageIcon(WizardDialog.class.getResource("/logo48.png")).getImage());
+            super.setIconImage(new ImageIcon(config.getResDir()+File.separator+"logo48.png").getImage());
             
             setUndecorated(true);
             setVisible(true);
@@ -352,7 +350,7 @@ public class WizardDialog extends JDialog {
     public static Profile showWizard(Boolean modal) {
         WizardDialog dialog = new WizardDialog(new DummyFrame("Stacksync"), modal);        
         
-        dialog.setIconImage(new ImageIcon(WizardDialog.class.getResource("logo48.png")).getImage());
+        dialog.setIconImage(new ImageIcon(config.getResDir()+File.separator+"logo48.png").getImage());
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.pack();
         

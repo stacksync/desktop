@@ -83,7 +83,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
-        frame.setIconImage(new ImageIcon(TrayEventListenerImpl.class.getResource("/logo48.png")).getImage());
+        frame.setIconImage(new ImageIcon(config.getResDir()+File.separator+"logo48.png").getImage());
         
         return frame;
     }

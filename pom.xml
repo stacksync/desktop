@@ -153,13 +153,20 @@
                     <include>LogProperties.xml</include>
                 </includes>
             </resource>
+            <!--<resource>
+                <directory>bin</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>native.py</include>
+                </includes>
+            </resource>-->
             <resource>
                 <directory>src</directory>
                 <excludes><exclude>**/*.java</exclude></excludes>
             </resource>
-            <resource>
+            <!--<resource>
                 <directory>res</directory>
-            </resource>
+            </resource>-->
         </resources>
         <plugins>
             <plugin>
@@ -219,6 +226,49 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                  <execution>
+                    <id>copy-res</id>
+                    <!-- here the phase you need -->
+                    <phase>validate</phase>
+                    <goals>
+                      <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                      <outputDirectory>${basedir}/target/res</outputDirectory>
+                      <resources>          
+                        <resource>
+                          <directory>res</directory>
+                          <filtering>true</filtering>
+                        </resource>
+                      </resources>
+                    </configuration>           
+                  </execution>
+                  <execution>
+                    <id>copy-bin</id>
+                    <!-- here the phase you need -->
+                    <phase>validate</phase>
+                    <goals>
+                      <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                      <outputDirectory>${basedir}/target/bin</outputDirectory>
+                      <resources>
+                          <resource>
+                            <directory>bin</directory>
+                            <includes>
+                                <include>native.py</include>
+                            </includes>
+                            <filtering>true</filtering>
+                        </resource>
+                      </resources>
+                    </configuration>           
+                  </execution>
+                </executions>
+              </plugin>
         </plugins>
     </build>
 </project>
