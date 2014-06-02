@@ -65,19 +65,13 @@ Some of the main features of the client are:
 * **Data deduplication**: We deduplicate data across a single user in order to optimize bandwidth and storage.
 
 # Requirements
-StackSync is developed using NetBeans and Java 1.7.
-
-The client requires a SyncService running with the user metadata initialized. In the
-[SyncService repository](https://github.com/stacksync/sync-service) you can read the installation
-instrucctions and how to add users to the system.
+* Java 1.7
+* Maven 2 (build)
+* A StackSync server installation running. Intallation instruction can be found [here](https://github.com/stacksync/sync-service)
+* A user initilialized in StackSync server.
 
 # Build, installation and execution
-To build StackSync it is necessary Apache Ant. Build.xml gets the SVN version to use
-in the manifest file. This is usefull for the updater, but since we are not working
-with svn, it has no sense and it has to be changed.
-
-When you build the project, the folder "dist" is created with the executable jar and
-all the dependencies.
+TBD
 
 ## Linux
 Under the folder [packaging/debian](packaging/debian) there is the Makefile to create the
