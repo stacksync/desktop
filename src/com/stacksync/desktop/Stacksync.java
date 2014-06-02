@@ -19,7 +19,6 @@ package com.stacksync.desktop;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import org.apache.commons.cli.*;
@@ -30,6 +29,7 @@ import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.gui.error.ErrorDialog;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.desktop.util.StringUtil;
+import java.net.MalformedURLException;
 
 
 /**

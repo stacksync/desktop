@@ -195,7 +195,7 @@ public class Profile implements Configurable {
             }
             
             // TODO we don't know if default workspace is encrypted or not
-            if (defaultWorkspace == null && !defaultWorkspacePassword.isEmpty()) {
+            if (defaultWorkspace == null && defaultWorkspacePassword != null && !defaultWorkspacePassword.isEmpty()) {
                 // Workspace encrypted
                 workspace.setPassword(defaultWorkspacePassword);
                 generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
