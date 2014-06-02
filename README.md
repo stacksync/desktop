@@ -71,8 +71,16 @@ Some of the main features of the client are:
 * A user initilialized in StackSync server.
 
 # Build, installation and execution
-TBD
+We just need to assemble the project into a JAR using Maven:
 
+    $ mvn assembly:assembly
+
+This will generate a "target" folder containing a JAR file called "desktop-client-X.X-jar-with-dependencies.jar"
+
+> **NOTE**: if you get an error (BUILD FAILURE), cleaning your local Maven repository may fix the problem.
+
+    $ rm -rf ~/.m2/repository/*
+    
 ## Linux
 Under the folder [packaging/debian](packaging/debian) there is the Makefile to create the
 deb file.
