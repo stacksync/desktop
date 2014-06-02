@@ -1,2 +1,2 @@
 #!/bin/bash
-cd /usr/lib/stacksync/ && java -jar UpdaterClient.jar
+cd /usr/lib/stacksync/ && java -jar Stacksync.jar

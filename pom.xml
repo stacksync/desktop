@@ -267,6 +267,23 @@
                       </resources>
                     </configuration>           
                   </execution>
+                  <execution>
+                    <id>copy-config</id>
+                    <!-- here the phase you need -->
+                    <phase>validate</phase>
+                    <goals>
+                      <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                      <outputDirectory>${basedir}/target/conf</outputDirectory>
+                      <resources>
+                          <resource>
+                            <directory>conf</directory>
+                            <filtering>true</filtering>
+                        </resource>
+                      </resources>
+                    </configuration>           
+                  </execution>
                 </executions>
               </plugin>
         </plugins>
