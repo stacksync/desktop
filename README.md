@@ -71,7 +71,9 @@ Some of the main features of the client are:
 * A user initilialized in StackSync server.
 
 # Build, installation and execution
-We just need to assemble the project into a JAR using Maven:
+First of all, you have to change the RabbitMQ server IP in order to connect the client to your server. Go to the class [com.stacksync.desktop.config.profile.BorkerProperties.java](src/com/stacksync/desktop/config/profile/BrokerProperties.java) and change the value of the variable host.
+
+Finally, just need to assemble the project into a JAR using Maven:
 
     $ mvn assembly:assembly
 
@@ -84,6 +86,10 @@ This will generate a "target" folder containing a JAR file called "desktop-clien
 ## Linux
 Under the folder [packaging/debian](packaging/debian) there is the Makefile to create the
 deb file.
+
+    $ cd packaging/debian
+    $ make compile
+    $ make package
 
 ## Windows
 We have a NSIS script that creates an installer ([here](installers/StackSyncInstallScript.nsi)).
