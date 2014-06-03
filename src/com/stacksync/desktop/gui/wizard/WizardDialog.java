@@ -29,6 +29,7 @@ import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
@@ -83,6 +84,7 @@ public class WizardDialog extends JDialog {
         // Image
         lblLeftImage.setText("");
         lblLeftImage.setIcon(new ImageIcon(config.getResDir()+File.separator+"logo48.png"));
+        lblLeftImage.setHorizontalAlignment(JLabel.CENTER);
         
         // Profile
         profile = new Profile(); // set if successfully created!
