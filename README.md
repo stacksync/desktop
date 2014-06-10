@@ -71,9 +71,8 @@ Some of the main features of the client are:
 * A user initilialized in StackSync server.
 
 # Build, installation and execution
-First of all, you have to change the RabbitMQ server IP in order to connect the client to your server. Go to the class [com.stacksync.desktop.config.profile.BorkerProperties.java](src/com/stacksync/desktop/config/profile/BrokerProperties.java) and change the value of the variable host.
 
-Finally, just need to assemble the project into a JAR using Maven:
+You just need to assemble the project into a JAR using Maven:
 
     $ mvn assembly:assembly
 
