@@ -14,31 +14,11 @@ import omq.common.util.ParameterQueue;
  * TODO this class seems a typical legacy code example, but it's necessary to
  * load the brokers configuration
  *
- * @author gguerrero
+ * @author StackSync Team
  */
 public class BrokerProperties implements Configurable {
-
-    private static final String port = "5672";
-    private static final String host = "130.206.36.132";
     
     private Properties properties = new Properties();
-
-    public BrokerProperties() {
-        properties.setProperty(ParameterQueue.USER_NAME, "guest");
-        properties.setProperty(ParameterQueue.USER_PASS, "guest");
-
-        // Set host info of rabbimq (where it is)
-        properties.setProperty(ParameterQueue.RABBIT_HOST, host);
-        properties.setProperty(ParameterQueue.RABBIT_PORT, port);
-        properties.setProperty(ParameterQueue.ENABLE_SSL, "false");
-
-        // Set info about where the message will be sent
-        properties.setProperty(ParameterQueue.RPC_EXCHANGE, "rpc_global_exchange");
-
-        // Set info about the queue & the exchange where the ResponseListener
-        // will listen to.
-        properties.setProperty(ParameterQueue.RPC_REPLY_QUEUE, "reply_queue");
-    }
 
     public void setRPCExchange(String rpc_exchange) {
         properties.setProperty(ParameterQueue.RPC_EXCHANGE, rpc_exchange);
@@ -102,8 +82,8 @@ public class BrokerProperties implements Configurable {
         setPassword(node.getProperty("password", "guest"));
 
         // Set host info of rabbimq (where it is)
-        setHost(node.getProperty("host", host));
-        setPort(node.getInteger("port", 5672));
+        setHost(node.getProperty("host"));
+        setPort(node.getInteger("port"));
         setEnableSsl(node.getBoolean("enableSSL", false));
 
         setRPCExchange(node.getProperty("rpc_exchange", "rpc_global_exchange"));

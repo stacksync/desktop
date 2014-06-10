@@ -3,7 +3,6 @@ package com.stacksync.desktop.gui.wizard;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.config.profile.BrokerProperties;
-import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.gui.settings.SettingsPanel;
 
@@ -17,12 +16,12 @@ public class MetadataPanel extends SettingsPanel {
         initComponents();
         
         /// setting text ///     
-        lblTitle.setText("Metadata Server");
-        lblConnectionTitle.setText("Connection details:");
-        lblServerIp.setText("Server Ip:");
+        lblTitle.setText("Connection details");
+        lblServerIp.setText("RabbitMQ Ip:");
         lblMachineName.setText("Machine Name:");
          
         txtServerIp.setText("");
+        txtServerIp.setSize(200, 24);
         txtMachineName.setText("");
         
         chkAuthenticated.setSelected(false);
@@ -43,6 +42,8 @@ public class MetadataPanel extends SettingsPanel {
         txtPassword.setVisible(false);
         lblPassword.setVisible(false);
         lblUsername.setVisible(false);
+        lblMachineName.setVisible(false);
+        txtMachineName.setVisible(false);
     }
 
     @Override
@@ -87,27 +88,12 @@ public class MetadataPanel extends SettingsPanel {
     }
 
     @Override
-    public void load() {        
-        // set the connection parameters
-        Connection conn = profile.getRepository().getConnection();        
-        rabbitConnection.setHost(conn.getHost());
-        rabbitConnection.setUsername(conn.getUsername());
-        rabbitConnection.setPassword(conn.getPassword());        
-        
-        txtServerIp.setText(rabbitConnection.getHost());        
-        spnPort.setValue(rabbitConnection.getPort());
-        
-        chkUseSSL.setSelected(rabbitConnection.enableSsl());
-        
-        txtUsername.setText(rabbitConnection.getUsername());
-        txtPassword.setText(rabbitConnection.getPassword());
-        
+    public void load() {
         txtMachineName.setText(env.getDeviceName());
     }
 
     @Override
-    public void save() {        
-        config.setDeviceName(txtMachineName.getText());
+    public void save() {
         
         rabbitConnection.setHost(txtServerIp.getText());
         rabbitConnection.setPort(Integer.parseInt(spnPort.getValue().toString()));
@@ -123,8 +109,6 @@ public class MetadataPanel extends SettingsPanel {
         
         rabbitConnection.setUsername(username);                    
         rabbitConnection.setPassword(password);
-        
-        rabbitConnection.setRPCReply(txtMachineName.getText());
     }
 
     /** This method is called from within the constructor to
@@ -137,7 +121,6 @@ public class MetadataPanel extends SettingsPanel {
     private void initComponents() {
 
         lblTitle = new javax.swing.JLabel();
-        lblConnectionTitle = new javax.swing.JLabel();
         lblServerIp = new javax.swing.JLabel();
         txtServerIp = new javax.swing.JTextField();
         lblMachineName = new javax.swing.JLabel();
@@ -152,12 +135,8 @@ public class MetadataPanel extends SettingsPanel {
         chkUseSSL = new javax.swing.JCheckBox();
 
         lblTitle.setFont(lblTitle.getFont().deriveFont(lblTitle.getFont().getStyle() | java.awt.Font.BOLD, lblTitle.getFont().getSize()+3));
-        lblTitle.setText("Metadata Server");
+        lblTitle.setText("Connection details");
         lblTitle.setName("lblTitle"); // NOI18N
-
-        lblConnectionTitle.setFont(lblConnectionTitle.getFont().deriveFont(lblConnectionTitle.getFont().getStyle() | java.awt.Font.BOLD));
-        lblConnectionTitle.setText("Connection Details");
-        lblConnectionTitle.setName("lblConnectionTitle"); // NOI18N
 
         lblServerIp.setText("Server Ip:");
         lblServerIp.setName("lblServerIp"); // NOI18N
@@ -213,22 +192,20 @@ public class MetadataPanel extends SettingsPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblTitle)
-                            .addComponent(lblConnectionTitle))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(lblTitle)
+                        .addGap(0, 0, 0))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblMachineName)
-                            .addComponent(lblServerIp)
-                            .addComponent(lblUsername)
-                            .addComponent(lblPassword))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblServerIp, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lblUsername, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lblPassword, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addGap(31, 31, 31)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkAuthenticated)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(txtServerIp)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                    .addComponent(txtServerIp, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(lblPort)
                                     .addGap(4, 4, 4)
@@ -244,9 +221,7 @@ public class MetadataPanel extends SettingsPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblTitle)
-                .addGap(33, 33, 33)
-                .addComponent(lblConnectionTitle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(61, 61, 61)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblServerIp)
                     .addComponent(txtServerIp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -294,7 +269,6 @@ public class MetadataPanel extends SettingsPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkAuthenticated;
     private javax.swing.JCheckBox chkUseSSL;
-    private javax.swing.JLabel lblConnectionTitle;
     private javax.swing.JLabel lblMachineName;
     private javax.swing.JLabel lblPassword;
     private javax.swing.JLabel lblPort;

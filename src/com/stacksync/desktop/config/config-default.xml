@@ -9,7 +9,7 @@
     <remoteLogs>false</remoteLogs>
 
     <rabbitMQ>
-        <host />
+        <host>localhost</host>
         
         <port>5672</port>
         <enableSSL>false</enableSSL>

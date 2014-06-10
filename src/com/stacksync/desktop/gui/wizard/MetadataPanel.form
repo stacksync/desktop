@@ -20,25 +20,22 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="lblTitle" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblConnectionTitle" alignment="0" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="lblTitle" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="lblMachineName" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblServerIp" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblUsername" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblPassword" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblServerIp" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblUsername" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblPassword" alignment="1" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="31" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="chkAuthenticated" min="-2" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="txtServerIp" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Component id="txtServerIp" min="-2" pref="250" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="lblPort" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
@@ -61,9 +58,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="lblTitle" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
-              <Component id="lblConnectionTitle" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="61" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="lblServerIp" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txtServerIp" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -102,19 +97,8 @@
             <Font bold="true" component="lblTitle" property="font" relativeSize="true" size="3"/>
           </FontInfo>
         </Property>
-        <Property name="text" type="java.lang.String" value="Metadata Server"/>
+        <Property name="text" type="java.lang.String" value="Connection details"/>
         <Property name="name" type="java.lang.String" value="lblTitle" noResource="true"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JLabel" name="lblConnectionTitle">
-      <Properties>
-        <Property name="font" type="java.awt.Font" noResource="true" editor="org.netbeans.modules.form.editors2.FontEditor">
-          <FontInfo relative="true">
-            <Font bold="true" component="lblConnectionTitle" property="font" relativeSize="true" size="0"/>
-          </FontInfo>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Connection Details"/>
-        <Property name="name" type="java.lang.String" value="lblConnectionTitle" noResource="true"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="lblServerIp">

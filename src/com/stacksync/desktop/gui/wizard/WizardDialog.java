@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 /**
  *
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
+ * @author StackSync Team
  */
 public class WizardDialog extends JDialog {
     private static final Config config = Config.getInstance();
@@ -50,11 +51,8 @@ public class WizardDialog extends JDialog {
     
     private StackSyncServerPanel panelStackSyncServer;
     private StackSyncTestPanel panelStackSyncTest;
-    private ConnectionPanel panelProfileBasic;
-    private ConnectionsPanel panelProfileBasics;
     private MetadataPanel panelMetadataServer;
     private EncryptionPanel panelEncryption;
-    private RepositoryTestPanel panelRepositoryTest;
     private FoldersPanel panelFolders;
 
     private Profile profile;
@@ -92,32 +90,27 @@ public class WizardDialog extends JDialog {
         // Panels
         currentPanelIndex = 0;
         panelStackSyncServer = new StackSyncServerPanel(profile);
-        panelProfileBasic = new ConnectionPanel(profile);
-        panelProfileBasics = new ConnectionsPanel(profile);
         panelMetadataServer = new MetadataPanel(profile);
         panelEncryption = new EncryptionPanel(profile);
-        panelRepositoryTest = new RepositoryTestPanel(profile);
         panelFolders = new FoldersPanel(profile);
         panelStackSyncTest = new StackSyncTestPanel(profile);
         
         if(Config.getInstance().isExtendedMode()){
-            panels = new SettingsPanel[] {panelStackSyncServer,
+            panels = new SettingsPanel[] {panelMetadataServer,
+                                          panelStackSyncServer,
                                           //panelProfileBasics,
-                                          //panelMetadataServer,
                                           panelStackSyncTest,
                                           panelEncryption,
                                           panelFolders
-                                          //panelRepositoryTest
             };
 
         } else{
-            panels = new SettingsPanel[] {panelStackSyncServer,
+            panels = new SettingsPanel[] {panelMetadataServer,
+                                          panelStackSyncServer,
                                           //panelProfileBasic,
-                                          //panelMetadataServer,
                                           panelStackSyncTest,
                                           panelEncryption,
                                           panelFolders
-                                          //panelRepositoryTest
             };
 
         }
@@ -246,10 +239,6 @@ public class WizardDialog extends JDialog {
                         currentPanelIndex--;
                     }
                 }
-                
-                if(panels[currentPanelIndex].equals(panelMetadataServer) && !config.isExtendedMode()){ //hides the metadata panel
-                    currentPanelIndex--;
-                }
                                 
                 showCurrentPanel(true);
                 break;
@@ -318,13 +307,6 @@ public class WizardDialog extends JDialog {
 
             currentPanelIndex++; 
             showCurrentPanel(true);
-              
-            //hides the metadata panel
-            if(panels[currentPanelIndex].equals(panelMetadataServer) && !config.isExtendedMode()){                
-                panels[currentPanelIndex].save();
-                currentPanelIndex++;                     
-                showCurrentPanel(true);
-            }
             
             if (!config.isExtendedMode()) {
                 if (panels[currentPanelIndex].equals(panelEncryption)) {
