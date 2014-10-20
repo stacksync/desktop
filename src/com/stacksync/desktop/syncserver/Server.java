@@ -124,9 +124,9 @@ public class Server {
         
         logger.info("Sending share proposal.");
         
-        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderName, encrypted);
+        /*ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderName, encrypted);
         request.setRequestId(getRequestId());
-        syncServer.createShareProposal(request);
+        syncServer.createShareProposal(request);*/
     }
     
     public void updateWorkspace(String accountId, String workspaceId, String workspaceName, Long parent) {
