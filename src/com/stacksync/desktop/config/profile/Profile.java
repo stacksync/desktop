@@ -9,6 +9,7 @@ import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.db.DatabaseHelper;
+import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
@@ -232,7 +233,7 @@ public class Profile implements Configurable {
             }
             
             bindWorkspace(w, changeManager);
-            getAndQueueChanges(w, changeManager);
+            getAndQueueSharedChanges(w, changeManager, controller);
             
             while (changeManager.queuesUpdatesIsWorking()) {
                 try {
@@ -271,7 +272,7 @@ public class Profile implements Configurable {
             }
             
             // new workspace, let's create the workspace folder
-            controller.createNewWorkspace(workspace);
+            //controller.createNewWorkspace(workspace);
             // save it in DB
             workspace.merge();
             localWorkspaces.put(workspace.getId(), workspace);
@@ -297,6 +298,17 @@ public class Profile implements Configurable {
         } catch (Exception ex) {
             throw new InitializationException(ex);
         }
+    }
+    
+    private void getAndQueueSharedChanges(CloneWorkspace workspace, ChangeManager changeManager, WorkspaceController controller) {
+        // 3. Get changes and queue them
+        List<Update> changes = server.getChanges(getAccountId(), workspace);
+        
+        // Get the root folder and create it
+        Update rootFolder = changes.remove(0);
+        controller.createNewWorkspace(workspace, rootFolder);
+        
+        changeManager.queueUpdates(changes);
     }
     
     private void getAndQueueChanges(CloneWorkspace workspace, ChangeManager changeManager) {

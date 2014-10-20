@@ -52,7 +52,7 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         cloneWorkspace.setPassword(password);
         cloneWorkspace.merge();
         
-        WorkspaceController.getInstance().createNewWorkspace(cloneWorkspace);
+        //WorkspaceController.getInstance().createNewWorkspace(cloneWorkspace);
         
         try {
             config.getProfile().addNewWorkspace(cloneWorkspace);

@@ -5,6 +5,7 @@ import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.repository.Update;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +26,7 @@ public class WorkspaceController {
         return instance;
     }
     
-    public void createNewWorkspace(CloneWorkspace newWorkspace) {
+    public void createNewWorkspace(CloneWorkspace newWorkspace, Update update) {
         
         if (newWorkspace.isDefaultWorkspace()) {
             // Don't create default wp
@@ -37,25 +38,27 @@ public class WorkspaceController {
                 + newWorkspace.getPathWorkspace());
         
         // Create "dummy" clone file in DB
-        saveWorkspaceRootFolder(newWorkspace, folder);
+        saveWorkspaceRootFolder(newWorkspace, folder, update);
         
         // Finally create the FS folder
         folder.mkdir();
         
     }
 
-    private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder) {
-        saveWorkspaceRootFolder(newWorkspace, folder, 1, CloneFile.Status.NEW);
-    }
+    /*private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder, Update update) {
+        saveWorkspaceRootFolder(newWorkspace, folder, update);
+    }*/
     
-    private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder, int version, CloneFile.Status status) {
+    private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder, Update update) {
         
         Folder root = config.getProfile().getFolder();
         CloneFile rootFolder = new CloneFile(root, folder);
-        rootFolder.setVersion(version);
-        rootFolder.setStatus(status);
+        rootFolder.setId(update.getFileId());
+        rootFolder.setVersion(update.getVersion());
+        rootFolder.setStatus(update.getStatus());
         rootFolder.setWorkspaceRoot(true);
         rootFolder.setServerUploadedAck(true);   // Don't commit this!!
+        rootFolder.setUsingTempId(false);
         
         if (newWorkspace.getParentId() != null) {
             rootFolder.setParent(db.getFileOrFolder(newWorkspace.getParentId()));
@@ -64,9 +67,10 @@ public class WorkspaceController {
         rootFolder.setWorkspace(newWorkspace);
         rootFolder.setFolder(true);
         rootFolder.setSize(0);
+        rootFolder.setServerUploadedTime(update.getServerUploadedTime());
         rootFolder.setLastModified(new Date(folder.lastModified()));
         rootFolder.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-        rootFolder.setChecksum(0);
+        rootFolder.setChecksum(update.getChecksum());
         
         rootFolder.merge();
     }
