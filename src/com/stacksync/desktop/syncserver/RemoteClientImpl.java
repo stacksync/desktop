@@ -52,7 +52,8 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         cloneWorkspace.setPassword(password);
         cloneWorkspace.merge();
         
-        //WorkspaceController.getInstance().createNewWorkspace(cloneWorkspace);
+        CloneFile sharedFolder = db.getFileOrFolder(spn.getItemId());
+        WorkspaceController.getInstance().changeFolderWorkspace(cloneWorkspace, sharedFolder);
         
         try {
             config.getProfile().addNewWorkspace(cloneWorkspace);

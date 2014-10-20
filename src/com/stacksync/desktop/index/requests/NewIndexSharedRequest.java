@@ -55,11 +55,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
 
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
         CloneFile parentCF = db.getFolder(root, parentFile);
-        if (parentCF.isWorkspaceRoot()) {
-            newVersion.setParent(null);
-        } else {
-            newVersion.setParent(parentCF);
-        }
+        newVersion.setParent(parentCF);
         
         CloneWorkspace workspace = parentCF.getWorkspace();
         newVersion.setWorkspace(workspace);

@@ -74,13 +74,13 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
         CloneFile parentCF = db.getFolder(root, parentFile);
         // If parent is null means the file is in the root folder (stacksync_folder).
-        // A shared folder will never arrive here!!
         if (parentCF != null && !parentCF.getWorkspace().getId().equals(defaultWorkspace.getId())) {
             // File inside a shared workspace
             Indexer.getInstance().queueNewIndexShared(root, file, previousVersion, checksum);
             return;
         }
         
+        // A shared folder will never arrive here!!
         // If arrives here means the file is in the default workspace! Apply normal process...
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
         

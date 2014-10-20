@@ -44,10 +44,6 @@ public class WorkspaceController {
         folder.mkdir();
         
     }
-
-    /*private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder, Update update) {
-        saveWorkspaceRootFolder(newWorkspace, folder, update);
-    }*/
     
     private void saveWorkspaceRootFolder(CloneWorkspace newWorkspace, File folder, Update update) {
         
@@ -73,6 +69,28 @@ public class WorkspaceController {
         rootFolder.setChecksum(update.getChecksum());
         
         rootFolder.merge();
+    }
+    
+    public void changeFolderWorkspace(CloneWorkspace workspace, CloneFile folder) {
+        
+        folder.setWorkspace(workspace);
+        folder.setWorkspaceRoot(true);
+        
+        List<CloneFile> children = db.getChildren(folder);
+        this.changeWorkspaceRecursively(children, workspace);
+        
+        folder.merge();
+    }
+    
+    private void changeWorkspaceRecursively(List<CloneFile> files, CloneWorkspace workspace) {
+        for (CloneFile file : files) {
+            file.setWorkspace(workspace);
+            if (file.isFolder()) {
+                this.changeWorkspaceRecursively(db.getChildren(file), workspace);
+            }
+            
+            file.merge();
+        }
     }
 
     public boolean applyChangesInWorkspace(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
