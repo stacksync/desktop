@@ -31,7 +31,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
     }
 
     @Override
-    public void process() {                
+    public void process() {
         logger.info("Indexer: Indexing new share file "+file+" ...");
         
         // Find file in DB
