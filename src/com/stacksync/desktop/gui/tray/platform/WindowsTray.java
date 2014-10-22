@@ -27,7 +27,7 @@ public class WindowsTray extends Tray {
     private SystemTray tray;
     private PopupMenu menu;
     private TrayIcon icon;
-    private MenuItem itemStatus, itemFolder, itemWebsite, itemWebsite2, itemQuit, itemSync;
+    private MenuItem itemStatus, itemFolder, itemWebsite, itemWebsite2, itemQuit, itemSync, itemShare;
     private TrayIconStatus status;
     private boolean syncActivated;
     
@@ -130,6 +130,17 @@ public class WindowsTray extends Tray {
 
         //menu.add(itemPreferences);
 
+        itemShare = new MenuItem(resourceBundle.getString("tray_share_folder"));
+        itemShare.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                fireTrayEvent(new TrayEvent(TrayEvent.EventType.SHARE));
+            }
+        });
+
+        menu.add(itemQuit);
+        
         final TrayEvent.EventType eventType = TrayEvent.EventType.PAUSE_SYNC;
         itemSync = new MenuItem(resourceBundle.getString("tray_pause_sync"));
         itemSync.addActionListener(new ActionListener() {
