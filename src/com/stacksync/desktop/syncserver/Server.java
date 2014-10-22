@@ -119,14 +119,14 @@ public class Server {
         logger.info(" [x] Sent '" + commitItems + "'");
     }
     
-    public void createShareProposal(String accountId, List<String> emails, String folderName, boolean encrypted)
+    public void createShareProposal(String accountId, List<String> emails, Long folderId, boolean encrypted)
             throws ShareProposalNotCreatedException, UserNotFoundException {
         
         logger.info("Sending share proposal.");
         
-        /*ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderName, encrypted);
+        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderId, encrypted);
         request.setRequestId(getRequestId());
-        syncServer.createShareProposal(request);*/
+        syncServer.createShareProposal(request);
     }
     
     public void updateWorkspace(String accountId, String workspaceId, String workspaceName, Long parent) {

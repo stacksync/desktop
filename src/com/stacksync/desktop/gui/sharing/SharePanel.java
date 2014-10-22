@@ -6,6 +6,8 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.db.DatabaseHelper;
+import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.syncserver.Server;
@@ -27,6 +29,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
     private ResourceBundle resourceBundle;
     
     private JFrame frame;
+    private File folderSelected;
     
     /**
      * Creates new form SharePanel
@@ -202,7 +205,16 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
             if (this.encryptCheckBox.isSelected()) {
                 encrypted = true;
             }
-            server.createShareProposal(profile.getAccountId(), emails, this.folderNameField.getText(), encrypted);
+            
+            DatabaseHelper db = DatabaseHelper.getInstance();
+            
+            if (this.folderSelected == null) {
+                ErrorMessage.showMessage(this, "Error", "No folder selected!");
+                return;
+            }
+            
+            CloneFile folder = db.getFileOrFolder(this.folderSelected);
+            server.createShareProposal(profile.getAccountId(), emails, folder.getId(), encrypted);
             this.frame.setVisible(false);
         } catch (ShareProposalNotCreatedException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
@@ -259,6 +271,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
             }
             
             this.folderNameField.setText(file.getAbsolutePath());
+            this.folderSelected = file;
         }
     }//GEN-LAST:event_browseButtonActionPerformed
 
