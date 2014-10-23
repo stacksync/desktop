@@ -40,7 +40,7 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         CloneWorkspace cloneWorkspace = new CloneWorkspace(newWorkspace);
         
         // If encrypted get the password
-        String password = null;
+        /*String password = null;
         if (spn.isEncrypted()) {
             password = getPassword(spn.getFolderName());
             
@@ -49,11 +49,14 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
                 return;
             }
         }
-        cloneWorkspace.setPassword(password);
-        cloneWorkspace.merge();
+        cloneWorkspace.setPassword(password);*/
         
-        CloneFile sharedFolder = db.getFileOrFolder(spn.getItemId());
-        WorkspaceController.getInstance().changeFolderWorkspace(cloneWorkspace, sharedFolder);
+        if (isMyWorkspace(cloneWorkspace))  {
+            cloneWorkspace.merge();
+        
+            CloneFile sharedFolder = db.getFileOrFolder(spn.getItemId());
+            WorkspaceController.getInstance().changeFolderWorkspace(cloneWorkspace, sharedFolder);
+        }
         
         try {
             config.getProfile().addNewWorkspace(cloneWorkspace);
@@ -61,6 +64,17 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
             logger.error("Error trying to listen new workspace: "+e);
         }
         
+    }
+    
+    private boolean isMyWorkspace(CloneWorkspace workspace) {
+        
+        boolean myWorkspace = false;
+        String me = db.getDefaultWorkspace().getOwner();
+        if (workspace.getOwner().equals(me)) {
+            myWorkspace = true;
+        }
+        
+        return myWorkspace;
     }
 
     @Override

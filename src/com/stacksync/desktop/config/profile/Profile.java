@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.NoResultException;
@@ -319,24 +320,13 @@ public class Profile implements Configurable {
     
     public void addNewWorkspace(CloneWorkspace cloneWorkspace) throws Exception {
         
-        if (cloneWorkspace.isEncrypted()) {
-            Encryption encryption = new Encryption(cloneWorkspace.getPassword());
-            this.workspaceEncryption.put(cloneWorkspace.getId(), encryption);
-        }
-        
         ChangeManager changeManager = remoteWatcher.getChangeManager();
         changeManager.start();
         
-        try {
-            // From now on, there will exist a new RemoteWorkspaceImpl which will be listen to the changes that are done in the SyncServer
-            broker.bind(cloneWorkspace.getId().toString(), new RemoteWorkspaceImpl(cloneWorkspace, changeManager));
-        } catch (Exception ex) {
-            throw new Exception(ex);
-        }
+        List<CloneWorkspace> workspace = new LinkedList<CloneWorkspace>();
+        workspace.add(cloneWorkspace);
         
-        // Get changes
-        List<Update> changes = server.getChanges(getAccountId(), cloneWorkspace);
-        changeManager.queueUpdates(changes);
+        this.processSharedWorkspaces(changeManager, workspace);
         
     }
 
