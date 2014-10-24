@@ -267,6 +267,19 @@ public class DatabaseHelper {
 
         return nearestPreviousVersion;
     }
+    
+    public List<CloneFile> getFileVersions(Long id) {
+        String queryStr = "select f from CloneFile f where "
+                + "      f.id = :id ";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneFile.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
+        
+        query.setParameter("id", id);
+
+        return query.getResultList();
+    }
 
     public List<CloneFile> getFiles(Folder root) {
         String queryStr = "select f from CloneFile f where "

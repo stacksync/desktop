@@ -11,6 +11,9 @@ import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.CommitInfo;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
@@ -33,6 +36,8 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         List<CommitInfo> listObjects = cr.getObjects();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
+        Hashtable<Long, Long> temporalsId = new Hashtable<Long, Long>();
+        
         String fullReqId = cr.getRequestId();
         String deviceName = fullReqId.split("-")[0];
         List<Update> ul = new ArrayList<Update>();
@@ -55,12 +60,21 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
                 if (update != null) {
                     ul.add(update);
                 }
+                
+                Long tempId = obj.getMetadata().getTempId();
+                if (tempId != null) {
+                    temporalsId.put(tempId, obj.getMetadata().getId());
+                }
             
             } catch (NullPointerException ex) {
                 logger.info("Error parsing: " + obj, ex);
             }
         }
-
+        
+        if (!temporalsId.isEmpty()) {
+            changeTempIdFromUncommitedItems(temporalsId, tempIdManager);
+        }
+        
         if (!ul.isEmpty()) {
             logger.info("Queuing updates(" + ul.size() + ")");
             changeManager.queueUpdates(ul);
@@ -121,5 +135,14 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         cf.merge();
     }
 
+    private void changeTempIdFromUncommitedItems(Hashtable<Long, Long> tempIds, TempIdManager tempIdManager) {
+        
+        Enumeration<Long> temps = tempIds.keys();
+        while (temps.hasMoreElements()) {
+            Long tempId = temps.nextElement();
+            List<CloneFile> files = db.getFileVersions(tempId);
+            tempIdManager.changeTempIdFromUncommitedItems(files, tempIds.get(tempId));
+        }
+    }
 
 }
