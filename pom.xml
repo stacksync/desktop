@@ -96,7 +96,7 @@
         <dependency>
             <groupId>java-cloudfiles</groupId>
             <artifactId>java-cloudfiles</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
         <!-- SFTP -->
         <dependency>
