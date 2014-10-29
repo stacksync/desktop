@@ -139,7 +139,7 @@ public class WindowsTray extends Tray {
             }
         });
 
-        menu.add(itemQuit);
+        menu.add(itemShare);
         
         final TrayEvent.EventType eventType = TrayEvent.EventType.PAUSE_SYNC;
         itemSync = new MenuItem(resourceBundle.getString("tray_pause_sync"));
