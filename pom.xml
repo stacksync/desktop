@@ -139,6 +139,11 @@
             <artifactId>mimemagicidentifier</artifactId>
             <version>0.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>liferay-nativity</groupId>
+            <artifactId>liferay-nativity</artifactId>
+            <version>1.0.1</version>
+        </dependency>
 
     </dependencies>
     
