@@ -12,6 +12,7 @@ public class MacDesktop extends Desktop {
     private static final Config config = Config.getInstance();
        
     private OverlayController controller;
+    private boolean initialized;
  
     protected MacDesktop() {
         logger.info("Creating desktop integration ...");
@@ -20,22 +21,36 @@ public class MacDesktop extends Desktop {
 
     @Override
     public void start(boolean startDemonOnly) {
+        
+        if (this.initialized) {
+            logger.info("Mac desktop already started.");
+            return;
+        }
+        
         logger.info("Starting desktop services (daemon: " + startDemonOnly + ") ...");
         try {
             Folder folder = config.getProfile().getFolder();
             this.controller.initialize(folder.getLocalFile().getPath());
+            this.initialized = true;
         } catch (OverlayException ex) {
             logger.error(ex.getMessage());
+            this.initialized = false;
         }
     }
 
     @Override
     public void touch(File file) {
-        this.controller.refreshFile(file);
+        if (this.initialized) {
+            this.controller.refreshFile(file);
+        }
     }
     
     @Override
     public void stop(boolean startDemonOnly) {
+        if (!this.initialized) {
+            return;
+        }
+        
         try {
             this.controller.stop();
         } catch (OverlayException ex) {
