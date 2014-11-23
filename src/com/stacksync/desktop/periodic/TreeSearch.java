@@ -17,13 +17,13 @@
  */
 package com.stacksync.desktop.periodic;
 
-import java.util.Timer;
-import java.util.TimerTask;
-import org.apache.log4j.Logger;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.index.Indexer;
+import java.util.Timer;
+import java.util.TimerTask;
+import org.apache.log4j.Logger;
 
 /**
  * Prevents missed updates by regularly searching the whole file tree for new or
