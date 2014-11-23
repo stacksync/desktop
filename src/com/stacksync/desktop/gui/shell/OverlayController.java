@@ -5,9 +5,10 @@ import com.liferay.nativity.control.NativityControlUtil;
 import com.liferay.nativity.modules.fileicon.FileIconControl;
 import com.liferay.nativity.modules.fileicon.FileIconControlCallback;
 import com.liferay.nativity.modules.fileicon.FileIconControlUtil;
+import com.stacksync.desktop.Constants;
+import com.stacksync.desktop.config.Config;
 import java.io.File;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Scanner;
 import org.apache.log4j.Logger;
 
@@ -18,6 +19,7 @@ import org.apache.log4j.Logger;
 public class OverlayController {
     
     private final Logger logger = Logger.getLogger(OverlayController.class.getName());
+    private static final Config config = Config.getInstance();
     
     public enum Status { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
     
@@ -41,7 +43,7 @@ public class OverlayController {
         );
     }
     
-    public void initialize() throws OverlayException {
+    public void initialize(String folderPath) throws OverlayException {
         // connect with overlay library
         boolean connected = this.nativityControl.connect();
         if (!connected){
@@ -50,17 +52,21 @@ public class OverlayController {
         logger.info("Connected to nativity plugin");
         
         // Set the folder to filter
-        this.nativityControl.setFilterFolder("/Users/cotes/test/overlay");
+        this.nativityControl.setFilterFolder(folderPath);
         
         // Enable overlay
         this.fileIconControl.enableFileIcons();
         logger.info("Enabled file icons");
         
         // Register icons
-        int uptodateId = fileIconControl.registerIcon("/Users/cotes/test/icons/ok.icns");
+        String basePath = config.getResDir()+File.separator+Constants.OVERLAY_FOLDER+File.separator;
+        
+        int uptodateId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_SYNCING);
         this.iconsIds.put(Status.UPTODATE, uptodateId);
-        int syncingId = fileIconControl.registerIcon("/Users/cotes/test/icons/sync.icns");
+        int syncingId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_SYNCING);
         this.iconsIds.put(Status.SYNCING, syncingId);
+        int unsyncableId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_UNSYNCABLE);
+        this.iconsIds.put(Status.UNSYNC, unsyncableId);
         
         // Draw overlays
         this.fileIconControl.setFileIcon("/Users/cotes/test/overlay/a", syncingId);
@@ -107,7 +113,7 @@ public class OverlayController {
     public static void main(String[] args){
         OverlayController controller = new OverlayController();
         try {
-            controller.initialize();
+            controller.initialize("/Users/cotes/test/overlay");
             Scanner scanner = new Scanner(System.in);
             scanner.nextLine();
             updateOverlays(controller);

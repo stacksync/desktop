@@ -120,6 +120,12 @@ public abstract class Constants {
     public static final String TRAY_FILENAME_UPTODATE = "tray-uptodate.png";
     public static final String TRAY_FILENAME_FORMAT_UPDATING = "tray-updating%s.png";
     
+    public static final String OVERLAY_FOLDER = "emblems";
+    public static final String OVERLAY_ICNS_UPTODATE = "uptodate.icns";
+    public static final String OVERLAY_ICNS_SYNCING = "syncing.icns";
+    public static final String OVERLAY_ICNS_UNSYNCABLE = "unsyncable.icns";
+    public static final String OVERLAY_ICNS_FOLDER_SHARE = "folder_share.icns";
+    
     public static final String JAVA_GNOME_NATIVE_LIB_FORMAT = "libgtkjni-4.0.20-dev-appindicator-r806-%s.so";
     
     public static final String FILE_IGNORE_PREFIX = ".ignore";

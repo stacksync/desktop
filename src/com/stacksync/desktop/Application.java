@@ -121,8 +121,6 @@ public class Application implements ConnectionController, ApplicationController 
         }
 
         tray.setStartDemonOnly(deamonMode);
-        // Desktop integration
-        desktop.start(deamonMode); // must be started before indexer!
         
         boolean success = loadProfile();
         
@@ -161,6 +159,8 @@ public class Application implements ConnectionController, ApplicationController 
     
     private void startThreads() {
         // Start the rest
+        // Desktop integration
+        desktop.start(config.isDaemonMode()); // must be started before indexer!
         indexer.start();
         localWatcher.start();
         periodic.start();

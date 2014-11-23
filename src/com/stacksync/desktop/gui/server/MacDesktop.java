@@ -1,6 +1,7 @@
 package com.stacksync.desktop.gui.server;
 
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.gui.shell.OverlayController;
 import com.stacksync.desktop.gui.shell.OverlayException;
 import java.io.File;
@@ -21,7 +22,8 @@ public class MacDesktop extends Desktop {
     public void start(boolean startDemonOnly) {
         logger.info("Starting desktop services (daemon: " + startDemonOnly + ") ...");
         try {
-            this.controller.initialize();
+            Folder folder = config.getProfile().getFolder();
+            this.controller.initialize(folder.getLocalFile().getPath());
         } catch (OverlayException ex) {
             logger.error(ex.getMessage());
         }

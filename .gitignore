@@ -8,3 +8,4 @@
 /logs/
 /target/
 /lib/
+.DS_Store
