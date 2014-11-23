@@ -40,16 +40,19 @@ public class MacDesktop extends Desktop {
     }
 
     @Override
-    public void touch(File file) {
+    public void touch(File file) {}
+    
+    @Override
+    public void touch(String filepath, CloneFile.SyncStatus status) {
         if (this.initialized) {
-            this.controller.refreshFile(file);
+            this.controller.drawOverlay(filepath, status);
         }
     }
     
     @Override
-    public void touch(File file, CloneFile.SyncStatus status) {
+    public void untouch(String filepath) {
         if (this.initialized) {
-            this.controller.drawOverlay(file.getPath(), status);
+            this.controller.removeOverlay(filepath);
         }
     }
     

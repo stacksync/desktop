@@ -107,8 +107,8 @@ public class OverlayController {
         this.fileIconControl.setFileIcon(path, this.iconsIds.get(status));
     }
     
-    public void removeOverlay() {
-        
+    public void removeOverlay(String path) {
+        this.fileIconControl.removeFileIcon(path);
     }
     
     private void registerOverlays() {

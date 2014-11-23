@@ -41,8 +41,12 @@ public class WindowsDesktop extends Desktop {
     }
     
     @Override
-    public void touch(File file, CloneFile.SyncStatus status) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void touch(String filepath, CloneFile.SyncStatus status) {
+    }
+    
+    @Override
+    public void untouch(String filepath) {
+        
     }
     
     @Override

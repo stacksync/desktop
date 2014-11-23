@@ -39,7 +39,9 @@ public abstract class Desktop {
 
     public abstract void touch(File file);
     
-    public abstract void touch(File file, CloneFile.SyncStatus status);
+    public abstract void touch(String filepath, CloneFile.SyncStatus status);
+    
+    public abstract void untouch(String filepath);
     
     public abstract void stop(boolean startDemonOnly);
     

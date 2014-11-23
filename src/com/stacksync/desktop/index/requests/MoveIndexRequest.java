@@ -141,7 +141,8 @@ public class MoveIndexRequest extends IndexRequest {
         dbToFile.merge();
 	    
         // Notify file manager
-        desktop.touch(dbToFile.getFile());
+        this.desktop.touch(dbToFile.getFile());
+        this.desktop.touch(dbToFile.getAbsolutePath(), CloneFile.SyncStatus.SYNCING);
 	    
         if (!dbToFile.isFolder()) {
             processFile(dbToFile);

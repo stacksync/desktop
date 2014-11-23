@@ -147,7 +147,9 @@ public class ChangeManager {
 
             CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());            
             boolean isLocalConflict = isLocalConflict(existingVersion, update) | update.getConflicted();
+            
             ///Existing version equals update -> skip: file is up-to-date!
+            // TODO: I think that this is not necessary
             if (existingVersion != null && !isLocalConflict && (existingVersion.getSyncStatus()== SyncStatus.UPTODATE)) {
                 logger.info("File " + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
                 
@@ -266,29 +268,52 @@ public class ChangeManager {
     }
 
     private void applyUpdate(CloneFile lastMatchingVersion, Update newFileUpdate) {
+    
+        if (lastMatchingVersion != null) {
+            this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.SYNCING);
+        }
         
         try{        
             // b) Rename
             if (newFileUpdate.getStatus() == Status.RENAMED) {
-                applyRenameOnlyChanges(lastMatchingVersion, newFileUpdate);
+                CloneFile renamedFile = applyRenameOnlyChanges(lastMatchingVersion, newFileUpdate);
+                this.desktop.touch(renamedFile.getAbsolutePath(), SyncStatus.UPTODATE);
+                if (lastMatchingVersion != null) {
+                    this.desktop.untouch(lastMatchingVersion.getAbsolutePath());
+                }
+                
                 return;
             }
 
             // c) Simply delete the last file
             if (newFileUpdate.getStatus() == Status.DELETED) {
                 applyDeleteChanges(lastMatchingVersion, newFileUpdate);
+                if (lastMatchingVersion != null) {
+                    this.desktop.untouch(lastMatchingVersion.getAbsolutePath());
+                }
                 return;
             }
 
             // d) Changed or new
-            applyChangeOrNew(lastMatchingVersion, newFileUpdate);
-            //return;
+            CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
+            if (lastMatchingVersion != null) {
+                    this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.UPTODATE);
+            }
+            this.desktop.touch(newFile.getAbsolutePath(), SyncStatus.UPTODATE);
 
         } catch (CouldNotApplyUpdateException ex) {
             // TODO Inifinite loop??
             logger.error("Warning: could not download/assemble " + newFileUpdate, ex);
             RemoteLogs.getInstance().sendLog(ex);            
             queue.add(newFileUpdate);
+            if (lastMatchingVersion != null) {
+                this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.UNSYNC);
+            }
+        } catch (Exception ex) {
+            logger.error("Warning: could not download/assemble " + newFileUpdate, ex);
+            if (lastMatchingVersion != null) {
+                this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.UNSYNC);
+            }
         }
     }
 
@@ -492,7 +517,7 @@ public class ChangeManager {
      * @param lastMatchingVersion
      * @param newFileUpdates
      */
-    private void applyRenameOnlyChanges(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException {
+    private CloneFile applyRenameOnlyChanges(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException {
         if(lastMatchingVersion == null || !checkChunks(lastMatchingVersion.getChunks(), newFileUpdate.getChunks())){
             if(lastMatchingVersion == null){
                 logger.warn("Error lastmatching version is nul");
@@ -501,14 +526,14 @@ public class ChangeManager {
             }
 
             applyChangeOrNew(lastMatchingVersion, newFileUpdate);
-            return;
+            return lastMatchingVersion;
         }        
         
         if (!lastMatchingVersion.getFile().exists()) {
             logger.warn("Error while renaming file " + lastMatchingVersion.getId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + " does NOT exist; Trying to download the file ...");
 
             applyChangeOrNew(lastMatchingVersion, newFileUpdate);
-            return;
+            return lastMatchingVersion;
         }                
 
         ///// A. Add to DB
@@ -525,7 +550,7 @@ public class ChangeManager {
             //checkear si checksum coincide                    
             //si existe el temp-rename eliminar
                         
-            return;
+            return newestVersion;
         }
 
         /// Do rename!
@@ -548,6 +573,7 @@ public class ChangeManager {
         // Update DB
         updateSyncStatus(newestVersion, SyncStatus.UPTODATE);
         em.merge(newestVersion);
+        return newestVersion;
     }
 
     /**
@@ -646,7 +672,7 @@ public class ChangeManager {
      * @param newFileUpdates
      * @throws CouldNotApplyUpdateException
      */
-    private void applyChangeOrNew(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException{
+    private CloneFile applyChangeOrNew(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException{
         ///// A. Add to DB
         CloneFile newestVersion = addToDB(newFileUpdate);
         logger.info("- ChangeManager: Downloading/Updating " + newestVersion.getFile() + "");
@@ -685,6 +711,8 @@ public class ChangeManager {
         // Update DB
         updateSyncStatus(newestVersion, SyncStatus.UPTODATE);
         em.merge(newestVersion);
+        
+        return newestVersion;
     }
 
     private void downloadChunks(CloneFile file) throws CouldNotApplyUpdateException {

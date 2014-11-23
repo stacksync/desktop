@@ -83,6 +83,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         // A shared folder will never arrive here!!
         // If arrives here means the file is in the default workspace! Apply normal process...
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
+        this.desktop.touch(file.getPath(), SyncStatus.SYNCING);
         
         // Create DB entry
         CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();

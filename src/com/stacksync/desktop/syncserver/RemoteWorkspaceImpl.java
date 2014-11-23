@@ -10,10 +10,10 @@ import com.stacksync.commons.notifications.CommitNotification;
 import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.CommitInfo;
+import com.stacksync.desktop.gui.server.Desktop;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
@@ -25,10 +25,12 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     private final Config config = Config.getInstance();
     private CloneWorkspace workspace;
     private ChangeManager changeManager;
+    private Desktop desktop;
 
     public RemoteWorkspaceImpl(CloneWorkspace workspace, ChangeManager changeManager) {
         this.workspace = workspace;
         this.changeManager = changeManager;
+        this.desktop = Desktop.getInstance();
     }
 
     @Override
@@ -101,6 +103,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
             logger.info("Exception: existing version is null");
         }
         
+        this.desktop.touch(existingVersion.getAbsolutePath(), CloneFile.SyncStatus.UPTODATE);
     }
 
     private Update doActionNotCommited(CommitInfo commit) {
@@ -111,10 +114,12 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
         if (existingVersion == null) {
             update.setConflicted(true);
+            this.desktop.touch(existingVersion.getAbsolutePath(), CloneFile.SyncStatus.UNSYNC);
             return update;
         } else {
             markAsUpdated(existingVersion);
         }
+        this.desktop.touch(existingVersion.getAbsolutePath(), CloneFile.SyncStatus.UNSYNC);
         return null;
     }
     
