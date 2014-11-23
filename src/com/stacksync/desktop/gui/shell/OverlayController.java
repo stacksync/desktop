@@ -1,5 +1,7 @@
 package com.stacksync.desktop.gui.shell;
 
+import java.io.File;
+
 /**
  *
  * @author cotes
@@ -25,7 +27,7 @@ public class OverlayController {
         // Disconnect overlay library
     }
     
-    public void refreshFile() {
+    public void refreshFile(File file) {
         
     }
     
