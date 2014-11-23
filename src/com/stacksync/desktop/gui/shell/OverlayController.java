@@ -64,6 +64,7 @@ public class OverlayController {
         
         // Register icons
         this.registerOverlays();
+        this.fileIconControl.removeAllFileIcons();
         
         // Draw overlays
         logger.info("Draw initial ovlerays");
