@@ -1,6 +1,7 @@
 package com.stacksync.desktop.gui.server;
 
 import com.stacksync.desktop.Environment;
+import com.stacksync.desktop.db.models.CloneFile;
 import java.io.File;
 import org.apache.log4j.Logger;
 
@@ -37,6 +38,8 @@ public abstract class Desktop {
     public abstract void start(boolean startDemonOnly);
 
     public abstract void touch(File file);
+    
+    public abstract void touch(File file, CloneFile.SyncStatus status);
     
     public abstract void stop(boolean startDemonOnly);
     

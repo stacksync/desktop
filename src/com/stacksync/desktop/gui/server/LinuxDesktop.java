@@ -18,6 +18,7 @@
 package com.stacksync.desktop.gui.server;
 
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.db.models.CloneFile;
 import java.io.File;
 import org.apache.log4j.Logger;
 
@@ -68,6 +69,11 @@ public class LinuxDesktop extends Desktop {
         }
 
         touchServ.touch(file);
+    }
+    
+    @Override
+    public void touch(File file, CloneFile.SyncStatus status) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override

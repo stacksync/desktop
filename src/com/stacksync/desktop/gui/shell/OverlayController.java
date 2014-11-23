@@ -9,6 +9,7 @@ import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import java.io.File;
 import java.util.EnumMap;
 import java.util.List;
@@ -25,15 +26,13 @@ public class OverlayController {
     private static final Config config = Config.getInstance();
     private final DatabaseHelper db = DatabaseHelper.getInstance();
     
-    public enum Status { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
-    
     private NativityControl nativityControl;
     private FileIconControl fileIconControl;
-    private EnumMap<Status, Integer> iconsIds;
+    private EnumMap<SyncStatus, Integer> iconsIds;
         
     public OverlayController() {
         
-        this.iconsIds = new EnumMap<Status, Integer>(Status.class);
+        this.iconsIds = new EnumMap<SyncStatus, Integer>(SyncStatus.class);
         
         this.nativityControl = NativityControlUtil.getNativityControl();
         this.fileIconControl = FileIconControlUtil.getFileIconControl(
@@ -76,12 +75,12 @@ public class OverlayController {
                 continue;
             }
             
-            if (dbFile.getSyncStatus() == CloneFile.SyncStatus.UPTODATE) {
-                this.drawOverlay(dbFile.getAbsolutePath(), Status.UPTODATE);
-            } else if (dbFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC) {
-                this.drawOverlay(dbFile.getAbsolutePath(), Status.UNSYNC);
-            } else if (dbFile.getSyncStatus() == CloneFile.SyncStatus.SYNCING) {
-                this.drawOverlay(dbFile.getAbsolutePath(), Status.SYNCING);
+            if (dbFile.getSyncStatus() == SyncStatus.UPTODATE) {
+                this.drawOverlay(dbFile.getAbsolutePath(), SyncStatus.UPTODATE);
+            } else if (dbFile.getSyncStatus() == SyncStatus.UNSYNC) {
+                this.drawOverlay(dbFile.getAbsolutePath(), SyncStatus.UNSYNC);
+            } else if (dbFile.getSyncStatus() == SyncStatus.SYNCING) {
+                this.drawOverlay(dbFile.getAbsolutePath(), SyncStatus.SYNCING);
             }
         }
     }
@@ -104,7 +103,7 @@ public class OverlayController {
     
     public void refreshFile(File file) { }
     
-    public void drawOverlay(String path, Status status) {
+    public void drawOverlay(String path, CloneFile.SyncStatus status) {
         this.fileIconControl.setFileIcon(path, this.iconsIds.get(status));
     }
     
@@ -116,17 +115,17 @@ public class OverlayController {
         String basePath = config.getResDir()+File.separator+Constants.OVERLAY_FOLDER+File.separator;
         
         int uptodateId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_UPTODATE);
-        this.iconsIds.put(Status.UPTODATE, uptodateId);
+        this.iconsIds.put(SyncStatus.UPTODATE, uptodateId);
         int syncingId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_SYNCING);
-        this.iconsIds.put(Status.SYNCING, syncingId);
+        this.iconsIds.put(SyncStatus.SYNCING, syncingId);
         int unsyncableId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_UNSYNCABLE);
-        this.iconsIds.put(Status.UNSYNC, unsyncableId);
+        this.iconsIds.put(SyncStatus.UNSYNC, unsyncableId);
     }
     
     private void unregisterOverlays() {
-        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.UPTODATE));
-        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.SYNCING));
-        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.UNSYNC));
+        this.fileIconControl.unregisterIcon(this.iconsIds.get(SyncStatus.UPTODATE));
+        this.fileIconControl.unregisterIcon(this.iconsIds.get(SyncStatus.SYNCING));
+        this.fileIconControl.unregisterIcon(this.iconsIds.get(SyncStatus.UNSYNC));
     }
     
     public static void main(String[] args){
@@ -142,7 +141,7 @@ public class OverlayController {
     }
     
     public static void updateOverlays(OverlayController controller){
-        controller.drawOverlay("/Users/cotes/test/overlay/a", Status.UPTODATE);
-        controller.drawOverlay("/Users/cotes/test/overlay/a/b", Status.UPTODATE);
+        controller.drawOverlay("/Users/cotes/test/overlay/a", SyncStatus.UPTODATE);
+        controller.drawOverlay("/Users/cotes/test/overlay/a/b", SyncStatus.UPTODATE);
     }
 }
