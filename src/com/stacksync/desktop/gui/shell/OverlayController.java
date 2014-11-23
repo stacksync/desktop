@@ -7,8 +7,11 @@ import com.liferay.nativity.modules.fileicon.FileIconControlCallback;
 import com.liferay.nativity.modules.fileicon.FileIconControlUtil;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.db.DatabaseHelper;
+import com.stacksync.desktop.db.models.CloneFile;
 import java.io.File;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Scanner;
 import org.apache.log4j.Logger;
 
@@ -20,6 +23,7 @@ public class OverlayController {
     
     private final Logger logger = Logger.getLogger(OverlayController.class.getName());
     private static final Config config = Config.getInstance();
+    private final DatabaseHelper db = DatabaseHelper.getInstance();
     
     public enum Status { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
     
@@ -59,25 +63,32 @@ public class OverlayController {
         logger.info("Enabled file icons");
         
         // Register icons
-        String basePath = config.getResDir()+File.separator+Constants.OVERLAY_FOLDER+File.separator;
-        
-        int uptodateId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_SYNCING);
-        this.iconsIds.put(Status.UPTODATE, uptodateId);
-        int syncingId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_SYNCING);
-        this.iconsIds.put(Status.SYNCING, syncingId);
-        int unsyncableId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_UNSYNCABLE);
-        this.iconsIds.put(Status.UNSYNC, unsyncableId);
+        this.registerOverlays();
         
         // Draw overlays
-        this.fileIconControl.setFileIcon("/Users/cotes/test/overlay/a", syncingId);
-        this.fileIconControl.setFileIcon("/Users/cotes/test/overlay/a/b", syncingId);
+        logger.info("Draw initial ovlerays");
+
+        List<CloneFile> dbFiles = db.getFiles(null);
+
+        for (CloneFile dbFile: dbFiles) {
+            if (!dbFile.getFile().exists()) {
+                continue;
+            }
+            
+            if (dbFile.getSyncStatus() == CloneFile.SyncStatus.UPTODATE) {
+                this.drawOverlay(dbFile.getAbsolutePath(), Status.UPTODATE);
+            } else if (dbFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC) {
+                this.drawOverlay(dbFile.getAbsolutePath(), Status.UNSYNC);
+            } else if (dbFile.getSyncStatus() == CloneFile.SyncStatus.SYNCING) {
+                this.drawOverlay(dbFile.getAbsolutePath(), Status.SYNCING);
+            }
+        }
     }
     
     public void stop() throws OverlayException {
         
         // Unregister overlays
-        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.UPTODATE));
-        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.SYNCING));
+        this.unregisterOverlays();
         
         // Disable overlays
         this.fileIconControl.disableFileIcons();
@@ -90,9 +101,7 @@ public class OverlayController {
         logger.info("Overlay controller stopped.");
     }
     
-    public void refreshFile(File file) {
-        
-    }
+    public void refreshFile(File file) { }
     
     public void drawOverlay(String path, Status status) {
         this.fileIconControl.setFileIcon(path, this.iconsIds.get(status));
@@ -102,12 +111,21 @@ public class OverlayController {
         
     }
     
-    private void registerOverlay() {
+    private void registerOverlays() {
+        String basePath = config.getResDir()+File.separator+Constants.OVERLAY_FOLDER+File.separator;
         
+        int uptodateId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_UPTODATE);
+        this.iconsIds.put(Status.UPTODATE, uptodateId);
+        int syncingId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_SYNCING);
+        this.iconsIds.put(Status.SYNCING, syncingId);
+        int unsyncableId = fileIconControl.registerIcon(basePath+Constants.OVERLAY_ICNS_UNSYNCABLE);
+        this.iconsIds.put(Status.UNSYNC, unsyncableId);
     }
     
-    private void unregisterOverlay() {
-        
+    private void unregisterOverlays() {
+        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.UPTODATE));
+        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.SYNCING));
+        this.fileIconControl.unregisterIcon(this.iconsIds.get(Status.UNSYNC));
     }
     
     public static void main(String[] args){
