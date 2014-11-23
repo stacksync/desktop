@@ -2,6 +2,7 @@ package com.stacksync.desktop.gui.server;
 
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.gui.shell.OverlayController;
+import com.stacksync.desktop.gui.shell.OverlayException;
 import java.io.File;
 import org.apache.log4j.Logger;
 
@@ -19,8 +20,11 @@ public class MacDesktop extends Desktop {
     @Override
     public void start(boolean startDemonOnly) {
         logger.info("Starting desktop services (daemon: " + startDemonOnly + ") ...");
-        
-        this.controller.initialize();
+        try {
+            this.controller.initialize();
+        } catch (OverlayException ex) {
+            logger.error(ex.getMessage());
+        }
     }
 
     @Override
@@ -30,6 +34,11 @@ public class MacDesktop extends Desktop {
     
     @Override
     public void stop(boolean startDemonOnly) {
-        this.controller.stop();
+        try {
+            this.controller.stop();
+        } catch (OverlayException ex) {
+            logger.error(ex.getMessage());
+        }
+
     }
 }
