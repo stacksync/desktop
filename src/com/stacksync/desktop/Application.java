@@ -176,6 +176,7 @@ public class Application implements ConnectionController, ApplicationController 
         localWatcher.stop();
         periodic.stop();
         cache.stop();
+        desktop.stop(config.isDaemonMode());
 
         if (config.getProfile() != null) {
             config.getProfile().stop();
