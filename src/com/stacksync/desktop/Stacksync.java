@@ -30,6 +30,7 @@ import com.stacksync.desktop.gui.error.ErrorDialog;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.desktop.util.StringUtil;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 
 /**
@@ -68,7 +69,7 @@ public class Stacksync {
         
         try {            
             try{
-                File file = new File(env.getDefaultUserConfigDir() + File.separator + Constants.LOGGING_DEFAULT_FILENAME);
+                File file = new File(env.getDefaultUserConfigDir() + File.separator + "conf" + File.separator + Constants.LOGGING_DEFAULT_FILENAME);
                 DOMConfigurator.configure(file.toURI().toURL());
             } catch(NullPointerException e){
                 System.out.println("No log4j config file was found no logs will be saved for this stacksync instance please make sure LogProperties.xml file is correctly placed " + e.toString());
@@ -154,11 +155,10 @@ public class Stacksync {
         //set the apache derby logs file location
         System.setProperty("derby.system.home", env.getDefaultUserConfigDir() + File.separator + Constants.CONFIG_DATABASE_DIRNAME); 
         
-        File fileLogConfig = new File(env.getDefaultUserConfigDir() + File.separator + Constants.LOGGING_DEFAULT_FILENAME);        
-        if(!fileLogConfig.exists()){
-            File fileLogConfigTemplate = new File(env.getAppConfDir()+ File.separator + Constants.LOGGING_DEFAULT_FILENAME);            
+        File fileLogConfig = new File(env.getDefaultUserConfigDir() + File.separator + "conf" + File.separator + Constants.LOGGING_DEFAULT_FILENAME);        
+        if(fileLogConfig.exists()){         
             try {
-                String content = FileUtil.readFileToString(fileLogConfigTemplate);
+                String content = FileUtil.readFileToString(fileLogConfig);
                 File file = new File(env.getDefaultUserConfigDir().getAbsolutePath() + File.separator + "logs");
                 
                 content = content.replace("REPLACED_BY_APPLICATION", file.toURI().toURL().getFile());

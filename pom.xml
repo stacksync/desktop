@@ -152,13 +152,16 @@
         <testSourceDirectory>test</testSourceDirectory>
         <resources>
             <resource>
+                <directory>resources</directory>
+            </resource>
+            <!--<resource>
                 <directory>conf</directory>
                 <filtering>true</filtering>
                 <includes>
                     <include>LogProperties.xml</include>
                 </includes>
             </resource>
-            <!--<resource>
+            <resource>
                 <directory>bin</directory>
                 <filtering>true</filtering>
                 <includes>
@@ -169,9 +172,6 @@
                 <directory>src</directory>
                 <excludes><exclude>**/*.java</exclude></excludes>
             </resource>
-            <!--<resource>
-                <directory>res</directory>
-            </resource>-->
         </resources>
         <plugins>
             <plugin>

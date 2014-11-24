@@ -29,7 +29,18 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Device;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
+import sun.net.www.protocol.file.FileURLConnection;
 
 /**
  *
@@ -124,10 +135,24 @@ public class Environment {
         defaultUserConfigFile = new File(defaultUserConfDir.getAbsoluteFile() + File.separator + Constants.CONFIG_FILENAME);
 
         appDir = new File(homePath);
-        appBinDir = new File(appDir.getAbsoluteFile()+File.separator+"bin");
-        appResDir = new File(appDir.getAbsoluteFile()+File.separator+"res");
-        appConfDir = new File(appDir.getAbsoluteFile()+File.separator+"conf");
-
+        appBinDir = new File(defaultUserConfDir.getAbsoluteFile()+File.separator+"bin");
+        appBinDir.mkdirs();
+        appResDir = new File(defaultUserConfDir.getAbsoluteFile()+File.separator+"res");
+        appResDir.mkdirs();
+        appConfDir = new File(defaultUserConfDir.getAbsoluteFile()+File.separator+"conf");
+        appConfDir.mkdirs();
+        
+        try {
+            URL resource = Environment.class.getResource("/bin");
+            copyResourcesRecursively(resource, defaultUserConfDir);
+            resource = Environment.class.getResource("/res");
+            copyResourcesRecursively(resource, defaultUserConfDir);
+            resource = Environment.class.getResource("/conf");
+            copyResourcesRecursively(resource, defaultUserConfDir);
+        } catch (Exception ex) {
+            throw new RuntimeException("Could not copy resources from JAR: "+ex);
+        }
+        
         // Errors
         if (!appDir.exists() ) {
             throw new RuntimeException("Could not find application directory at "+appDir);
@@ -193,6 +218,58 @@ public class Environment {
         } catch (Exception ex) {
             logger.error("aplicationstarter#Couldn't set native look and feel.", ex);
         }
+    }
+    
+    public void copyResourcesRecursively(URL originUrl, File destination) throws Exception {
+        URLConnection urlConnection = originUrl.openConnection();
+        if (urlConnection instanceof JarURLConnection) {
+            copyResourcesFromJar((JarURLConnection) urlConnection, destination);
+        } else if (urlConnection instanceof FileURLConnection) {
+            FileUtils.copyDirectoryToDirectory(new File(originUrl.getPath()), destination);
+        } else {
+            throw new Exception("URLConnection[" + urlConnection.getClass().getSimpleName() +
+                    "] is not a recognized/implemented connection type.");
+        }
+    }
+
+    public void copyResourcesFromJar(JarURLConnection jarConnection, File destDir) {
+
+        try {
+            JarFile jarFile = jarConnection.getJarFile();
+
+            /**
+             * Iterate all entries in the jar file.
+             */
+            for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
+
+                JarEntry jarEntry = e.nextElement();
+                String jarEntryName = jarEntry.getName();
+                String jarConnectionEntryName = jarConnection.getEntryName();
+
+                /**
+                 * Extract files only if they match the path.
+                 */
+                if (jarEntryName.startsWith(jarConnectionEntryName)) {
+
+                    String filename = jarEntryName.startsWith(jarConnectionEntryName) ? jarEntryName.substring(jarConnectionEntryName.length()) : jarEntryName;
+                    File currentFile = new File(destDir, filename);
+
+                    if (jarEntry.isDirectory()) {
+                        currentFile.mkdirs();
+                    } else {
+                        InputStream is = jarFile.getInputStream(jarEntry);
+                        OutputStream out = FileUtils.openOutputStream(currentFile);
+                        IOUtils.copy(is, out);
+                        is.close();
+                        out.close();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            // TODO add logger
+            e.printStackTrace();
+        }
+
     }
 
     public File getAppConfDir() {

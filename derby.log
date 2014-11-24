@@ -1,0 +1,10 @@
+----------------------------------------------------------------
+Mon Nov 24 15:35:30 CET 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-0149-e23a-9462-000007cf6450 
+on database directory /home/cotes/.stacksync/db/stacksync  with class loader sun.misc.Launcher$AppClassLoader@713c817 
+Loaded from file:/home/cotes/.m2/repository/org/apache/derby/derby/10.9.1.0/derby-10.9.1.0.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.7.0_51-b13
+user.dir=/home/cotes/NetBeansProjects/stacksync-git
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
