@@ -16,7 +16,10 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.gui.tray.TrayEvent;
 import com.stacksync.desktop.gui.tray.TrayEventListener;
 import com.stacksync.desktop.gui.tray.TrayIconStatus;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ResourceBundle;
+import javax.imageio.ImageIO;
 
 public class MacTray extends Tray {
     
@@ -24,7 +27,7 @@ public class MacTray extends Tray {
     private SystemTray tray;
     private PopupMenu menu;
     private TrayIcon icon;
-    private MenuItem itemStatus, itemPreferences, itemWebsite, itemWebsite2, itemQuit;
+    private MenuItem itemStatus, itemPreferences, itemWebsite, itemWebsite2, itemQuit, itemShare, itemFolder;
     
     private TrayIconStatus status;    
     private JFrame frame;
@@ -49,7 +52,7 @@ public class MacTray extends Tray {
     public void notify(String summary, String body, File imageFile) {        
         
         frame = new JFrame();
-        frame.setSize(300,125);
+        frame.setSize(400,80);
         frame.setUndecorated(true);
         
         Dimension scrSize = Toolkit.getDefaultToolkit().getScreenSize();// size of the screen
@@ -66,10 +69,16 @@ public class MacTray extends Tray {
         constraints.insets = new Insets(5, 5, 5, 5);
         constraints.fill = GridBagConstraints.BOTH;
         
-        JLabel headingLabel = new JLabel(summary);
+        JLabel headingLabel = new JLabel(summary + ": " + body);
         if(imageFile != null){
-            Icon headingIcon = new ImageIcon(imageFile.getPath());
-            headingLabel.setIcon(headingIcon); // --- use image icon you want to be as heading image.            
+            BufferedImage img;
+            try {
+                img = ImageIO.read(imageFile);
+                Image scaledImg = img.getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+                ImageIcon scaledIcon = new ImageIcon(scaledImg);
+                headingLabel.setIcon(scaledIcon);
+            } catch (IOException ex) { }
+            
         }
         headingLabel.setOpaque(false);
         frame.add(headingLabel, constraints);
@@ -91,15 +100,7 @@ public class MacTray extends Tray {
         cloesButton.setFocusable(false);
         
         frame.add(cloesButton, constraints);
-                
-        constraints.gridx = 0;
-        constraints.gridy++;
-        constraints.weightx = 1.0f;
-        constraints.weighty = 1.0f;
-        constraints.insets = new Insets(5, 5, 5, 5);
-        constraints.fill = GridBagConstraints.BOTH;        
-        JLabel messageLabel = new JLabel("<HtMl>"+body);
-        frame.add(messageLabel, constraints);
+        
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
         frame.setAlwaysOnTop(true);
@@ -114,12 +115,12 @@ public class MacTray extends Tray {
                     System.err.println(e.getMessage());
                 }
             };
-        }.start();  
+        }.start();
     }
 
     @Override
     public void updateUI() {
-        //initMenu();
+        addItemFolder();
     }
     
     @Override
@@ -164,7 +165,7 @@ public class MacTray extends Tray {
         // Profile and folders
         menu.addSeparator();
 
-        Profile profile = config.getProfile();
+        /*Profile profile = config.getProfile();
 
         final Folder folder = profile.getFolder();
         if (folder != null && folder.isActive() && folder.getLocalFile() != null) {
@@ -180,8 +181,12 @@ public class MacTray extends Tray {
             });
 
             menu.add(itemFolder);
-        }
-
+        }*/
+        
+        
+        itemFolder = new MenuItem(resourceBundle.getString("tray_folder"));
+        itemFolder.setEnabled(false);
+        menu.add(itemFolder);
         menu.addSeparator();
 
         // Preferences
@@ -195,6 +200,15 @@ public class MacTray extends Tray {
         //});
 
         //menu.add(itemPreferences);
+        
+        itemShare = new MenuItem(resourceBundle.getString("tray_share_folder"));
+        itemShare.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                fireTrayEvent(new TrayEvent(TrayEvent.EventType.SHARE));
+            }
+        });
 
         
         //menu.addSeparator();
@@ -231,6 +245,28 @@ public class MacTray extends Tray {
         });
 
         menu.add(itemQuit);
+    }
+    
+    private void addItemFolder() {
+        
+        try {
+            Profile profile = config.getProfile();
+            final Folder folder = profile.getFolder();
+            if (folder != null && folder.isActive() && folder.getLocalFile() != null) {
+
+                itemFolder.setLabel(folder.getLocalFile().getName());
+                itemFolder.setEnabled(true);
+                itemFolder.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        fireTrayEvent(new TrayEvent(TrayEvent.EventType.OPEN_FOLDER, folder.getLocalFile().getAbsolutePath()));
+                    }
+                });
+            }
+        } catch(Exception e){
+            
+        }
     }
     
     private void initIcon() throws InitializationException {

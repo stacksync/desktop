@@ -30,7 +30,6 @@ import com.stacksync.desktop.gui.error.ErrorDialog;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.desktop.util.StringUtil;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 
 /**

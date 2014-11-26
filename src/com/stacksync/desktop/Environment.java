@@ -233,6 +233,10 @@ public class Environment {
         if (urlConnection instanceof JarURLConnection) {
             copyResourcesFromJar((JarURLConnection) urlConnection, destination);
         } else if (urlConnection instanceof FileURLConnection) {
+            // I know that this is not so beatiful... I'll try to change in a future...
+            if (operatingSystem == OperatingSystem.Mac) {
+                destination = defaultUserConfDir;
+            }
             FileUtils.copyDirectoryToDirectory(new File(originUrl.getPath()), destination);
         } else {
             throw new Exception("URLConnection[" + urlConnection.getClass().getSimpleName() +
