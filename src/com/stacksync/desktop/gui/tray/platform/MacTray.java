@@ -29,13 +29,12 @@ public class MacTray extends Tray {
     private TrayIcon icon;
     private MenuItem itemStatus, itemPreferences, itemWebsite, itemWebsite2, itemQuit, itemShare, itemFolder;
     
-    private TrayIconStatus status;    
+    private TrayIconStatus status;  
     private JFrame frame;
     
     public MacTray() {
         super();
 
-        // cp. init
         this.menu = null;
         this.status = new TrayIconStatus(new TrayIconStatus.TrayIconStatusListener() {
             @Override
@@ -210,8 +209,9 @@ public class MacTray extends Tray {
             }
         });
 
+        menu.add(itemShare);
         
-        //menu.addSeparator();
+        menu.addSeparator();
         itemWebsite = new MenuItem(resourceBundle.getString("tray_stacksync_website"));
         itemWebsite.addActionListener(new ActionListener() {
 
@@ -291,7 +291,7 @@ public class MacTray extends Tray {
             throw new InitializationException("Unable to add tray icon.", e);
         }
     }
-    
+        
     
     public static void main(String[] args) throws ConfigException, InitializationException, InterruptedException {
         System.out.println("STARTED");
