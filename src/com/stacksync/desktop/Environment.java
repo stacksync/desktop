@@ -143,12 +143,20 @@ public class Environment {
         appConfDir.mkdirs();
         
         try {
+            File binFolder, resFolder, confFolder;
+            if (operatingSystem == OperatingSystem.Mac) {
+                binFolder = appBinDir;
+                resFolder = appResDir;
+                confFolder = appConfDir;
+            } else {
+                binFolder = resFolder = confFolder = defaultUserConfDir;
+            }
             URL resource = Environment.class.getResource("/bin");
-            copyResourcesRecursively(resource, defaultUserConfDir);
+            copyResourcesRecursively(resource, binFolder);
             resource = Environment.class.getResource("/res");
-            copyResourcesRecursively(resource, defaultUserConfDir);
+            copyResourcesRecursively(resource, resFolder);
             resource = Environment.class.getResource("/conf");
-            copyResourcesRecursively(resource, defaultUserConfDir);
+            copyResourcesRecursively(resource, confFolder);
         } catch (Exception ex) {
             throw new RuntimeException("Could not copy resources from JAR: "+ex);
         }
