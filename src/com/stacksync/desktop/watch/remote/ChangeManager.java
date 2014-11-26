@@ -525,15 +525,15 @@ public class ChangeManager {
                 logger.warn("Error file chunks not matching " + lastMatchingVersion.getId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + "; Trying to download the file ...");
             }
 
-            applyChangeOrNew(lastMatchingVersion, newFileUpdate);
-            return lastMatchingVersion;
+            CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
+            return newFile;
         }        
         
         if (!lastMatchingVersion.getFile().exists()) {
             logger.warn("Error while renaming file " + lastMatchingVersion.getId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + " does NOT exist; Trying to download the file ...");
 
-            applyChangeOrNew(lastMatchingVersion, newFileUpdate);
-            return lastMatchingVersion;
+            CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
+            return newFile;
         }                
 
         ///// A. Add to DB
