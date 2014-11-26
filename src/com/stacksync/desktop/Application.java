@@ -280,18 +280,19 @@ public class Application implements ConnectionController, ApplicationController 
     }
 
     private Profile initFirstTimeWizard() {
-        Profile profile = WizardDialog.showWizardOpenJdk(true);
+        Profile newProfile = WizardDialog.showWizardOpenJdk(true);
 
         // Ok clicked
-        if (profile != null) {
-            config.setProfile(profile);
+        if (newProfile != null) {
+            config.setProfile(newProfile);
+            this.profile = newProfile;
             //settingsDialog.addProfileToTree(profile, false);
             tray.updateUI();
 
-            profile.savePathToRegistry();
+            newProfile.savePathToRegistry();
             try {
                 config.save();
-                profile.setActive(true);
+                newProfile.setActive(true);
             } catch (ConfigException ex) {
                 logger.error("Could not save profile from first-start wizard. EXITING.", ex);
                 RemoteLogs.getInstance().sendLog(ex);
@@ -308,7 +309,7 @@ public class Application implements ConnectionController, ApplicationController 
             }
         }
 
-        return profile;
+        return newProfile;
     }
 
     @Override
