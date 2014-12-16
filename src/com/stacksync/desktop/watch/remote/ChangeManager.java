@@ -412,11 +412,11 @@ public class ChangeManager {
             cfclone.setUsingTempId(true);
             cfclone.setServerUploadedAck(false);
             cfclone.setSyncStatus(SyncStatus.LOCAL);
-
+            
             newConflictingLocalFile = cfclone;
 
-            Object toBeRemoved = em.merge(cf);
-            em.remove(toBeRemoved);
+            CloneFile toBeRemoved = (CloneFile)em.merge(cf);
+            toBeRemoved.deleteFromDB();
             em.merge(cfclone);
 
             /// GGIENDPART ///            
