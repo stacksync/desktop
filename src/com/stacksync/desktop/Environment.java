@@ -144,7 +144,7 @@ public class Environment {
         
         try {
             File binFolder, resFolder, confFolder;
-            if (operatingSystem == OperatingSystem.Mac) {
+            if (operatingSystem == OperatingSystem.Mac || operatingSystem == OperatingSystem.Linux) {
                 binFolder = appBinDir;
                 resFolder = appResDir;
                 confFolder = appConfDir;
@@ -234,7 +234,7 @@ public class Environment {
             copyResourcesFromJar((JarURLConnection) urlConnection, destination);
         } else if (urlConnection instanceof FileURLConnection) {
             // I know that this is not so beatiful... I'll try to change in a future...
-            if (operatingSystem == OperatingSystem.Mac) {
+            if (operatingSystem == OperatingSystem.Mac || operatingSystem == OperatingSystem.Linux) {
                 destination = defaultUserConfDir;
             }
             FileUtils.copyDirectoryToDirectory(new File(originUrl.getPath()), destination);

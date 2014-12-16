@@ -409,6 +409,9 @@ public class ChangeManager {
             cfclone.setName(newFileName);
             cfclone.setVersion(version);
             cfclone.setId(fileId);
+            cfclone.setUsingTempId(true);
+            cfclone.setServerUploadedAck(false);
+            cfclone.setSyncStatus(SyncStatus.LOCAL);
 
             newConflictingLocalFile = cfclone;
 

@@ -55,7 +55,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
                     doActionCommitted(obj, tempIdManager);
                 } else if (isMyCommit(deviceName) && !committed) {
                     update = doActionNotCommited(obj);
-                } else {
+                } else if (committed){
                     update = Update.parse(obj.getMetadata(), workspace);
                 }
 
