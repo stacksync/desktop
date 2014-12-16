@@ -225,8 +225,8 @@ public class ChangeManager {
                         if(localVersionByFilename.getServerUploadedAck()){
                             // TODO delete path from log
                             //logger.error(") File " + update.getFileId() + " has the same path " + update.getPath() + "/" + update.getName() + " and different id.");
-                        } else{
-                            List<CloneFile> previusVersions = localVersionByFilename.getPreviousVersions();
+                        } else{ 
+                           List<CloneFile> previusVersions = localVersionByFilename.getPreviousVersions();
                             previusVersions.add(localVersionByFilename);
                             
                             CloneFile firstConflictVersion = null;
@@ -552,8 +552,10 @@ public class ChangeManager {
             //si esta renombrado comprobar el checksum i sino coincide aplicar changeornew
             //checkear si checksum coincide                    
             //si existe el temp-rename eliminar
-                        
-            return newestVersion;
+            CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
+            return newFile; 
+            
+            //return newestVersion;
         }
 
         /// Do rename!
