@@ -33,6 +33,7 @@ import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.desktop.db.DatabaseHelper;
+import java.util.UUID;
 
 @Entity
 @Cacheable(false)
@@ -674,6 +675,8 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         } else {
             object.setId(getId());
         }
+        
+        object.setWorkspaceId(UUID.fromString(getWorkspace().getId()));
         
         object.setVersion(getVersion());
         object.setModifiedAt(getLastModified());
