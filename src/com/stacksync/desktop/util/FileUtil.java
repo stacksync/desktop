@@ -587,10 +587,12 @@ public class FileUtil {
     
     
     public static String getMimeType(File file){
+        FileInputStream fis = null;
         try {
             String mimetype = null;
             
-            byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
+            fis = new FileInputStream(file);
+            byte[] bytes = IOUtils.toByteArray(fis);
             
             if(mimeTypesMap != null){
                 try {            
@@ -605,6 +607,12 @@ public class FileUtil {
             return mimetype;
         } catch (IOException ex) {
             return "unknown";
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException ex) { }
+            }
         }
     }
     
