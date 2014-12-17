@@ -223,8 +223,14 @@ public class ChangeManager {
                     } else {
                         
                         if(localVersionByFilename.getServerUploadedAck()){
-                            // TODO delete path from log
-                            //logger.error(") File " + update.getFileId() + " has the same path " + update.getPath() + "/" + update.getName() + " and different id.");
+                            try{
+                                resolveConflict(localVersionByFilename, update);
+                            } catch (CouldNotApplyUpdateException ex) {
+                                logger.error("Unable to download/assemble winning file!", ex);
+                                RemoteLogs.getInstance().sendLog(ex);
+                                // TODO Inifinite loop??
+                                queue.add(update);
+                            }
                         } else{ 
                            List<CloneFile> previusVersions = localVersionByFilename.getPreviousVersions();
                             previusVersions.add(localVersionByFilename);
