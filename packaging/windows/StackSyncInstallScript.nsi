@@ -30,7 +30,7 @@
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
   
-  Icon "..\..\target\res\logo48.ico"
+  Icon "..\..\resources\res\logo48.ico"
 
 ;--------------------------------
 ;Interface Settings
@@ -95,9 +95,9 @@ Section "Installation Files" ;No components page, name is not important
   SetOutPath $INSTDIR
   
   ; Put file there
-  File /r "..\..\target\res"
-  File /r "..\..\target\bin"
-  File /r "..\..\target\conf"
+  File /r "..\..\resources\res"
+  File /r "..\..\resources\bin"
+  File /r "..\..\resources\conf"
   File /oname=Stacksync.jar ..\..\target\desktop-client-2.0-jar-with-dependencies.jar
 
   ;Store installation folder

@@ -99,7 +99,9 @@ public class WindowsTray extends Tray {
 
     @Override
     public void destroy() {
-        // Nothing.
+        try {
+            WinRegistry.setOverlayActivity(false);
+        } catch (Exception ex) {        }
     }
     
     private void initMenu(String initialMessage) {
