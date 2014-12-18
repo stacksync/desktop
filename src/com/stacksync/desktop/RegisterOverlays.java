@@ -110,7 +110,7 @@ public class RegisterOverlays {
                 registerWindowsDll(new File(filePath.getAbsolutePath() + "\\dlls\\" + dll + bits + ".dll"));
             }
             
-            restartExplorer();
+            //restartExplorer();
         } catch (InterruptedException ex) {
             throw new IOException(ex.getCause());
         }
@@ -130,7 +130,7 @@ public class RegisterOverlays {
                 unRegisterWindowsDll(new File(filePath.getAbsolutePath() + "\\dlls\\" + dll + bits + ".dll"));
             }
 
-            restartExplorer();
+            //restartExplorer();
         } catch (InterruptedException ex) {
             throw new IOException(ex.getCause());
         }

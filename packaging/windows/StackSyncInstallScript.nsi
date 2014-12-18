@@ -98,6 +98,7 @@ Section "Installation Files" ;No components page, name is not important
   File /r "..\..\resources\res"
   File /r "..\..\resources\bin"
   File /r "..\..\resources\conf"
+  File /r "dlls"
   File /oname=Stacksync.jar ..\..\target\desktop-client-2.0-jar-with-dependencies.jar
 
   ;Store installation folder
@@ -122,47 +123,46 @@ SectionEnd ; end the section
 
 Section "System Overlays"
 
-  ;IfFileExists "$SYSDIR\atl100.dll" 0 file_not_found
-	;goto end
-  ;file_not_found:
-    ;SetOutPath $SYSDIR
-    ;File "dll\atl100.dll"
-  ;end:
+  IfFileExists "$SYSDIR\atl100.dll" 0 file_not_found
+	goto end
+  file_not_found:
+    SetOutPath $SYSDIR
+    File "dlls\atl100.dll"
+  end:
 	
-  ;IfFileExists "$SYSDIR\msvcr100.dll" 0 file_not_found_msvcr
-    ;goto end2
-  ;file_not_found_msvcr:
-    ;SetOutPath $SYSDIR
-    ;File "dll\msvcr100.dll"
-  ;end2:
+  IfFileExists "$SYSDIR\msvcr100.dll" 0 file_not_found_msvcr
+    goto end2
+  file_not_found_msvcr:
+    SetOutPath $SYSDIR
+    File "dlls\msvcr100.dll"
+  end2:
   
   ;Sleep 2000
   
-  ;${If} ${RunningX64}
-      ;IfFileExists "$SYSDIR\LiferayNativityUtil_x64.dll" 0 file_not_found_util64
-        ;goto end3
-      ;file_not_found_util64:
-        ;SetOutPath $SYSDIR
-        ;File "dll\LiferayNativityUtil_x64.dll"
-      ;end3:
-  ;${Else}
-    ;IfFileExists "$SYSDIR\LiferayNativityUtil_x86.dll" 0 file_not_found_util86
-        ;goto end4
-      ;file_not_found_util86:
-        ;Messagebox MB_OK "Hola"
-        ;SetOutPath $SYSDIR
-        ;File "dll\LiferayNativityUtil_x86.dll"
-      ;end4:
-  ;${EndIf}
+  ${If} ${RunningX64}
+      IfFileExists "$SYSDIR\LiferayNativityUtil_x64.dll" 0 file_not_found_util64
+        goto end3
+      file_not_found_util64:
+        SetOutPath $SYSDIR
+        File "dlls\LiferayNativityUtil_x64.dll"
+      end3:
+  ${Else}
+    IfFileExists "$SYSDIR\LiferayNativityUtil_x86.dll" 0 file_not_found_util86
+        goto end4
+      file_not_found_util86:
+        SetOutPath $SYSDIR
+        File "dlls\LiferayNativityUtil_x86.dll"
+      end4:
+  ${EndIf}
   
-  ;Call GetJRE2
-  ;Pop $R0
+  Call GetJRE2
+  Pop $R0
  
   ; change for your purpose (-jar etc.)
-  ;StrCpy $0 '"$R0" -cp "$INSTDIR\Stacksync.jar" com.stacksync.desktop.RegisterOverlays --install --path "$INSTDIR"'
+  StrCpy $0 '"$R0" -cp "$INSTDIR\Stacksync.jar" com.stacksync.desktop.RegisterOverlays --install --path "$INSTDIR"'
  
-  ;SetOutPath $EXEDIR
-  ;ExecWait $0
+  SetOutPath $EXEDIR
+  ExecWait $0
   
 SectionEnd ;
 
@@ -238,14 +238,14 @@ Section "Uninstall"
 	;Delete "$INSTDIR\StackSyncSyncingOverlay_x86.dll"
   ;${EndIf}
   
-  ;;Call un.GetJRE2
-  ;;Pop $R0
+  Call un.GetJRE2
+  Pop $R0
  
   ; change for your purpose (-jar etc.)
-  ;;StrCpy $0 '"$R0" -cp "$INSTDIR\Stacksync.jar" com.stacksync.desktop.RegisterOverlays --uninstall --path "$INSTDIR"'
+  StrCpy $0 '"$R0" -cp "$INSTDIR\Stacksync.jar" com.stacksync.desktop.RegisterOverlays --uninstall --path "$INSTDIR"'
  
-  ;;SetOutPath $EXEDIR
-  ;;ExecWait $0
+  SetOutPath $EXEDIR
+  ExecWait $0
   
   SetOutPath $INSTDIR
 

@@ -144,7 +144,7 @@ public class Environment {
         
         try {
             File binFolder, resFolder, confFolder;
-            if (operatingSystem == OperatingSystem.Mac || operatingSystem == OperatingSystem.Linux) {
+            if (operatingSystem == OperatingSystem.Mac || operatingSystem == OperatingSystem.Linux || operatingSystem == OperatingSystem.Windows) {
                 binFolder = appBinDir;
                 resFolder = appResDir;
                 confFolder = appConfDir;
