@@ -89,7 +89,7 @@
 ; The stuff to install
 Section "Installation Files" ;No components page, name is not important
 
-  ;Call DetectJRE
+  Call DetectJRE
   
   ; Set output path to the installation directory.
   SetOutPath $INSTDIR
@@ -185,22 +185,16 @@ Function DetectJRE
   !define JAVAEXE "javaw.exe"
   
   ReadRegStr $R0 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
-  ;StrCpy $R0 ""
-  StrCmp $R0 "" DetectTry2 0
+  StrCmp $R0 "" DetectTry2
   ReadRegStr $R1 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment\$R0" "JavaHome"
-  StrCpy $R1 "$R1\bin\${JAVAEXE}"
-  ;Messagebox MB_OK "$R0"
-  ;Messagebox MB_OK "$R1"
+  StrCmp $R1 "" DetectTry2
   goto JavaFound
   
  DetectTry2:
   ReadRegStr $R0 HKLM "SOFTWARE\JavaSoft\Java Development Kit" "CurrentVersion"
-  ;StrCpy $R0 ""
   StrCmp $R0 "" NotDetected
   ReadRegStr $R1 HKLM "SOFTWARE\JavaSoft\Java Development Kit\$R0" "JavaHome"
   StrCpy $R1 "$R1\bin\${JAVAEXE}"
-  ;Messagebox MB_OK "JDK $R0"
-  ;Messagebox MB_OK "$R1"
   goto JavaFound
   
  NotDetected:
@@ -208,6 +202,7 @@ Function DetectJRE
   Quit
 
  JavaFound:
+  StrCpy $R1 "$R1\bin\${JAVAEXE}"
   
 FunctionEnd
 
@@ -309,6 +304,8 @@ Function GetJRE2
  
   IfErrors 0 JreFound  ;; 3) found it in the registry
   StrCpy $R0 "${JAVAEXE}"  ;; 4) wishing you good luck
+
+
  
  JreFound:
   Pop $R1
