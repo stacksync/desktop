@@ -18,6 +18,7 @@
 package com.stacksync.desktop.repository;
 
 import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.commons.models.SyncMetadata;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
@@ -232,38 +233,41 @@ public class Update {
         this.mimeType = mimeType;
     }
     
-    public static Update parse(ItemMetadata itemMetadata, CloneWorkspace workspace) 
+    public static Update parse(SyncMetadata itemMetadata, CloneWorkspace workspace) 
         throws NullPointerException {
         
         Update update = new Update();
-
+        
         update.setServerUploaded(true);
         update.setServerUploadedAck(true);
         update.setServerUploadedTime(new Date());
 
-        update.setFileId(itemMetadata.getId());
-        update.setVersion(itemMetadata.getVersion());
-        
-        update.setModifiedAt(itemMetadata.getModifiedAt());
-        update.setStatus(CloneFile.Status.valueOf(itemMetadata.getStatus()));
-        update.setChecksum(itemMetadata.getChecksum());
-        update.setMimeType(itemMetadata.getMimetype());
-        update.setFileSize(itemMetadata.getSize());
-        update.setFolder(itemMetadata.isFolder());
+        //TODO: ABE Metadata management; refactor polymorphism
+        ItemMetadata it = (ItemMetadata) itemMetadata;
 
-        update.setName(itemMetadata.getFilename());
+        update.setFileId(it.getId());
+        update.setVersion(it.getVersion());
+                
+        update.setModifiedAt(it.getModifiedAt());
+        update.setStatus(CloneFile.Status.valueOf(it.getStatus()));
+        update.setChecksum(it.getChecksum());
+        update.setMimeType(it.getMimetype());
+        update.setFileSize(it.getSize());
+        update.setFolder(it.isFolder());
+
+        update.setName(it.getFilename());
 
         // Parent
-        if (itemMetadata.getParentId() != null && !itemMetadata.getParentId().toString().isEmpty()) {
-            update.setParentFileId(itemMetadata.getParentId());
-            if (itemMetadata.getParentVersion() != null) {
-                update.setParentFileVersion(itemMetadata.getParentVersion());
+        if (it.getParentId() != null && !it.getParentId().toString().isEmpty()) {
+            update.setParentFileId(it.getParentId());
+            if (it.getParentVersion() != null) {
+                update.setParentFileVersion(it.getParentVersion());
             }
         }
 
-        update.setChunks(itemMetadata.getChunks());
+        update.setChunks(it.getChunks());
         update.setWorkpace(workspace);
-
+        
         return update;
         
     }

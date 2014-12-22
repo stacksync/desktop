@@ -8,6 +8,7 @@ import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.commons.exceptions.WorkspaceNotUpdatedException;
 import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.commons.models.SyncMetadata;
 import com.stacksync.commons.models.Workspace;
 import com.stacksync.commons.omq.ISyncService;
 import com.stacksync.commons.requests.CommitRequest;
@@ -55,8 +56,8 @@ public class Server {
 
         GetChangesRequest request = new GetChangesRequest(UUID.fromString(accountId), UUID.fromString(workspace.getId()));
 
-        List<ItemMetadata> items = syncServer.getChanges(request);
-        for (ItemMetadata item : items) {
+        List<SyncMetadata> items = syncServer.getChanges(request);
+        for (SyncMetadata item : items) {
             Update update = Update.parse(item, workspace);
             updates.add(update);
         }
@@ -109,7 +110,7 @@ public class Server {
         
     }
 
-    public void commit(String accountId, CloneWorkspace workspace, List<ItemMetadata> commitItems) throws IOException {
+    public void commit(String accountId, CloneWorkspace workspace, List<SyncMetadata> commitItems) throws IOException {
 
         CommitRequest request = new CommitRequest(UUID.fromString(accountId), UUID.fromString(workspace.getId()),
                 config.getDeviceId(), commitItems);

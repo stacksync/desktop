@@ -28,6 +28,7 @@ import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.commons.models.SyncMetadata;
 import java.io.IOException;
 import java.util.*;
 import org.apache.log4j.Logger;
@@ -166,7 +167,7 @@ public class RemoteWatcher {
             Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
             // This hashmap contains a list of files changed in each workspace.
-            HashMap<CloneWorkspace, List<ItemMetadata>> workspaces = new HashMap<CloneWorkspace, List<ItemMetadata>>();
+            HashMap<CloneWorkspace, List<SyncMetadata>> workspaces = new HashMap<CloneWorkspace, List<SyncMetadata>>();
             
             for(List<CloneFile> w: updatedFiles.values()){
                 for(CloneFile c: w){
@@ -177,11 +178,11 @@ public class RemoteWatcher {
                     CloneWorkspace workspace = c.getWorkspace();
                     ItemMetadata obj = c.mapToItemMetadata();
                     
-                    List<ItemMetadata> itemsToCommit;
+                    List<SyncMetadata> itemsToCommit;
                     if (workspaces.containsKey(workspace)) {
                         itemsToCommit = workspaces.get(workspace);
                     } else {
-                        itemsToCommit = new ArrayList<ItemMetadata>();
+                        itemsToCommit = new ArrayList<SyncMetadata>();
                     }
                     
                     itemsToCommit.add(obj);
@@ -193,7 +194,7 @@ public class RemoteWatcher {
             
             // Commit all files modified in each workspace
             for (CloneWorkspace workspace : workspaces.keySet()) {
-                List<ItemMetadata> commitItems = workspaces.get(workspace);
+                List<SyncMetadata> commitItems = workspaces.get(workspace);
                 server.commit(accountId, workspace, commitItems);
             }
             
