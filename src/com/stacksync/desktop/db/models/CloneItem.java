@@ -189,7 +189,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     
     public void generatePath() {
 
-        if (parent == null) {
+        /*if (parent == null) {
             // Check if I'm in the default wp
             DatabaseHelper db = DatabaseHelper.getInstance();
             CloneWorkspace defaultWorkspace = db.getDefaultWorkspace();
@@ -217,7 +217,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
             
         } else {
             setPath();
-        }
+        }*/
     }
     
     private void setPath() {
@@ -283,9 +283,9 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     public List<CloneItem> getVersionHistory() {
         List<CloneItem> versions = new ArrayList<CloneItem>();
 
-        versions.addAll(getPreviousVersions());
+        /*versions.addAll(getPreviousVersions());
         versions.add(this);
-        versions.addAll(getNextVersions());
+        versions.addAll(getNextVersions());*/
 
         return versions;
     }
@@ -366,7 +366,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         query.setMaxResults(1);
         
         query.setParameter("id", getId());
-        query.setParameter("version", getVersion());
+        //query.setParameter("version", getVersion());
         query.setParameter("syncStatus", SyncStatus.UPTODATE);
 
         try {
