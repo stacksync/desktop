@@ -5,8 +5,18 @@
  */
 package com.stacksync.desktop.test.db;
 
+import com.stacksync.desktop.Constants;
+import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Database;
+import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
 
 /**
  *
@@ -24,15 +34,70 @@ public class TestItem {
     public static void setUpClass() {
         
         // Create and copy config file
+        File configFile = prepareConfigFile();
+        
+        // Read config file and load database
+        loadDatabase(configFile);
+        
+        database.getEntityManager();
+    }
+    
+    public static File prepareConfigFile() {
         File configFolder = new File("database_test");
         configFolder.mkdir();
         
-        // Read config file and load database
-        //loadDatabase();
+        File configFile = new File(configFolder.getAbsoluteFile() + File.separator + Constants.CONFIG_FILENAME);
+        
+        InputStream is = null;
+        try {
+            is = TestItem.class.getResourceAsStream(Constants.CONFIG_DEFAULT_FILENAME);
+
+            FileUtil.writeFile(is, configFile);
+        } catch (IOException e) {
+            assert false;
+        } finally {
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException ex) {
+                assert false;
+            }
+        }
+        
+        return configFile;
     }
     
-    public static void loadDatabase(){
+    public static void loadDatabase(File configFile){
         
+        InputStream configStream = null;
+        try {
+            configStream = new FileInputStream(configFile);
+            parseConfigFile(configStream);
+        } catch (FileNotFoundException ex) {
+            assert false;
+        } finally {
+            try {
+                if (configStream != null) {
+                    configStream.close();
+                }
+            } catch (IOException ex) { }
+        }
+    }
+    
+    public static void parseConfigFile(InputStream configStream) {
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
+            Document doc = dBuilder.parse(configStream);
+            ConfigNode node = new ConfigNode(doc.getDocumentElement());
+
+            database.load(node.findChildByName("database"));
+
+        } catch (Exception e) {
+            assert false;
+        }
     }
     
     //@AfterClass
