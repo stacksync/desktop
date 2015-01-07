@@ -17,6 +17,8 @@
  */
 package com.stacksync.desktop.repository;
 
+import com.stacksync.commons.models.ABEItemMetadata;
+import com.stacksync.commons.models.ABEMetaComponent;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.SyncMetadata;
 import com.stacksync.desktop.db.models.CloneFile;
@@ -50,6 +52,11 @@ public class Update {
     private boolean serverUploadedAck;    
     private Date serverUploadedTime;
     private boolean conflicted;
+    
+    /* ABE Encryption Fields */
+    private List<ABEMetaComponent> abeComponents;
+    private String cipherSymKey;
+
     
     // chunkIds (checksums) 
     private List<String> chunks;   
@@ -233,18 +240,41 @@ public class Update {
         this.mimeType = mimeType;
     }
     
+    public List<ABEMetaComponent> getAbeComponents() {
+        return abeComponents;
+    }
+
+    public void setAbeComponents(List<ABEMetaComponent> abeComponents) {
+        this.abeComponents = abeComponents;
+    }
+
+    public String getCipherSymKey() {
+        return cipherSymKey;
+    }
+
+    public void setCipherSymKey(String cipherSymKey) {
+        this.cipherSymKey = cipherSymKey;
+    }
+    
+    private void setAbeMetadata(ABEItemMetadata abeMeta) {
+        setAbeComponents(abeMeta.getAbeComponents());
+        setCipherSymKey(abeMeta.getCipherSymKey());
+    }
+        
     public static Update parse(SyncMetadata itemMetadata, CloneWorkspace workspace) 
         throws NullPointerException {
-        
         Update update = new Update();
-        
         update.setServerUploaded(true);
         update.setServerUploadedAck(true);
         update.setServerUploadedTime(new Date());
 
-        //TODO: ABE Metadata management; refactor polymorphism
+        /* Parse ABE Metadata as well if workspace is ABE-encrypted */
+        if (workspace.isAbeEncrypted()) {
+            update.setAbeMetadata((ABEItemMetadata) itemMetadata);
+        }
+        
         ItemMetadata it = (ItemMetadata) itemMetadata;
-
+        
         update.setFileId(it.getId());
         update.setVersion(it.getVersion());
                 
@@ -271,5 +301,5 @@ public class Update {
         return update;
         
     }
-    
+        
 }

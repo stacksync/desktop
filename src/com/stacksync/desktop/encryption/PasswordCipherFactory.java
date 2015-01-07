@@ -1,4 +1,4 @@
-package com.stacksync.desktop.config.cipher;
+package com.stacksync.desktop.encryption;
 
 public class PasswordCipherFactory {
     

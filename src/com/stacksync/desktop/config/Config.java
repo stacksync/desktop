@@ -17,6 +17,7 @@
  */
 package com.stacksync.desktop.config;
 
+import com.stacksync.desktop.encryption.BasicEncryption;
 import com.stacksync.desktop.config.profile.BrokerProperties;
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,7 +58,7 @@ public class Config {
     private static final Config instance = new Config();
     private File configDir;
     private File configFile;
-    private Encryption encryption;
+    private BasicEncryption encryption;
     private Document doc;
     private ConfigNode self;
     private String logApiRestUrl;
@@ -125,11 +126,11 @@ public class Config {
         return instance;
     }
 
-    private Encryption getEncryption() {
-        Encryption encrypt = null;
+    private BasicEncryption getEncryption() {
+        BasicEncryption encrypt = null;
         try {
             String password = "stacksync";
-            encrypt = new Encryption(password);
+            encrypt = new BasicEncryption(password);
         } catch (ConfigException ex) {
             logger.error("Error creating config file encrypter.", ex);
         }

@@ -1,4 +1,4 @@
-package com.stacksync.desktop.config.cipher;
+package com.stacksync.desktop.encryption;
 
 /*
  * This class is a simple example of how to use the password cipher for

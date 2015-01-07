@@ -5,11 +5,13 @@ import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Configurable;
-import com.stacksync.desktop.config.Encryption;
+import com.stacksync.desktop.encryption.BasicEncryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.encryption.AbeEncryption;
+import com.stacksync.desktop.encryption.Encryption;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.NoPasswordException;
@@ -269,6 +271,8 @@ public class Profile implements Configurable {
                 }
                 workspace.setPassword(password);
                 generateAndSaveEncryption(workspace.getId(), password);
+            } else if (workspace.isAbeEncrypted()) {
+                generateAndSaveAbeEncryption(workspace.getId());
             }
             
             // new workspace, let's create the workspace folder
@@ -283,7 +287,16 @@ public class Profile implements Configurable {
     private void generateAndSaveEncryption(String id, String password) throws InitializationException {
         try {
             // Create workspace encryption
-            Encryption encryption = new Encryption(password);
+            BasicEncryption encryption = new BasicEncryption(password);
+            this.workspaceEncryption.put(id, encryption);
+        } catch (ConfigException ex) {
+            throw new InitializationException(ex);
+        }
+    }
+    
+    private void generateAndSaveAbeEncryption(String id) throws InitializationException {
+        try {
+            AbeEncryption encryption = new AbeEncryption();
             this.workspaceEncryption.put(id, encryption);
         } catch (ConfigException ex) {
             throw new InitializationException(ex);

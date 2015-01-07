@@ -19,8 +19,8 @@ package com.stacksync.desktop.connection.plugins.swift;
 
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
-import com.stacksync.desktop.config.cipher.PasswordCipher;
-import com.stacksync.desktop.config.cipher.PasswordCipherFactory;
+import com.stacksync.desktop.encryption.PasswordCipher;
+import com.stacksync.desktop.encryption.PasswordCipherFactory;
 import com.stacksync.desktop.connection.plugins.ConfigPanel;
 import com.stacksync.desktop.connection.plugins.Connection;
 import com.stacksync.desktop.connection.plugins.PluginInfo;

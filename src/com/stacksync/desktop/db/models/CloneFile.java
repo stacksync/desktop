@@ -81,6 +81,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Transient
     private Folder root;
     
+    @Transient
+    private byte[] cipherSymKey;
+    
     // FILE PROPERTIES
     @Column(name = "is_folder")
     private boolean folder;

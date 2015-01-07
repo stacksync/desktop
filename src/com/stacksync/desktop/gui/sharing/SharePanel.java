@@ -3,7 +3,7 @@ package com.stacksync.desktop.gui.sharing;
 import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.config.Encryption;
+import com.stacksync.desktop.encryption.BasicEncryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
@@ -178,7 +178,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
                         .addGap(5, 5, 5)
                         .addComponent(lblPasswordConfirm, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(shareButton)
                     .addComponent(cancelButton))
                 .addGap(14, 14, 14))
@@ -366,7 +366,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
 
             // TODO check the password length
             try {
-                Encryption encryption = new Encryption(new String(txtPassword.getPassword()));
+                BasicEncryption encryption = new BasicEncryption(new String(txtPassword.getPassword()));
             } catch (ConfigException ex) {
                 ErrorMessage.showMessage(this, "Error", ex.getMessage());
                 check = false;

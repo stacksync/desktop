@@ -20,7 +20,7 @@ package com.stacksync.desktop.test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import com.stacksync.desktop.config.Encryption;
+import com.stacksync.desktop.encryption.BasicEncryption;
 
 /**
  *
@@ -28,7 +28,7 @@ import com.stacksync.desktop.config.Encryption;
  */
 public class TestEncryption {
     public static void main(String[] args) throws Exception {
-        Encryption enc = new Encryption("encpass");
+        BasicEncryption enc = new BasicEncryption("encpass");
         enc.setPassword("encpass");
 
         // Encrypt

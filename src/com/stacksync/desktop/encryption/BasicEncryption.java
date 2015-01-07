@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.stacksync.desktop.config;
+package com.stacksync.desktop.encryption;
 
 /**
  *
@@ -31,7 +31,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 import com.stacksync.desktop.exceptions.ConfigException;
 
-public class Encryption {
+public class BasicEncryption implements Encryption {
     
     /**
      * Default cipher to encrypt the chunks.
@@ -51,7 +51,7 @@ public class Encryption {
     private SecretKeySpec keySpec;
     private Cipher cipher;
 
-    public Encryption(String password) throws ConfigException {
+    public BasicEncryption(String password) throws ConfigException {
         this.password = password;
         cipherStr = DEFAULT_ENCRYPTION_CIPHER;
         keylength = DEFAULT_ENCRYPTION_KEYLENGTH;
@@ -59,7 +59,7 @@ public class Encryption {
         init();
     }
 
-    private void init() throws ConfigException {
+    public void init() throws ConfigException {
         if(cipherStr.toLowerCase().compareTo("none") != 0){
 
             try {

@@ -47,6 +47,9 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="encrypted", nullable=false)
     private boolean encrypted;
+
+    @Column(name="abe_encrypted", nullable=false)
+    private boolean abeEncrypted;
     
     @Column(name="password")
     private String password;
@@ -76,9 +79,12 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.owner = r.getOwner().getId().toString();
         this.pathWorkspace = generatePath();
         this.encrypted = true;
+        this.abeEncrypted = false;
         
-        if (!defaultWorkspace)
+        if (!defaultWorkspace) {
             this.encrypted = r.isEncrypted();
+            this.abeEncrypted = r.isAbeEncrypted();
+        }
     }
 
     public String getId() {
@@ -191,6 +197,14 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     public void setEncrypted(boolean encrypted) {
         this.encrypted = encrypted;
     }
+    
+    public boolean isAbeEncrypted() {
+        return abeEncrypted;
+    }
+
+    public void setAbeEncrypted(boolean abeEncrypted) {
+        this.abeEncrypted = abeEncrypted;
+    }
 
     public boolean isDefaultWorkspace() {
         return defaultWorkspace;
@@ -238,7 +252,9 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         workspace.setSwiftStorageURL(getSwiftStorageURL());
         workspace.setPassword(getPassword());
         workspace.setEncrypted(isEncrypted());
+        workspace.setAbeEncrypted(isAbeEncrypted());
         workspace.setDefaultWorkspace(isDefaultWorkspace());
         return workspace;
     }
+
 }

@@ -7,7 +7,6 @@ import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.commons.exceptions.WorkspaceNotUpdatedException;
 import com.stacksync.commons.models.AccountInfo;
-import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.SyncMetadata;
 import com.stacksync.commons.models.Workspace;
 import com.stacksync.commons.omq.ISyncService;

@@ -17,7 +17,7 @@
  */
 package com.stacksync.desktop.gui.wizard;
 
-import com.stacksync.desktop.config.Encryption;
+import com.stacksync.desktop.encryption.BasicEncryption;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
@@ -316,7 +316,7 @@ public class EncryptionPanel extends SettingsPanel {
 
             // TODO check the password length
             try {
-                Encryption encryption = new Encryption(new String(txtPassword.getPassword()));
+                BasicEncryption encryption = new BasicEncryption(new String(txtPassword.getPassword()));
             } catch (ConfigException ex) {
                 ErrorMessage.showMessage(this, "Error", ex.getMessage());
                 check = false;
