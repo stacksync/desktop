@@ -59,7 +59,7 @@ public class BasicEncryption implements Encryption {
         init();
     }
 
-    public void init() throws ConfigException {
+    private void init() throws ConfigException {
         if(cipherStr.toLowerCase().compareTo("none") != 0){
 
             try {

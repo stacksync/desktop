@@ -8,20 +8,9 @@ package com.stacksync.desktop.encryption;
 import com.ast.cloudABE.cloudABEClient.CloudABEClient;
 import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
 import com.stacksync.desktop.exceptions.ConfigException;
-import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -29,23 +18,29 @@ import org.xml.sax.SAXException;
  */
 public class AbeEncryption implements Encryption {
 
-    // TODO: Move constant into the proper config file
-    private static final String defaultXMLPath = "./src/com/stacksync/desktop/encryption/attribute_universe.xml";
-    private CloudABEClientAdapter cabe;
+    //TODO: Move constant into the proper config file
+    private static final String DEFAULT_XML_PATH = "./src/com/stacksync/desktop/encryption/attribute_universe.xml";
+    //TODO: Default Access Structure for testing purposes. Must either be provided beforehand or computed.
+    private static final String DEFAULT_ACCESS_STRUCT = "(MarketingA | (DesignA & DesignB))";
+    
+    private String xmlPath;
+    private String accessStructure;
+    private CloudABEClient cabe;
 
     public AbeEncryption() throws ConfigException {
         try {
-            cabe = new CloudABEClientAdapter("null");
-            //TODO: attribute universe should be obtained remotely beforehand
-            cabe.setupABESystem(0, parseAttributeUniverse());
+            cabe = new CloudABEClientAdapter();
+            xmlPath = DEFAULT_XML_PATH;
+            accessStructure = DEFAULT_ACCESS_STRUCT;
+            init();
         } catch (Exception e) {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
         }
     }
 
-    @Override
-    public void init() throws ConfigException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private void init() {
+            cabe.setupABESystem(0, cabe.getAttUniverseFromXML(xmlPath));
+            cabe.newABEUser("stacksync_user", accessStructure);
     }
 
     @Override
@@ -60,47 +55,5 @@ public class AbeEncryption implements Encryption {
         //TODO
         //cabe.decryptData(data, attributes);
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    //TODO: Move to ABE library
-    private ArrayList<String> parseAttributeUniverse() throws SAXException, IOException, ParserConfigurationException {
-        Node root = null;
-        ArrayList<String> universe = new ArrayList<String>();
-
-        /*
-         Parse the xml file
-         */
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc;
-        doc = builder.parse(defaultXMLPath);
-        root = (Node) doc.getDocumentElement();
-        /*
-         Build the attribute universe set
-         */
-        if (root != null) {
-            universe = buildAttSet(root);
-        }
-
-        return universe;
-    }
-
-    private static ArrayList<String> buildAttSet(Node root) {
-        NodeList nodeList = root.getChildNodes();
-        ArrayList<String> universe = new ArrayList<String>();
-        if (nodeList.getLength() == 1) {
-            universe.add(root.getNodeName());
-        }
-        for (int count = 0; count < nodeList.getLength(); count++) {
-            Node tempNode = nodeList.item(count);
-            /* make sure it is a node element */
-            if (tempNode.getNodeType() == Node.ELEMENT_NODE) {
-                if (tempNode.hasChildNodes()) {
-                    /* loop again if has child nodes */
-                    universe.addAll(buildAttSet(tempNode));
-                }
-            }
-        }
-        return universe;
     }
 }

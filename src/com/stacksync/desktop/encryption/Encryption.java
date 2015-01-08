@@ -15,8 +15,6 @@ import javax.crypto.IllegalBlockSizeException;
  * @author javigd
  */
 public interface Encryption {
-
-    public void init() throws ConfigException;
     
     public byte[] encrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException;
 

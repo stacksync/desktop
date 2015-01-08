@@ -145,8 +145,8 @@
             <version>1.0.1</version>
         </dependency>
         <dependency>
-            <groupId>com.ast.cloudABE</groupId>
-            <artifactId>cloudABE</artifactId>
+            <groupId>com.ast.ABEClient</groupId>
+            <artifactId>abeClient</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>

@@ -6,6 +6,8 @@
     <class>com.stacksync.desktop.db.models.CloneChunk</class>
     <class>com.stacksync.desktop.db.models.CloneFile</class>
     <class>com.stacksync.desktop.db.models.CloneWorkspace</class>
+    <class>com.stacksync.desktop.db.models.ABEMetaComponent</class>
+    <class>com.stacksync.desktop.db.models.Attribute</class>
     <shared-cache-mode>NONE</shared-cache-mode>
     <properties>
       <property name="javax.persistence.jdbc.url" value="REPLACED_BY_APPLICATION"/>
