@@ -106,7 +106,7 @@ public class Config {
          */
         device = new Device();
         brokerProps = new BrokerProperties();
-        database = new Database();
+        database = new Database(this.configDir.getAbsolutePath());
         cache = new Cache();
 
         encryption = getEncryption();

@@ -27,7 +27,8 @@ public class TestItem {
     private static Database database;
     
     public TestItem() {
-        database = new Database();
+        File configFolder = new File("database_test");
+        database = new Database(configFolder.getAbsolutePath());
     }
     
     //@BeforeClass
@@ -114,20 +115,11 @@ public class TestItem {
     public void tearDown() {
     }
 
-    //@Test
-    public void test() {
-        System.out.println("Hello");
-    }
-    // TODO add test methods here.
-    // The methods must be annotated with annotation @Test. For example:
-    //
-    // @Test
-    // public void hello() {}
-    
     public static void main(String[] args) {
         TestItem test = new TestItem();
         TestItem.setUpClass();
+        
+        
         TestItem.tearDownClass();
-        test.test();
     }
 }

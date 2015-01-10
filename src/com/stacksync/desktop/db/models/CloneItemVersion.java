@@ -5,52 +5,26 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import javax.persistence.*;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.logging.RemoteLogs;
 
 @Entity
 @Cacheable(false)
-@IdClass(value = CloneFilePk.class)
 public class CloneItemVersion extends PersistentObject implements Serializable, Cloneable {
 
     private static final Logger logger = Logger.getLogger(CloneItemVersion.class.getName());
-    private static final Config config = Config.getInstance();
-    
-    private static final long serialVersionUID = 12314234L;
 
-    /**
-     * <ul> <li>UNKNOWN <li>NEW: New file <lI>CHANGED: The file contents have
-     * changed. At least one chunk differs. <li>RENAMED: The file path or name
-     * has changed. <li>MERGED: The file history has been merged to a different
-     * file. </ul>
-     */
     public enum Status { UNKNOWN, NEW, CHANGED, RENAMED, DELETED };
 
-    /**
-     * LOCAL: The file entry hasn't been propagated to the server yet IN_UPDATE:
-     * The file entry should be included in the update-file, but not (yet) in
-     * the base file IN_BASE: The file entry should be included in the base-file
-     * (= complete DB dump)
-     */
     public enum SyncStatus { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
     
-    /**
-     * versionId of the root file; identifies the history of a file
-     */
     @Id
-    @ManyToOne(cascade=CascadeType.REMOVE)
-    @JoinColumns({
-        @JoinColumn(name = "file_id", referencedColumnName = "file_id"),
-    })
-    @Column(name = "file_id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     
-    @Id
     @Column(name = "file_version", nullable = false)
     private long version;
     
@@ -88,7 +62,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     private Date serverUploadedTime;
 
     public CloneItemVersion() {
-        this.id = new Random().nextLong();
         this.version = 1;
         this.chunks = new ArrayList<CloneChunk>();
         this.status = Status.UNKNOWN;
@@ -110,6 +83,10 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
         this.lastModified = new Date(file.lastModified());       
         
     }
+    
+    public Long getId() {
+        return id;
+    }
 
     public long getVersion() {
         return version;
@@ -117,14 +94,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
 
     public void setVersion(long version) {
         this.version = version;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
     
     public SyncStatus getSyncStatus() {
@@ -171,92 +140,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
         this.checksum = checksum;
     }
 
-    public CloneItemVersion getPreviousVersion() {
-        // If we are the first, there are no others
-        if (getVersion() == 1) {
-            return null;
-        }
-
-        List<CloneItemVersion> pV = getPreviousVersions();
-
-        if (pV.isEmpty()) {
-            return null;
-        }
-
-        return pV.get(pV.size() - 1);
-    }
-
-    public List<CloneItemVersion> getPreviousVersions() {
-        // If we are the first, there are no others
-        if (getVersion() == 1) {
-            return new ArrayList<CloneItemVersion>();
-        }
-
-        String queryStr = "select c from CloneFile c where "
-                + "     c.id = :id and "
-                + "     c.version < :version "
-                + "     order by c.version asc";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItemVersion.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
-        
-        query.setParameter("id", getId());
-        query.setParameter("version", getVersion());
-
-        List<CloneItemVersion> list = query.getResultList();
-        return list;
-    }
-    
-    public List<CloneItemVersion> getNextVersions() {
-        String queryStr = "select c from CloneFile c where "
-                + "     c.id = :id and "
-                + "     c.version > :version "
-                + "     order by c.version asc";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItemVersion.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
-        
-        query.setParameter("id", getId());
-        query.setParameter("version", getVersion());
-        
-        List<CloneItemVersion> list = query.getResultList();
-        return list;
-    }
-    
-    public void deleteHigherVersion() {
-
-        String queryStr = "DELETE from CloneFile c where "
-                + "     c.id = :id and "
-                + "     c.version > :version";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItemVersion.class);
-        
-        query.setParameter("id", getId());
-        query.setParameter("version", getVersion());
-
-        config.getDatabase().getEntityManager().getTransaction().begin();
-        query.executeUpdate();
-        config.getDatabase().getEntityManager().getTransaction().commit();
-    }
-    
-    public void deleteFromDB() {
-
-        String queryStr = "DELETE from CloneFile c where "
-                + "     c.id = :id and "
-                + "     c.version = :version";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItemVersion.class);
-        
-        query.setParameter("id", getId());
-        query.setParameter("version", getVersion());
-
-        config.getDatabase().getEntityManager().getTransaction().begin();
-        query.executeUpdate();
-        config.getDatabase().getEntityManager().getTransaction().commit();
-    }
-
     public Status getStatus() {
         return status;
     }
@@ -296,7 +179,7 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (this.getId() != null ? this.getId().hashCode() : 0);
         hash += version;
         return hash;
     }
@@ -335,23 +218,34 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
 
         CloneItemVersion other = (CloneItemVersion) object;
 
-        if (other.id == null || this.id == null) {
+        if (other.getId() == null || this.getId() == null) {
             return false;
         }
 
-        return other.id.equals(this.id) && other.version == this.version;
+        return other.getId().equals(this.getId()) && other.version == this.version;
     }
 
     @Override
     public String toString() {
 
-        return "CloneFile[id=" + id + ", version=" + version + ", name="  
+        return "CloneFile[id=" + getId() + ", version=" + version + ", name="  
                 + name + " checksum=" + checksum + ", chunks=" + chunks.size() 
                 + ", status=" + status + ", syncStatus=" + syncStatus + "]";
     }
-
-    public long getNewRandom() {
-        return new Random().nextLong();
-    }
     
+    /*public void deleteFromDB() {
+
+        String queryStr = "DELETE from CloneFile c where "
+                + "     c.id = :id and "
+                + "     c.version = :version";
+
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItemVersion.class);
+        
+        query.setParameter("id", getId());
+        query.setParameter("version", getVersion());
+
+        config.getDatabase().getEntityManager().getTransaction().begin();
+        query.executeUpdate();
+        config.getDatabase().getEntityManager().getTransaction().commit();
+    }*/
 }

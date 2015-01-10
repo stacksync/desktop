@@ -29,7 +29,6 @@ public class Folder implements Configurable {
     private Profile profile;
     
     private boolean active;
-    private String remoteId;
     private File localFile;
 
     public Folder() {
@@ -40,7 +39,6 @@ public class Folder implements Configurable {
         this.profile = profile;
         
         this.active = true;
-        this.remoteId = "";
         this.localFile = null;
     }
 
@@ -101,6 +99,6 @@ public class Folder implements Configurable {
     
     @Override
     public String toString(){
-        return "Folder[active=" + active + ", remoteId=" + remoteId + ", localFile= " + localFile + "]";
+        return "Folder[active=" + active + ", localFile= " + localFile + "]";
     }
 }

@@ -315,7 +315,7 @@ public class DatabaseHelper {
     }
 
     private CloneFile createFile(Profile profile, Update update, SyncStatus syncStatus) {
-        CloneFile newFile = new CloneFile();
+        CloneFile newFile = new CloneFile(profile.getFolder());
                
         newFile.setId(update.getFileId());
         newFile.setVersion(update.getVersion());

@@ -152,9 +152,14 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.usingTempId = true;
         this.workspaceRoot = false; // By default
     }
+    
+    public CloneFile(Folder root) {
+        this();
+        this.root = root;
+    }
 
     public CloneFile(Folder root, File file) {
-        this();
+        this(root);
 
         // Set account
         this.profile = root.getProfile();
@@ -174,10 +179,6 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     }
 
     public Folder getRoot() {
-        if (root == null) {
-            root = getProfile().getFolder();
-        }
-
         return root;
     }
 

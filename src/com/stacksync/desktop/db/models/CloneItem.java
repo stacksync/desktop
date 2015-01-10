@@ -2,57 +2,33 @@ package com.stacksync.desktop.db.models;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javax.persistence.*;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
-import com.stacksync.desktop.db.DatabaseHelper;
 
 @Entity
 @Cacheable(false)
-@IdClass(value = CloneFilePk.class)
 public class CloneItem extends PersistentObject implements Serializable, Cloneable {
 
     private static final Logger logger = Logger.getLogger(CloneItem.class.getName());
-    private static final Config config = Config.getInstance();
     
     private static final long serialVersionUID = 12314234L;
 
-    /**
-     * <ul> <li>UNKNOWN <li>NEW: New file <lI>CHANGED: The file contents have
-     * changed. At least one chunk differs. <li>RENAMED: The file path or name
-     * has changed. <li>MERGED: The file history has been merged to a different
-     * file. </ul>
-     */
     public enum Status { UNKNOWN, NEW, CHANGED, RENAMED, DELETED };
 
-    /**
-     * LOCAL: The file entry hasn't been propagated to the server yet IN_UPDATE:
-     * The file entry should be included in the update-file, but not (yet) in
-     * the base file IN_BASE: The file entry should be included in the base-file
-     * (= complete DB dump)
-     */
     public enum SyncStatus { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
     
-    /**
-     * versionId of the root file; identifies the history of a file
-     */
     @Id
     @Column(name = "file_id", nullable = false)
     private Long id;
     
     @Column(name = "latest_version")
     private long latest_version;
-    
-    @Transient
-    private Profile profile;
     
     @Transient
     private Folder root;
@@ -92,6 +68,9 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     
     @Column(name="is_workspace_root", nullable=false)
     private boolean workspaceRoot;
+    
+    @OneToMany (targetEntity = CloneItemVersion.class)
+    private List<CloneItemVersion> versions;
 
     public CloneItem() {
         this.id = new Random().nextLong();
@@ -105,13 +84,14 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         this.usingTempId = true;
         this.workspaceRoot = false; // By default
     }
+    
+    public CloneItem(Folder root) {
+        this();
+        this.root = root;
+    }
 
     public CloneItem(Folder root, File file) {
-        this();
-
-        // Set account
-        this.profile = root.getProfile();
-        this.root = root;
+        this(root);
         
         this.name = file.getName();
         this.path = "/" + FileUtil.getRelativeParentDirectory(root.getLocalFile(), file);
@@ -125,10 +105,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     }
 
     public Folder getRoot() {
-        if (root == null) {
-            root = getProfile().getFolder();
-        }
-
         return root;
     }
 
@@ -142,18 +118,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
 
     public CloneItem getParent() {
         return parent;
-    }
-
-    public Profile getProfile() {
-        if (profile == null) {
-            profile = config.getProfile();
-        }
-
-        return profile;
-    }
-
-    public void setProfile(Profile profile) {
-        this.profile = profile;
     }
 
     public boolean isFolder() {
@@ -249,9 +213,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         return String.format("file-%s", getName());
     }
 
-    /**
-     * Get relative path to the root dir.
-     */
     public String getRelativePath() {
         return FileUtil.getRelativePath(getRoot().getLocalFile(), getFile());
     }
@@ -280,109 +241,28 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         this.workspaceRoot = workspaceRoot;
     }
 
-    public List<CloneItem> getVersionHistory() {
-        List<CloneItem> versions = new ArrayList<CloneItem>();
-
-        /*versions.addAll(getPreviousVersions());
-        versions.add(this);
-        versions.addAll(getNextVersions());*/
-
-        return versions;
-    }
-
-    public CloneItem getFirstVersion() {
-        String queryStr = "select c from CloneFile c where "
-                + "     c.id = :id "
-               // + "   and c.version = 1");
-                + "     order by c.version asc";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
-        
-        query.setMaxResults(1);
-        query.setParameter("id", getId());
-
-        try {
-            return (CloneItem) query.getSingleResult();
-        } catch (NoResultException ex) {
-            logger.info(" No result -> " + ex.getMessage());
-            return null;
-        }
-    }
-    
-    // TODO optimize this!!! It returns a list with ALL the entries where the
-    // parent is this file. This is incorrect since could be files moved to
-    // other folders in further versions.
-    public List<CloneItem> getChildren() {
-        
-        String queryStr = "select c from CloneFile c where "
-                + "     c.parent = :parent";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
-        
-        query.setParameter("parent", this);
-        List<CloneItem> list = query.getResultList();
-        
-        /*for(CloneFile cf: list){
-            config.getDatabase().getEntityManager().refresh(cf);
-        }*/
-        return list;
-    }
-
-    public CloneItem getLastVersion() {
-        String queryStr = "select c from CloneFile c where "
-                + "     c.id = :id"
-                + "     order by c.version desc";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
-        
-        query.setMaxResults(1);
-        query.setParameter("id", getId());
-
-        try {
-            return (CloneItem) query.getSingleResult();
-        } catch (NoResultException ex) {
-            logger.info(" No result -> " + ex.getMessage());
-            return null;
-        }
-    }
-    
-    public CloneItem getLastSyncedVersion() {
-
-        String queryStr = "select c from CloneFile c where "
-                + "     c.id = :id and "
-                + "     c.version < :version and "
-                + "     c.syncStatus = :syncStatus "
-                + "     order by c.version desc";
-
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");    
-        query.setMaxResults(1);
-        
-        query.setParameter("id", getId());
-        //query.setParameter("version", getVersion());
-        query.setParameter("syncStatus", SyncStatus.UPTODATE);
-
-        try {
-            return (CloneItem) query.getSingleResult();
-        } catch (NoResultException ex) {
-            logger.info(" No result -> " + ex.getMessage());
-            return null;
-        }
-    }
-
     public Status getStatus() {
         return status;
     }
     
     public void setStatus(Status status) {
         this.status = status;
+    }
+    
+    public CloneWorkspace getWorkspace() {
+        return this.workspace;
+    }
+    
+    public void setWorkspace(CloneWorkspace workspace){
+        this.workspace = workspace;
+    }
+    
+    public void setMimetype(String mimetype) {
+        this.mimetype = mimetype;
+    }
+    
+    public String getMimetype(){
+        return this.mimetype;
     }
 
     @Override
@@ -398,7 +278,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
             CloneItem clone = (CloneItem) super.clone();
 
             clone.id = getId();
-            clone.profile = getProfile(); // POINTER; No Copy!
             clone.root = getRoot(); // POINTER; No Copy!
             clone.folder = isFolder();
             clone.path = getPath();
@@ -443,22 +322,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
 
     public long getNewRandom() {
         return new Random().nextLong();
-    }
-    
-    public CloneWorkspace getWorkspace() {
-        return this.workspace;
-    }
-    
-    public void setWorkspace(CloneWorkspace workspace){
-        this.workspace = workspace;
-    }
-    
-    public void setMimetype(String mimetype) {
-        this.mimetype = mimetype;
-    }
-    
-    public String getMimetype(){
-        return this.mimetype;
     }
     
     /*

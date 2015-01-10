@@ -4,12 +4,10 @@ import com.stacksync.commons.models.Workspace;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.PersistentObject;
 import java.io.Serializable;
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
-import javax.persistence.OneToMany;
 
 @Entity
 @IdClass(value = CloneWorkspacePk.class)
@@ -53,9 +51,6 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="is_default")
     private boolean defaultWorkspace;
-    
-    @OneToMany
-    private List<CloneFile> files;
     
     public CloneWorkspace(){}
     
@@ -218,10 +213,6 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     @Override
     public String toString() {
         return "CloneWorkspace[id=" + id + ", pathWorkspace=" + pathWorkspace + ", localLastUpdate=" + localLastUpdate + ", remoteLastUpdate=" + remoteLastUpdate + "]";
-    }
-        
-    public List<CloneFile> getFiles(){
-        return this.files;
     }
     
     @Override

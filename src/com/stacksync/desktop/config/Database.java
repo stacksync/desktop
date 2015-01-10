@@ -45,10 +45,12 @@ public class Database implements Configurable {
     private Properties properties;
     private EntityManagerFactory entityManagerFactory;
     private Map<Long, EntityManager> entityManagers;
+    private String databaseFolder;
 
-    public Database() {
-        properties = new Properties();
-        entityManagers = new HashMap<Long, EntityManager>();
+    public Database(String configFolder) {
+        this.properties = new Properties();
+        this.entityManagers = new HashMap<Long, EntityManager>();
+        this.databaseFolder = configFolder + File.separator + Constants.CONFIG_DATABASE_DIRNAME;
     }
 
     public synchronized Query createQuery(String query, Class type) {
@@ -74,7 +76,8 @@ public class Database implements Configurable {
 
     @Override
     public void load(ConfigNode node) throws ConfigException {
-        File dbFileName = new File(Config.getInstance().getConfDir() + File.separator + Constants.CONFIG_DATABASE_DIRNAME + File.separator + Constants.CONFIG_DATABASE_FILENAME);
+        //File dbFileName = new File(Config.getInstance().getConfDir() + File.separator + Constants.CONFIG_DATABASE_DIRNAME + File.separator + Constants.CONFIG_DATABASE_FILENAME);
+        File dbFileName = new File(this.databaseFolder + File.separator + Constants.CONFIG_DATABASE_FILENAME);
 
         // Override database location with [confdir]/db/stacksync
         properties.setProperty(PersistenceUnitProperties.JDBC_URL,
@@ -102,10 +105,10 @@ public class Database implements Configurable {
         //check directory
         File serviceProperties = new File(dbFileName.getAbsolutePath() + File.separator + "service.properties");
         if (!serviceProperties.exists()) {
-            File databaseFolder = new File(Config.getInstance().getConfDir() + File.separator + Constants.CONFIG_DATABASE_DIRNAME);
+            File folder = new File(this.databaseFolder);
 
-            FileUtil.deleteRecursively(databaseFolder);
-            databaseFolder.mkdirs();
+            FileUtil.deleteRecursively(folder);
+            folder.mkdirs();
         }
         
         // Load!
