@@ -14,8 +14,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.commons.io.FileUtils;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.w3c.dom.Document;
 
 /**
@@ -26,13 +32,11 @@ public class TestItem {
     
     private static Database database;
     
-    public TestItem() {
+    @BeforeClass
+    public static void setUpClass() {
+        
         File configFolder = new File("database_test");
         database = new Database(configFolder.getAbsolutePath());
-    }
-    
-    //@BeforeClass
-    public static void setUpClass() {
         
         // Create and copy config file
         File configFile = prepareConfigFile();
@@ -101,10 +105,12 @@ public class TestItem {
         }
     }
     
-    //@AfterClass
+    @AfterClass
     public static void tearDownClass() {
         File configFolder = new File("database_test");
-        configFolder.delete();
+        try {
+            FileUtils.deleteDirectory(configFolder);
+        } catch (IOException ex) { }
     }
     
     //@Before
@@ -114,12 +120,17 @@ public class TestItem {
     //@After
     public void tearDown() {
     }
+    
+    @Test
+    public void test() {
+        System.out.println("Hola!");
+    }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         TestItem test = new TestItem();
         TestItem.setUpClass();
         
         
         TestItem.tearDownClass();
-    }
+    }*/
 }
