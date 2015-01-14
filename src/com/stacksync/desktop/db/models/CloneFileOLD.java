@@ -37,7 +37,7 @@ import com.stacksync.desktop.db.DatabaseHelper;
 @Entity
 @Cacheable(false)
 @IdClass(value = CloneFilePk.class)
-public class CloneFile extends PersistentObject implements Serializable, Cloneable {
+public class CloneFileOLD extends PersistentObject implements Serializable, Cloneable {
 
     private static final Logger logger = Logger.getLogger(CloneFile.class.getName());
     private static final Config config = Config.getInstance();

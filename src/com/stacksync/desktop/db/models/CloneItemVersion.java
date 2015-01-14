@@ -25,6 +25,10 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id", nullable = false) 
+    private CloneItem item;
+    
     @Column(name = "file_version", nullable = false)
     private long version;
     
@@ -32,9 +36,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     private long checksum;
     
     // FILE PROPERTIES
-    @Column(name = "name", length = 1024)
-    private String name;
-    
     @Column(name = "file_size")
     private long size;
     
@@ -68,7 +69,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
         this.syncStatus = SyncStatus.UNKNOWN;
 
         this.checksum = 0;
-        this.name = "(unknown)";
         
         this.serverUploadedAck = false;
         this.serverUploadedTime = null;
@@ -76,8 +76,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
 
     public CloneItemVersion(Folder root, File file) {
         this();
-
-        this.name = file.getName();
         
         this.size = file.isDirectory() ? 0 : file.length();
         this.lastModified = new Date(file.lastModified());       
@@ -110,14 +108,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
 
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getFileName() {
@@ -176,6 +166,14 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
         chunks.add(chunk);
     }
 
+    public CloneItem getItem() {
+        return item;
+    }
+
+    public void setItem(CloneItem item) {
+        this.item = item;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -192,7 +190,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
             clone.id = getId();
             clone.checksum = getChecksum();
             clone.lastModified = new Date(getLastModified().getTime());
-            clone.name = getName();
             clone.size = getSize();
             clone.chunks = getChunks(); // POINTER; No Copy!
             clone.status = getStatus(); //TODO: is this ok?
@@ -228,9 +225,8 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     @Override
     public String toString() {
 
-        return "CloneFile[id=" + getId() + ", version=" + version + ", name="  
-                + name + " checksum=" + checksum + ", chunks=" + chunks.size() 
-                + ", status=" + status + ", syncStatus=" + syncStatus + "]";
+        return "CloneFile[id=" + getId() + ", version=" + version + " checksum=" + checksum + 
+                ", chunks=" + chunks.size() + ", status=" + status + ", syncStatus=" + syncStatus + "]";
     }
     
     /*public void deleteFromDB() {

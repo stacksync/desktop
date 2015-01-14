@@ -7,10 +7,8 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 
 @Entity
-@IdClass(value = CloneWorkspacePk.class)
 public class CloneWorkspace extends PersistentObject implements Serializable {
         
     private static final long serialVersionUID = 3232299912L;
@@ -94,7 +92,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         String path;
         
         if (this.parentId != null) {
-            CloneFile parent = DatabaseHelper.getInstance().getFileOrFolder(this.parentId);
+            CloneItem parent = DatabaseHelper.getInstance().getFileOrFolder(this.parentId);
             path = parent.getPath();
             if (!path.endsWith("/")) {
                 path += "/";

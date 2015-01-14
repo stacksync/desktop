@@ -28,7 +28,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     private Long id;
     
     @Column(name = "latest_version")
-    private long latest_version;
+    private long latestVersion;
     
     @Transient
     private Folder root;
@@ -69,7 +69,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     @Column(name="is_workspace_root", nullable=false)
     private boolean workspaceRoot;
     
-    @OneToMany (targetEntity = CloneItemVersion.class)
+    @OneToMany (targetEntity = CloneItemVersion.class, cascade=CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CloneItemVersion> versions;
 
     public CloneItem() {
@@ -263,6 +263,22 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     
     public String getMimetype(){
         return this.mimetype;
+    }
+
+    public long getLatestVersion() {
+        return latestVersion;
+    }
+
+    public void setLatestBersion(long latestVersion) {
+        this.latestVersion = latestVersion;
+    }
+
+    public List<CloneItemVersion> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(List<CloneItemVersion> versions) {
+        this.versions = versions;
     }
 
     @Override

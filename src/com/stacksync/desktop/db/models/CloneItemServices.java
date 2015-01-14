@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
  */
 public class CloneItemServices {
     
-    private static final Logger logger = Logger.getLogger(CloneFile.class.getName());
+    private static final Logger logger = Logger.getLogger(CloneItemServices.class.getName());
     private static final Config config = Config.getInstance();
     
     public List<CloneItem> getVersionHistory() {

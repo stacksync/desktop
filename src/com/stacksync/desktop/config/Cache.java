@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.db.models.CloneChunk;
-import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.exceptions.CacheException;
 import com.stacksync.desktop.exceptions.ConfigException;
 
