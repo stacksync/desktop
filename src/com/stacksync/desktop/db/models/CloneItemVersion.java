@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.logging.RemoteLogs;
 
@@ -74,7 +73,7 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
         this.serverUploadedTime = null;
     }
 
-    public CloneItemVersion(Folder root, File file) {
+    public CloneItemVersion(File file) {
         this();
         
         this.size = file.isDirectory() ? 0 : file.length();

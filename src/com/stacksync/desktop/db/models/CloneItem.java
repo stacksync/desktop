@@ -7,9 +7,11 @@ import java.util.Random;
 import javax.persistence.*;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
+import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.PersistentObject;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
+import java.util.ArrayList;
 
 @Entity
 @Cacheable(false)
@@ -153,7 +155,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     
     public void generatePath() {
 
-        /*if (parent == null) {
+        if (parent == null) {
             // Check if I'm in the default wp
             DatabaseHelper db = DatabaseHelper.getInstance();
             CloneWorkspace defaultWorkspace = db.getDefaultWorkspace();
@@ -181,7 +183,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
             
         } else {
             setPath();
-        }*/
+        }
     }
     
     private void setPath() {
@@ -279,6 +281,14 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
 
     public void setVersions(List<CloneItemVersion> versions) {
         this.versions = versions;
+    }
+    
+    public void addVersion(CloneItemVersion version) {
+        if (versions==null) {
+            versions = new ArrayList<CloneItemVersion>();
+        }
+        
+        versions.add(version);
     }
 
     @Override
