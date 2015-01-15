@@ -22,7 +22,12 @@ import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.encryption.BasicEncryption;
 import com.stacksync.desktop.config.Folder;
+import com.stacksync.desktop.encryption.AbeCipherData;
+import com.stacksync.desktop.encryption.BasicCipherData;
 import com.stacksync.desktop.encryption.Encryption;
+import com.stacksync.desktop.encryption.PlainData;
+import com.stacksync.desktop.encryption.AbePlainData;
+import com.stacksync.desktop.encryption.BasicPlainData;
 import com.stacksync.desktop.gui.linux.BrowseFileRequest;
 import com.stacksync.desktop.gui.linux.BrowseFileRequest.BrowseType;
 import com.stacksync.desktop.gui.linux.LinuxNativeClient;
@@ -320,9 +325,9 @@ public class FileUtil {
 
     public static byte[] unpack(byte[] packed, Encryption enc)
             throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-
+        
         if (enc != null) {
-            packed = enc.decrypt(packed);
+            packed = enc.decrypt(new BasicCipherData(packed));
         }
         return FileUtil.gunzip(packed);
     }
@@ -332,7 +337,7 @@ public class FileUtil {
 
         byte[] gzipped = FileUtil.gzip(raw);
         if (enc != null) {
-            gzipped = enc.encrypt(gzipped);
+            gzipped = enc.encrypt(new BasicPlainData(gzipped)).getCipherText();
         }
         return gzipped;
     }

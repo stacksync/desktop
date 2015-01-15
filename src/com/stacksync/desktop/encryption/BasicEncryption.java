@@ -84,8 +84,10 @@ public class BasicEncryption implements Encryption {
 
                 // Check
                 byte[] testBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                
+                PlainData data = new BasicPlainData(testBytes);
 
-                if (!Arrays.equals(decrypt(encrypt(testBytes)), testBytes)) {
+                if (!Arrays.equals(decrypt(encrypt(data)), testBytes)) {
                     throw new ConfigException("Test encrypt/decrypt cycle failed.");
                 }
             } catch (Exception e) {
@@ -110,21 +112,23 @@ public class BasicEncryption implements Encryption {
         this.password = password;
     }
 
-    public synchronized byte[] encrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    @Override
+    public synchronized CipherData encrypt(PlainData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         if(cipherStr.toLowerCase().compareTo("none") != 0){
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-            return cipher.doFinal(data);            
+            return new BasicCipherData(cipher.doFinal(data.getData()));            
         } else {
-            return data;
+            return new BasicCipherData(data.getData());
         }        
     }
 
-    public synchronized byte[] decrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    @Override
+    public synchronized byte[] decrypt(CipherData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         if(cipherStr.toLowerCase().compareTo("none") != 0){            
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
-            return cipher.doFinal(data);        
+            return cipher.doFinal(data.getCipherText());        
         } else {
-            return data;
+            return data.getCipherText();
         }        
     }
     

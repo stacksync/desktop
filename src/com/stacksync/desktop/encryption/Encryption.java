@@ -5,6 +5,7 @@
  */
 package com.stacksync.desktop.encryption;
 
+import com.ast.cloudABE.kpabe.CipherText;
 import com.stacksync.desktop.exceptions.ConfigException;
 import java.security.InvalidKeyException;
 import javax.crypto.BadPaddingException;
@@ -16,8 +17,8 @@ import javax.crypto.IllegalBlockSizeException;
  */
 public interface Encryption {
     
-    public byte[] encrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException;
+    public CipherData encrypt(PlainData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException;
 
-    public byte[] decrypt(byte[] data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException;
+    public byte[] decrypt(CipherData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException;
     
 }

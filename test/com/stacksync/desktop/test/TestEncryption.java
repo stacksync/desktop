@@ -21,6 +21,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import com.stacksync.desktop.encryption.BasicEncryption;
+import com.stacksync.desktop.encryption.AbeCipherData;
+import com.stacksync.desktop.encryption.AbePlainData;
+import com.stacksync.desktop.encryption.BasicCipherData;
+import com.stacksync.desktop.encryption.BasicPlainData;
 
 /**
  *
@@ -41,7 +45,7 @@ public class TestEncryption {
         fis.read(buffer);
         fis.close();
 
-        byte[] encrypted = enc.encrypt(buffer);
+        byte[] encrypted = enc.encrypt(new BasicPlainData(buffer)).getCipherText();
 
         FileOutputStream fos = new FileOutputStream(new File("/tmp/face-enc.jpg"));
 
@@ -55,7 +59,7 @@ public class TestEncryption {
         fis.read(buffer);
         fis.close();
 
-        byte[] decrypted = enc.decrypt(buffer);
+        byte[] decrypted = enc.decrypt(new BasicCipherData(buffer));
 
         fos = new FileOutputStream(new File("/tmp/face-dec.jpg"));
 

@@ -1,0 +1,54 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.stacksync.desktop.encryption;
+
+import com.ast.cloudABE.kpabe.CipherText;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+/**
+ *
+ * @author javigd
+ */
+public class AbeCipherData extends CipherData {
+
+    private ArrayList<String> attributes;
+    private HashMap<String, byte[]> encryptedAttributes;
+
+    public AbeCipherData(byte[] cipherText, ArrayList<String> attributes,
+            HashMap<String, byte[]> encrypted_attributes) {
+        super(cipherText);
+        this.attributes = attributes;
+        this.encryptedAttributes = encrypted_attributes;
+    }
+    
+    public AbeCipherData(CipherText cipher) {
+        super(cipher.getEncrypted_message());
+        this.attributes = cipher.getAttributes();
+        this.encryptedAttributes = cipher.getEncrypted_attributes();
+    }
+
+    public ArrayList<String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(ArrayList<String> attributes) {
+        this.attributes = attributes;
+    }
+
+    public HashMap<String, byte[]> getEncryptedAttributes() {
+        return encryptedAttributes;
+    }
+
+    public void setEncrypted_attributes(HashMap<String, byte[]> encryptedAttributes) {
+        this.encryptedAttributes = encryptedAttributes;
+    }
+    
+    public CipherText toCipherText() {
+        return new CipherText(this.getAttributes(), this.getCipherText(), this.getEncryptedAttributes());
+    }
+
+}
