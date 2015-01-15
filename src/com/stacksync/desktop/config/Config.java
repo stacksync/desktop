@@ -37,6 +37,7 @@ import org.apache.log4j.Logger;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.DataInputStream;
@@ -70,7 +71,7 @@ public class Config {
     private ResourceBundle resourceBundle;
     private boolean remoteLogs;
     private File resDir;
-    private Database database;
+    private DatabaseHelper databaseHelper;
     private Cache cache;
     private Profile profile;
     private BrokerProperties brokerProps;
@@ -106,7 +107,7 @@ public class Config {
          */
         device = new Device();
         brokerProps = new BrokerProperties();
-        database = new Database(this.configDir.getAbsolutePath());
+        databaseHelper = DatabaseHelper.getInstance();
         cache = new Cache();
 
         encryption = getEncryption();
@@ -208,10 +209,6 @@ public class Config {
  
     public void setResDir(File resDir) {
         this.resDir = resDir;
-    }
-
-    public Database getDatabase() {
-        return database;
     }
 
     public Cache getCache() {
@@ -495,7 +492,7 @@ public class Config {
             device.setName(env.getDeviceName());
         }
         brokerProps.load(node.findChildByName("rabbitMQ"));
-        database.load(node.findChildByName("database"));
+        databaseHelper.initializeDatabase(this.configDir.getAbsolutePath(), node.findChildByName("database"));
         cache.load(node.findChildByName("cache"));
         profile = new Profile();
         profile.load(node.findChildByName("profile"));

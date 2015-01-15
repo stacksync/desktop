@@ -2,10 +2,11 @@ package com.stacksync.desktop.test.db;
 
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.ConfigNode;
-import com.stacksync.desktop.config.Database;
+import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,22 +31,19 @@ import org.w3c.dom.Document;
  */
 public class TestItem {
     
-    private static Database database;
+    private static DatabaseHelper databaseHelper;
     private static EntityManager entityManager;
     
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws ConfigException {
+        
+        databaseHelper = DatabaseHelper.getInstance();
         
         File configFolder = new File("database_test");
-        database = new Database(configFolder.getAbsolutePath());
-        
         // Create and copy config file
         File configFile = prepareConfigFile();
-        
-        // Read config file and load database
-        loadDatabase(configFile);
-        
-        entityManager = database.getEntityManager();
+        databaseHelper.initializeDatabase(configFolder.getAbsolutePath(), getDBConfigNode(configFile));
+        entityManager = databaseHelper.getEntityManager();
     }
     
     public static File prepareConfigFile() {
@@ -74,12 +72,13 @@ public class TestItem {
         return configFile;
     }
     
-    public static void loadDatabase(File configFile){
+    public static ConfigNode getDBConfigNode(File configFile){
         
+        ConfigNode node = null;
         InputStream configStream = null;
         try {
             configStream = new FileInputStream(configFile);
-            parseConfigFile(configStream);
+            node = parseConfigFile(configStream);
         } catch (FileNotFoundException ex) {
             assert false;
         } finally {
@@ -89,21 +88,25 @@ public class TestItem {
                 }
             } catch (IOException ex) { }
         }
+        
+        return node;
     }
     
-    public static void parseConfigFile(InputStream configStream) {
+    public static ConfigNode parseConfigFile(InputStream configStream) {
+        
+        ConfigNode node = null;
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
             Document doc = dBuilder.parse(configStream);
-            ConfigNode node = new ConfigNode(doc.getDocumentElement());
-
-            database.load(node.findChildByName("database"));
-
+            node = new ConfigNode(doc.getDocumentElement());
+            node = node.findChildByName("database");
         } catch (Exception e) {
             assert false;
         }
+        
+        return node;
     }
     
     @AfterClass
@@ -177,6 +180,12 @@ public class TestItem {
     @Test
     public void createItemWithVersions() {
         System.out.println("Hola");
+    }
+    
+    @Test
+    public void getItemById() {
+        CloneItem item = databaseHelper.getFileOrFolder(1L);
+        assert item.getId().equals(1L);
     }
     
     public void persist(Object o){

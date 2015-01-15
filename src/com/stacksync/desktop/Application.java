@@ -22,6 +22,7 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConnectionController;
 import com.stacksync.desktop.config.ConnectionTester;
 import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.exceptions.StorageConnectException;
@@ -141,7 +142,7 @@ public class Application implements ConnectionController, ApplicationController 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                config.getDatabase().getEntityManager(); // creates de database to solve some time after.
+                DatabaseHelper.getInstance().getEntityManager(); // creates de database to solve some time after.
             }
         }, "InitDatabase").start();
 

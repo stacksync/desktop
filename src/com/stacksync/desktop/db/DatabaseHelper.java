@@ -27,8 +27,9 @@ import java.util.Map;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.ConfigNode;
+import com.stacksync.desktop.config.Database;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.models.CloneChunk;
@@ -38,9 +39,10 @@ import com.stacksync.desktop.db.models.CloneItem.Status;
 import com.stacksync.desktop.db.models.CloneItem.SyncStatus;
 import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.util.FileUtil;
-import com.stacksync.desktop.util.StringUtil;
+import javax.persistence.EntityManager;
 
 /**
  * Provides access to the database.
@@ -52,6 +54,7 @@ public class DatabaseHelper {
     private final Config config = Config.getInstance();
     private final Logger logger = Logger.getLogger(DatabaseHelper.class.getName());
     private static final DatabaseHelper instance = new DatabaseHelper();
+    private Database database;
     private int MAXTRIES = 5;
     
 
@@ -63,6 +66,15 @@ public class DatabaseHelper {
         return instance;
     }
 
+    public void initializeDatabase(String configFolder, ConfigNode node) throws ConfigException {
+        this.database = new Database(configFolder);
+        this.database.load(node);
+    }
+    
+    public EntityManager getEntityManager() {
+        return this.database.getEntityManager();
+    }
+    
     public CloneItem getFolder(Folder root, File file) {
         return getFileOrFolder(root, file, true);
     }
@@ -114,7 +126,7 @@ public class DatabaseHelper {
                 + "      and f.status <> :notStatus1 "
                 + "      order by f.lastModified desc";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
@@ -150,7 +162,7 @@ public class DatabaseHelper {
                 + "      f.status <> :notStatus1 and "
                 + "      f.parent = :parent";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
@@ -167,7 +179,7 @@ public class DatabaseHelper {
         String queryStr = "select f from CloneItem f "
                 + "where f.id = :id";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -196,7 +208,7 @@ public class DatabaseHelper {
                 + "                                     f.id = ff.id) "
                 + "      order by f.lastModified desc";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -235,7 +247,7 @@ public class DatabaseHelper {
         String queryStr = "select f from CloneFile f where "
                 + "      f.id = :id ";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -248,7 +260,7 @@ public class DatabaseHelper {
         String queryStr = "select f from CloneItem f where "
                 + "      f.status <> :notStatus1";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -261,7 +273,7 @@ public class DatabaseHelper {
         String queryStr = "select f from CloneItem f where "
                 + "      f.syncStatus = :StatusSync ";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -334,7 +346,7 @@ public class DatabaseHelper {
                 + "     (c.serverUploadedTime < :timeNow or "
                 + "     c.serverUploadedTime is null)";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, Long.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, Long.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -356,7 +368,7 @@ public class DatabaseHelper {
         String queryStr = "select c from CloneChunk c where "
                 + "     c.checksum = :checksum";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneChunk.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -374,39 +386,39 @@ public class DatabaseHelper {
     }
 
     public void persist(Object... objects) {
-        config.getDatabase().getEntityManager().getTransaction().begin();
+        this.database.getEntityManager().getTransaction().begin();
 
         for (Object o : objects) {
-            config.getDatabase().getEntityManager().persist(o);
+            this.database.getEntityManager().persist(o);
         }
 
-        config.getDatabase().getEntityManager().flush();
-        config.getDatabase().getEntityManager().clear();
-        config.getDatabase().getEntityManager().getTransaction().commit();
+        this.database.getEntityManager().flush();
+        this.database.getEntityManager().clear();
+        this.database.getEntityManager().getTransaction().commit();
     }
 
     public synchronized void merge(Object... objects) {
-        config.getDatabase().getEntityManager().getTransaction().begin();
+        this.database.getEntityManager().getTransaction().begin();
 
         for (Object o : objects) {
-            config.getDatabase().getEntityManager().merge(o);
+            this.database.getEntityManager().merge(o);
         }
 
-        config.getDatabase().getEntityManager().flush();
-        config.getDatabase().getEntityManager().clear();
-        config.getDatabase().getEntityManager().getTransaction().commit();
+        this.database.getEntityManager().flush();
+        this.database.getEntityManager().clear();
+        this.database.getEntityManager().getTransaction().commit();
     }
     
     public void remove(Object... objects) {
-        config.getDatabase().getEntityManager().getTransaction().begin();
+        this.database.getEntityManager().getTransaction().begin();
 
         for (Object o : objects) {
-            config.getDatabase().getEntityManager().remove(o);
+            this.database.getEntityManager().remove(o);
         }
 
-        config.getDatabase().getEntityManager().flush();
-        config.getDatabase().getEntityManager().clear();
-        config.getDatabase().getEntityManager().getTransaction().commit();
+        this.database.getEntityManager().flush();
+        this.database.getEntityManager().clear();
+        this.database.getEntityManager().getTransaction().commit();
     }
     
     private int getFieldTimeout(){
@@ -430,7 +442,7 @@ public class DatabaseHelper {
                 + "     c.serverUploadedTime is null) order by "
                 + "                                     c.path asc";    
         
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -452,7 +464,7 @@ public class DatabaseHelper {
     
     public Map<String, CloneWorkspace> getWorkspaces() {        
         String queryStr = "select w from CloneWorkspace w";        
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneWorkspace.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -471,7 +483,7 @@ public class DatabaseHelper {
         String queryStr = "select c from CloneChunk c where "
                 + "     c.status = :status ";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneChunk.class);
         
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
@@ -486,7 +498,7 @@ public class DatabaseHelper {
                 + "     where "
                 + "     ch.checksum = :checksum ";        
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
@@ -500,14 +512,14 @@ public class DatabaseHelper {
                 + "     WHERE c.parent = :current_parent";
 
         
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         
         query.setParameter("new_parent", newParent);
         query.setParameter("current_parent", currentParent);
 
-        config.getDatabase().getEntityManager().getTransaction().begin();
+        this.database.getEntityManager().getTransaction().begin();
         query.executeUpdate();
-        config.getDatabase().getEntityManager().getTransaction().commit();
+        this.database.getEntityManager().getTransaction().commit();
     }
     
     public CloneWorkspace getDefaultWorkspace() {
@@ -517,7 +529,7 @@ public class DatabaseHelper {
         String queryStr = "select wp from CloneWorkspace wp where "
                 + "     wp.pathWorkspace = :path";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneChunk.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         query.setParameter("path", "/");
@@ -537,7 +549,7 @@ public class DatabaseHelper {
                 + "           wp.id = :workspaceId"
                 + "        )";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneChunk.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         query.setParameter("isRoot", true);
@@ -562,7 +574,7 @@ public class DatabaseHelper {
                 + "     c.serverUploadedTime is null) order by "
                 + "         c.path asc";
         
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -575,7 +587,7 @@ public class DatabaseHelper {
     public CloneWorkspace getWorkspace(String id) {
         String queryStr = "select w from CloneWorkspace w where"
                 + "            w.id = :id";        
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneWorkspace.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneWorkspace.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
@@ -595,7 +607,7 @@ public class DatabaseHelper {
                 + "      ) and "
                 + "      f.workspaceRoot = false";
 
-        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         

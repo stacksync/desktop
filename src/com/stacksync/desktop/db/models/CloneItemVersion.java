@@ -24,7 +24,7 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "file_id", nullable = false) 
     private CloneItem item;
     
