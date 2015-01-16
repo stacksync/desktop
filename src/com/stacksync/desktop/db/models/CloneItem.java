@@ -271,7 +271,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         return latestVersion;
     }
 
-    public void setLatestBersion(long latestVersion) {
+    public void setLatestVersion(long latestVersion) {
         this.latestVersion = latestVersion;
     }
 

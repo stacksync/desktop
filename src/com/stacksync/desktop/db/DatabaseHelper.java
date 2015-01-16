@@ -172,7 +172,7 @@ public class DatabaseHelper {
         return query.getResultList();
     }
 
-    /**
+    /*
      * Get file in current (newest) version.
      */
     public CloneItem getFileOrFolder(long id) {
@@ -242,29 +242,19 @@ public class DatabaseHelper {
 
         return nearestPreviousVersion;
     }*/
-    
-    public List<CloneItem> getFileVersions(Long id) {
-        String queryStr = "select f from CloneFile f where "
-                + "      f.id = :id ";
-
-        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
-        
-        query.setParameter("id", id);
-
-        return query.getResultList();
-    }
 
     public List<CloneItem> getFiles() {
-        String queryStr = "select f from CloneItem f where "
-                + "      f.status <> :notStatus1";
 
+        String queryStr = "select f from CloneItem f where "
+                + "f.latestVersion not in "
+                + "    (select v.version from CloneItemVersion v where "
+                + "        v.item = f and v.status = :notStatus1)";
+        
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("notStatus1", Status.DELETED);
+        query.setParameter("notStatus1", CloneItemVersion.Status.DELETED);
 
         return query.getResultList();
     }
