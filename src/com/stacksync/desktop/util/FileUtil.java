@@ -17,6 +17,7 @@
  */
 package com.stacksync.desktop.util;
 
+import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.oogly.mime.identifier.magic.MagicMimeTypeIdentifier;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
@@ -333,7 +334,7 @@ public class FileUtil {
     }
 
     public static byte[] pack(byte[] raw, Encryption enc)
-            throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+            throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, AttributeNotFoundException {
 
         byte[] gzipped = FileUtil.gzip(raw);
         if (enc != null) {
