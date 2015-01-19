@@ -136,7 +136,7 @@ public class TestItem {
         createItem1(workspace);
         createItem2(workspace);
         createItem3(workspace);
-        
+        createItem4(workspace);
     }
     
     private void createItem1(CloneWorkspace workspace) {
@@ -249,17 +249,45 @@ public class TestItem {
         persist(item);
     }
     
+    private void createItem4(CloneWorkspace workspace) {
+        CloneItem item = new CloneItem();
+        item.setId(4L);
+        item.setName("testfolder");
+        item.setFolder(true);
+        item.setMimetype("file");
+        item.setStatus(CloneItem.Status.NEW);
+        item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
+        item.setUsingTempId(false);
+        item.setWorkspace(workspace);
+        item.generatePath();
+        ArrayList<CloneItemVersion> versions = new ArrayList<CloneItemVersion>();
+        
+        CloneItemVersion version1 = new CloneItemVersion();
+        version1.setVersion(1);
+        version1.setSize(4);
+        version1.setChecksum(4);
+        version1.setItem(item);
+        version1.setStatus(CloneItemVersion.Status.NEW);
+        versions.add(version1);
+        
+        item.setLatestVersion(1);
+        item.setVersions(versions);
+        persist(item);
+    }
+    
     @After
     public void tearDown() {
         CloneWorkspace workspace = entityManager.find(CloneWorkspace.class, "wp1");
         CloneItem item = entityManager.find(CloneItem.class, 1L);
         CloneItem item2 = entityManager.find(CloneItem.class, 2L);
         CloneItem item3 = entityManager.find(CloneItem.class, 3L);
+        CloneItem item4 = entityManager.find(CloneItem.class, 4L);
         
         entityManager.getTransaction().begin();
         entityManager.remove(item);
         entityManager.remove(item2);
         entityManager.remove(item3);
+        entityManager.remove(item4);
         entityManager.remove(workspace);
         entityManager.getTransaction().commit();
     }
@@ -272,8 +300,7 @@ public class TestItem {
     @Test
     public void getNoDeletedFiles() {
         List<CloneItem> items = databaseHelper.getFiles();
-        assert items.size() == 1;
-        assert items.get(0).getId().equals(2L);
+        assert items.size() == 2;
     }
     
     @Test
@@ -283,7 +310,7 @@ public class TestItem {
     }
     
     @Test
-    public void getFileFromFile(){
+    public void getFile(){
         Folder root = new Folder();
         File rootFile = new File("./database_test");
         root.setLocalFile(rootFile);
@@ -292,6 +319,35 @@ public class TestItem {
         CloneItem item = databaseHelper.getFile(root, testFile);
         assert item.getName().equals("testfile");
         assert item.getId().equals(2L);
+    }
+    
+    @Test
+    public void getFolderFromFolder(){
+        Folder root = new Folder();
+        File rootFile = new File("./database_test");
+        root.setLocalFile(rootFile);
+        
+        File testFolder = new File("./database_test/testfolder");
+        CloneItem folder = databaseHelper.getFolder(root, testFolder);
+        assert folder.getId().equals(4L);
+        
+    }
+    
+    @Test
+    public void getFileOrFolder() {
+        Folder root = new Folder();
+        File rootFile = new File("./database_test");
+        root.setLocalFile(rootFile);
+        
+        File testFolder = new File("./database_test/testfolder");
+        CloneItem folder = databaseHelper.getFileOrFolder(root, testFolder);
+        assert folder.getId().equals(4L);
+        
+        File testFile = new File("./database_test/testfile");
+        CloneItem item = databaseHelper.getFileOrFolder(root, testFile);
+        assert item.getName().equals("testfile");
+        assert item.getId().equals(2L);
+        
     }
     
     public void persist(Object o){
