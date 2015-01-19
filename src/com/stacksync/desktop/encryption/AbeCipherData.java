@@ -6,8 +6,10 @@
 package com.stacksync.desktop.encryption;
 
 import com.ast.cloudABE.kpabe.CipherText;
+import com.stacksync.commons.models.ABEMetaComponent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -23,6 +25,19 @@ public class AbeCipherData extends CipherData {
         super(cipherText);
         this.attributes = attributes;
         this.encryptedAttributes = encrypted_attributes;
+    }
+    
+    public AbeCipherData(byte[] cipherText, List<ABEMetaComponent> metaComponents) {
+        super(cipherText);
+        ArrayList<String> attrs = new ArrayList<String>();
+        HashMap<String, byte[]> encryptedAttrs = new HashMap<String, byte[]>();
+        for (ABEMetaComponent meta : metaComponents){
+            String attribute = meta.getAttributeId();
+            attrs.add(attribute);
+            encryptedAttrs.put(attribute, meta.getEncryptedPKComponent().getBytes());
+        }
+        this.attributes = attrs;
+        this.encryptedAttributes = encryptedAttrs;
     }
     
     public AbeCipherData(CipherText cipher) {

@@ -81,6 +81,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Transient
     private Folder root;
     
+    @Transient
+    private byte[] symmetricKey;
+    
     @Column(name = "enc_symmetric_key")
     private byte[] cipherSymKey;
     
@@ -371,6 +374,14 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setCipherSymKey(byte[] cipherSymKey) {
         this.cipherSymKey = cipherSymKey;
+    }
+    
+    public byte[] getSymmetricKey() {
+        return symmetricKey;
+    }
+
+    public void setSymmetricKey(byte[] symmetricKey) {
+        this.symmetricKey = symmetricKey;
     }
 
     public CloneFile getPreviousVersion() {

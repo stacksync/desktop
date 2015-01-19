@@ -44,12 +44,20 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.Chunker;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.encryption.AbeCipherData;
+import com.stacksync.desktop.encryption.AbeEncryption;
+import com.stacksync.desktop.encryption.BasicEncryption;
+import com.stacksync.desktop.encryption.CipherData;
+import com.stacksync.desktop.encryption.Encryption;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.repository.files.RemoteFile;
 import com.stacksync.desktop.util.FileUtil;
+import java.security.InvalidKeyException;
 import java.util.concurrent.LinkedBlockingQueue;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 
 /**
  *
@@ -688,6 +696,12 @@ public class ChangeManager {
         CloneFile newestVersion = addToDB(newFileUpdate);
         logger.info("- ChangeManager: Downloading/Updating " + newestVersion.getFile() + "");
 
+        /* ABE Metadata decryption tasks. Retrieve symmetric key */
+        if(newestVersion.getWorkspace().isAbeEncrypted()) {
+            byte[] symmetricKey = retrieveSymKey(newestVersion, newFileUpdate);
+            newestVersion.setSymmetricKey(symmetricKey);
+        }
+        
         // Skip conditions
         boolean unknownButFileExists = lastMatchingVersion == null && newestVersion.getFile().exists();
         if (unknownButFileExists) {
@@ -725,6 +739,18 @@ public class ChangeManager {
         
         return newestVersion;
     }
+    
+    
+    /**
+     * Decrypt a symmetric key of a file from the proper Attribute-Based
+     * Encryption metadata.
+     * @return decrypted symmetric key
+     */
+    private byte[] retrieveSymKey(CloneFile cf, Update update) {
+        AbeEncryption enc = (AbeEncryption) cf.getRoot().getProfile().getEncryption(cf.getWorkspace().getId());
+        CipherData cipher = new AbeCipherData(update.getCipherSymKey().getBytes(), update.getAbeComponents());
+        return enc.decrypt(cipher);
+    }
 
     private void downloadChunks(CloneFile file) throws CouldNotApplyUpdateException {
         logger.info("Downloading file " + file.getRelativePath() + " ...");  
@@ -761,7 +787,9 @@ public class ChangeManager {
 
     private void assembleFile(CloneFile cf, File tempFile) throws CouldNotApplyUpdateException {
         
-        FileOutputStream fos = null;       
+        FileOutputStream fos = null;
+        Encryption enc;
+        
         try {
             fos = new FileOutputStream(tempFile, false);
             logger.info("- Decrypting chunks to temp file  " + tempFile.getAbsolutePath() + " ...");
@@ -774,7 +802,13 @@ public class ChangeManager {
                 File chunkFile = config.getCache().getCacheChunk(chunk);
 
                 byte[] packed = FileUtil.readFileToByteArray(chunkFile);
-                byte[] unpacked = FileUtil.unpack(packed, cf.getProfile().getEncryption(cf.getWorkspace().getId()));
+                if(cf.getWorkspace().isAbeEncrypted()) {
+                    AbeEncryption abenc = (AbeEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
+                    enc = abenc.getBasicEncryption(new String(cf.getSymmetricKey()));
+                } else {
+                    enc = cf.getProfile().getEncryption(cf.getWorkspace().getId());
+                }
+                byte[] unpacked = FileUtil.unpack(packed, enc);
 
                 // Write decrypted chunk to file
                 fos.write(unpacked);

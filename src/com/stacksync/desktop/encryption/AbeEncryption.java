@@ -21,6 +21,7 @@ public class AbeEncryption implements Encryption {
 
     private String accessStructure;
     private CloudABEClient cabe;
+    private BasicEncryptionFactory bef;
 
     public AbeEncryption() throws ConfigException {
         try {
@@ -47,16 +48,20 @@ public class AbeEncryption implements Encryption {
     }
 
     @Override
-    public synchronized AbeCipherData encrypt(PlainData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException, AttributeNotFoundException {
+    public synchronized AbeCipherData encrypt(PlainData data) throws InvalidKeyException, AttributeNotFoundException {
         AbePlainData dataAbe = (AbePlainData) data;
         CipherText cipher = cabe.encryptData(dataAbe.getData(), dataAbe.getAttributes());
         return new AbeCipherData(cipher);
     }
 
     @Override
-    public synchronized byte[] decrypt(CipherData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    public synchronized byte[] decrypt(CipherData data) {
         AbeCipherData cipher = (AbeCipherData) data;
         return cabe.decryptCipherText(cipher.toCipherText());
+    }
+    
+    public BasicEncryption getBasicEncryption(String password) throws ConfigException {
+        return bef.getBasicEncryption(password);
     }
 
 }
