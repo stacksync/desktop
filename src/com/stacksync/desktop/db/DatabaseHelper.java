@@ -257,9 +257,10 @@ public class DatabaseHelper {
         return query.getResultList();
     }
 
-    public List<CloneItem> getFiles(SyncStatus status) {
-        String queryStr = "select f from CloneItem f where "
-                + "      f.syncStatus = :StatusSync ";
+    public List<CloneItemVersion> getFiles(SyncStatus status) {
+        String queryStr = "select v from CloneItem f, CloneItemVersion v where "
+                + "      v.item = f and "
+                + "      v.syncStatus = :StatusSync order by v.version asc";
 
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");

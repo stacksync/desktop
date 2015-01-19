@@ -331,11 +331,20 @@ public class TestItem {
         version2.setSize(5);
         version2.setChecksum(5);
         version2.setItem(item);
-        version2.setStatus(CloneItemVersion.Status.DELETED);
-        version2.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version2.setStatus(CloneItemVersion.Status.CHANGED);
+        version2.setSyncStatus(CloneItemVersion.SyncStatus.LOCAL);
         versions.add(version2);
         
-        item.setLatestVersion(2);
+        CloneItemVersion version3 = new CloneItemVersion();
+        version3.setVersion(3);
+        version3.setSize(5);
+        version3.setChecksum(5);
+        version3.setItem(item);
+        version3.setStatus(CloneItemVersion.Status.DELETED);
+        version3.setSyncStatus(CloneItemVersion.SyncStatus.LOCAL);
+        versions.add(version3);
+        
+        item.setLatestVersion(3);
         item.setVersions(versions);
         persist(item);
     }
@@ -436,6 +445,18 @@ public class TestItem {
         List<CloneItem> children = databaseHelper.getChildren(folder);
         assert children.size() == 1;
         assert children.get(0).getId().equals(5L);
+    }
+    
+    @Test
+    public void getFilesFromStatus() {
+        List<CloneItemVersion> localItemsVersions = databaseHelper.getFiles(CloneItemVersion.SyncStatus.LOCAL);
+        assert localItemsVersions.size() == 2;
+        
+        CloneItemVersion version1 = localItemsVersions.remove(0);
+        assert version1.getItem().getId().equals(6L) && version1.getVersion() == 2;
+        
+        CloneItemVersion version2 = localItemsVersions.remove(0);
+        assert version2.getItem().getId().equals(6L) && version2.getVersion() == 3;
     }
     
     public void persist(Object o){
