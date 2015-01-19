@@ -35,9 +35,9 @@ import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
 import com.stacksync.desktop.db.models.CloneItem;
-import com.stacksync.desktop.db.models.CloneItem.Status;
-import com.stacksync.desktop.db.models.CloneItem.SyncStatus;
 import com.stacksync.desktop.db.models.CloneItemVersion;
+import com.stacksync.desktop.db.models.CloneItemVersion.Status;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
@@ -255,7 +255,7 @@ public class DatabaseHelper {
         return query.getResultList();
     }
 
-    public List<CloneItem> getFiles(CloneItem.SyncStatus status) {
+    public List<CloneItem> getFiles(SyncStatus status) {
         String queryStr = "select f from CloneItem f where "
                 + "      f.syncStatus = :StatusSync ";
 
@@ -280,8 +280,7 @@ public class DatabaseHelper {
         newFile.setWorkspace(update.getWorkspace());
         newFile.setMimetype(update.getMimeType());
         newFile.setName(update.getName());
-        newFile.setStatus(update.getStatus());
-        newFile.setSyncStatus(syncStatus);
+        
         newFile.setFolder(update.isFolder());
         newFile.setUsingTempId(false);
         if (update.getParentFileId() != null) {
@@ -297,6 +296,8 @@ public class DatabaseHelper {
         version.setServerUploadedTime(update.getServerUploadedTime());        
         version.setLastModified(update.getModifiedAt());
         version.setSize(update.getFileSize());
+        version.setStatus(update.getStatus());
+        version.setSyncStatus(syncStatus);
         version.setItem(newFile);
 
         // Add Chunks (if there are any!)
@@ -336,7 +337,7 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("StatusSync", CloneItem.SyncStatus.UPTODATE);
+        query.setParameter("StatusSync", SyncStatus.UPTODATE);
         query.setParameter("timeNow", time);
         query.setMaxResults(1);
 
@@ -432,7 +433,7 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("statusSync", CloneItem.SyncStatus.UPTODATE);       
+        query.setParameter("statusSync", SyncStatus.UPTODATE);       
         query.setParameter("timeNow", time);
         
         Map<String, List<CloneItem>> workspaces = new HashMap<String, List<CloneItem>>();
@@ -564,7 +565,7 @@ public class DatabaseHelper {
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("statusSync", CloneItem.SyncStatus.UPTODATE);
+        query.setParameter("statusSync", SyncStatus.UPTODATE);
         query.setParameter("timeNow", time);
 
         return query.getResultList();

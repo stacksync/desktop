@@ -20,10 +20,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     private static final Logger logger = Logger.getLogger(CloneItem.class.getName());
     
     private static final long serialVersionUID = 12314234L;
-
-    public enum Status { UNKNOWN, NEW, CHANGED, RENAMED, DELETED };
-
-    public enum SyncStatus { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
     
     @Id
     @Column(name = "file_id", nullable = false)
@@ -53,14 +49,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
    
     @OneToOne
     private CloneWorkspace workspace;
-        
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private Status status;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(name = "sync_status")
-    private SyncStatus syncStatus;
     
     @Column(name = "mimetype")
     private String mimetype;
@@ -76,8 +64,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
 
     public CloneItem() {
         this.id = new Random().nextLong();
-        this.status = Status.UNKNOWN;
-        this.syncStatus = SyncStatus.UNKNOWN;
 
         this.path = "(unknown)";
         this.mimetype = "unknown";
@@ -195,14 +181,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         }
     }
 
-    public SyncStatus getSyncStatus() {
-        return syncStatus;
-    }
-
-    public void setSyncStatus(SyncStatus syncStatus) {
-        this.syncStatus = syncStatus;
-    }
-
     public String getName() {
         return name;
     }
@@ -241,14 +219,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
 
     public void setWorkspaceRoot(boolean workspaceRoot) {
         this.workspaceRoot = workspaceRoot;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-    
-    public void setStatus(Status status) {
-        this.status = status;
     }
     
     public CloneWorkspace getWorkspace() {
@@ -308,8 +278,6 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
             clone.folder = isFolder();
             clone.path = getPath();
             clone.name = getName();
-            clone.status = getStatus(); //TODO: is this ok?
-            clone.syncStatus = getSyncStatus(); //TODO: is this ok?
             clone.parent = getParent(); // POINTER
             clone.usingTempId = isUsingTempId();
             clone.setWorkspaceRoot(isWorkspaceRoot());
@@ -342,8 +310,7 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
     public String toString() {
 
         return "CloneFile[id=" + id + ", name="  
-                + name + ", status=" + status + ", syncStatus=" + syncStatus + ", workspace=" 
-                + workspace + "]";
+                + name + ", workspace=" + workspace + "]";
     }
 
     public long getNewRandom() {

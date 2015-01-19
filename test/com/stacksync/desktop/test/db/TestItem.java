@@ -145,8 +145,6 @@ public class TestItem {
         item.setName("testfolder");
         item.setFolder(true);
         item.setMimetype("folder");
-        item.setStatus(CloneItem.Status.NEW);
-        item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
         item.setUsingTempId(false);
         item.setWorkspace(workspace);
         item.generatePath();
@@ -158,6 +156,7 @@ public class TestItem {
         version1.setChecksum(1);
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
+        version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version1);
         
         CloneItemVersion version2 = new CloneItemVersion();
@@ -166,6 +165,7 @@ public class TestItem {
         version2.setChecksum(2);
         version2.setItem(item);
         version2.setStatus(CloneItemVersion.Status.CHANGED);
+        version2.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version2);
         
         CloneItemVersion version3 = new CloneItemVersion();
@@ -174,6 +174,7 @@ public class TestItem {
         version3.setChecksum(3);
         version3.setItem(item);
         version3.setStatus(CloneItemVersion.Status.DELETED);
+        version3.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version3);
         
         item.setLatestVersion(3);
@@ -187,8 +188,6 @@ public class TestItem {
         item.setName("testfile");
         item.setFolder(false);
         item.setMimetype("file");
-        item.setStatus(CloneItem.Status.NEW);
-        item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
         item.setUsingTempId(false);
         item.setWorkspace(workspace);
         item.generatePath();
@@ -200,6 +199,7 @@ public class TestItem {
         version1.setChecksum(4);
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
+        version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version1);
         
         CloneItemVersion version2 = new CloneItemVersion();
@@ -208,6 +208,7 @@ public class TestItem {
         version2.setChecksum(5);
         version2.setItem(item);
         version2.setStatus(CloneItemVersion.Status.CHANGED);
+        version2.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version2);
         
         item.setLatestVersion(2);
@@ -221,8 +222,6 @@ public class TestItem {
         item.setName("testfile");
         item.setFolder(false);
         item.setMimetype("file");
-        item.setStatus(CloneItem.Status.NEW);
-        item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
         item.setUsingTempId(false);
         item.setWorkspace(workspace);
         item.generatePath();
@@ -234,6 +233,7 @@ public class TestItem {
         version1.setChecksum(4);
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
+        version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version1);
         
         CloneItemVersion version2 = new CloneItemVersion();
@@ -242,6 +242,7 @@ public class TestItem {
         version2.setChecksum(5);
         version2.setItem(item);
         version2.setStatus(CloneItemVersion.Status.DELETED);
+        version2.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version2);
         
         item.setLatestVersion(2);
@@ -255,8 +256,6 @@ public class TestItem {
         item.setName("testfolder");
         item.setFolder(true);
         item.setMimetype("file");
-        item.setStatus(CloneItem.Status.NEW);
-        item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
         item.setUsingTempId(false);
         item.setWorkspace(workspace);
         item.generatePath();
@@ -268,6 +267,7 @@ public class TestItem {
         version1.setChecksum(4);
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
+        version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         versions.add(version1);
         
         item.setLatestVersion(1);

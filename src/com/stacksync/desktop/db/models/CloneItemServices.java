@@ -108,7 +108,7 @@ public class CloneItemServices {
         
         query.setParameter("id", item.getId());
         //query.setParameter("version", getVersion());
-        query.setParameter("syncStatus", CloneItem.SyncStatus.UPTODATE);
+        query.setParameter("syncStatus", CloneItemVersion.SyncStatus.UPTODATE);
 
         try {
             return (CloneItem) query.getSingleResult();

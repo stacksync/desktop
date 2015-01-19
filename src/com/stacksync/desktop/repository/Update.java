@@ -18,8 +18,8 @@
 package com.stacksync.desktop.repository;
 
 import com.stacksync.commons.models.ItemMetadata;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.Status;
+import com.stacksync.desktop.db.models.CloneItemVersion;
+import com.stacksync.desktop.db.models.CloneItemVersion.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import java.util.Date;
 import java.util.List;
@@ -245,7 +245,7 @@ public class Update {
         update.setVersion(itemMetadata.getVersion());
         
         update.setModifiedAt(itemMetadata.getModifiedAt());
-        update.setStatus(CloneFile.Status.valueOf(itemMetadata.getStatus()));
+        update.setStatus(CloneItemVersion.Status.valueOf(itemMetadata.getStatus()));
         update.setChecksum(itemMetadata.getChecksum());
         update.setMimeType(itemMetadata.getMimetype());
         update.setFileSize(itemMetadata.getSize());
