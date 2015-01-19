@@ -148,28 +148,7 @@ public class DatabaseHelper {
 
         return dbFile;
     }
-            
-    /*
-     * get direct children
-     */
-    public List<CloneItem> getChildren(CloneItem parentFile) {
-        // First, check by full file path
-        String queryStr = "select f from CloneItem f, CloneItemVersion v where "
-                + "      f.parent = :parent and "
-                + "      v.item = f and "
-                + "      f.latestVersion = v.version and "
-                + "      v.status <> :notStatus1";
-
-        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
-        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
-        
-        query.setParameter("notStatus1", Status.DELETED);
-        query.setParameter("parent", parentFile);
-
-        return query.getResultList();
-    }
-
+    
     /*
      * Get file in current (newest) version.
      */
@@ -189,6 +168,27 @@ public class DatabaseHelper {
             logger.debug(" No result -> " + ex.getMessage());
             return null;
         }
+    }
+    
+    /*
+     * get direct children
+     */
+    public List<CloneItem> getChildren(CloneItem parentFile) {
+        // First, check by full file path
+        String queryStr = "select f from CloneItem f, CloneItemVersion v where "
+                + "      f.parent = :parent and "
+                + "      v.item = f and "
+                + "      f.latestVersion = v.version and "
+                + "      v.status <> :notStatus1";
+
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
+        
+        query.setParameter("notStatus1", Status.DELETED);
+        query.setParameter("parent", parentFile);
+
+        return query.getResultList();
     }
 
     /*

@@ -419,6 +419,12 @@ public class TestItem {
     }
     
     @Test
+    public void getFileOrFolderFromId() {
+        CloneItem item = databaseHelper.getFileOrFolder(5L);
+        assert item.getId().equals(5L);
+    }
+    
+    @Test
     public void getChildrenTest() {
         Folder root = new Folder();
         File rootFile = new File("./database_test");
