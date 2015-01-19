@@ -158,6 +158,7 @@ public class TestItem {
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
         version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version1.setServerUploadedAck(true);
         versions.add(version1);
         
         CloneItemVersion version2 = new CloneItemVersion();
@@ -167,6 +168,7 @@ public class TestItem {
         version2.setItem(item);
         version2.setStatus(CloneItemVersion.Status.CHANGED);
         version2.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version2.setServerUploadedAck(true);
         versions.add(version2);
         
         CloneItemVersion version3 = new CloneItemVersion();
@@ -176,6 +178,7 @@ public class TestItem {
         version3.setItem(item);
         version3.setStatus(CloneItemVersion.Status.DELETED);
         version3.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version3.setServerUploadedAck(false);
         versions.add(version3);
         
         item.setLatestVersion(3);
@@ -201,6 +204,7 @@ public class TestItem {
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
         version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version1.setServerUploadedAck(true);
         versions.add(version1);
         
         CloneItemVersion version2 = new CloneItemVersion();
@@ -210,6 +214,7 @@ public class TestItem {
         version2.setItem(item);
         version2.setStatus(CloneItemVersion.Status.CHANGED);
         version2.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version2.setServerUploadedAck(true);
         versions.add(version2);
         
         item.setLatestVersion(2);
@@ -235,6 +240,7 @@ public class TestItem {
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
         version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version1.setServerUploadedAck(true);
         versions.add(version1);
         
         CloneItemVersion version2 = new CloneItemVersion();
@@ -244,6 +250,7 @@ public class TestItem {
         version2.setItem(item);
         version2.setStatus(CloneItemVersion.Status.DELETED);
         version2.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version2.setServerUploadedAck(false);
         versions.add(version2);
         
         item.setLatestVersion(2);
@@ -269,6 +276,7 @@ public class TestItem {
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
         version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version1.setServerUploadedAck(true);
         versions.add(version1);
         
         item.setLatestVersion(1);
@@ -298,6 +306,7 @@ public class TestItem {
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
         version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version1.setServerUploadedAck(true);
         versions.add(version1);
         
         item.setLatestVersion(1);
@@ -324,6 +333,7 @@ public class TestItem {
         version1.setItem(item);
         version1.setStatus(CloneItemVersion.Status.NEW);
         version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version1.setServerUploadedAck(true);
         versions.add(version1);
         
         CloneItemVersion version2 = new CloneItemVersion();
@@ -333,6 +343,7 @@ public class TestItem {
         version2.setItem(item);
         version2.setStatus(CloneItemVersion.Status.CHANGED);
         version2.setSyncStatus(CloneItemVersion.SyncStatus.LOCAL);
+        version2.setServerUploadedAck(true);
         versions.add(version2);
         
         CloneItemVersion version3 = new CloneItemVersion();
@@ -342,6 +353,7 @@ public class TestItem {
         version3.setItem(item);
         version3.setStatus(CloneItemVersion.Status.DELETED);
         version3.setSyncStatus(CloneItemVersion.SyncStatus.LOCAL);
+        version3.setServerUploadedAck(false);
         versions.add(version3);
         
         item.setLatestVersion(3);
@@ -457,6 +469,16 @@ public class TestItem {
         
         CloneItemVersion version2 = localItemsVersions.remove(0);
         assert version2.getItem().getId().equals(6L) && version2.getVersion() == 3;
+    }
+    
+    @Test
+    public void getFileVersionCountTest() {
+        Long value = databaseHelper.getFileVersionCount();
+        if (value != null) {
+            assert value.equals(2L);
+        } else {
+            assert false;
+        }
     }
     
     public void persist(Object o){

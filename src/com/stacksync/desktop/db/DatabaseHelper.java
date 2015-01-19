@@ -55,8 +55,6 @@ public class DatabaseHelper {
     private final Logger logger = Logger.getLogger(DatabaseHelper.class.getName());
     private static final DatabaseHelper instance = new DatabaseHelper();
     private Database database;
-    private int MAXTRIES = 5;
-    
 
     private DatabaseHelper() {
         logger.debug("Creating DB helper ...");
@@ -330,11 +328,12 @@ public class DatabaseHelper {
         Date time = cal.getTime();
  
         // Newest file update
-        String queryStr = "select count(c.id) from CloneItem c where "
-                + "     c.syncStatus = :StatusSync and "                                       
-                + "     c.serverUploadedAck = false and "                
-                + "     (c.serverUploadedTime < :timeNow or "
-                + "     c.serverUploadedTime is null)";
+        String queryStr = "select count(c.id) from CloneItem c, CloneItemVersion v where "
+                + "     v.item = c and "
+                + "     v.syncStatus = :StatusSync and "                                       
+                + "     v.serverUploadedAck = false and "                
+                + "     (v.serverUploadedTime < :timeNow or "
+                + "     v.serverUploadedTime is null)";
 
         Query query = this.database.getEntityManager().createQuery(queryStr, Long.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
