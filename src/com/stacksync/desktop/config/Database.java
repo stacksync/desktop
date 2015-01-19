@@ -24,7 +24,6 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.Query;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.exceptions.ConfigException;
@@ -51,15 +50,6 @@ public class Database implements Configurable {
         this.properties = new Properties();
         this.entityManagers = new HashMap<Long, EntityManager>();
         this.databaseFolder = configFolder + File.separator + Constants.CONFIG_DATABASE_DIRNAME;
-    }
-
-    public synchronized Query createQuery(String query, Class type) {
-        Query request = getEntityManager().createQuery(query, type);
-
-        request.setHint("javax.persistence.cache.storeMode", "REFRESH");
-        request.setHint("eclipselink.cache-usage", "DoNotCheckCache");
-
-        return request;
     }
 
     public synchronized EntityManager getEntityManager() {

@@ -21,13 +21,11 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     public enum SyncStatus { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
     @OneToOne
     @JoinColumn(name = "file_id", nullable = false) 
     private CloneItem item;
     
+    @Id
     @Column(name = "file_version", nullable = false)
     private long version;
     
@@ -79,10 +77,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
         this.size = file.isDirectory() ? 0 : file.length();
         this.lastModified = new Date(file.lastModified());       
         
-    }
-    
-    public Long getId() {
-        return id;
     }
 
     public long getVersion() {
@@ -176,8 +170,8 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (this.getId() != null ? this.getId().hashCode() : 0);
-        hash += version;
+        /*hash += (this.getId() != null ? this.getId().hashCode() : 0);
+        hash += version;*/
         return hash;
     }
 
@@ -186,7 +180,6 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
         try {
             CloneItemVersion clone = (CloneItemVersion) super.clone();
 
-            clone.id = getId();
             clone.checksum = getChecksum();
             clone.lastModified = new Date(getLastModified().getTime());
             clone.size = getSize();
@@ -214,17 +207,17 @@ public class CloneItemVersion extends PersistentObject implements Serializable, 
 
         CloneItemVersion other = (CloneItemVersion) object;
 
-        if (other.getId() == null || this.getId() == null) {
+        if (other.getItem() == null || this.getItem() == null) {
             return false;
         }
 
-        return other.getId().equals(this.getId()) && other.version == this.version;
+        return other.getItem().getId().equals(this.getItem().getId()) && other.version == this.version;
     }
 
     @Override
     public String toString() {
 
-        return "CloneFile[id=" + getId() + ", version=" + version + " checksum=" + checksum + 
+        return "CloneFile[id=" + getItem().getId() + ", version=" + version + " checksum=" + checksum + 
                 ", chunks=" + chunks.size() + ", status=" + status + ", syncStatus=" + syncStatus + "]";
     }
     

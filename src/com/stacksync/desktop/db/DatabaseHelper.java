@@ -116,15 +116,14 @@ public class DatabaseHelper {
 
     private CloneItem getFileOrFolder(Folder root, File file, Boolean folder) {
         assert root != null;
-
-        // First, check by full file path
-        String queryStr =
-                "select f from CloneItem f where "
-                + "      f.path = :path and "
-                + "      f.name = :name "
+        
+        String queryStr = "select f from CloneItem f, CloneItemVersion v where "
+                + "f.path = :path and "
+                + "f.name = :name "
                 + ((folder != null) ? "and f.folder = :folder " : " ")
-                + "      and f.status <> :notStatus1 "
-                + "      order by f.lastModified desc";
+                + " and v.item = f and "
+                + "v.version = f.latestVersion and "
+                + "v.status <> :notStatus1";
 
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
@@ -136,21 +135,18 @@ public class DatabaseHelper {
         path = FileUtil.getFilePathCleaned(path);
         query.setParameter("path", path);
         query.setParameter("name", file.getName());
-        query.setParameter("notStatus1", Status.DELETED);
+        query.setParameter("notStatus1", CloneItemVersion.Status.DELETED);
 
         if (folder != null) {
             query.setParameter("folder", folder);
         }
 
-        List<CloneItem> dbFiles = query.getResultList();
+        CloneItem dbFile = null;
+        try{
+            dbFile = (CloneItem) query.getSingleResult();
+        } catch(NoResultException ex) {}
 
-        // Error: No matching DB entries found.
-        if (dbFiles.isEmpty()) {
-            return null;
-        } else {
-            // Success
-            return dbFiles.get(0);
-        }
+        return dbFile;
     }
             
     /*
@@ -245,10 +241,10 @@ public class DatabaseHelper {
 
     public List<CloneItem> getFiles() {
 
-        String queryStr = "select f from CloneItem f where "
-                + "f.latestVersion not in "
-                + "    (select v.version from CloneItemVersion v where "
-                + "        v.item = f and v.status = :notStatus1)";
+        String queryStr = "select f from CloneItem f, CloneItemVersion v where "
+                + "v.item = f and "
+                + "v.version = f.latestVersion and "
+                + "v.status <> :notStatus1";
         
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
@@ -259,7 +255,7 @@ public class DatabaseHelper {
         return query.getResultList();
     }
 
-    public List<CloneItem> getFiles(Folder root, CloneItem.SyncStatus status) {
+    public List<CloneItem> getFiles(CloneItem.SyncStatus status) {
         String queryStr = "select f from CloneItem f where "
                 + "      f.syncStatus = :StatusSync ";
 

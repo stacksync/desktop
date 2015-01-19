@@ -2,6 +2,7 @@ package com.stacksync.desktop.test.db;
 
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.ConfigNode;
+import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneItemVersion;
@@ -129,17 +130,26 @@ public class TestItem {
         workspace.setOwner("me");
         workspace.setEncrypted(false);
         workspace.setPathWorkspace("/");
+        workspace.setDefaultWorkspace(true);
         persist(workspace);
         
+        createItem1(workspace);
+        createItem2(workspace);
+        createItem3(workspace);
+        
+    }
+    
+    private void createItem1(CloneWorkspace workspace) {
         CloneItem item = new CloneItem();
         item.setId(1L);
+        item.setName("testfolder");
         item.setFolder(true);
         item.setMimetype("folder");
         item.setStatus(CloneItem.Status.NEW);
         item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
         item.setUsingTempId(false);
-        item.setLatestVersion(3);
         item.setWorkspace(workspace);
+        item.generatePath();
         ArrayList<CloneItemVersion> versions = new ArrayList<CloneItemVersion>();
         
         CloneItemVersion version1 = new CloneItemVersion();
@@ -166,39 +176,77 @@ public class TestItem {
         version3.setStatus(CloneItemVersion.Status.DELETED);
         versions.add(version3);
         
+        item.setLatestVersion(3);
         item.setVersions(versions);
         persist(item);
+    }
+    
+    private void createItem2(CloneWorkspace workspace) {
+        CloneItem item = new CloneItem();
+        item.setId(2L);
+        item.setName("testfile");
+        item.setFolder(false);
+        item.setMimetype("file");
+        item.setStatus(CloneItem.Status.NEW);
+        item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
+        item.setUsingTempId(false);
+        item.setWorkspace(workspace);
+        item.generatePath();
+        ArrayList<CloneItemVersion> versions = new ArrayList<CloneItemVersion>();
         
-        CloneItem item2 = new CloneItem();
-        item2.setId(2L);
-        item2.setFolder(false);
-        item2.setMimetype("file");
-        item2.setStatus(CloneItem.Status.NEW);
-        item2.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
-        item2.setUsingTempId(false);
-        item2.setLatestVersion(2);
-        item2.setWorkspace(workspace);
-        ArrayList<CloneItemVersion> versions2 = new ArrayList<CloneItemVersion>();
+        CloneItemVersion version1 = new CloneItemVersion();
+        version1.setVersion(1);
+        version1.setSize(4);
+        version1.setChecksum(4);
+        version1.setItem(item);
+        version1.setStatus(CloneItemVersion.Status.NEW);
+        versions.add(version1);
         
-        CloneItemVersion version4 = new CloneItemVersion();
-        version4.setVersion(1);
-        version4.setSize(4);
-        version4.setChecksum(4);
-        version4.setItem(item2);
-        version4.setStatus(CloneItemVersion.Status.NEW);
-        versions2.add(version4);
+        CloneItemVersion version2 = new CloneItemVersion();
+        version2.setVersion(2);
+        version2.setSize(5);
+        version2.setChecksum(5);
+        version2.setItem(item);
+        version2.setStatus(CloneItemVersion.Status.CHANGED);
+        versions.add(version2);
         
-        CloneItemVersion version5 = new CloneItemVersion();
-        version5.setVersion(5);
-        version5.setSize(5);
-        version5.setChecksum(5);
-        version5.setItem(item2);
-        version5.setStatus(CloneItemVersion.Status.CHANGED);
-        versions2.add(version5);
+        item.setLatestVersion(2);
+        item.setVersions(versions);
+        persist(item);
+    }
+    
+    private void createItem3(CloneWorkspace workspace) {
+        CloneItem item = new CloneItem();
+        item.setId(3L);
+        item.setName("testfile");
+        item.setFolder(false);
+        item.setMimetype("file");
+        item.setStatus(CloneItem.Status.NEW);
+        item.setSyncStatus(CloneItem.SyncStatus.UPTODATE);
+        item.setUsingTempId(false);
+        item.setWorkspace(workspace);
+        item.generatePath();
+        ArrayList<CloneItemVersion> versions = new ArrayList<CloneItemVersion>();
         
-        item2.setVersions(versions2);
-        persist(item2);
+        CloneItemVersion version1 = new CloneItemVersion();
+        version1.setVersion(1);
+        version1.setSize(4);
+        version1.setChecksum(4);
+        version1.setItem(item);
+        version1.setStatus(CloneItemVersion.Status.NEW);
+        versions.add(version1);
         
+        CloneItemVersion version2 = new CloneItemVersion();
+        version2.setVersion(2);
+        version2.setSize(5);
+        version2.setChecksum(5);
+        version2.setItem(item);
+        version2.setStatus(CloneItemVersion.Status.DELETED);
+        versions.add(version2);
+        
+        item.setLatestVersion(2);
+        item.setVersions(versions);
+        persist(item);
     }
     
     @After
@@ -206,18 +254,20 @@ public class TestItem {
         CloneWorkspace workspace = entityManager.find(CloneWorkspace.class, "wp1");
         CloneItem item = entityManager.find(CloneItem.class, 1L);
         CloneItem item2 = entityManager.find(CloneItem.class, 2L);
+        CloneItem item3 = entityManager.find(CloneItem.class, 3L);
         
         entityManager.getTransaction().begin();
         entityManager.remove(item);
         entityManager.remove(item2);
+        entityManager.remove(item3);
         entityManager.remove(workspace);
         entityManager.getTransaction().commit();
     }
     
-    @Test
+    /*@Test
     public void createItemWithVersions() {
         System.out.println("Hola");
-    }
+    }*/
     
     @Test
     public void getNoDeletedFiles() {
@@ -230,6 +280,18 @@ public class TestItem {
     public void getItemById() {
         CloneItem item = databaseHelper.getFileOrFolder(1L);
         assert item.getId().equals(1L);
+    }
+    
+    @Test
+    public void getFileFromFile(){
+        Folder root = new Folder();
+        File rootFile = new File("./database_test");
+        root.setLocalFile(rootFile);
+        
+        File testFile = new File("./database_test/testfile");
+        CloneItem item = databaseHelper.getFile(root, testFile);
+        assert item.getName().equals("testfile");
+        assert item.getId().equals(2L);
     }
     
     public void persist(Object o){
