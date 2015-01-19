@@ -237,11 +237,11 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         return this.mimetype;
     }
 
-    public long getLatestVersion() {
+    public long getLatestVersionNumber() {
         return latestVersion;
     }
 
-    public void setLatestVersion(long latestVersion) {
+    public void setLatestVersionNumber(long latestVersion) {
         this.latestVersion = latestVersion;
     }
 
@@ -259,6 +259,17 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         }
         
         versions.add(version);
+    }
+    
+    public CloneItemVersion getLatestVersion() {
+        CloneItemVersion latest = null;
+        for (CloneItemVersion version : versions) {
+            if (version.getVersion() == getLatestVersionNumber()){
+                latest = version;
+                break;
+            } 
+        }
+        return latest;
     }
 
     @Override

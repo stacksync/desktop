@@ -30,8 +30,9 @@ import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneChunk;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
@@ -58,15 +59,15 @@ public class Uploader {
     
     private Profile profile;
     private TransferManager transfer;
-    private BlockingQueue<CloneFile> queue;
+    private BlockingQueue<CloneItemVersion> queue;
     private Thread worker;
     private Map<String, RemoteFile> fileList;
     private Date cacheLastUpdate;
-    private CloneFile workingFile;
+    private CloneItemVersion workingFile;
 
     public Uploader(Profile profile) {
         this.profile = profile;
-        this.queue = new LinkedBlockingQueue<CloneFile>();
+        this.queue = new LinkedBlockingQueue<CloneItemVersion>();
         
         this.tray.registerProcess(this.getClass().getSimpleName());
         this.worker = null; // cmp. method 'start'
@@ -87,16 +88,16 @@ public class Uploader {
         worker.start();
     }
 
-    private void queuePendingList(List<CloneFile> filesSyncing){
-        for (CloneFile file: filesSyncing) {
+    private void queuePendingList(List<CloneItemVersion> filesSyncing){
+        for (CloneItemVersion version: filesSyncing) {
 
             boolean found = false;
-            for (CloneFile file2 : queue) {
-                if (file.getName().compareTo(file2.getName()) == 0
-                        && file.getChecksum() == file2.getChecksum()
-                        && file.getId() == file2.getId()
-                        && file.getVersion() == file2.getVersion()
-                        && file.getSize() == file2.getSize()) {
+            for (CloneItemVersion version2 : queue) {
+                if (version.getChecksum() == version2.getChecksum()
+                        && version.getVersion() == version2.getVersion()
+                        && version.getSize() == version2.getSize()
+                        && version.getItem().getId().equals(version2.getItem().getId())
+                        && version.getItem().getName().equals(version2.getItem().getName())) {
 
                     found = true;
                     break;
@@ -104,17 +105,17 @@ public class Uploader {
             }
 
             if (!found) {
-                queue(file);
+                queue(version);
             }
         }
     }
     
     public synchronized void queuePendingFiles() {
         //Queue the pending Syncing and Local files if networks goes down and after ups.
-        List<CloneFile> filesSyncing = db.getFiles(profile.getFolder(), CloneFile.SyncStatus.SYNCING);
+        List<CloneItemVersion> filesSyncing = db.getFiles(SyncStatus.SYNCING);
         queuePendingList(filesSyncing);
         
-        filesSyncing = db.getFiles(profile.getFolder(), CloneFile.SyncStatus.LOCAL);
+        filesSyncing = db.getFiles(SyncStatus.LOCAL);
         queuePendingList(filesSyncing);
     }
 
@@ -127,27 +128,27 @@ public class Uploader {
         worker = null;
     }
 
-    private void searchAddInQueue(CloneFile file) throws InterruptedException{
+    private void searchAddInQueue(CloneItemVersion version) throws InterruptedException{
         boolean found = false;
-        for(CloneFile cf: queue){
-            if(cf.getId() == file.getId() && cf.getVersion() == file.getVersion()){                        
+        for(CloneItemVersion version2: queue){
+            if(version2.getVersion() == version.getVersion() && version2.getItem().getId().equals(version.getItem().getId())){                        
                 found = true;
                 break;
             }
         }
 
         if(!found){            
-            queue.put(file);
+            queue.put(version);
         }        
     }
     
-    public synchronized void queue(CloneFile file) {
+    public synchronized void queue(CloneItemVersion version) {
         try {   
             if(workingFile == null){                
-                searchAddInQueue(file);
+                searchAddInQueue(version);
             } else{            
-                if(workingFile.getId() != file.getId() || workingFile.getVersion() != file.getVersion()){
-                    searchAddInQueue(file);
+                if(workingFile.getVersion() != version.getVersion() || !workingFile.getItem().getId().equals(version.getItem().getId())){
+                    searchAddInQueue(version);
                 }                
             }
         } catch (InterruptedException ex) {
@@ -166,7 +167,7 @@ public class Uploader {
                     tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "Uploading " + (queue.size() + 1) +  " files...");
                     
                     try {
-                        if(!workingFile.isFolder()){
+                        if(!workingFile.getItem().isFolder()){
                             processRequest(workingFile);
                         } else{
                             logger.info("Exception folder doens't have chunks!!!");
@@ -175,7 +176,7 @@ public class Uploader {
                         logger.error("Could not process the file: ", ex);
                         RemoteLogs.getInstance().sendLog(ex);
                         
-                        workingFile.setSyncStatus(CloneFile.SyncStatus.SYNCING);
+                        workingFile.setSyncStatus(SyncStatus.SYNCING);
                         workingFile.merge();
                         queue(workingFile);
                     } catch (NullPointerException ex1){
@@ -198,16 +199,16 @@ public class Uploader {
             }
         }
 
-        private void processRequest(CloneFile file) throws StorageException, StorageQuotaExcedeedException {            
+        private void processRequest(CloneItemVersion file) throws StorageException, StorageQuotaExcedeedException {            
             logger.info("UploadManager: Uploading file " + file.getFileName() + " ...");           
 
             // Update DB sync status                
             //now do this the newIndexRequest
-            file = db.getFileOrFolder(file.getId(), file.getVersion());
-            file.setSyncStatus(CloneFile.SyncStatus.SYNCING);
+            //file = db.getFileOrFolder(file.getId(), file.getVersion());
+            file.setSyncStatus(SyncStatus.SYNCING);
             file.merge();
 
-            touch(file, SyncStatus.SYNCING);
+            touch(file.getItem(), SyncStatus.SYNCING);
 
             // TODO IMPORTANT What about the DB to check the cunks!!!??
             // Get file list (to check if chunks already exist)
@@ -246,7 +247,7 @@ public class Uploader {
                 try {
                     logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
                     
-                    CloneWorkspace workspace = file.getWorkspace();
+                    CloneWorkspace workspace = file.getItem().getWorkspace();
                     transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
                 } catch (StorageException ex) {
                     logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
@@ -258,7 +259,7 @@ public class Uploader {
                 
                 numChunk++;
             }
-            logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
+            logger.info("UploadManager: File " + file.getItem().getAbsolutePath() + " uploaded");
 
             /**
              * Test this code:
@@ -267,13 +268,13 @@ public class Uploader {
              * Is it necessary to get again the file from the DB???
              */
             
-            file = db.getFileOrFolder(file.getId(), file.getVersion());
+            //file = db.getFileOrFolder(file.getId(), file.getVersion());
             
             // Update DB sync status
             file.setSyncStatus(SyncStatus.UPTODATE);
             file.merge();
 
-            touch(file, SyncStatus.UPTODATE);
+            touch(file.getItem(), SyncStatus.UPTODATE);
         }
 
         private RemoteFile getRemoteFile(String fileRemoteName){
@@ -290,16 +291,18 @@ public class Uploader {
             return rFile;
         }
 
-        private void touch(CloneFile file, SyncStatus syncStatus) {
+        private void touch(CloneItem file, SyncStatus syncStatus) {
             // Touch myself
             desktop.touch(file.getFile());
 
             // Touch parents
-            CloneFile childCF = file;
-            CloneFile parentCF;
+            CloneItem childCF = file;
+            CloneItem parentCF;
 
             while (null != (parentCF = childCF.getParent())) {
-                if (parentCF.getSyncStatus() != syncStatus) {
+                
+                CloneItemVersion latestVersion = parentCF.getLatestVersion();
+                if (latestVersion != null && latestVersion.getSyncStatus() != syncStatus) {
                     //parentCF.setSyncStatus(syncStatus);
                     //parentCF.merge();
 

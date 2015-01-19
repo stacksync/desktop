@@ -181,7 +181,7 @@ public class TestItem {
         version3.setServerUploadedAck(false);
         versions.add(version3);
         
-        item.setLatestVersion(3);
+        item.setLatestVersionNumber(3);
         item.setVersions(versions);
         persist(item);
     }
@@ -217,7 +217,7 @@ public class TestItem {
         version2.setServerUploadedAck(true);
         versions.add(version2);
         
-        item.setLatestVersion(2);
+        item.setLatestVersionNumber(2);
         item.setVersions(versions);
         persist(item);
     }
@@ -253,7 +253,7 @@ public class TestItem {
         version2.setServerUploadedAck(false);
         versions.add(version2);
         
-        item.setLatestVersion(2);
+        item.setLatestVersionNumber(2);
         item.setVersions(versions);
         persist(item);
     }
@@ -279,7 +279,7 @@ public class TestItem {
         version1.setServerUploadedAck(true);
         versions.add(version1);
         
-        item.setLatestVersion(1);
+        item.setLatestVersionNumber(1);
         item.setVersions(versions);
         persist(item);
         
@@ -309,7 +309,7 @@ public class TestItem {
         version1.setServerUploadedAck(true);
         versions.add(version1);
         
-        item.setLatestVersion(1);
+        item.setLatestVersionNumber(1);
         item.setVersions(versions);
         persist(item);
     }
@@ -356,7 +356,7 @@ public class TestItem {
         version3.setServerUploadedAck(false);
         versions.add(version3);
         
-        item.setLatestVersion(3);
+        item.setLatestVersionNumber(3);
         item.setVersions(versions);
         persist(item);
     }
