@@ -154,9 +154,11 @@ public class DatabaseHelper {
      */
     public List<CloneItem> getChildren(CloneItem parentFile) {
         // First, check by full file path
-        String queryStr = "select f from CloneItem f where "
-                + "      f.status <> :notStatus1 and "
-                + "      f.parent = :parent";
+        String queryStr = "select f from CloneItem f, CloneItemVersion v where "
+                + "      f.parent = :parent and "
+                + "      v.item = f and "
+                + "      f.latestVersion = v.version and "
+                + "      v.status <> :notStatus1";
 
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
