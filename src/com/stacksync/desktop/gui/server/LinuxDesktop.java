@@ -18,7 +18,7 @@
 package com.stacksync.desktop.gui.server;
 
 import com.stacksync.desktop.config.Config;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import java.io.File;
 import org.apache.log4j.Logger;
 
@@ -72,7 +72,7 @@ public class LinuxDesktop extends Desktop {
     }
     
     @Override
-    public void touch(String filepath, CloneFile.SyncStatus status) {
+    public void touch(String filepath, SyncStatus status) {
     }
     
     @Override

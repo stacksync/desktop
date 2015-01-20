@@ -8,8 +8,9 @@ import com.liferay.nativity.modules.fileicon.FileIconControlUtil;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import java.io.File;
 import java.util.EnumMap;
 import java.util.List;
@@ -68,18 +69,20 @@ public class OverlayController {
         // Draw overlays
         logger.info("Draw initial ovlerays");
 
-        List<CloneFile> dbFiles = db.getFiles(null);
+        List<CloneItem> dbFiles = db.getFiles();
 
-        for (CloneFile dbFile: dbFiles) {
+        for (CloneItem dbFile: dbFiles) {
             if (!dbFile.getFile().exists()) {
                 continue;
             }
             
-            if (dbFile.getSyncStatus() == SyncStatus.UPTODATE) {
+            CloneItemVersion latestVersion = dbFile.getLatestVersion();
+            
+            if (latestVersion.getSyncStatus() == SyncStatus.UPTODATE) {
                 this.drawOverlay(dbFile.getAbsolutePath(), SyncStatus.UPTODATE);
-            } else if (dbFile.getSyncStatus() == SyncStatus.UNSYNC) {
+            } else if (latestVersion.getSyncStatus() == SyncStatus.UNSYNC) {
                 this.drawOverlay(dbFile.getAbsolutePath(), SyncStatus.UNSYNC);
-            } else if (dbFile.getSyncStatus() == SyncStatus.SYNCING) {
+            } else if (latestVersion.getSyncStatus() == SyncStatus.SYNCING) {
                 this.drawOverlay(dbFile.getAbsolutePath(), SyncStatus.SYNCING);
             }
         }
@@ -103,7 +106,7 @@ public class OverlayController {
     
     public void refreshFile(File file) { }
     
-    public void drawOverlay(String path, CloneFile.SyncStatus status) {
+    public void drawOverlay(String path, SyncStatus status) {
         this.fileIconControl.setFileIcon(path, this.iconsIds.get(status));
     }
     

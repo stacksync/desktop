@@ -2,7 +2,7 @@ package com.stacksync.desktop.gui.server;
 
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import com.stacksync.desktop.gui.shell.OverlayController;
 import com.stacksync.desktop.gui.shell.OverlayException;
 import java.io.File;
@@ -43,7 +43,7 @@ public class MacDesktop extends Desktop {
     public void touch(File file) {}
     
     @Override
-    public void touch(String filepath, CloneFile.SyncStatus status) {
+    public void touch(String filepath, SyncStatus status) {
         if (this.initialized) {
             this.controller.drawOverlay(filepath, status);
         }
