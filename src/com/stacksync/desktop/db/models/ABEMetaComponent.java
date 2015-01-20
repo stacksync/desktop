@@ -32,9 +32,8 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
     })
     private CloneFile file;
 
-    @ManyToOne(cascade=CascadeType.REMOVE)
-    @JoinColumn(name="attribute_id", nullable=false)
-    private Attribute attribute;
+    @Column(name = "attribute_id", nullable = false)
+    private String attribute;
 
     @Column(name = "encrypted_pk_component", nullable = false)
     private String encryptedPKComponent;
@@ -46,7 +45,7 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
         this.id = null;
     }
 
-    public ABEMetaComponent(Long id, Attribute attribute, String encryptedPKComponent, Long version) {
+    public ABEMetaComponent(Long id, String attribute, String encryptedPKComponent, Long version) {
         this.id = id;
         this.attribute = attribute;
         this.encryptedPKComponent = encryptedPKComponent;
@@ -85,11 +84,11 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
         this.file = file;
     }
 
-    public Attribute getAttribute() {
+    public String getAttribute() {
         return attribute;
     }
 
-    public void setAttribute(Attribute attribute) {
+    public void setAttribute(String attribute) {
         this.attribute = attribute;
     }
 
@@ -105,7 +104,7 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
     public String toString() {
 
         String format = "ItemMetadata: {id=%s, attribute=%s, pk component=%s}";
-        String result = String.format(format, id, attribute.getId().toString(), encryptedPKComponent);
+        String result = String.format(format, id, attribute, encryptedPKComponent);
 
         return result;
     }

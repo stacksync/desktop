@@ -742,7 +742,7 @@ public class ChangeManager {
     
     
     /**
-     * Decrypt a symmetric key of a file from the proper Attribute-Based
+     * Decrypt the symmetric key of a file from the proper Attribute-Based
      * Encryption metadata.
      * @return decrypted symmetric key
      */
@@ -794,6 +794,13 @@ public class ChangeManager {
             fos = new FileOutputStream(tempFile, false);
             logger.info("- Decrypting chunks to temp file  " + tempFile.getAbsolutePath() + " ...");
 
+            if(cf.getWorkspace().isAbeEncrypted()) {
+                AbeEncryption abenc = (AbeEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
+                enc = abenc.getBasicEncryption(new String(cf.getSymmetricKey()));
+            } else {
+                enc = cf.getProfile().getEncryption(cf.getWorkspace().getId());
+            }
+
             int chunkNum = 1;
             for (CloneChunk chunk: cf.getChunks()) {
                 logger.info("Chunk (" + chunkNum + File.separator + cf.getChunks().size() + ")" + config.getCache().getCacheChunk(chunk));
@@ -802,12 +809,6 @@ public class ChangeManager {
                 File chunkFile = config.getCache().getCacheChunk(chunk);
 
                 byte[] packed = FileUtil.readFileToByteArray(chunkFile);
-                if(cf.getWorkspace().isAbeEncrypted()) {
-                    AbeEncryption abenc = (AbeEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
-                    enc = abenc.getBasicEncryption(new String(cf.getSymmetricKey()));
-                } else {
-                    enc = cf.getProfile().getEncryption(cf.getWorkspace().getId());
-                }
                 byte[] unpacked = FileUtil.unpack(packed, enc);
 
                 // Write decrypted chunk to file

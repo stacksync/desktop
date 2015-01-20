@@ -62,6 +62,17 @@ public class AbeCipherData extends CipherData {
         this.encryptedAttributes = encryptedAttributes;
     }
     
+    public ArrayList<com.stacksync.desktop.db.models.ABEMetaComponent> getAbeMetaComponents() {
+        ArrayList<com.stacksync.desktop.db.models.ABEMetaComponent> metaComponents = 
+                new ArrayList<com.stacksync.desktop.db.models.ABEMetaComponent>();
+        
+        for(String attribute : this.attributes) {
+            String encryptedAttribute = new String(encryptedAttributes.get(attribute));
+            metaComponents.add(new com.stacksync.desktop.db.models.ABEMetaComponent(null, attribute, encryptedAttribute, null));
+        }
+        return metaComponents;
+    }
+    
     public CipherText toCipherText() {
         return new CipherText(this.getAttributes(), this.getCipherText(), this.getEncryptedAttributes());
     }

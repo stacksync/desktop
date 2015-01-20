@@ -84,6 +84,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Transient
     private byte[] symmetricKey;
     
+    @Transient
+    private ArrayList<ABEMetaComponent> abeComponents;
+    
     @Column(name = "enc_symmetric_key")
     private byte[] cipherSymKey;
     
@@ -382,6 +385,14 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
     public void setSymmetricKey(byte[] symmetricKey) {
         this.symmetricKey = symmetricKey;
+    }
+    
+    public ArrayList<ABEMetaComponent> getAbeComponents() {
+        return abeComponents;
+    }
+
+    public void setAbeComponents(ArrayList<ABEMetaComponent> abeComponents) {
+        this.abeComponents = abeComponents;
     }
 
     public CloneFile getPreviousVersion() {

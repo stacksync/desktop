@@ -5,9 +5,9 @@ import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
 import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.ast.cloudABE.kpabe.CipherText;
 import com.stacksync.desktop.exceptions.ConfigException;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
+import java.security.SecureRandom;
 
 /**
  *
@@ -22,11 +22,14 @@ public class AbeEncryption implements Encryption {
     private String accessStructure;
     private CloudABEClient cabe;
     private BasicEncryptionFactory bef;
+    
+    private SecureRandom random;
 
     public AbeEncryption() throws ConfigException {
         try {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
             this.accessStructure = DEFAULT_ACCESS_STRUCT;
+            this.random = new SecureRandom();
             init();
         } catch (Exception e) {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
@@ -37,6 +40,7 @@ public class AbeEncryption implements Encryption {
         try {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
             this.accessStructure = accessStructure;
+            this.random = new SecureRandom();
             init();
         } catch (Exception e) {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
@@ -64,4 +68,7 @@ public class AbeEncryption implements Encryption {
         return bef.getBasicEncryption(password);
     }
 
+    public String generateSymKey() {
+        return new BigInteger(130, random).toString(32);
+    }
 }
