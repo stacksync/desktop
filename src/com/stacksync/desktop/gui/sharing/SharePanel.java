@@ -7,7 +7,7 @@ import com.stacksync.desktop.config.Encryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.syncserver.Server;
@@ -31,7 +31,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
     private JFrame frame;
     private File folderSelected;
     
-    /**
+    /*
      * Creates new form SharePanel
      */
     public SharePanel(JFrame frame) {
@@ -178,7 +178,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
                         .addGap(5, 5, 5)
                         .addComponent(lblPasswordConfirm, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(shareButton)
                     .addComponent(cancelButton))
                 .addGap(14, 14, 14))
@@ -220,7 +220,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
                 return;
             }
             
-            CloneFile folder = db.getFileOrFolder(this.folderSelected);
+            CloneItem folder = db.getFileOrFolder(this.folderSelected);
             server.createShareProposal(profile.getAccountId(), emails, folder.getId(), encrypted);
             this.frame.setVisible(false);
         } catch (ShareProposalNotCreatedException ex) {

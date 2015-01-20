@@ -26,7 +26,8 @@ import com.stacksync.desktop.Application;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.index.requests.CheckIndexRequest;
 import com.stacksync.desktop.index.requests.DeleteIndexRequest;
@@ -106,10 +107,10 @@ public class Indexer {
             logger.debug("- Folder "+folder.getLocalFile()+" ...");
             
             // Check for files that do NOT exist anymore
-            List<CloneFile> dbFiles = db.getFiles(folder);
+            List<CloneItem> dbFiles = db.getFiles();
             
-            for (CloneFile dbFile: dbFiles) {
-                if (!dbFile.getFile().exists() && dbFile.getSyncStatus() != CloneFile.SyncStatus.REMOTE) {
+            for (CloneItem dbFile: dbFiles) {
+                if (!dbFile.getFile().exists() && dbFile.getLatestVersion().getSyncStatus() != SyncStatus.REMOTE) {
                     logger.info("File "+dbFile.getFile()+" does NOT exist anymore. Marking as deleted.");                    
                     queueDeleted(folder, dbFile.getFile());
                     //new DeleteIndexRequest(folder, dbFile).process();
@@ -141,15 +142,15 @@ public class Indexer {
         queue.add(new MoveIndexRequest(fromRoot, fromFile, toRoot, toFile));
     }
     
-    public void queueMoved(CloneFile guessedPreviousVersion, Folder toRoot, File toFile) {
+    public void queueMoved(CloneItem guessedPreviousVersion, Folder toRoot, File toFile) {
         queue.add(new MoveIndexRequest(guessedPreviousVersion, toRoot, toFile));
     }    
     
-    public void queueMovedWorkspace(CloneFile guessedPreviousVersion, Folder toRoot, File toFile) {
+    public void queueMovedWorkspace(CloneItem guessedPreviousVersion, Folder toRoot, File toFile) {
         queue.add(new MoveIndexWorkspaceRequest(guessedPreviousVersion, toRoot, toFile));
     }
     
-    public void queueRenamedWorkspace(CloneFile guessedPreviousVersion, File toFile) {
+    public void queueRenamedWorkspace(CloneItem guessedPreviousVersion, File toFile) {
         queue.add(new RenameIndexWorkspaceRequest(guessedPreviousVersion, toFile));
     }
 
@@ -157,11 +158,11 @@ public class Indexer {
         queue.add(new DeleteIndexRequest(root, file));
     }
     
-    public void queueDeleted(Folder root, CloneFile file, CloneFile deletedParent) {
+    public void queueDeleted(Folder root, CloneItem file, CloneItem deletedParent) {
         queue.add(new DeleteIndexRequest(root, file, deletedParent));
     }    
     
-    public void queueNewIndex(Folder root, File file, CloneFile previousVersion, long checksum){
+    public void queueNewIndex(Folder root, File file, CloneItem previousVersion, long checksum){
         queue.add(new NewIndexRequest(root, file, previousVersion, checksum));
     }
     
@@ -169,7 +170,7 @@ public class Indexer {
         queue.add(newRequest);
     }
 
-    public void queueNewIndexShared(Folder root, File file, CloneFile previousVersion, long checksum) {
+    public void queueNewIndexShared(Folder root, File file, CloneItem previousVersion, long checksum) {
         queue.add(new NewIndexSharedRequest(root, file, previousVersion, checksum));
     }
 
