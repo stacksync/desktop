@@ -137,7 +137,7 @@ public class TestItem {
         createItem2(workspace);
         createItem3(workspace);
         createFolder1(workspace);
-        
+        createSharedWorkspace();
     }
     
     private void createItem1(CloneWorkspace workspace) {
@@ -361,15 +361,56 @@ public class TestItem {
         persist(item);
     }
     
+    private void createSharedWorkspace() {
+        CloneWorkspace workspace = new CloneWorkspace();
+        workspace.setDefaultWorkspace(false);
+        workspace.setId("shared");
+        workspace.setName("shared_folder");
+        workspace.setLocalLastUpdate(1);
+        workspace.setRemoteRevision(1);
+        workspace.setOwner("me");
+        workspace.setEncrypted(false);
+        workspace.setPathWorkspace("/shared_folder");
+        workspace.setDefaultWorkspace(false);
+        persist(workspace);
+        
+        CloneItem item = new CloneItem();
+        item.setId(10L);
+        item.setName("shared_folder");
+        item.setFolder(true);
+        item.setMimetype("folder");
+        item.setUsingTempId(false);
+        item.setWorkspace(workspace);
+        item.setWorkspaceRoot(true);
+        item.setLatestVersionNumber(1);
+        item.generatePath();
+        ArrayList<CloneItemVersion> versions = new ArrayList<CloneItemVersion>();
+        
+        CloneItemVersion version1 = new CloneItemVersion();
+        version1.setVersion(1);
+        version1.setSize(1);
+        version1.setChecksum(1);
+        version1.setItem(item);
+        version1.setStatus(CloneItemVersion.Status.NEW);
+        version1.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        version1.setServerUploadedAck(false);
+        versions.add(version1);
+        
+        item.setVersions(versions);
+        persist(item);
+    }
+    
     @After
     public void tearDown() {
         CloneWorkspace workspace = entityManager.find(CloneWorkspace.class, "wp1");
+        CloneWorkspace workspace2 = entityManager.find(CloneWorkspace.class, "shared");
         CloneItem item = entityManager.find(CloneItem.class, 1L);
         CloneItem item2 = entityManager.find(CloneItem.class, 2L);
         CloneItem item3 = entityManager.find(CloneItem.class, 3L);
         CloneItem item4 = entityManager.find(CloneItem.class, 4L);
         CloneItem item5 = entityManager.find(CloneItem.class, 5L);
         CloneItem item6 = entityManager.find(CloneItem.class, 6L);
+        CloneItem item7 = entityManager.find(CloneItem.class, 10L);
         
         entityManager.getTransaction().begin();
         entityManager.remove(item);
@@ -379,6 +420,8 @@ public class TestItem {
         entityManager.remove(item5);
         entityManager.remove(item6);
         entityManager.remove(workspace);
+        entityManager.remove(item7);
+        entityManager.remove(workspace2);
         entityManager.getTransaction().commit();
     }
     
@@ -390,7 +433,7 @@ public class TestItem {
     @Test
     public void getNoDeletedFiles() {
         List<CloneItem> items = databaseHelper.getFiles();
-        assert items.size() == 3;
+        assert items.size() == 4;
     }
     
     @Test
@@ -475,10 +518,31 @@ public class TestItem {
     public void getFileVersionCountTest() {
         Long value = databaseHelper.getFileVersionCount();
         if (value != null) {
-            assert value.equals(2L);
+            assert value.equals(3L);
         } else {
             assert false;
         }
+    }
+    
+    @Test
+    public void getWorkspaceFilesTest() {
+        List<CloneItem> items = databaseHelper.getWorkspaceFiles("wp1");
+        assert items.size() == 3;
+    }
+    
+    @Test
+    public void getWorkspaceTest() {
+        CloneWorkspace w = databaseHelper.getWorkspace("wp1");
+        assert w.getId().equals("wp1");
+        assert w.getOwner().equals("me");
+        assert w.getName().equals("default");
+    }
+    
+    @Test
+    public void getWorkspacesUpdatesTest() {
+        List<CloneItem> roots = databaseHelper.getWorkspacesUpdates();
+        assert roots.size() == 1;
+        assert roots.get(0).getId().equals(10L);
     }
     
     public void persist(Object o){

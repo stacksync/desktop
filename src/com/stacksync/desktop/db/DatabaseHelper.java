@@ -555,12 +555,14 @@ public class DatabaseHelper {
         cal.set(getFieldTimeout(), getValueTimeout(cal)); 
         Date time = cal.getTime();     
         
-        String queryStr = "select c from CloneItem c where "
-                + "     c.syncStatus = :statusSync and "                
-                + "     c.serverUploadedAck = false and "
+        String queryStr = "select c from CloneItem c, CloneItemVersion v where "
+                + "     v.item = c and "
+                + "     v.version = c.latestVersion and "
+                + "     v.syncStatus = :statusSync and "                
+                + "     v.serverUploadedAck = false and "
                 + "     c.workspaceRoot = true and "
-                + "     (c.serverUploadedTime < :timeNow or "
-                + "     c.serverUploadedTime is null) order by "
+                + "     (v.serverUploadedTime < :timeNow or "
+                + "     v.serverUploadedTime is null) order by "
                 + "         c.path asc";
         
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
@@ -588,8 +590,10 @@ public class DatabaseHelper {
 
     public List<CloneItem> getWorkspaceFiles(String id) {
         
-        String queryStr = "select f from CloneItem f where "
-                + "      f.status <> :notStatus1 and "
+        String queryStr = "select f from CloneItem f, CloneItemVersion v where "
+                + "      v.item = f and "
+                + "      v.version = f.latestVersion and "
+                + "      v.status <> :notStatus1 and "
                 + "      f.workspace = ("
                 + "           select wp from CloneWorkspace wp where "
                 + "           wp.id = :workspaceId"
