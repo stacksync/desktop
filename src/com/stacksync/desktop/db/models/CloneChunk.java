@@ -23,7 +23,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
 import com.stacksync.desktop.db.PersistentObject;
 
 /**
@@ -32,7 +31,6 @@ import com.stacksync.desktop.db.PersistentObject;
  * @author Philipp C. Heckel
  */
 @Entity
-@IdClass(value = CloneChunkPk.class)
 public class CloneChunk extends PersistentObject implements Serializable {
     private static final long serialVersionUID = 3232299912L;
     

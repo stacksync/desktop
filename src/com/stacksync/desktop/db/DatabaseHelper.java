@@ -482,10 +482,11 @@ public class DatabaseHelper {
     }
 
     public List<CloneItem> getCloneFiles(CloneChunk chunk) {
-        String queryStr = "select distinct c from CloneFile c "
-                + "     join c.chunks ch "
+        String queryStr = "select distinct c from CloneItem c, CloneItemVersion v "
+                + "     join v.chunks ch "
                 + "     where "
-                + "     ch.checksum = :checksum ";        
+                + "     ch.checksum = :checksum and "
+                + "     v.item = c";        
 
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         
@@ -516,12 +517,12 @@ public class DatabaseHelper {
         CloneWorkspace defaultWorkspace;
         
         String queryStr = "select wp from CloneWorkspace wp where "
-                + "     wp.pathWorkspace = :path";
+                + "     wp.defaultWorkspace = :isDefault";
 
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneChunk.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
-        query.setParameter("path", "/");
+        query.setParameter("isDefault", true);
 
         defaultWorkspace = (CloneWorkspace) query.getSingleResult();
         

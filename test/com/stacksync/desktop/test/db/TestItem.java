@@ -4,6 +4,7 @@ import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.DatabaseHelper;
+import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
@@ -220,6 +221,11 @@ public class TestItem {
         item.setLatestVersionNumber(2);
         item.setVersions(versions);
         persist(item);
+        
+        CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.REMOTE);
+        persist(chunk);
+        version2.addChunk(chunk);
+        persist(version2);
     }
     
     private void createItem3(CloneWorkspace workspace) {
@@ -312,6 +318,10 @@ public class TestItem {
         item.setLatestVersionNumber(1);
         item.setVersions(versions);
         persist(item);
+        
+        CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.REMOTE);
+        version1.addChunk(chunk);
+        persist(version1);
     }
     
     private void createChildDeleted1(CloneWorkspace workspace, CloneItem folder) {
@@ -411,6 +421,7 @@ public class TestItem {
         CloneItem item5 = entityManager.find(CloneItem.class, 5L);
         CloneItem item6 = entityManager.find(CloneItem.class, 6L);
         CloneItem item7 = entityManager.find(CloneItem.class, 10L);
+        CloneChunk chunk1 = entityManager.find(CloneChunk.class, "checksum1");
         
         entityManager.getTransaction().begin();
         entityManager.remove(item);
@@ -419,8 +430,9 @@ public class TestItem {
         entityManager.remove(item4);
         entityManager.remove(item5);
         entityManager.remove(item6);
-        entityManager.remove(workspace);
         entityManager.remove(item7);
+        entityManager.remove(chunk1);
+        entityManager.remove(workspace);
         entityManager.remove(workspace2);
         entityManager.getTransaction().commit();
     }
@@ -536,6 +548,11 @@ public class TestItem {
         assert w.getId().equals("wp1");
         assert w.getOwner().equals("me");
         assert w.getName().equals("default");
+        
+        CloneWorkspace w2 = databaseHelper.getWorkspace("shared");
+        assert w2.getId().equals("shared");
+        assert w2.getOwner().equals("me");
+        assert w2.getName().equals("shared_folder");
     }
     
     @Test
@@ -543,6 +560,27 @@ public class TestItem {
         List<CloneItem> roots = databaseHelper.getWorkspacesUpdates();
         assert roots.size() == 1;
         assert roots.get(0).getId().equals(10L);
+    }
+    
+    @Test
+    public void getWorkspaceRootTest() {
+        CloneItem root = databaseHelper.getWorkspaceRoot("shared");
+        assert root.getId() == 10L;
+        assert root.getName().equals("shared_folder");
+    }
+    
+    @Test
+    public void getDefaultWorkspaceTest() {
+        CloneWorkspace defaultWorkspace = databaseHelper.getDefaultWorkspace();
+        assert defaultWorkspace.isDefaultWorkspace();
+        assert defaultWorkspace.getPathWorkspace().equals("/");
+    }
+    
+    @Test
+    public void getCloneItemsFromChunk() {
+        CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.REMOTE);
+        List<CloneItem> items = databaseHelper.getCloneFiles(chunk);
+        assert items.size() == 2;
     }
     
     public void persist(Object o){
