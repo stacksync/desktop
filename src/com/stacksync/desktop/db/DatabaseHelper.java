@@ -31,6 +31,7 @@ import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
+import com.stacksync.desktop.db.models.ABEMetaComponent;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
 import com.stacksync.desktop.db.models.CloneFile;
@@ -486,11 +487,30 @@ public class DatabaseHelper {
             if(!workspaces.containsKey(cf.getWorkspace().getId())){
                 workspaces.put(cf.getWorkspace().getId(), new ArrayList<CloneFile>());
             } 
-                
+            // Get extra metadata if workspace is ABE-encrypted
+            if(cf.getWorkspace().isAbeEncrypted()) {
+                cf.setAbeComponents(getAbeComponents(cf.getId(), cf.getVersion()));
+            }
             workspaces.get(cf.getWorkspace().getId()).add(cf);            
         }
         
         return workspaces;
+    }
+    
+    public List<ABEMetaComponent> getAbeComponents(Long fileId, Long fileVersion) {
+        
+        String queryStr = "select c from AbeMetaComponent c where "
+                + "     c.file_id = :fileId and "                
+                + "     c.file_version = :fileVersion";
+        
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, ABEMetaComponent.class);
+        query.setHint("javax.persistence.cache.storeMode", "REFRESH");
+        query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
+        
+        query.setParameter("fileId", fileId);       
+        query.setParameter("fileVersion", fileVersion);
+        
+        return query.getResultList();
     }
     
     public Map<String, CloneWorkspace> getWorkspaces() {        

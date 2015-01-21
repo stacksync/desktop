@@ -176,7 +176,7 @@ public class RemoteWatcher {
                     c.merge(); 
                     
                     CloneWorkspace workspace = c.getWorkspace();
-                    ItemMetadata obj = c.mapToItemMetadata();
+                    SyncMetadata obj = c.mapToSyncMetadata();
                     
                     List<SyncMetadata> itemsToCommit;
                     if (workspaces.containsKey(workspace)) {
