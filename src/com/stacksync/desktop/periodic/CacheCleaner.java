@@ -29,8 +29,8 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
+import com.stacksync.desktop.db.models.CloneItemVersion;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 
 /**
  * Cleans the local cache by deleting unused files.
@@ -87,12 +87,12 @@ public class CacheCleaner {
             }
 
             if(canDelete){
-                List<CloneFile> cloneFiles = db.getCloneFiles(chunk);
+                List<CloneItemVersion> versions = db.getCloneFileVersions(chunk);
                 
-                for(CloneFile cf: cloneFiles){
-                    if(cf.getSyncStatus() != SyncStatus.UPTODATE){
+                for(CloneItemVersion version: versions){
+                    if(version.getSyncStatus() != SyncStatus.UPTODATE){
                         canDelete = false;
-                        logger.debug("Chunk is used by " + cf + " ...");
+                        logger.debug("Chunk is used by " + version + " ...");
                         break;
                     }
                 }

@@ -483,14 +483,14 @@ public class DatabaseHelper {
         return query.getResultList();
     }
 
-    public List<CloneItem> getCloneFiles(CloneChunk chunk) {
-        String queryStr = "select distinct c from CloneItem c, CloneItemVersion v "
+    public List<CloneItemVersion> getCloneFileVersions(CloneChunk chunk) {
+        String queryStr = "select distinct v from CloneItem c, CloneItemVersion v "
                 + "     join v.chunks ch "
                 + "     where "
                 + "     ch.checksum = :checksum and "
                 + "     v.item = c";        
 
-        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItemVersion.class);
         
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");

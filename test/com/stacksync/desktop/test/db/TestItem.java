@@ -225,6 +225,8 @@ public class TestItem {
         
         CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.CACHED);
         persist(chunk);
+        version1.addChunk(chunk);
+        persist(version1);
         version2.addChunk(chunk);
         persist(version2);
     }
@@ -575,8 +577,8 @@ public class TestItem {
     @Test
     public void getCloneItemsFromChunk() {
         CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.REMOTE);
-        List<CloneItem> items = databaseHelper.getCloneFiles(chunk);
-        assert items.size() == 2;
+        List<CloneItemVersion> versions = databaseHelper.getCloneFileVersions(chunk);
+        assert versions.size() == 3;
     }
     
     @Test
