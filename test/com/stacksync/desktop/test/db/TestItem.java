@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -222,7 +223,7 @@ public class TestItem {
         item.setVersions(versions);
         persist(item);
         
-        CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.REMOTE);
+        CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.CACHED);
         persist(chunk);
         version2.addChunk(chunk);
         persist(version2);
@@ -319,7 +320,7 @@ public class TestItem {
         item.setVersions(versions);
         persist(item);
         
-        CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.REMOTE);
+        CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.CACHED);
         version1.addChunk(chunk);
         persist(version1);
     }
@@ -436,11 +437,6 @@ public class TestItem {
         entityManager.remove(workspace2);
         entityManager.getTransaction().commit();
     }
-    
-    /*@Test
-    public void createItemWithVersions() {
-        System.out.println("Hola");
-    }*/
     
     @Test
     public void getNoDeletedFiles() {
@@ -581,6 +577,17 @@ public class TestItem {
         CloneChunk chunk = new CloneChunk("checksum1", CloneChunk.CacheStatus.REMOTE);
         List<CloneItem> items = databaseHelper.getCloneFiles(chunk);
         assert items.size() == 2;
+    }
+    
+    @Test
+    public void getChunkCachedTest() {
+        List<CloneChunk> chunks = databaseHelper.getChunkCached();
+        assert chunks.size() == 1;
+    }
+    
+    @Test
+    public void getHistoryUptoDate() {
+        Map<String, List<CloneItemVersion>> versionsToUpload = databaseHelper.getHistoryUptoDate();
     }
     
     public void persist(Object o){

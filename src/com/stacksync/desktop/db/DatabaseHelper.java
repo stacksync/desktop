@@ -418,34 +418,36 @@ public class DatabaseHelper {
         return cal.get(Calendar.MINUTE) - 1;
     }
     
-    public Map<String, List<CloneItem>> getHistoryUptoDate() {
+    public Map<String, List<CloneItemVersion>> getHistoryUptoDate() {
         Calendar cal = Calendar.getInstance();  
         cal.set(getFieldTimeout(), getValueTimeout(cal)); 
         Date time = cal.getTime();        
         
-        String queryStr = "select c from CloneItem c where "
-                + "     c.syncStatus = :statusSync and "                
-                + "     c.serverUploadedAck = false and "
+        String queryStr = "select v from CloneItemVersion v, CloneItem c where "
+                + "     v.syncStatus = :statusSync and "                
+                + "     v.serverUploadedAck = false and "
+                + "     v.item = c and "
                 + "     c.workspaceRoot = false and "
-                + "     (c.serverUploadedTime < :timeNow or "
-                + "     c.serverUploadedTime is null) order by "
+                + "     (v.serverUploadedTime < :timeNow or "
+                + "     v.serverUploadedTime is null) order by "
                 + "                                     c.path asc";    
         
-        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
+        Query query = this.database.getEntityManager().createQuery(queryStr, CloneItemVersion.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("statusSync", SyncStatus.UPTODATE);       
         query.setParameter("timeNow", time);
         
-        Map<String, List<CloneItem>> workspaces = new HashMap<String, List<CloneItem>>();
-        List<CloneItem> clonefiles = query.getResultList();
-        for(CloneItem cf: clonefiles){
-            if(!workspaces.containsKey(cf.getWorkspace().getId())){
-                workspaces.put(cf.getWorkspace().getId(), new ArrayList<CloneItem>());
+        Map<String, List<CloneItemVersion>> workspaces = new HashMap<String, List<CloneItemVersion>>();
+        List<CloneItemVersion> versions = query.getResultList();
+        for(CloneItemVersion version: versions){
+            CloneItem item = version.getItem();
+            if(!workspaces.containsKey(item.getWorkspace().getId())){
+                workspaces.put(item.getWorkspace().getId(), new ArrayList<CloneItemVersion>());
             } 
                 
-            workspaces.get(cf.getWorkspace().getId()).add(cf);            
+            workspaces.get(item.getWorkspace().getId()).add(version);            
         }
         
         return workspaces;
