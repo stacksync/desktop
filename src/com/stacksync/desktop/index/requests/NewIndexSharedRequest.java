@@ -251,7 +251,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         ArrayList<String> attSet = new ArrayList<String>();
         attSet.add("MarketingA");
         attSet.add("DesignA");
-        attSet.add("DesignY");
+        attSet.add("DesignB");
 
         PlainData plainData = new AbePlainData(data, attSet);
 

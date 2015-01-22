@@ -759,7 +759,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
 
         // Return ABEItemMetadata object if workspace implements ABE encryption
         if (getWorkspace().isAbeEncrypted()) {
-            ABEItemMetadata abeObject = new ABEItemMetadata(object, getCommonAbeComponents(), new String(getCipherSymKey()));
+            ABEItemMetadata abeObject = new ABEItemMetadata(object, getCommonAbeComponents(), getCipherSymKey());
             abeObject.setTempId(object.getTempId());
             abeObject.setWorkspaceId(object.getWorkspaceId());
             return abeObject;

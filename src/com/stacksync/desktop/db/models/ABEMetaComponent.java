@@ -6,6 +6,8 @@ import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
@@ -22,6 +24,7 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
     private static final long serialVersionUID = 3232299912L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "abe_component_id", nullable = false)
     private Long id;
     
@@ -36,7 +39,7 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
     private String attribute;
 
     @Column(name = "encrypted_pk_component", nullable = false)
-    private String encryptedPKComponent;
+    private byte[] encryptedPKComponent;
 
     @Column(name = "abe_component_version", nullable = false)
     private Long version;
@@ -45,7 +48,7 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
         this.id = null;
     }
 
-    public ABEMetaComponent(Long id, String attribute, String encryptedPKComponent, Long version) {
+    public ABEMetaComponent(Long id, String attribute, byte[] encryptedPKComponent, Long version) {
         this.id = id;
         this.attribute = attribute;
         this.encryptedPKComponent = encryptedPKComponent;
@@ -60,11 +63,11 @@ public class ABEMetaComponent extends PersistentObject implements Serializable, 
         this.id = id;
     }
 
-    public String getEncryptedPKComponent() {
+    public byte[] getEncryptedPKComponent() {
         return encryptedPKComponent;
     }
 
-    public void setEncryptedPKComponent(String encryptedPKComponent) {
+    public void setEncryptedPKComponent(byte[] encryptedPKComponent) {
         this.encryptedPKComponent = encryptedPKComponent;
     }
 

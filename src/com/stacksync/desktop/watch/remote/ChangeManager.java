@@ -190,7 +190,7 @@ public class ChangeManager {
                             resolveConflict(existingVersion, update);
                         } catch (CouldNotApplyUpdateException ex) {
                             logger.error("Unable to download/assemble winning file!", ex);
-                            RemoteLogs.getInstance().sendLog(ex);
+                            //RemoteLogs.getInstance().sendLog(ex);
                             // TODO Inifinite loop??
                             queue.add(update);
                         }
@@ -235,7 +235,7 @@ public class ChangeManager {
                                 resolveConflict(localVersionByFilename, update);
                             } catch (CouldNotApplyUpdateException ex) {
                                 logger.error("Unable to download/assemble winning file!", ex);
-                                RemoteLogs.getInstance().sendLog(ex);
+                                //RemoteLogs.getInstance().sendLog(ex);
                                 // TODO Inifinite loop??
                                 queue.add(update);
                             }
@@ -258,7 +258,7 @@ public class ChangeManager {
                                 } catch (CouldNotApplyUpdateException ex) {
                                     // TODO Inifinite loop??
                                     logger.error("Unable to download/assemble winning file!", ex);
-                                    RemoteLogs.getInstance().sendLog(ex);
+                                    //RemoteLogs.getInstance().sendLog(ex);
                                     queue.add(update);
                                 }
                             }                            
@@ -318,7 +318,7 @@ public class ChangeManager {
         } catch (CouldNotApplyUpdateException ex) {
             // TODO Inifinite loop??
             logger.error("Warning: could not download/assemble " + newFileUpdate, ex);
-            RemoteLogs.getInstance().sendLog(ex);            
+            //RemoteLogs.getInstance().sendLog(ex);            
             queue.add(newFileUpdate);
             if (lastMatchingVersion != null) {
                 this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.UNSYNC);
@@ -748,7 +748,7 @@ public class ChangeManager {
      */
     private byte[] retrieveSymKey(CloneFile cf, Update update) {
         AbeEncryption enc = (AbeEncryption) cf.getRoot().getProfile().getEncryption(cf.getWorkspace().getId());
-        CipherData cipher = new AbeCipherData(update.getCipherSymKey().getBytes(), update.getAbeComponents());
+        CipherData cipher = new AbeCipherData(update.getCipherSymKey(), update.getAbeComponents());
         return enc.decrypt(cipher);
     }
 

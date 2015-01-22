@@ -10,6 +10,7 @@ import com.stacksync.commons.notifications.CommitNotification;
 import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.CommitInfo;
+import com.stacksync.commons.models.SyncMetadata;
 import com.stacksync.desktop.gui.server.Desktop;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -87,7 +88,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         
         long version = commit.getCommittedVersion();
         long fileId = commit.getMetadata().getId();
-        ItemMetadata itemMetadata = commit.getMetadata();
+        SyncMetadata itemMetadata = commit.getMetadata();
             
         CloneFile existingVersion;
         Long tempId = itemMetadata.getTempId();
@@ -108,7 +109,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
 
     private Update doActionNotCommited(CommitInfo commit) {
        
-        ItemMetadata itemMetadata = commit.getMetadata();
+        SyncMetadata itemMetadata = commit.getMetadata();
         
         Update update = Update.parse(itemMetadata, workspace);
         CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
@@ -127,7 +128,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         return config.getDeviceName().compareTo(deviceName) == 0;
     }
     
-    private CloneFile changeTempId(ItemMetadata itemMetadata, TempIdManager tempIdManager) {
+    private CloneFile changeTempId(SyncMetadata itemMetadata, TempIdManager tempIdManager) {
         
         CloneFile localFile = db.getFileOrFolder(itemMetadata.getTempId(), itemMetadata.getVersion());
         

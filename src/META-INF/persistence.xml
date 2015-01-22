@@ -15,7 +15,6 @@
       <property name="javax.persistence.jdbc.password" value=""/>
       <property name="javax.persistence.jdbc.driver" value="REPLACED_BY_APPLICATION"/>
       <!-- EclipseLink specific -->
-      <property name="eclipselink.ddl-generation" value="REPLACED_BY_APPLICATION"/>
       <property name="eclipselink.cache.shared.default" value="false"/>
       <property name="eclipselink.cache.size.default" value="0"/>
       <property name="eclipselink.cache.type.default" value="None"/>

@@ -259,6 +259,8 @@ public class Profile implements Configurable {
             
             if (workspace.isEncrypted()) {
                 generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
+            } else if (workspace.isAbeEncrypted()) {
+                generateAndSaveAbeEncryption(workspace.getId());
             }
         }else{
             

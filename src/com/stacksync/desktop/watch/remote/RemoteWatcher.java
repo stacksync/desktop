@@ -163,8 +163,7 @@ public class RemoteWatcher {
 
         try {
             logger.info("Commit new changes.");
-            
-            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
+                      Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
             // This hashmap contains a list of files changed in each workspace.
             HashMap<CloneWorkspace, List<SyncMetadata>> workspaces = new HashMap<CloneWorkspace, List<SyncMetadata>>();

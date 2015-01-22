@@ -86,6 +86,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
         txtPassword = new javax.swing.JPasswordField();
         txtPassword1 = new javax.swing.JPasswordField();
         browseButton = new javax.swing.JButton();
+        enableABE = new javax.swing.JCheckBox();
 
         lblMail.setText("__E-mail:");
 
@@ -121,6 +122,8 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
             }
         });
 
+        enableABE.setText("__ABE");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -128,7 +131,11 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
             .addGroup(layout.createSequentialGroup()
                 .addGap(55, 55, 55)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(encryptCheckBox)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(enableABE, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(encryptCheckBox))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(lblFolder)
@@ -164,7 +171,9 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
                     .addComponent(lblFolder)
                     .addComponent(browseButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(encryptCheckBox)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(encryptCheckBox)
+                    .addComponent(enableABE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -209,8 +218,13 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
         
         try {
             boolean encrypted = false;
+            boolean abeEncrypted = false;
             if (this.encryptCheckBox.isSelected()) {
                 encrypted = true;
+            }
+            
+            if (this.enableABE.isSelected()) {
+                abeEncrypted = true;
             }
             
             DatabaseHelper db = DatabaseHelper.getInstance();
@@ -221,7 +235,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
             }
             
             CloneFile folder = db.getFileOrFolder(this.folderSelected);
-            server.createShareProposal(profile.getAccountId(), emails, folder.getId(), encrypted);
+            server.createShareProposal(profile.getAccountId(), emails, folder.getId(), encrypted, abeEncrypted);
             this.frame.setVisible(false);
         } catch (ShareProposalNotCreatedException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
@@ -286,6 +300,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
     private javax.swing.JButton browseButton;
     private javax.swing.JButton cancelButton;
     private javax.swing.JTextField emailField;
+    private javax.swing.JCheckBox enableABE;
     private javax.swing.JCheckBox encryptCheckBox;
     private javax.swing.JTextField folderNameField;
     private javax.swing.JLabel lblFolder;

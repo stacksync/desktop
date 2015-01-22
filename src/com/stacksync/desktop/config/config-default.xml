@@ -19,7 +19,7 @@
         <rpc_exchange>rpc_global_exchange</rpc_exchange>
     </rabbitMQ>
 
-    <!--
+    
     <database>
         <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/stacksync"/>
         <property name="javax.persistence.jdbc.password" value="stacksync"/>
@@ -27,7 +27,7 @@
         <property name="javax.persistence.jdbc.user" value="stacksync"/>
         <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
     </database>
-    -->
+    
     
     <cache>
         <size>1024</size>

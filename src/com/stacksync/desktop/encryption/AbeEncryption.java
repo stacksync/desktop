@@ -48,7 +48,8 @@ public class AbeEncryption implements Encryption {
     }
 
     private void init() throws AttributeNotFoundException {
-        cabe.setupABESystem(0, accessStructure);
+        cabe.setupABESystem(0, accessStructure, true);
+        this.bef = new BasicEncryptionFactory();
     }
 
     @Override

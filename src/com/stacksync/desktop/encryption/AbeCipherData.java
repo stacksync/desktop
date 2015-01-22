@@ -34,7 +34,7 @@ public class AbeCipherData extends CipherData {
         for (ABEMetaComponent meta : metaComponents){
             String attribute = meta.getAttributeId();
             attrs.add(attribute);
-            encryptedAttrs.put(attribute, meta.getEncryptedPKComponent().getBytes());
+            encryptedAttrs.put(attribute, meta.getEncryptedPKComponent());
         }
         this.attributes = attrs;
         this.encryptedAttributes = encryptedAttrs;
@@ -67,8 +67,8 @@ public class AbeCipherData extends CipherData {
                 new ArrayList<com.stacksync.desktop.db.models.ABEMetaComponent>();
         
         for(String attribute : this.attributes) {
-            String encryptedAttribute = new String(encryptedAttributes.get(attribute));
-            metaComponents.add(new com.stacksync.desktop.db.models.ABEMetaComponent(null, attribute, encryptedAttribute, null));
+            metaComponents.add(new com.stacksync.desktop.db.models.ABEMetaComponent(
+                    null, attribute, encryptedAttributes.get(attribute), null));
         }
         return metaComponents;
     }

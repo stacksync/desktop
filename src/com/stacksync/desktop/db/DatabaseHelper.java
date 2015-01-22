@@ -489,7 +489,7 @@ public class DatabaseHelper {
             } 
             // Get extra metadata if workspace is ABE-encrypted
             if(cf.getWorkspace().isAbeEncrypted()) {
-                cf.setAbeComponents(getAbeComponents(cf.getId(), cf.getVersion()));
+                cf.setAbeComponents(getAbeComponents(cf));
             }
             workspaces.get(cf.getWorkspace().getId()).add(cf);            
         }
@@ -497,18 +497,16 @@ public class DatabaseHelper {
         return workspaces;
     }
     
-    public List<ABEMetaComponent> getAbeComponents(Long fileId, Long fileVersion) {
+    public List<ABEMetaComponent> getAbeComponents(CloneFile file) {
         
-        String queryStr = "select c from AbeMetaComponent c where "
-                + "     c.file_id = :fileId and "                
-                + "     c.file_version = :fileVersion";
+        String queryStr = "select c from ABEMetaComponent c where "
+                + "     c.file = :file";
         
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, ABEMetaComponent.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("fileId", fileId);       
-        query.setParameter("fileVersion", fileVersion);
+        query.setParameter("file", file);       
         
         return query.getResultList();
     }
@@ -561,6 +559,25 @@ public class DatabaseHelper {
         
         query.setParameter("new_parent", newParent);
         query.setParameter("current_parent", currentParent);
+
+        config.getDatabase().getEntityManager().getTransaction().begin();
+        query.executeUpdate();
+        config.getDatabase().getEntityManager().getTransaction().commit();
+        
+        if(newParent.getWorkspace().isAbeEncrypted()) {
+            updateAbeComponentsFile(newParent, currentParent);
+        }
+    }
+    
+    public void updateAbeComponentsFile(CloneFile newFile, CloneFile oldFile) {
+        String queryStr = "UPDATE ABEMetaComponent c set c.file=:new_file"
+                + "     WHERE c.file = :old_file";
+
+        
+        Query query = config.getDatabase().getEntityManager().createQuery(queryStr, ABEMetaComponent.class);
+        
+        query.setParameter("new_file", newFile);
+        query.setParameter("old_file", oldFile);
 
         config.getDatabase().getEntityManager().getTransaction().begin();
         query.executeUpdate();

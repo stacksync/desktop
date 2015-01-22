@@ -55,7 +55,7 @@ public class Update {
     
     /* ABE Encryption Fields */
     private List<ABEMetaComponent> abeComponents;
-    private String cipherSymKey;
+    private byte[] cipherSymKey;
 
     
     // chunkIds (checksums) 
@@ -248,11 +248,11 @@ public class Update {
         this.abeComponents = abeComponents;
     }
 
-    public String getCipherSymKey() {
+    public byte[] getCipherSymKey() {
         return cipherSymKey;
     }
 
-    public void setCipherSymKey(String cipherSymKey) {
+    public void setCipherSymKey(byte[] cipherSymKey) {
         this.cipherSymKey = cipherSymKey;
     }
     
