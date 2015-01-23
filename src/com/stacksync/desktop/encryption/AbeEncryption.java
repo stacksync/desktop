@@ -5,9 +5,12 @@ import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
 import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.ast.cloudABE.kpabe.CipherText;
 import com.stacksync.desktop.exceptions.ConfigException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,7 +25,7 @@ public class AbeEncryption implements Encryption {
     private String accessStructure;
     private CloudABEClient cabe;
     private BasicEncryptionFactory bef;
-    
+
     private SecureRandom random;
 
     public AbeEncryption() throws ConfigException {
@@ -46,7 +49,7 @@ public class AbeEncryption implements Encryption {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
         }
     }
-    
+
     public AbeEncryption(String accessStructure, boolean generate) throws ConfigException {
         try {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
@@ -75,12 +78,19 @@ public class AbeEncryption implements Encryption {
         AbeCipherData cipher = (AbeCipherData) data;
         return cabe.decryptCipherText(cipher.toCipherText());
     }
-    
-    public BasicEncryption getBasicEncryption(String password) throws ConfigException {
-        return bef.getBasicEncryption(password);
+
+    public BasicEncryption getBasicEncryption(byte[] key) throws ConfigException {
+        return bef.getBasicEncryption(key);
     }
 
-    public String generateSymKey() {
-        return new BigInteger(130, random).toString(32);
+    public byte[] generateSymKey() {
+        //FIXME: Generate a safe key
+        String key = "mykey";
+        try {
+            return key.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(AbeEncryption.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 }

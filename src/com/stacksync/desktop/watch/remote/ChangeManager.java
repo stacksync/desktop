@@ -796,7 +796,7 @@ public class ChangeManager {
 
             if(cf.getWorkspace().isAbeEncrypted()) {
                 AbeEncryption abenc = (AbeEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
-                enc = abenc.getBasicEncryption(new String(cf.getSymmetricKey()));
+                enc = abenc.getBasicEncryption(cf.getSymmetricKey());
             } else {
                 enc = cf.getProfile().getEncryption(cf.getWorkspace().getId());
             }

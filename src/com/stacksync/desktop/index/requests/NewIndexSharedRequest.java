@@ -165,11 +165,11 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 // Get the ABE encryption
                 AbeEncryption abenc = (AbeEncryption) root.getProfile().getEncryption(cf.getWorkspace().getId());
                 // Generate key
-                String key = abenc.generateSymKey();
+                byte[] key = abenc.generateSymKey();
                 // Initialize BasicEncryption object from generated key (encryption of chunks)
                 enc = abenc.getBasicEncryption(key);
                 // Encrypt key using ABE protocol
-                AbeCipherData abeCipherMeta = getEncryptedSymKey(abenc, key.getBytes());
+                AbeCipherData abeCipherMeta = getEncryptedSymKey(abenc, key);
                 // Save the produced ABE encryption metadata in CloneFile Object
                 cf.setCipherSymKey(abeCipherMeta.getCipherText());
                 cf.setAbeComponents(abeCipherMeta.getAbeMetaComponents());
@@ -247,7 +247,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
      * @return produced ABE metadata
      */
     private AbeCipherData getEncryptedSymKey(AbeEncryption enc, byte[] data) {
-        // FIXME: Hardcoded attribute set (only for testing purposes)
+        // FIXME: Hardcoded attribute set (testing purposes)
         ArrayList<String> attSet = new ArrayList<String>();
         attSet.add("MarketingA");
         attSet.add("DesignA");

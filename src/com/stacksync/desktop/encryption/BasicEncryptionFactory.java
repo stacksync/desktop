@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class BasicEncryptionFactory {
 
-    public BasicEncryption getBasicEncryption(String password) throws ConfigException {
-        return new BasicEncryption(password);
+    public BasicEncryption getBasicEncryption(byte[] key) throws ConfigException {
+        return new BasicEncryption(key);
     }
 }

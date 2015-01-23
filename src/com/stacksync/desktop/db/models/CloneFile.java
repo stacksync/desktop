@@ -762,6 +762,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
             ABEItemMetadata abeObject = new ABEItemMetadata(object, getCommonAbeComponents(), getCipherSymKey());
             abeObject.setTempId(object.getTempId());
             abeObject.setWorkspaceId(object.getWorkspaceId());
+            abeObject.setChunks(object.getChunks());
             return abeObject;
         }
         // Return ItemMetadata object otherwise

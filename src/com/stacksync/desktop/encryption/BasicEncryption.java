@@ -30,6 +30,9 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 import com.stacksync.desktop.exceptions.ConfigException;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BasicEncryption implements Encryption {
     
@@ -44,6 +47,7 @@ public class BasicEncryption implements Encryption {
     public static final int DEFAULT_ENCRYPTION_KEYLENGTH = 128;
     
     private String password;
+    private byte[] bytePass;
     private String cipherStr;
     private Integer keylength;
 
@@ -53,6 +57,19 @@ public class BasicEncryption implements Encryption {
 
     public BasicEncryption(String password) throws ConfigException {
         this.password = password;
+        try {
+            this.bytePass = password.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(BasicEncryption.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        cipherStr = DEFAULT_ENCRYPTION_CIPHER;
+        keylength = DEFAULT_ENCRYPTION_KEYLENGTH;
+        
+        init();
+    }
+    
+    public BasicEncryption(byte[] bytePass) throws ConfigException {
+        this.bytePass = bytePass;
         cipherStr = DEFAULT_ENCRYPTION_CIPHER;
         keylength = DEFAULT_ENCRYPTION_KEYLENGTH;
         
@@ -69,7 +86,7 @@ public class BasicEncryption implements Encryption {
                 MessageDigest msgDigest = MessageDigest.getInstance("SHA-256");
                 msgDigest.reset();
 
-                byte[] longkey = msgDigest.digest(password.getBytes("UTF-8"));
+                byte[] longkey = msgDigest.digest(bytePass);
                 if (longkey.length == key.length) {
                     this.key = longkey;
                 } else if (longkey.length > key.length) {

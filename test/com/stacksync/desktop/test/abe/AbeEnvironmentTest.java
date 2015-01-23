@@ -29,7 +29,7 @@ import org.junit.Test;
  */
 public class AbeEnvironmentTest {
 
-    private static final Logger logger = Logger.getLogger(AbeClientTest.class.getName());
+    private static final Logger logger = Logger.getLogger(AbeEnvironmentTest.class.getName());
 
     private static Encryption encAlice;
     private static Encryption encBob;
