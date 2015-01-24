@@ -27,6 +27,7 @@ public class WorkspaceController {
     
     public void createNewWorkspace(CloneWorkspace newWorkspace, Update update, Folder root) {
         
+        // FIX ME: I think this is not necessary!
         if (newWorkspace.isDefaultWorkspace()) {
             // Don't create default wp
             return;
