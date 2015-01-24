@@ -259,6 +259,9 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         }
         
         versions.add(version);
+        if (version.getVersion() > this.latestVersion) {
+            this.latestVersion = version.getVersion();
+        }
     }
     
     public CloneItemVersion getLatestVersion() {

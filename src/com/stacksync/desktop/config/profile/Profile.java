@@ -306,7 +306,7 @@ public class Profile implements Configurable {
         
         // Get the root folder and create it
         Update rootFolder = changes.remove(0);
-        controller.createNewWorkspace(workspace, rootFolder);
+        controller.createNewWorkspace(workspace, rootFolder, this.folder);
         
         changeManager.queueUpdates(changes);
     }
