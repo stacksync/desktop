@@ -436,7 +436,7 @@ public class TestItem {
         File testFolder = new File("./database_test/testfolder");
         CloneItem folder = databaseHelper.getFolder(root, testFolder);
         
-        List<CloneItem> children = databaseHelper.getChildren(folder);
+        List<CloneItem> children = databaseHelper.getNotDeletedChildren(folder);
         assert children.size() == 1;
         assert children.get(0).getId().equals(5L);
     }

@@ -168,22 +168,30 @@ public class DatabaseHelper {
         }
     }
     
+    public List<CloneItem> getNotDeletedChildren(CloneItem parentFile) {
+        return this.getChildren(parentFile, Status.DELETED);
+    }
+    
+    public List<CloneItem> getAllChildren(CloneItem parentFile) {
+        return this.getChildren(parentFile, null);
+    }
+    
     /*
      * get direct children
      */
-    public List<CloneItem> getChildren(CloneItem parentFile) {
+    public List<CloneItem> getChildren(CloneItem parentFile, Status notStatus) {
         // First, check by full file path
         String queryStr = "select f from CloneItem f, CloneItemVersion v where "
                 + "      f.parent = :parent and "
                 + "      v.item = f and "
-                + "      f.latestVersion = v.version and "
-                + "      v.status <> :notStatus1";
+                + "      f.latestVersion = v.version "
+                + ((notStatus != null) ? " and v.status <> :notStatus1" : "");
 
         Query query = this.database.getEntityManager().createQuery(queryStr, CloneItem.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");
         
-        query.setParameter("notStatus1", Status.DELETED);
+        if (notStatus != null) query.setParameter("notStatus1", notStatus);
         query.setParameter("parent", parentFile);
 
         return query.getResultList();

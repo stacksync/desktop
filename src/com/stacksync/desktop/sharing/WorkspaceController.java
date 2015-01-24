@@ -77,7 +77,7 @@ public class WorkspaceController {
         folder.setWorkspace(workspace);
         folder.setWorkspaceRoot(true);
         
-        List<CloneItem> children = db.getChildren(folder);
+        List<CloneItem> children = db.getAllChildren(folder);
         this.changeWorkspaceRecursively(children, workspace);
         
         folder.merge();
@@ -87,7 +87,7 @@ public class WorkspaceController {
         for (CloneItem file : files) {
             file.setWorkspace(workspace);
             if (file.isFolder()) {
-                this.changeWorkspaceRecursively(db.getChildren(file), workspace);
+                this.changeWorkspaceRecursively(db.getAllChildren(file), workspace);
             }
             
             file.merge();
