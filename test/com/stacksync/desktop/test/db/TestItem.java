@@ -1,7 +1,5 @@
 package com.stacksync.desktop.test.db;
 
-import com.stacksync.desktop.Constants;
-import com.stacksync.desktop.config.ConfigNode;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneChunk;
@@ -9,25 +7,19 @@ import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.ConfigException;
-import com.stacksync.desktop.util.FileUtil;
+import com.stacksync.desktop.test.utils.DatabaseUtils;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.w3c.dom.Document;
 
 /**
  *
@@ -45,72 +37,9 @@ public class TestItem {
         
         File configFolder = new File("database_test");
         // Create and copy config file
-        File configFile = prepareConfigFile();
-        databaseHelper.initializeDatabase(configFolder.getAbsolutePath(), getDBConfigNode(configFile));
+        File configFile = DatabaseUtils.prepareConfigFile();
+        databaseHelper.initializeDatabase(configFolder.getAbsolutePath(), DatabaseUtils.getDBConfigNode(configFile));
         entityManager = databaseHelper.getEntityManager();
-    }
-    
-    public static File prepareConfigFile() {
-        File configFolder = new File("database_test");
-        configFolder.mkdir();
-        
-        File configFile = new File(configFolder.getAbsoluteFile() + File.separator + Constants.CONFIG_FILENAME);
-        
-        InputStream is = null;
-        try {
-            is = TestItem.class.getResourceAsStream(Constants.CONFIG_DEFAULT_FILENAME);
-
-            FileUtil.writeFile(is, configFile);
-        } catch (IOException e) {
-            assert false;
-        } finally {
-            try {
-                if (is != null) {
-                    is.close();
-                }
-            } catch (IOException ex) {
-                assert false;
-            }
-        }
-        
-        return configFile;
-    }
-    
-    public static ConfigNode getDBConfigNode(File configFile){
-        
-        ConfigNode node = null;
-        InputStream configStream = null;
-        try {
-            configStream = new FileInputStream(configFile);
-            node = parseConfigFile(configStream);
-        } catch (FileNotFoundException ex) {
-            assert false;
-        } finally {
-            try {
-                if (configStream != null) {
-                    configStream.close();
-                }
-            } catch (IOException ex) { }
-        }
-        
-        return node;
-    }
-    
-    public static ConfigNode parseConfigFile(InputStream configStream) {
-        
-        ConfigNode node = null;
-        try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-
-            Document doc = dBuilder.parse(configStream);
-            node = new ConfigNode(doc.getDocumentElement());
-            node = node.findChildByName("database");
-        } catch (Exception e) {
-            assert false;
-        }
-        
-        return node;
     }
     
     @AfterClass
