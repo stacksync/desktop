@@ -1,20 +1,3 @@
-/*
- * Syncany, www.syncany.org
- * Copyright (C) 2011 Philipp C. Heckel <philipp.heckel@gmail.com> 
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.stacksync.desktop.index.requests;
 
 import java.io.File;
@@ -24,34 +7,31 @@ import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.Status;
-import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion.Status;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
+import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 
-/**
- *
- * @author Philipp C. Heckel
- */
 public class NewIndexRequest extends SingleRootIndexRequest {
     
     private final Logger logger = Logger.getLogger(NewIndexRequest.class.getName());
     
     private File file;
-    private CloneFile previousVersion;    
+    private CloneItem indexedItem;    
     private long checksum;
 
-    public NewIndexRequest(Folder root, File file, CloneFile previousVersion, long checksum) {
+    public NewIndexRequest(Folder root, File file, CloneItem previousVersion, long checksum) {
         super(root);
   
         this.file = file;        
-        this.previousVersion = previousVersion;
+        this.indexedItem = previousVersion;
         this.checksum = checksum;
     }
 
@@ -61,22 +41,18 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         
         // Check ignore and if file exists
         boolean allCorrect = doChecks();
-        if (!allCorrect) { return; }
-        
-        // Find file in DB
-        CloneFile dbFile = db.getFileOrFolder(root, file);
-        if(dbFile != null && alreadyProcessed(dbFile)){
+        if (!allCorrect || alreadyProcessed()) {
             return;
         }
         
         // Check workspace
         CloneWorkspace defaultWorkspace = db.getDefaultWorkspace();
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
-        CloneFile parentCF = db.getFolder(root, parentFile);
+        CloneItem parentCF = db.getFolder(root, parentFile);
         // If parent is null means the file is in the root folder (stacksync_folder).
         if (parentCF != null && !parentCF.getWorkspace().getId().equals(defaultWorkspace.getId())) {
             // File inside a shared workspace
-            Indexer.getInstance().queueNewIndexShared(root, file, previousVersion, checksum);
+            Indexer.getInstance().queueNewIndexShared(root, file, indexedItem, checksum);
             return;
         }
         
@@ -86,28 +62,29 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         this.desktop.touch(file.getPath(), SyncStatus.SYNCING);
         
         // Create DB entry
-        CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();
-        newVersion.setParent(parentCF);
-        newVersion.setWorkspace(defaultWorkspace);
+        CloneItem newItem = (indexedItem == null) ? addNewVersion() : addChangedVersion();
+        newItem.setParent(parentCF);
+        newItem.setWorkspace(defaultWorkspace);
         
         // This will check if the file is inside a folder that isn't created.
-        if (parentCF == null && !newVersion.getPath().equals("/")) {
-            Indexer.getInstance().queueNewIndex(root, file, previousVersion, checksum);
+        if (parentCF == null && !newItem.getPath().equals("/")) {
+            Indexer.getInstance().queueNewIndex(root, file, indexedItem, checksum);
             return;
         }
 
-        newVersion.setFolder(file.isDirectory());
+        CloneItemVersion newVersion = newItem.getLatestVersion();
+        newItem.setFolder(file.isDirectory());
         newVersion.setSize(file.length());
         
         newVersion.setLastModified(new Date(file.lastModified()));
         newVersion.setSyncStatus(SyncStatus.LOCAL);
-        newVersion.merge();
+        newItem.merge();
         
         // Process folder and files differently
         if (file.isDirectory()) {
-            processFolder(newVersion);
+            processFolder(newItem, newVersion);
         } else if (file.isFile()) {
-            processFile(newVersion);
+            processFile(newItem, newVersion);
         }
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
@@ -129,19 +106,30 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         return true;
     }
     
-    private boolean alreadyProcessed(CloneFile fileToProcess) {
+    private boolean alreadyProcessed() {
         
-        if (previousVersion == null){
+        CloneItem dbFile = db.getFileOrFolder(root, file);
+        if(dbFile == null){
+            return false;
+        }
+        
+        CloneItemVersion latestVersion = dbFile.getLatestVersion();
+        if (latestVersion == null) {
+            logger.error("Indexing file without latest version: "+dbFile.getId());
+            return false;
+        }
+        
+        if (indexedItem == null){
             logger.warn("Indexer: Error already NewIndexRequest processed. Ignoring.");
             return true;
         } else {
-            if(fileToProcess.getChecksum() == checksum){
+            if(latestVersion.getChecksum() == checksum){
                 logger.warn("Indexer: Error already Indexed this version. Ignoring.");
                 return true;
             }
         }
 
-        if(fileToProcess.isFolder()){
+        if(dbFile.isFolder()){
             logger.warn("Indexer: Error already NewIndexRequest this folder. Ignoring.");
             return true;
         }
@@ -150,49 +138,53 @@ public class NewIndexRequest extends SingleRootIndexRequest {
     }
     
 
-    private CloneFile addNewVersion() {
-        CloneFile newVersion = new CloneFile(root, file);        
-        newVersion.setVersion(1);
-        newVersion.setStatus(Status.NEW);        
+    private CloneItem addNewVersion() {
+        CloneItem newItem = new CloneItem(root, file);  
+        CloneItemVersion newVersion = new CloneItemVersion(file);
+        newVersion.setStatus(Status.NEW);
+        newItem.addVersion(newVersion);
         
-        return newVersion;
+        return newItem;
     }
     
-    private CloneFile addChangedVersion() {        
-        CloneFile newVersion = (CloneFile) previousVersion.clone();
+    private CloneItem addChangedVersion() {        
         
-        if (newVersion.getSyncStatus() == SyncStatus.UNSYNC
-                && previousVersion.getStatus() != Status.RENAMED) {
-            if (previousVersion.getVersion() == 1) {
-                previousVersion.remove();
-                newVersion = this.addNewVersion();
+        CloneItemVersion oldVersion = indexedItem.getLatestVersion();
+
+        if (oldVersion.getSyncStatus() == SyncStatus.UNSYNC && oldVersion.getStatus() != Status.RENAMED) {
+            if (oldVersion.getVersion() == 1) {
+                oldVersion.setServerUploadedAck(false);
+                oldVersion.setServerUploadedTime(null);
+                oldVersion.setChecksum(0);
+                oldVersion.setChunks(new ArrayList<CloneChunk>());
             } else {
-                newVersion.setStatus(Status.CHANGED);
-                newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
-                newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
-                previousVersion.remove();
+                oldVersion.setStatus(Status.CHANGED);
+                oldVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
+                indexedItem.setMimetype(FileUtil.getMimeType(file));
             }
         } else {
-            newVersion.setVersion(previousVersion.getVersion()+1);
+            CloneItemVersion newVersion = (CloneItemVersion) oldVersion.clone();
+            newVersion.setVersion(oldVersion.getVersion()+1);
             newVersion.setStatus(Status.CHANGED);
             newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
-            newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
+            indexedItem.setMimetype(FileUtil.getMimeType(indexedItem.getFile()));
+            indexedItem.addVersion(newVersion);
         }
 
-        return newVersion;
+        return indexedItem;
     }
     
-    private void processFolder(CloneFile cf) {        
+    private void processFolder(CloneItem item, CloneItemVersion latestVersion) {        
         // Add rest of the DB stuff 
-        cf.setChecksum(0);
+        latestVersion.setChecksum(0);
         
-        if (FileUtil.checkIllegalName(cf.getName())
-                || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
-            cf.setSyncStatus(SyncStatus.UNSYNC);
+        if (FileUtil.checkIllegalName(item.getName())
+                || FileUtil.checkIllegalName(item.getPath().replace("/", ""))){
+            latestVersion.setSyncStatus(SyncStatus.UNSYNC);
         } else {
-            cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+            latestVersion.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         }
-        cf.merge();
+        item.merge();
         
         // Analyze file tree (if directory) -- RECURSIVELY!!
         logger.info("Indexer: Indexing CHILDREN OF "+file+" ...");
@@ -208,7 +200,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         }
     }
 
-    private void processFile(CloneFile cf) {
+    private void processFile(CloneItem item, CloneItemVersion latestVersion) {
         try {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
@@ -224,7 +216,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
-                byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(cf.getWorkspace().getId()));
+                byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(item.getWorkspace().getId()));
                 if (!chunkCacheFile.exists()) {
                     FileUtil.writeFile(packed, chunkCacheFile);
                 } else{
@@ -233,31 +225,31 @@ public class NewIndexRequest extends SingleRootIndexRequest {
                     }
                 }
                 
-                cf.addChunk(chunk);
+                latestVersion.addChunk(chunk);
             }      
             
             logger.info("Indexer: saving chunks...");
-            cf.merge();
+            item.merge();
             logger.info("Indexer: chunks saved...");
             
             // 2. Add the rest to the DB, and persist it
             if (chunkInfo != null) { // The last chunk holds the file checksum                
-                cf.setChecksum(chunkInfo.getFileChecksum()); 
+                latestVersion.setChecksum(chunkInfo.getFileChecksum()); 
             } else {
-                cf.setChecksum(checksum);
+                latestVersion.setChecksum(checksum);
             }
-            cf.merge();
+            item.merge();
             chunks.closeStream();
             
             // 3. Upload it
-            if (FileUtil.checkIllegalName(cf.getName())
-                    || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
+            if (FileUtil.checkIllegalName(item.getName())
+                    || FileUtil.checkIllegalName(item.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
-                cf.setSyncStatus(SyncStatus.UNSYNC);
-                cf.merge();
+                latestVersion.setSyncStatus(SyncStatus.UNSYNC);
+                item.merge();
             } else {
                 logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
-                root.getProfile().getUploader().queue(cf);
+                root.getProfile().getUploader().queue(latestVersion);
             }
             
         } catch (Exception ex) {
