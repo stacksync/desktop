@@ -21,8 +21,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion;
+import com.stacksync.desktop.db.models.CloneItemVersion.SyncStatus;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.util.FileUtil;
 
@@ -67,7 +68,7 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
     }
 
     private void processFolder() {
-        CloneFile dbFile = db.getFolder(root, file);
+        CloneItem dbFile = db.getFolder(root, file);
 
         // Matching DB entry found
         if (dbFile != null) {
@@ -81,7 +82,7 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
 
     private void processFile() {
         // Find file in DB
-        CloneFile dbFile = db.getFile(root, file);
+        CloneItem dbFile = db.getFile(root, file);
         
         // Find checksum of file; 
         long fileCheckSum;
@@ -98,39 +99,34 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
         
         // Matching DB entry found; Now check filesize and time
         if (dbFile != null) {
-            
-            if(dbFile.getChecksum() == 0 && dbFile.getSyncStatus() == SyncStatus.LOCAL){
-                logger.debug("File " + dbFile.getFile().toString() + " is indexing now. Nothing to do!");    
+            CloneItemVersion dbLatestVersion = dbFile.getLatestVersion();
+            if (dbLatestVersion == null) {
+                logger.error("File " + dbFile.getName() + "-" + dbFile.getId() + " has no latest version." );
                 return;
             }
             
-            boolean isSameFile = Math.abs(file.lastModified() - dbFile.getLastModified().getTime()) < 500
-                && file.length() == dbFile.getSize();            
-            
-            if (isSameFile || fileCheckSum == dbFile.getChecksum()) {
-                logger.debug("File " + dbFile.getFile().toString() + " found in DB. Same modified date, same size. Nothing to do!");    
+            if(dbLatestVersion.getChecksum() == 0 && dbLatestVersion.getSyncStatus() == SyncStatus.LOCAL){
+                logger.debug("File " + dbFile.getName() + " is indexing now. Nothing to do!");    
                 return;
             }
             
-            logger.info("File " + dbFile.getFile().toString() + " found, but modified date or size differs. Indexing as CHANGED file.");
-            logger.info("-> fs = ("+file.lastModified()+", "+file.length()+"), db = ( "+dbFile.getLastModified().getTime()+", "+dbFile.getSize()+")");
+            boolean isSameFile = Math.abs(file.lastModified() - dbLatestVersion.getLastModified().getTime()) < 500
+                && file.length() == dbLatestVersion.getSize();            
+            
+            if (isSameFile || fileCheckSum == dbLatestVersion.getChecksum()) {
+                logger.debug("File " + dbFile.getName() + " found in DB. Same modified date, same size. Nothing to do!");    
+                return;
+            }
+            
+            logger.info("File " + dbFile.getName() + " found, but modified date or size differs. Indexing as CHANGED file.");
+            logger.info("-> fs = ("+file.lastModified()+", "+file.length()+"), db = ( "+dbLatestVersion.getLastModified().getTime()+", "+dbLatestVersion.getSize()+")");
             
             //new NewIndexRequest(root, file, dbFile).process();
             Indexer.getInstance().queueNewIndex(root, file, dbFile, fileCheckSum);
         
         } else if (dbFile == null) {
-            // No match in DB found, try to find a 'close' entry with matching checksum
-                        
-            // Guess nearest version (by checksum and name)
-            CloneFile guessedPreviousVersion = db.getNearestFile(root, file, fileCheckSum);
-
-            if (guessedPreviousVersion != null) {
-                logger.info("Previous version GUESSED by checksum and name: "+guessedPreviousVersion.getAbsolutePath()+"; Updating DB ...");                 
-                Indexer.getInstance().queueMoved(guessedPreviousVersion, root, file);
-            } else {                
-                logger.info("No previous version found. Adding new file ...");
-                Indexer.getInstance().queueNewIndex(root, file, null, fileCheckSum);
-            }
+            logger.info("No previous version found. Adding new file ...");
+            Indexer.getInstance().queueNewIndex(root, file, null, fileCheckSum);
         }  
     }
 }

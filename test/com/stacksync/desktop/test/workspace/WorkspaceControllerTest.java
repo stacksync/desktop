@@ -249,6 +249,32 @@ public class WorkspaceControllerTest {
         assert children.get(0).getWorkspace().getId().equals(sharedWorkspace.getId());
     }
     
+    // TODO This is not ready yet!!!
+    @Test
+    public void renameWorkspaceTest() {
+        
+        /*CloneWorkspace local = databaseHelper.getWorkspace("shared");
+        CloneWorkspace remote = local.clone();
+        remote.setName("shared_folder_renamed");
+        remote.setPathWorkspace(local.getPathWorkspace().replace("shared_folder", "shared_folder_renamed"));
+        
+        CloneItem folder = databaseHelper.getFileOrFolder(1L);
+        workspaceController.changeFolderWorkspace(local, folder);
+        
+        workspaceController.applyChangesInWorkspace(local, remote, true);
+        
+        List<CloneItem> children = databaseHelper.getWorkspaceFiles(local.getId());
+        for (CloneItem child : children) {
+            assert child.getPath().contains(remote.getPathWorkspace());
+        }*/
+    }
+    
+    // This neither
+    @Test
+    public void moveWorkspaceTest() {
+        
+    }
+    
     public void persist(Object o){
         entityManager.getTransaction().begin();
         entityManager.persist(o);
