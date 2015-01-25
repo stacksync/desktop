@@ -156,10 +156,10 @@ public class Indexer {
 
     public void queueDeleted(Folder root, File file) {
         queue.add(new DeleteIndexRequest(root, file));
-    }
+    }  
     
-    public void queueDeleted(Folder root, CloneItem file, CloneItem deletedParent) {
-        queue.add(new DeleteIndexRequest(root, file, deletedParent));
+    public void queueDeleted(Folder root, CloneItem file) {
+        queue.add(new DeleteIndexRequest(root, file));
     }    
     
     public void queueNewIndex(Folder root, File file, CloneItem previousVersion, long checksum){

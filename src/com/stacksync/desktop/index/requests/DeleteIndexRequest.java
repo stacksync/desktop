@@ -21,8 +21,9 @@ import java.io.File;
 import java.util.List;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.Status;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion;
+import com.stacksync.desktop.db.models.CloneItemVersion.Status;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.util.FileUtil;
 
@@ -34,9 +35,8 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
     
     private final Logger logger = Logger.getLogger(DeleteIndexRequest.class.getName());
     
-    private CloneFile dbFile;
+    private CloneItem dbFile;
     private File file;
-    private CloneFile deleteParent;
 
     public DeleteIndexRequest(Folder root, File file) {
         super(root);
@@ -45,11 +45,10 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         this.file = file;
     }
     
-    public DeleteIndexRequest(Folder root, CloneFile dbFile, CloneFile deletedParent) {
+    public DeleteIndexRequest(Folder root, CloneItem dbFile) {
         super(root);
         this.dbFile = dbFile;
         this.file = dbFile.getFile();
-        this.deleteParent = deletedParent;
     }    
 
     public File getFile() {
@@ -77,41 +76,39 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         }
         
         // File found in DB.
-        CloneFile deletedVersion = (CloneFile) dbFile.clone();
+        CloneItemVersion latestVersion = dbFile.getLatestVersion();
         
-        if (deletedVersion.getSyncStatus() == CloneFile.SyncStatus.UNSYNC) {
+        if (latestVersion.getSyncStatus() == CloneItemVersion.SyncStatus.UNSYNC) {
 
-            CloneFile lastSynced = deletedVersion.getLastSyncedVersion();
+            // TODO, FIXME, IMPORTANT Adapt this code to work with item versions.
+            CloneItemVersion lastSynced = dbFile.getLastSyncedVersion();
 
             if (lastSynced == null) {
-                // No exist a legal version synchronized -> Delete all!!
-                deletedVersion.setVersion(0);
+                // No exist a legal version synchronized -> remove item!!
+                // NOT TESTED
+                dbFile.remove();
             } else {
                 // Use next version and forget about the UNSYNC versions.
-                deletedVersion = (CloneFile) lastSynced.clone();
-                deletedVersion.setVersion(lastSynced.getVersion()+1);
-                if (deleteParent != null) {
-                    deletedVersion.setParent(deleteParent);
-                }
+                latestVersion = (CloneItemVersion) lastSynced.clone();
+                latestVersion.setVersion(lastSynced.getVersion()+1);
                 // Updated changes
-                deletedVersion.setStatus(Status.DELETED);
-                deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+                latestVersion.setStatus(Status.DELETED);
+                latestVersion.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
 
-                deletedVersion.merge();
-                
+                // Before merge this new version, I have to remove unsync versions
+                // to avoid duplicated PK in database!
+                dbFile.addVersion(latestVersion);
+                latestVersion.merge();
             }
-            
-            deletedVersion.deleteHigherVersion();
                 
         } else {
 
             // Updated changes
-            deletedVersion.setVersion(deletedVersion.getVersion()+1);
-            if (deleteParent != null) {
-                deletedVersion.setParent(deleteParent);
-            }
+            CloneItemVersion deletedVersion = (CloneItemVersion) latestVersion.clone();
+            deletedVersion.setVersion(latestVersion.getVersion()+1);
             deletedVersion.setStatus(Status.DELETED);
-            deletedVersion.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+            deletedVersion.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+            dbFile.addVersion(deletedVersion);
 
             deletedVersion.merge();
         }
@@ -122,12 +119,12 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         // Delete children (if directory) -- RECURSIVELY !!
         if (dbFile.isFolder()) {     
             logger.info("Indexer: Deleting CHILDREN of "+file+" ...");
-            List<CloneFile> children = db.getChildren(dbFile);
+            List<CloneItem> children = db.getNotDeletedChildren(dbFile);
 
-            for (CloneFile child : children) {
+            for (CloneItem child : children) {
                 logger.info("Indexer: Delete CHILD "+child.getAbsolutePath()+" ...");
                 // Do it!
-                Indexer.getInstance().queueDeleted(root, child, deletedVersion);
+                Indexer.getInstance().queueDeleted(root, child);
             }
         }
 
