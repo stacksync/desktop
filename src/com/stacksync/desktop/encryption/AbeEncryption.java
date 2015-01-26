@@ -84,13 +84,7 @@ public class AbeEncryption implements Encryption {
     }
 
     public byte[] generateSymKey() {
-        //FIXME: Generate a safe key
-        String key = "mykey";
-        try {
-            return key.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(AbeEncryption.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+        String str = new BigInteger(130, random).toString(32);
+        return str.getBytes();
     }
 }

@@ -14,6 +14,7 @@ import com.stacksync.desktop.encryption.CipherData;
 import com.stacksync.desktop.encryption.Encryption;
 import com.stacksync.desktop.encryption.PlainData;
 import com.stacksync.desktop.exceptions.ConfigException;
+import com.stacksync.desktop.util.FileUtil;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
@@ -64,36 +65,34 @@ public class AbeBasicIntegrationTest {
     }
 
     /**
-     * ABE Encryption test: Simple encryption-decryption. Single attribute.
+     * ABE Encryption test: Simple encryption-decryption cycle. Single
+     * attribute.
      */
     @Test
     public void dataEncryptionTest() {
-        String key = "mykey";
-        String message = "test message";
+        String message = "testing...";
         PlainData mymessage = null;
         ArrayList<String> attSet = new ArrayList<String>();
         attSet.add("MarketingA");
         attSet.add("DesignA");
         attSet.add("DesignB");
 
-        // Plaindata object for key ABE encryption
-        PlainData mykey = new AbePlainData(key.getBytes(), attSet);
+        System.out.println("----------[dataEncryptionTest]---------");
 
-        //Plaindata object for message symmetric encryption
-        try {
-            mymessage = new BasicPlainData(message.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(AbeBasicIntegrationTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        byte[] myKeyBytes = encryption.generateSymKey();
+
+        // Plaindata object for key ABE encryption
+        PlainData mykey = new AbePlainData(myKeyBytes, attSet);
+
+        mymessage = new BasicPlainData(message.getBytes());
 
         try {
             System.out.println("[dataEncryptionTest] Original Message: " + message);
             // Encrypt key
             CipherData cipherKey = encryption.encrypt(mykey);
-            System.out.println("[dataEncryptionTest] Original key: " + key);
+            System.out.println("[dataEncryptionTest] Original key: " + new String(myKeyBytes));
             // Encrypt message
 //            byte[] myKeyBytes = key.getBytes("UTF-8");
-            byte[] myKeyBytes = encryption.generateSymKey();
             Encryption symEnc = encryption.getBasicEncryption(myKeyBytes);
             CipherData cipherMessage = symEnc.encrypt(mymessage);
             // Send chunks and metadata...
@@ -114,4 +113,66 @@ public class AbeBasicIntegrationTest {
             System.out.println("[dataEncryptionTest] Unable to decrypt. " + ex.getMessage());
         }
     }
+
+    /**
+     * ABE Encryption test: Simple encryption-decryption cycle. Single
+     * attribute.
+     */
+    @Test
+    public void dataCompressedEncryptionTest() {
+        String message = "testing...";
+        ArrayList<String> attSet = new ArrayList<String>();
+        attSet.add("MarketingA");
+        attSet.add("DesignA");
+        attSet.add("DesignB");
+
+        System.out.println("----------[dataCompressedEncryptionTest]---------");
+
+        byte[] myKeyBytes = encryption.generateSymKey();
+
+        // Plaindata object for key ABE encryption
+        PlainData mykey = new AbePlainData(myKeyBytes, attSet);
+
+        try {
+            System.out.println("[dataCompressedEncryptionTest] Original Message: " + message);
+            // 1. Encrypt key using ABE
+            System.out.println("[dataCompressedEncryptionTest] Original key: " + new String(myKeyBytes));
+            System.out.println("[dataCompressedEncryptionTest] 1. Encrypting key using ABE encryption");
+            CipherData cipherKey = encryption.encrypt(mykey);
+            // 2. Compress message content
+            System.out.println("[dataCompressedEncryptionTest] 2. Compressing data...");
+//            byte[] compressedMessage = FileUtil.gzip(message.getBytes());
+            // 3. Encrypt compressed data
+            System.out.println("[dataCompressedEncryptionTest] 3. Encrypting compressed data (AES)...");
+//            BasicPlainData mymessage = new BasicPlainData(compressedMessage);
+            Encryption symEnc = encryption.getBasicEncryption(myKeyBytes);
+            byte[] packed = FileUtil.pack(message.getBytes(), symEnc);
+//            CipherData cipherMessage = symEnc.encrypt(mymessage);
+            // (4) Send chunks and metadata...
+            // (5) Get chunks and metadata back...
+            System.out.println("[dataCompressedEncryptionTest] 4. Data & metadata ready to be sent to the cloud");
+            System.out.println("[dataCompressedEncryptionTest] 5. Data & metadata downloaded from cloud");
+            // Decrypt key
+            // 6. Decrypt key using ABE
+            System.out.println("[dataCompressedEncryptionTest] 6. Decrypting key using ABE encryption");
+            byte[] decryptedKey = encryption.decrypt(cipherKey);
+            if (decryptedKey != null) {
+                System.out.println("[dataCompressedEncryptionTest] Decrypted key: " + new String(decryptedKey));
+            } else {
+                System.out.println("[dataCompressedEncryptionTest] Unable to decrypt. ABE Decryption requierements unsatisfied");
+            }
+            System.out.println("[dataCompressedEncryptionTest] 7. Decrypting data (AES)");
+            // 7. Decrypt data
+            Encryption symEnc2 = encryption.getBasicEncryption(decryptedKey);
+//            byte[] decryptedData = symEnc2.decrypt(cipherMessage);
+            // 8. unGzip data
+            System.out.println("[dataCompressedEncryptionTest] 8. Uncompressing decrypted data...");
+//            byte[] unGzippedData = FileUtil.gunzip(decryptedData);
+            byte[] unpacked = FileUtil.unpack(packed, symEnc2);
+            System.out.println("[dataCompressedEncryptionTest] Decrypted message: " + new String(unpacked));
+        } catch (Exception ex) {
+            System.out.println("[dataCompressedEncryptionTest] Unable to decrypt. " + ex.getMessage());
+        }
+    }
+
 }

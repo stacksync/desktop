@@ -660,7 +660,7 @@ public class ChangeManager {
         
         ///// C+D. Download and assemble file
         downloadChunks(newestVersion);
-        assembleFile(newestVersion, tempNewFile);            
+        assembleFile(newestVersion, tempNewFile);
         
         ///// E. delete local version (if there is one)
         if (lastMatchingVersion != null && lastMatchingVersion.getFile().exists()) {
@@ -817,6 +817,8 @@ public class ChangeManager {
             }
 
             fos.close();
+        } catch (BadPaddingException e) {
+            logger.error("Exception: ", e);
         } catch (Exception e) {
             throw new CouldNotApplyUpdateException(e);
         } finally {
