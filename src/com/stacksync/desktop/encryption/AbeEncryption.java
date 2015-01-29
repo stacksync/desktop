@@ -5,12 +5,9 @@ import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
 import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.ast.cloudABE.kpabe.CipherText;
 import com.stacksync.desktop.exceptions.ConfigException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -18,8 +15,6 @@ import java.util.logging.Logger;
  */
 public class AbeEncryption implements Encryption {
 
-    //TODO: Default Access Structure for testing purposes. This must be provided beforehand.
-    private static final String DEFAULT_ACCESS_STRUCT = "(MarketingA | (DesignA & DesignB))";
     private static final String abeResourcesPath = "./resources/abe/";
 
     private String accessStructure;
@@ -31,9 +26,9 @@ public class AbeEncryption implements Encryption {
     public AbeEncryption() throws ConfigException {
         try {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
-            this.accessStructure = DEFAULT_ACCESS_STRUCT;
+            this.accessStructure = null;
             this.random = new SecureRandom();
-            init(false);
+            init();
         } catch (Exception e) {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
         }
@@ -44,25 +39,14 @@ public class AbeEncryption implements Encryption {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
             this.accessStructure = accessStructure;
             this.random = new SecureRandom();
-            init(false);
+            init();
         } catch (Exception e) {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
         }
     }
-
-    public AbeEncryption(String accessStructure, boolean generate) throws ConfigException {
-        try {
-            this.cabe = new CloudABEClientAdapter(abeResourcesPath);
-            this.accessStructure = accessStructure;
-            this.random = new SecureRandom();
-            init(generate);
-        } catch (Exception e) {
-            throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
-        }
-    }
-
-    private void init(boolean generate) throws AttributeNotFoundException {
-        cabe.setupABESystem(0, accessStructure, generate);
+    
+    private void init() throws AttributeNotFoundException {
+        cabe.setupABESystem(0, accessStructure);
         this.bef = new BasicEncryptionFactory();
     }
 

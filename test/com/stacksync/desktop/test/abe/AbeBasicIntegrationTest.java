@@ -45,7 +45,7 @@ public class AbeBasicIntegrationTest {
         System.out.println("[TestSetup] Setting up Attribute-Based encryption environment...");
         /* Set up the ABE encryption environment */
         try {
-            encryption = new AbeEncryption(DEFAULT_ACCESS_STRUCT);
+            encryption = new AbeEncryption();
         } catch (Exception ex) {
             System.out.println("[TestSetup] Unable to load client data!");
             logger.log(Level.SEVERE, null, ex);
