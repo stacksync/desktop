@@ -16,14 +16,14 @@
         </triggeringPolicy> 
         
         <layout class="org.apache.log4j.PatternLayout">
-            <param value="%d{[yyyy-MM-dd HH:mm:ss]} %p %t %c{1}.%M:%L - %m%n" name="ConversionPattern"/>
+            <param value="%d{[yyyy-MM-dd HH:mm:ss,SSS]} %p %t %c{1}.%M:%L - %m%n" name="ConversionPattern"/>
         </layout>        
     </appender>
 
     <appender name="consoleAppender" class="org.apache.log4j.ConsoleAppender">
         <param name="Threshold" value="info" />
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{[yyyy-MM-dd HH:mm:ss]} %p %t %c{1}.%M:%L - %m%n" />
+            <param name="ConversionPattern" value="%d{[yyyy-MM-dd HH:mm:ss,SSS]} %p %t %c{1}.%M:%L - %m%n" />
         </layout>
     </appender>
     

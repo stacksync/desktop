@@ -64,16 +64,16 @@ import javax.crypto.IllegalBlockSizeException;
  * @author Philipp C. Heckel
  */
 public class ChangeManager {
-    
+
     private final Logger logger = Logger.getLogger(ChangeManager.class.getName());
     private final Chunker chunker = new Chunker();
-    
-    private final Config config =  Config.getInstance();
+
+    private final Config config = Config.getInstance();
     private final DatabaseHelper db = DatabaseHelper.getInstance();
     private final Tray tray = Tray.getInstance();
-    
-    private final int INTERVAL = 5000;    
-    
+
+    private final int INTERVAL = 5000;
+
     // cp start()
     private final LinkedBlockingQueue<Update> queue;
     private boolean processingFiles;
@@ -81,7 +81,7 @@ public class ChangeManager {
     private Timer timer;
     private TransferManager transfer;
     private EntityManager em;
-    
+
     // deps
     private Desktop desktop;
     private Uploader uploader;
@@ -97,7 +97,7 @@ public class ChangeManager {
     }
 
     public synchronized void start() {
-        
+
         em = config.getDatabase().getEntityManager();
         // Dependencies
         this.desktop = Desktop.getInstance();
@@ -106,7 +106,7 @@ public class ChangeManager {
         if (timer != null) {
             return;
         }
-        
+
         transfer = profile.getRepository().getConnection().createTransferManager();
         uploader = profile.getUploader();
 
@@ -127,17 +127,17 @@ public class ChangeManager {
         timer.cancel();
         timer = null;
     }
-    
-    public void queueUpdates(List<Update> ul){
+
+    public void queueUpdates(List<Update> ul) {
         synchronized (queue) {
             queue.addAll(ul);
         }
     }
-    
+
     private void doProcessUpdates() {
         // Note: Don't do this in the init method.
         //       This MUST happen in this thread!
-        
+
         Update update = null;
         Map<Long, List<Update>> newUpdatesMap = new HashMap<Long, List<Update>>();
         Folder root;
@@ -150,25 +150,25 @@ public class ChangeManager {
         }
 
         while (null != (update = queue.poll())) {
-            tray.setStatusText(this.getClass().getSimpleName(), "Changing " + (queue.size() + 1) +  " files...");
-            logger.info("Processing update " + update);                    
+            tray.setStatusText(this.getClass().getSimpleName(), "Changing " + (queue.size() + 1) + " files...");
+            logger.info("Processing update " + update);
 
-            CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());            
+            CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
             boolean isLocalConflict = isLocalConflict(existingVersion, update) | update.getConflicted();
-            
+
             ///Existing version equals update -> skip: file is up-to-date!
             // TODO: I think that this is not necessary
-            if (existingVersion != null && !isLocalConflict && (existingVersion.getSyncStatus()== SyncStatus.UPTODATE)) {
+            if (existingVersion != null && !isLocalConflict && (existingVersion.getSyncStatus() == SyncStatus.UPTODATE)) {
                 logger.info("File " + update.getName() + "-" + update.getFileId() + ", version " + update.getVersion() + " is UP-TO-DATE. ");
-                
-                if(!existingVersion.getServerUploadedAck()){
+
+                if (!existingVersion.getServerUploadedAck()) {
                     existingVersion.setServerUploadedAck(true);
                     existingVersion.merge();
                 }
-                
+
                 continue;
             }
-            
+
             logger.info("Processing update: " + update);
             if (!newUpdatesMap.containsKey(update.getFileId())) {
                 newUpdatesMap.put(update.getFileId(), new ArrayList<Update>());
@@ -178,15 +178,15 @@ public class ChangeManager {
 
             ///// 3. Handle all possible cases
             CloneFile localVersionById = db.getFileOrFolder(update.getFileId());
-            
+
             if (localVersionById != null) { // A) I know the file ID
                 if (isLocalConflict) { /// a) Conflict exists
                     logger.info("Aa) File ID " + update.getFileId() + " known, conflict found of " + existingVersion + " with updates " + update + ". Resolving conflict ...");
-                    
-                    if(update.isFolder()){
+
+                    if (update.isFolder()) {
                         resolveFolderConflict(existingVersion, update);
                     } else {
-                        try{
+                        try {
                             resolveConflict(existingVersion, update);
                         } catch (CouldNotApplyUpdateException ex) {
                             logger.error("Unable to download/assemble winning file!", ex);
@@ -215,7 +215,7 @@ public class ChangeManager {
                     path += parentCF.getName() + File.separator;
                 }
                 path += update.getName();
-                
+
                 File localFileName = FileUtil.getCanonicalFile(new File(path));
                 CloneFile localVersionByFilename = db.getFileOrFolder(root, localFileName); //update.getRootId(), update.getPath(), update.getName());
 
@@ -225,13 +225,13 @@ public class ChangeManager {
                     applyUpdate(null, update);
                 } else { // b) Local file exists:
                     logger.info("Bb) File ID " + update.getFileId() + " NOT known. Conflicting file (same file path) FOUND in DB: " + localVersionByFilename);
-                    
-                    if(update.isFolder()){
+
+                    if (update.isFolder()) {
                         resolveFolderConflict(localVersionByFilename, update);
                     } else {
-                        
-                        if(localVersionByFilename.getServerUploadedAck()){
-                            try{
+
+                        if (localVersionByFilename.getServerUploadedAck()) {
+                            try {
                                 resolveConflict(localVersionByFilename, update);
                             } catch (CouldNotApplyUpdateException ex) {
                                 logger.error("Unable to download/assemble winning file!", ex);
@@ -239,21 +239,21 @@ public class ChangeManager {
                                 // TODO Inifinite loop??
                                 queue.add(update);
                             }
-                        } else{ 
-                           List<CloneFile> previusVersions = localVersionByFilename.getPreviousVersions();
+                        } else {
+                            List<CloneFile> previusVersions = localVersionByFilename.getPreviousVersions();
                             previusVersions.add(localVersionByFilename);
-                            
+
                             CloneFile firstConflictVersion = null;
-                            
-                            for(CloneFile cf: previusVersions){
-                                if(!cf.getServerUploadedAck()){ // set the first conflict version
+
+                            for (CloneFile cf : previusVersions) {
+                                if (!cf.getServerUploadedAck()) { // set the first conflict version
                                     firstConflictVersion = cf;
                                     break;
                                 }
                             }
-                            
-                            if(firstConflictVersion != null){
-                                try{
+
+                            if (firstConflictVersion != null) {
+                                try {
                                     resolveConflict(localVersionByFilename, update);
                                 } catch (CouldNotApplyUpdateException ex) {
                                     // TODO Inifinite loop??
@@ -261,13 +261,13 @@ public class ChangeManager {
                                     //RemoteLogs.getInstance().sendLog(ex);
                                     queue.add(update);
                                 }
-                            }                            
-                        }                        
-                    }                                        
+                            }
+                        }
+                    }
                 }
             }
         }
-        
+
         synchronized (queue) {
             this.processingFiles = false;
         }
@@ -282,12 +282,12 @@ public class ChangeManager {
     }
 
     private void applyUpdate(CloneFile lastMatchingVersion, Update newFileUpdate) {
-    
+
         if (lastMatchingVersion != null) {
             this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.SYNCING);
         }
-        
-        try{        
+
+        try {
             // b) Rename
             if (newFileUpdate.getStatus() == Status.RENAMED) {
                 CloneFile renamedFile = applyRenameOnlyChanges(lastMatchingVersion, newFileUpdate);
@@ -295,7 +295,7 @@ public class ChangeManager {
                 if (lastMatchingVersion != null) {
                     this.desktop.untouch(lastMatchingVersion.getAbsolutePath());
                 }
-                
+
                 return;
             }
 
@@ -311,7 +311,7 @@ public class ChangeManager {
             // d) Changed or new
             CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
             if (lastMatchingVersion != null) {
-                    this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.UPTODATE);
+                this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.UPTODATE);
             }
             this.desktop.touch(newFile.getAbsolutePath(), SyncStatus.UPTODATE);
 
@@ -336,34 +336,33 @@ public class ChangeManager {
         logger.info("resolveFolderConflict: C. Adding updates to DB: " + conflictUpdate);
         CloneFile winningVersion = addToDB(conflictUpdate);
         winningVersion.setStatus(Status.RENAMED);
-        
+
         ///// D. Create 'winning' file
         logger.info("resolveFolderConflict: D. Create/Download winning file ...");
         // TODO what if this is a rename-only history??? 
 
         File fileOldVersion = new File(firstConflictingVersion.getAbsolutePath());
         FileUtil.renameVia(fileOldVersion, winningVersion.getFile());// just in case!
-        
+
         updateSyncStatus(winningVersion, SyncStatus.UPTODATE);
         em.merge(winningVersion);
     }
-    
-    private void resolveDeleteConflict(CloneFile firstConflictingVersion, Update conflictUpdate){
+
+    private void resolveDeleteConflict(CloneFile firstConflictingVersion, Update conflictUpdate) {
         firstConflictingVersion.setChecksum(conflictUpdate.getChecksum());
-        
+
         firstConflictingVersion.setServerUploadedAck(conflictUpdate.getServerUploadedAck());
         firstConflictingVersion.setServerUploadedTime(conflictUpdate.getServerUploadedTime());
-        
+
         firstConflictingVersion.setStatus(conflictUpdate.getStatus());
         firstConflictingVersion.setSyncStatus(SyncStatus.UPTODATE);
-        
+
         firstConflictingVersion.merge();
     }
-    
-    
-    private String generateConflictName(CloneFile conflictFile){
+
+    private String generateConflictName(CloneFile conflictFile) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-        
+
         String fileName = FileUtil.getBasename(conflictFile.getName());
         if (fileName.contains("conflicting copy,")) {
             fileName = fileName.substring(0, fileName.indexOf("(")).trim()
@@ -377,16 +376,16 @@ public class ChangeManager {
                 + " conflicting copy, "
                 + dateFormat.format(conflictFile.getLastModified())
                 + ")" + FileUtil.getExtension(conflictFile.getName(), true);
-        
+
         return newFileName;
     }
-    
-    private void resolveConflict(CloneFile firstConflictingVersion, Update conflictUpdate) throws CouldNotApplyUpdateException {        
-        if(firstConflictingVersion.getStatus().equals(Status.DELETED) && conflictUpdate.getStatus().equals(Status.DELETED)){
+
+    private void resolveConflict(CloneFile firstConflictingVersion, Update conflictUpdate) throws CouldNotApplyUpdateException {
+        if (firstConflictingVersion.getStatus().equals(Status.DELETED) && conflictUpdate.getStatus().equals(Status.DELETED)) {
             resolveDeleteConflict(firstConflictingVersion, conflictUpdate);
             return;
-        }        
-        
+        }
+
         ///// A. Adjust local history (first conflicting version - last local version)
         logger.info("resolveConflict: A. Adjusting local history of " + firstConflictingVersion + " ...");
 
@@ -404,13 +403,13 @@ public class ChangeManager {
         em.getTransaction().begin();
 
         long version = 1;
-        long fileId = firstConflictingVersion.getNewRandom();        
+        long fileId = firstConflictingVersion.getNewRandom();
 
         String newFileName = generateConflictName(firstConflictingVersion);
 
-        for (CloneFile cf: versionsToAdjust) {
+        for (CloneFile cf : versionsToAdjust) {
             logger.info("- Adding adjusted version " + cf + " from DB: " + cf.getAbsolutePath() + "");
-            
+
             /// GGIPART /// Solved bug trying remove old version and insert new version            
             CloneFile cfclone = (CloneFile) cf.clone();
 
@@ -426,10 +425,10 @@ public class ChangeManager {
             cfclone.setUsingTempId(true);
             cfclone.setServerUploadedAck(false);
             cfclone.setSyncStatus(SyncStatus.LOCAL);
-            
+
             newConflictingLocalFile = cfclone;
 
-            CloneFile toBeRemoved = (CloneFile)em.merge(cf);
+            CloneFile toBeRemoved = (CloneFile) em.merge(cf);
             toBeRemoved.deleteFromDB();
             em.merge(cfclone);
 
@@ -455,13 +454,13 @@ public class ChangeManager {
         logger.info("resolveConflict: C. Adding updates to DB: " + conflictUpdate);
         CloneFile winningVersion = addToDB(conflictUpdate);
 
-        if(winningVersion.getStatus() == Status.DELETED){            
+        if (winningVersion.getStatus() == Status.DELETED) {
             File tempDeleteFile = new File(winningVersion.getAbsoluteParentDirectory() + "/.ignore-delete-" + winningVersion.getName());
             FileUtil.deleteRecursively(tempDeleteFile); // just in case!
 
             winningVersion.getFile().renameTo(tempDeleteFile);
-            FileUtil.deleteRecursively(tempDeleteFile);            
-            
+            FileUtil.deleteRecursively(tempDeleteFile);
+
             updateSyncStatus(winningVersion, SyncStatus.UPTODATE);
         } else {
             updateSyncStatus(winningVersion, SyncStatus.REMOTE);
@@ -485,9 +484,9 @@ public class ChangeManager {
         em.merge(winningVersion);
     }
 
-    private CloneFile addToDB(Update newFileUpdate) {        
+    private CloneFile addToDB(Update newFileUpdate) {
         CloneFile existingVersion = db.getFileOrFolder(newFileUpdate.getFileId(), newFileUpdate.getVersion());
-        if(existingVersion != null){
+        if (existingVersion != null) {
             logger.info("found clonefile in database " + existingVersion);
             existingVersion.setSyncStatus(SyncStatus.REMOTE);
             existingVersion.merge();
@@ -499,44 +498,45 @@ public class ChangeManager {
     }
 
     private CloneFile updateSyncStatus(CloneFile newFileVersion, SyncStatus syncStatus) {
-        newFileVersion.setSyncStatus(syncStatus);                    
+        newFileVersion.setSyncStatus(syncStatus);
         newFileVersion.setMimetype(FileUtil.getMimeType(newFileVersion.getFile()));
-        
+
         newFileVersion.merge();
         return newFileVersion;
     }
-    
-    private boolean checkChunks(List<CloneChunk> l1, List<String> l2){
+
+    private boolean checkChunks(List<CloneChunk> l1, List<String> l2) {
         boolean isEqual = true;
-        
-        if(l1.size() != l2.size()){
+
+        if (l1.size() != l2.size()) {
             isEqual = false;
         } else {
-            for(int i=0; i < l1.size(); i++){
+            for (int i = 0; i < l1.size(); i++) {
                 CloneChunk c1 = l1.get(i);
                 String c2 = l2.get(i);
-                
-                if(c1.getChecksum().compareTo(c2) != 0){
+
+                if (c1.getChecksum().compareTo(c2) != 0) {
                     isEqual = false;
                     break;
                 }
             }
         }
-        
+
         return isEqual;
     }
 
     /**
      *
-     * <p>Note: files and folders are handled the same (in this case!). When
+     * <p>
+     * Note: files and folders are handled the same (in this case!). When
      * updating this method, make sure to check if it works for both!
      *
      * @param lastMatchingVersion
      * @param newFileUpdates
      */
     private CloneFile applyRenameOnlyChanges(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException {
-        if(lastMatchingVersion == null || !checkChunks(lastMatchingVersion.getChunks(), newFileUpdate.getChunks())){
-            if(lastMatchingVersion == null){
+        if (lastMatchingVersion == null || !checkChunks(lastMatchingVersion.getChunks(), newFileUpdate.getChunks())) {
+            if (lastMatchingVersion == null) {
                 logger.warn("Error lastmatching version is nul");
             } else {
                 logger.warn("Error file chunks not matching " + lastMatchingVersion.getId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + "; Trying to download the file ...");
@@ -544,14 +544,14 @@ public class ChangeManager {
 
             CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
             return newFile;
-        }        
-        
+        }
+
         if (!lastMatchingVersion.getFile().exists()) {
             logger.warn("Error while renaming file " + lastMatchingVersion.getId() + "v" + lastMatchingVersion.getVersion() + ": " + lastMatchingVersion.getRelativePath() + " does NOT exist; Trying to download the file ...");
 
             CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
             return newFile;
-        }                
+        }
 
         ///// A. Add to DB
         CloneFile newestVersion = addToDB(newFileUpdate);
@@ -562,13 +562,13 @@ public class ChangeManager {
         if (newestVersion.getFile().exists()) {
             logger.warn("- ChangeManager: Unable to rename file. " + newestVersion.getFile() + " already exists.");
             logger.warn("TODO TODO TODO what do we do in this case???");
-            
+
             //si esta renombrado comprobar el checksum i sino coincide aplicar changeornew
             //checkear si checksum coincide                    
             //si existe el temp-rename eliminar
             CloneFile newFile = applyChangeOrNew(lastMatchingVersion, newFileUpdate);
-            return newFile; 
-            
+            return newFile;
+
             //return newestVersion;
         }
 
@@ -597,7 +597,8 @@ public class ChangeManager {
 
     /**
      *
-     * <p>Note: files and folders are handled the same (in this case!). When
+     * <p>
+     * Note: files and folders are handled the same (in this case!). When
      * updating this method, make sure to check if it works for both!
      *
      * @param lastMatchingVersion
@@ -608,20 +609,20 @@ public class ChangeManager {
 
         ///// A. Add to DB
         CloneFile deletedVersion = addToDB(newFileUpdate);
-        
+
         ///// B. Delete newest local file
         File fileToDelete;
         if (lastMatchingVersion == null) {
             fileToDelete = deletedVersion.getFile();
         } else {
-            fileToDelete = lastMatchingVersion.getFile();            
+            fileToDelete = lastMatchingVersion.getFile();
         }
-        
+
         // No local version exists (weird!)
         if (!fileToDelete.exists()) {
-            logger.warn("Error while deleting file " + deletedVersion.getId() + "v" + deletedVersion.getVersion() + ": " + deletedVersion.getRelativePath() + " does NOT exist.");                        
+            logger.warn("Error while deleting file " + deletedVersion.getId() + "v" + deletedVersion.getVersion() + ": " + deletedVersion.getRelativePath() + " does NOT exist.");
         } else {
-            
+
             // No difference between folder and file !
             File tempDeleteFile = new File(fileToDelete.getParentFile().getAbsolutePath() + "/.ignore-delete-" + fileToDelete.getName());
             FileUtil.deleteRecursively(tempDeleteFile); // just in case!
@@ -629,14 +630,13 @@ public class ChangeManager {
             fileToDelete.renameTo(tempDeleteFile);
             FileUtil.deleteRecursively(tempDeleteFile);
         }
-        
+
         // Update DB
         updateSyncStatus(deletedVersion, SyncStatus.UPTODATE);
         em.merge(deletedVersion);
     }
 
-    
-    private void downloadChangeOrNew(CloneFile lastMatchingVersion, CloneFile newestVersion) throws CouldNotApplyUpdateException{
+    private void downloadChangeOrNew(CloneFile lastMatchingVersion, CloneFile newestVersion) throws CouldNotApplyUpdateException {
         // Temp files
         File tempNewFile = new File(newestVersion.getAbsoluteParentDirectory() + File.separator + ".ignore-assemble-to-" + newestVersion.getName());
         File tempDeleteFile = new File(newestVersion.getAbsoluteParentDirectory() + File.separator + ".ignore-delete-" + newestVersion.getName());
@@ -644,24 +644,23 @@ public class ChangeManager {
         FileUtil.deleteRecursively(tempNewFile); // just in case!
         FileUtil.deleteRecursively(tempDeleteFile); // just in case!
 
-        
         ///// B. Make folder
         if (newestVersion.isFolder()) {
             File newFolder = new File(newestVersion.getAbsoluteParentDirectory() + File.separator + newestVersion.getName());
             newFolder.mkdir();
             return;
-        } 
-        
+        }
+
         /// if path don't exist create!
         File filePath = newestVersion.getFile().getParentFile();
         if (!filePath.exists()) {
             filePath.mkdirs();
         }
-        
+
         ///// C+D. Download and assemble file
         downloadChunks(newestVersion);
         assembleFile(newestVersion, tempNewFile);
-        
+
         ///// E. delete local version (if there is one)
         if (lastMatchingVersion != null && lastMatchingVersion.getFile().exists()) {
             lastMatchingVersion.getFile().renameTo(tempDeleteFile);
@@ -673,7 +672,7 @@ public class ChangeManager {
         tempNewFile.renameTo(newestVersion.getFile());
         FileUtil.deleteRecursively(tempNewFile);
     }
-    
+
     /**
      * Steps: A. add new updates to DB
      *
@@ -691,23 +690,25 @@ public class ChangeManager {
      * @param newFileUpdates
      * @throws CouldNotApplyUpdateException
      */
-    private CloneFile applyChangeOrNew(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException{
+    private CloneFile applyChangeOrNew(CloneFile lastMatchingVersion, Update newFileUpdate) throws CouldNotApplyUpdateException {
         ///// A. Add to DB
         CloneFile newestVersion = addToDB(newFileUpdate);
         logger.info("- ChangeManager: Downloading/Updating " + newestVersion.getFile() + "");
 
         /* ABE Metadata decryption tasks. Retrieve symmetric key */
-        if(newestVersion.getWorkspace().isAbeEncrypted()) {
+        if (newestVersion.getWorkspace().isAbeEncrypted()) {
+            logger.info("- ChangeManager: [ABE] Retrieving symmetric key (ABE Decryption)... ");
             byte[] symmetricKey = retrieveSymKey(newestVersion, newFileUpdate);
             newestVersion.setSymmetricKey(symmetricKey);
+            logger.info("- ChangeManager: [ABE] Symmetric key retrieved. ");
         }
-        
+
         // Skip conditions
         boolean unknownButFileExists = lastMatchingVersion == null && newestVersion.getFile().exists();
         if (unknownButFileExists) {
             logger.warn("File " + newestVersion.getFile() + " already exists.");
-            
-            if(!newestVersion.isFolder()){
+
+            if (!newestVersion.isFolder()) {
                 try {
                     //ChunkEnumeration chunks = chunker.createChunks(newestVersion.getFile(), profile.getRepository().getChunkSize());
                     ChunkEnumeration chunks = chunker.createChunks(newestVersion.getFile());
@@ -715,13 +716,13 @@ public class ChangeManager {
                     long checksum = chunker.createFileChecksum(newestVersion.getFile());
                     chunks.closeStream();
 
-                    if(checksum != newestVersion.getChecksum()){
+                    if (checksum != newestVersion.getChecksum()) {
                         logger.info("resolveConflict: renaming localfile " + newestVersion + " ...");
                         String newFileName = generateConflictName(newestVersion);
-        
+
                         File conflictedCopy = new File(newestVersion.getAbsoluteParentDirectory() + File.separator + newFileName);
                         newestVersion.getFile().renameTo(conflictedCopy);
-                        
+
                         downloadChangeOrNew(lastMatchingVersion, newestVersion);
                     }
                 } catch (FileNotFoundException ex) {
@@ -730,20 +731,20 @@ public class ChangeManager {
                 }
             }
         } else {
-            downloadChangeOrNew(lastMatchingVersion, newestVersion); 
+            downloadChangeOrNew(lastMatchingVersion, newestVersion);
         }
 
         // Update DB
         updateSyncStatus(newestVersion, SyncStatus.UPTODATE);
         em.merge(newestVersion);
-        
+
         return newestVersion;
     }
-    
-    
+
     /**
      * Decrypt the symmetric key of a file from the proper Attribute-Based
      * Encryption metadata.
+     *
      * @return decrypted symmetric key
      */
     private byte[] retrieveSymKey(CloneFile cf, Update update) {
@@ -753,10 +754,10 @@ public class ChangeManager {
     }
 
     private void downloadChunks(CloneFile file) throws CouldNotApplyUpdateException {
-        logger.info("Downloading file " + file.getRelativePath() + " ...");  
+        logger.info("Downloading file " + file.getRelativePath() + " ...");
 
         int chunkNum = 1;
-        for (CloneChunk chunk: file.getChunks()) {
+        for (CloneChunk chunk : file.getChunks()) {
             File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
             if (chunk.getCacheStatus() == CacheStatus.CACHED && chunkCacheFile.exists()) {
@@ -769,7 +770,7 @@ public class ChangeManager {
 
                 String fileName = chunk.getFileName();
                 CloneWorkspace workspace = file.getWorkspace();
-                transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);     
+                transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);
 
                 // Change DB state of chunk
                 chunk.setCacheStatus(CacheStatus.CACHED);
@@ -784,17 +785,16 @@ public class ChangeManager {
         logger.info("- File " + file.getRelativePath() + " downloaded; Assembling ...");
     }
 
-
     private void assembleFile(CloneFile cf, File tempFile) throws CouldNotApplyUpdateException {
-        
+
         FileOutputStream fos = null;
         Encryption enc;
-        
+
         try {
             fos = new FileOutputStream(tempFile, false);
             logger.info("- Decrypting chunks to temp file  " + tempFile.getAbsolutePath() + " ...");
 
-            if(cf.getWorkspace().isAbeEncrypted()) {
+            if (cf.getWorkspace().isAbeEncrypted()) {
                 AbeEncryption abenc = (AbeEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
                 enc = abenc.getBasicEncryption(cf.getSymmetricKey());
             } else {
@@ -802,7 +802,7 @@ public class ChangeManager {
             }
 
             int chunkNum = 1;
-            for (CloneChunk chunk: cf.getChunks()) {
+            for (CloneChunk chunk : cf.getChunks()) {
                 logger.info("Chunk (" + chunkNum + File.separator + cf.getChunks().size() + ")" + config.getCache().getCacheChunk(chunk));
 
                 // Read file to buffer
@@ -823,9 +823,9 @@ public class ChangeManager {
             throw new CouldNotApplyUpdateException(e);
         } finally {
             try {
-                if(fos != null){
+                if (fos != null) {
                     fos.close();
-                }                
+                }
             } catch (IOException ex) {
                 logger.error("Exception: ", ex);
             }
@@ -848,24 +848,23 @@ public class ChangeManager {
         if (existingVersion.getStatus() == Status.DELETED && update.getStatus() == Status.DELETED) {
             return false;
         }
-        
+
         Long evParentId = null;
         if (existingVersion.getParent() != null) {
             evParentId = existingVersion.getParent().getId();
         }
-        
+
         Long updateParentId = null;
-        if (update.getParentFileId() != null){
+        if (update.getParentFileId() != null) {
             updateParentId = update.getParentFileId();
         }
-        
+
         if (existingVersion.getStatus() == Status.RENAMED && update.getStatus() == Status.RENAMED
                 && isSameParent(evParentId, updateParentId)
                 && existingVersion.getName().equals(update.getName())) {
 
             return false;
         }
-        
 
         if (existingVersion.getStatus() == Status.NEW && update.getStatus() == Status.NEW
                 && existingVersion.getSize() == update.getFileSize()
@@ -885,7 +884,7 @@ public class ChangeManager {
             return false;
         }
 
-        if(existingVersion.getSyncStatus() == SyncStatus.REMOTE && existingVersion.getVersion() == update.getVersion()){
+        if (existingVersion.getSyncStatus() == SyncStatus.REMOTE && existingVersion.getVersion() == update.getVersion()) {
             logger.info("Reapply the update again: " + update);
             return false;
         }
@@ -893,23 +892,23 @@ public class ChangeManager {
         // Conflict, I lose!
         return true;
     }
-    
+
     public boolean isSameParent(Long parentId1, Long parentId2) {
-        
-        if ( parentId1 == null && parentId2 == null ) {
+
+        if (parentId1 == null && parentId2 == null) {
             return true;
         }
-        
-        if ( parentId1 == null || parentId2 == null ) {
+
+        if (parentId1 == null || parentId2 == null) {
             return false;
         }
-        
-        if ( parentId1.equals(parentId2) ) {
+
+        if (parentId1.equals(parentId2)) {
             return true;
         }
-        
+
         return false;
-        
+
     }
 
     public void showNotification(Map<Long, List<Update>> appliedUpdates) {
@@ -946,7 +945,6 @@ public class ChangeManager {
         FileUtil.deleteRecursively(tempNewFile); // just in case!
         FileUtil.deleteRecursively(tempDeleteFile); // just in case!
 
-
         ///// B. Make folder
         if (newestVersion.isFolder()) {
             tempNewFile.mkdirs();
@@ -980,18 +978,18 @@ public class ChangeManager {
         em.merge(newestVersion);
         /// GGIENDPART ///        
     }
-    
+
     public boolean queuesUpdatesIsWorking() {
         boolean empty;
         boolean processingFile;
-        
+
         synchronized (queue) {
             empty = queue.isEmpty();
             processingFile = this.processingFiles;
         }
-        
+
         return !empty | processingFile;
     }
-    
+
     /// GGIENDPART ///
 }

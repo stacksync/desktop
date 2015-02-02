@@ -162,6 +162,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
 
             // 1.a Attribute-Based encryption tasks 
             if (cf.getWorkspace().isAbeEncrypted()) {
+                logger.info("Indexer: [ABE] Generating and encrypting symmetric key (ABE Encryption)... ");
                 // Get the ABE encryption
                 AbeEncryption abenc = (AbeEncryption) root.getProfile().getEncryption(cf.getWorkspace().getId());
                 // Generate key
@@ -173,6 +174,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 // Save the produced ABE encryption metadata in CloneFile Object
                 cf.setCipherSymKey(abeCipherMeta.getCipherText());
                 cf.setAbeComponents(abeCipherMeta.getAbeMetaComponents());
+                logger.info("Indexer: [ABE] Symmetric key encrypted. ");
             } else {
                 // 1.b Get encryption 
                 enc = root.getProfile().getEncryption(cf.getWorkspace().getId());
@@ -213,7 +215,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
             }
             cf.merge();
             chunks.closeStream();
-            
+
             // 2.a. Persist produced ABE metadata if required
             if (cf.getWorkspace().isAbeEncrypted()) {
                 for (ABEMetaComponent meta : cf.getAbeComponents()) {
@@ -242,6 +244,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
 
     /**
      * Encrypt a given key using ABE protocol
+     *
      * @param enc
      * @param data
      * @return produced ABE metadata
