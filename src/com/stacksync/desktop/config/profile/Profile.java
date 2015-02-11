@@ -298,7 +298,7 @@ public class Profile implements Configurable {
     
     private void generateAndSaveAbeEncryption(String id) throws InitializationException {
         try {
-            AbeEncryption encryption = new AbeEncryption();
+            AbeEncryption encryption = new AbeEncryption(env.getAppConfDir().getPath() + "/abe/");
             this.workspaceEncryption.put(id, encryption);
         } catch (ConfigException ex) {
             throw new InitializationException(ex);

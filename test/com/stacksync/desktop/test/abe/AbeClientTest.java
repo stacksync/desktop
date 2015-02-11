@@ -35,13 +35,14 @@ public class AbeClientTest {
     private static Encryption encryption;
 
     private static final String DEFAULT_ACCESS_STRUCT = "(MarketingA | (DesignA & DesignB))";
+    private static final String ABE_RES_PATH = "./resources/conf/abe/";
 
     @BeforeClass
     public static void setUpClass() {
         System.out.println("[TestSetup] Setting up Attribute-Based encryption environment...");
         /* Set up the ABE encryption environment */
         try {
-            encryption = new AbeEncryption(DEFAULT_ACCESS_STRUCT);
+            encryption = new AbeEncryption(ABE_RES_PATH, DEFAULT_ACCESS_STRUCT);
         } catch (Exception ex) {
             System.out.println("[TestSetup] Unable to load client data!");
             logger.log(Level.SEVERE, null, ex);

@@ -35,6 +35,8 @@ public class AbeEnvironmentTest {
     private static Encryption encBob;
 
     private static final String DEFAULT_ACCESS_STRUCT = "(MarketingA | (DesignA & DesignB))";
+    private static final String ABE_RES_PATH = "./resources/conf/abe/";
+
     private static final String BOB_ACCESS_STRUCT = "(DesignA & DesignB)";
 
     @BeforeClass
@@ -46,9 +48,9 @@ public class AbeEnvironmentTest {
             //Encryption generateEncryption = new AbeEncryption(DEFAULT_ACCESS_STRUCT, true);
             // Initialize testing ABE clients
             System.out.println("[TestSetup] Initializing ABE environment for Alice...");
-            encAlice = new AbeEncryption(DEFAULT_ACCESS_STRUCT);
+            encAlice = new AbeEncryption(ABE_RES_PATH, DEFAULT_ACCESS_STRUCT);
             System.out.println("[TestSetup] Initializing ABE environment for Bob...");
-            encBob = new AbeEncryption(BOB_ACCESS_STRUCT);
+            encBob = new AbeEncryption(ABE_RES_PATH, BOB_ACCESS_STRUCT);
         } catch (Exception ex) {
             System.out.println("[TestSetup] Unable to load client data!");
             logger.log(Level.SEVERE, null, ex);

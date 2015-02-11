@@ -14,16 +14,14 @@ import java.security.SecureRandom;
  * @author javigd
  */
 public class AbeEncryption implements Encryption {
-
-    private static final String abeResourcesPath = "./resources/abe/";
-
+    
     private String accessStructure;
     private CloudABEClient cabe;
     private BasicEncryptionFactory bef;
 
     private SecureRandom random;
 
-    public AbeEncryption() throws ConfigException {
+    public AbeEncryption(String abeResourcesPath) throws ConfigException {
         try {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
             this.accessStructure = null;
@@ -34,7 +32,7 @@ public class AbeEncryption implements Encryption {
         }
     }
 
-    public AbeEncryption(String accessStructure) throws ConfigException {
+    public AbeEncryption(String abeResourcesPath, String accessStructure) throws ConfigException {
         try {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
             this.accessStructure = accessStructure;
