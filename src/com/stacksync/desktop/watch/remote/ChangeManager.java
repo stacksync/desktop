@@ -695,12 +695,14 @@ public class ChangeManager {
         CloneFile newestVersion = addToDB(newFileUpdate);
         logger.info("- ChangeManager: Downloading/Updating " + newestVersion.getFile() + "");
 
+        logger.info("[ABE Benchmarking - New File] Downloading/Updating new file " + newestVersion.getFileName() + "");
+
         /* ABE Metadata decryption tasks. Retrieve symmetric key */
         if (newestVersion.getWorkspace().isAbeEncrypted()) {
-            logger.info("- ChangeManager: [ABE] Retrieving symmetric key (ABE Decryption)... ");
+            logger.info("[ABE Benchmarking - ABE key decryption] Retrieving symmetric key...");
             byte[] symmetricKey = retrieveSymKey(newestVersion, newFileUpdate);
+            logger.info("[ABE Benchmarking - ABE key decryption] Symmetric key decrypted.");
             newestVersion.setSymmetricKey(symmetricKey);
-            logger.info("- ChangeManager: [ABE] Symmetric key retrieved. ");
         }
 
         // Skip conditions
@@ -755,6 +757,7 @@ public class ChangeManager {
 
     private void downloadChunks(CloneFile file) throws CouldNotApplyUpdateException {
         logger.info("Downloading file " + file.getRelativePath() + " ...");
+        logger.info("[ABE Benchmarking - Download] Downloading chunks for file " + file.getFileName() + "");
 
         int chunkNum = 1;
         for (CloneChunk chunk : file.getChunks()) {
@@ -767,10 +770,13 @@ public class ChangeManager {
 
             try {
                 logger.info("- Downloading chunk (" + chunkNum + "/" + file.getChunks().size() + ") " + chunk + " ...");
+                logger.info("[ABE Benchmarking - Download] Downloading chunk " + chunkNum + "...");
 
                 String fileName = chunk.getFileName();
                 CloneWorkspace workspace = file.getWorkspace();
                 transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);
+
+                logger.info("[ABE Benchmarking - Download] Chunk downloaded successfully.");
 
                 // Change DB state of chunk
                 chunk.setCacheStatus(CacheStatus.CACHED);
@@ -782,6 +788,7 @@ public class ChangeManager {
             }
         }
 
+        logger.info("[ABE Benchmarking - Download] Chunks downloaded successfully.");
         logger.info("- File " + file.getRelativePath() + " downloaded; Assembling ...");
     }
 
@@ -793,6 +800,7 @@ public class ChangeManager {
         try {
             fos = new FileOutputStream(tempFile, false);
             logger.info("- Decrypting chunks to temp file  " + tempFile.getAbsolutePath() + " ...");
+            logger.info("[ABE Benchmarking - Unpacking] Unpacking chunks...");
 
             if (cf.getWorkspace().isAbeEncrypted()) {
                 AbeEncryption abenc = (AbeEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
@@ -810,7 +818,7 @@ public class ChangeManager {
 
                 byte[] packed = FileUtil.readFileToByteArray(chunkFile);
                 byte[] unpacked = FileUtil.unpack(packed, enc);
-
+                logger.info("[ABE Benchmarking - Unpacking] Chunk unpacked.");
                 // Write decrypted chunk to file
                 fos.write(unpacked);
                 chunkNum++;
@@ -830,7 +838,7 @@ public class ChangeManager {
                 logger.error("Exception: ", ex);
             }
         }
-
+        logger.info("[ABE Benchmarking - Unpacking] All chunks have been unpacked successfully.");
         logger.info("- File " + cf.getRelativePath() + " downloaded");
     }
 

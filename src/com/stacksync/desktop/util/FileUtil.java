@@ -65,13 +65,13 @@ import org.apache.log4j.Logger;
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class FileUtil {
+
     private static final MagicMimeTypeIdentifier mimeTypesMap = new MagicMimeTypeIdentifier();
-    private static final Logger logger = Logger.getLogger(FileUtil.class.getName());    
+    private static final Logger logger = Logger.getLogger(FileUtil.class.getName());
     private static final Environment env = Environment.getInstance();
-    
+
     private static final double BASE = 1024, KB = BASE, MB = KB * BASE, GB = MB * BASE;
     private static final DecimalFormat df = new DecimalFormat("#.##");
-    
 
     public static String formatSize(double size) {
         if (size >= GB) {
@@ -200,7 +200,7 @@ public class FileUtil {
         InputStream srcStream = new FileInputStream(src);
         OutputStream dstStream = new FileOutputStream(dst);
         copy(srcStream, dstStream);
-        
+
         srcStream.close();
         dstStream.close();
     }
@@ -247,7 +247,6 @@ public class FileUtil {
         }
 
         //System.out.println(new Date()+" -- fertig");
-
         in.close();
         out.close();
     }
@@ -255,19 +254,19 @@ public class FileUtil {
     public static byte[] readFileToByteArray(File file) throws IOException {
         return FileUtils.readFileToByteArray(file);
     }
-    
+
     public static String readFileToString(File file) throws IOException {
         return FileUtils.readFileToString(file);
-    }    
-    
-    public static void writeFile(String content, File file) throws IOException{
+    }
+
+    public static void writeFile(String content, File file) throws IOException {
         FileUtils.writeStringToFile(file, content);
     }
 
     public static void writeFile(byte[] bytes, File file) throws IOException {
         InputStream inStream = new ByteArrayInputStream(bytes);
         writeFile(inStream, file);
-        
+
         inStream.close();
     }
 
@@ -310,7 +309,7 @@ public class FileUtil {
 
         byte[] result = byteArrayOutputStream.toByteArray();
         byteArrayOutputStream.close();
-        
+
         return result;
     }
 
@@ -320,25 +319,32 @@ public class FileUtil {
 
         byte[] result = out.toByteArray();
         out.close();
-        
+
         return result;
     }
 
     public static byte[] unpack(byte[] packed, Encryption enc)
             throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        
+
         if (enc != null) {
+            logger.info("[ABE Benchmarking - Unpacking] Decrypting data...");
             packed = enc.decrypt(new BasicCipherData(packed));
+            logger.info("[ABE Benchmarking - Unpacking] Data decrypted successfully.");
         }
+        logger.info("[ABE Benchmarking - Unpacking] Uncompressing chunk...");
         return FileUtil.gunzip(packed);
     }
 
     public static byte[] pack(byte[] raw, Encryption enc)
             throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, AttributeNotFoundException {
 
+        logger.info("[ABE Benchmarking - Packing] Compressing chunk...");
         byte[] gzipped = FileUtil.gzip(raw);
+        logger.info("[ABE Benchmarking - Packing] Chunk compressed.");
         if (enc != null) {
+            logger.info("[ABE Benchmarking - Packing] Encrypting raw data...");
             gzipped = enc.encrypt(new BasicPlainData(gzipped)).getCipherText();
+            logger.info("[ABE Benchmarking - Packing] Raw data encrypted successfully.");
         }
         return gzipped;
     }
@@ -355,24 +361,24 @@ public class FileUtil {
         } catch (Exception ex) { /* Fressen */ }
     }
 
-    private static boolean openLinuxExplorer(String command, File path){        
+    private static boolean openLinuxExplorer(String command, File path) {
         boolean result = false;
-        
+
         File f1 = new File(command);
-        if(f1.exists()){
+        if (f1.exists()) {
             try {
                 Runtime.getRuntime().exec(command + " " + path.getAbsolutePath());
                 result = true;
-            } catch (IOException ex) { 
+            } catch (IOException ex) {
                 System.out.println(ex);
-            }            
-        }        
-        
+            }
+        }
+
         return result;
     }
-    
+
     public static void showWindow(final File file) throws IOException {
-        
+
         if (openLinuxExplorer("/usr/bin/nautilus", file)) {
             logger.debug("Opened file with /usr/bin/nautilus");
         } else if (openLinuxExplorer("/usr/share/nautilus", file)) {
@@ -385,13 +391,13 @@ public class FileUtil {
             logger.debug("Opened with the default Desktop.");
             Desktop.getDesktop().open(file);
         }
-        
+
     }
-    
+
     public static void openFile(final File file) {
         try {
-                switch (env.getOperatingSystem()) {
-                case Linux:                    
+            switch (env.getOperatingSystem()) {
+                case Linux:
                     showWindow(file);
                     break;
                 case Mac:
@@ -487,24 +493,23 @@ public class FileUtil {
         }
 
         return fc.getSelectedFile();
-    }  
-    
-    public static String getFilePathCleaned(String path){
-        if(env.getOperatingSystem() == Environment.OperatingSystem.Windows){
-            if(path.contains("\\")){
+    }
+
+    public static String getFilePathCleaned(String path) {
+        if (env.getOperatingSystem() == Environment.OperatingSystem.Windows) {
+            if (path.contains("\\")) {
                 path = path.replace("\\", "/");
             }
         }
-        
-        if(path.isEmpty() || !path.startsWith("/")){
+
+        if (path.isEmpty() || !path.startsWith("/")) {
             path = "/" + path;
         }
-        
+
         return path;
     }
-        
-    
-    public static void createWindowsLink(String link, String target){
+
+    public static void createWindowsLink(String link, String target) {
         // TODO Is it always working fine???
         File FileLink = new File(link);
         if (!FileLink.exists()) {
@@ -519,7 +524,7 @@ public class FileUtil {
                 fo.write(script.getBytes());
                 fo.flush();
                 fo.close();
-                
+
                 Runtime.getRuntime().exec("wscript.exe \"" + file.getAbsolutePath() + "\"");
             } catch (IOException ex) {
                 logger.error(ex);
@@ -527,90 +532,90 @@ public class FileUtil {
             }
         }
     }
-    
-    public static boolean checkIgnoreFile(Folder root, File file){    
+
+    public static boolean checkIgnoreFile(Folder root, File file) {
         String fileNameLower = file.getName().toLowerCase();
-        
+
         /* This case is a special one. It will check if the file
-           has the structure .nw_111_aaa meaning it is a new wp. */
+         has the structure .nw_111_aaa meaning it is a new wp. */
         if (isSpecialFileToProcess(root, file)) {
             return false;
         }
-        
+
         if (isStackSyncTemporalFile(root, file)) {
             return true;
         }
-        
+
         //.ds_store
         if (fileNameLower.compareTo(Constants.FILE_IGNORE_MAC_PREFIX) == 0) {
             return true;
         }
-        
+
         //.thumbs.db
         if (fileNameLower.compareTo("thumbs.db") == 0) {
             return true;
-        }        
-        
+        }
+
         // gedit temporal file
-        if (fileNameLower.endsWith("~")){
+        if (fileNameLower.endsWith("~")) {
             return true;
         }
-        
+
         // .file linux hidden file
-        if (fileNameLower.startsWith(".")){
+        if (fileNameLower.startsWith(".")) {
             return true;
         }
-        
+
         File parent = file.getParentFile();
-        if(parent != null && parent.getAbsolutePath().compareTo(root.getLocalFile().getAbsolutePath()) != 0 &&
-                             parent.getAbsolutePath().length() > root.getLocalFile().getAbsolutePath().length()){            
+        if (parent != null && parent.getAbsolutePath().compareTo(root.getLocalFile().getAbsolutePath()) != 0
+                && parent.getAbsolutePath().length() > root.getLocalFile().getAbsolutePath().length()) {
             return checkIgnoreFile(root, parent);
         }
-        
+
         return false;
     }
-    
+
     public static boolean isStackSyncTemporalFile(Folder root, File file) {
         String fileNameLower = file.getName().toLowerCase();
-        
+
         // .ignore file
         if (fileNameLower.startsWith(Constants.FILE_IGNORE_PREFIX)) {
             return true;
         }
-        
+
         return false;
     }
-    
+
     public static boolean isSpecialFileToProcess(Folder root, File file) {
         String fileNameLower = file.getName().toLowerCase();
-        
+
         // .nw_111_aaa file means: folder name = aaa, workspace id = 111
         if (fileNameLower.startsWith(".nw_")) {
             return true;
         }
-        
+
         return false;
     }
-    
-    
-    public static String getMimeType(File file){
+
+    public static String getMimeType(File file) {
         FileInputStream fis = null;
         try {
             String mimetype = null;
-            
+
             fis = new FileInputStream(file);
             byte[] bytes = IOUtils.toByteArray(fis);
-            
-            if(mimeTypesMap != null){
-                try {            
-                    mimetype = mimeTypesMap.identify(bytes);        
-                } catch (Exception ex){ }        
+
+            if (mimeTypesMap != null) {
+                try {
+                    mimetype = mimeTypesMap.identify(bytes);
+                } catch (Exception ex) {
+                }
             }
-            
-            if(mimetype == null){
+
+            if (mimetype == null) {
                 mimetype = "unknown";
             }
-            
+
             return mimetype;
         } catch (IOException ex) {
             return "unknown";
@@ -618,26 +623,27 @@ public class FileUtil {
             if (fis != null) {
                 try {
                     fis.close();
-                } catch (IOException ex) { }
+                } catch (IOException ex) {
+                }
             }
         }
     }
-    
-    public static String getPropertyFromManifest(String manifestPath, String property){
+
+    public static String getPropertyFromManifest(String manifestPath, String property) {
         try {
             URLClassLoader cl = (URLClassLoader) FileUtil.class.getClassLoader();
-            
+
             URL url = cl.findResource(manifestPath);
             Manifest manifest = new Manifest(url.openStream());
             Attributes attr = manifest.getMainAttributes();
-            
-            return attr.getValue(property);            
+
+            return attr.getValue(property);
         } catch (IOException ex) {
             logger.debug("Exception: ", ex);
             return null;
         }
     }
-    
+
     public static boolean checkIllegalName(String filename) {
         Pattern pattern = Pattern.compile("[\\\\/:*<>|\"?]");
         Matcher matcher = pattern.matcher(filename);

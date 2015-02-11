@@ -160,19 +160,21 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
 
+            logger.info("[ABE Benchmarking - File Info] New Shared File: " + cf.getName() + " size: " + cf.getSize());
+            
             // 1.a Attribute-Based encryption tasks 
             if (cf.getWorkspace().isAbeEncrypted()) {
-                logger.info("[ABE BENCHMARKING - KEY GEN & ABE ENCRYPTION] Generating symmetric key... ");
+                logger.info("[ABE Benchmarking - Symmetric key gen] Generating symmetric key... ");
                 // Get the ABE encryption
                 AbeEncryption abenc = (AbeEncryption) root.getProfile().getEncryption(cf.getWorkspace().getId());
                 // Generate key
                 byte[] key = abenc.generateSymKey();
                 // Initialize BasicEncryption object from generated key (encryption of chunks)
                 enc = abenc.getBasicEncryption(key);
-                logger.info("[ABE BENCHMARKING - KEY GEN & ABE ENCRYPTION] Encrypting symmetric key... ");
+                logger.info("[ABE Benchmarking - Symmetric key ABE encryption] Encrypting symmetric key... ");
                 // Encrypt key using ABE protocol
                 AbeCipherData abeCipherMeta = getEncryptedSymKey(abenc, key);
-                logger.info("[ABE BENCHMARKING - KEY GEN & ABE ENCRYPTION] Symmetric key encrypted... ");
+                logger.info("[ABE Benchmarking - Symmetric key ABE encryption] Symmetric key encrypted... ");
                 // Save the produced ABE encryption metadata in CloneFile Object
                 cf.setCipherSymKey(abeCipherMeta.getCipherText());
                 cf.setAbeComponents(abeCipherMeta.getAbeMetaComponents());
@@ -183,6 +185,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
 
             //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
+            logger.info("[ABE Benchmarking - Packing] Packing chunks...");
             while (chunks.hasMoreElements()) {
                 chunkInfo = chunks.nextElement();
 
@@ -203,6 +206,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
 
                 cf.addChunk(chunk);
             }
+            logger.info("[ABE Benchmarking - Packing] All chunks have been successfully packed.");
 
             logger.info("Indexer: saving chunks...");
             cf.merge();
