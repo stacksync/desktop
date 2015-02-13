@@ -73,7 +73,7 @@ public class AbeEnvironmentTest {
      * ABE Encryption test: Simple encryption-decryption sharing.
      */
     @Test
-    public void dataAbeSharinghTest() {
+    public void dataAbeSharingTest() {
         String message = "Test";
         ArrayList<String> attSet = new ArrayList<String>();
         attSet.add("DesignA");

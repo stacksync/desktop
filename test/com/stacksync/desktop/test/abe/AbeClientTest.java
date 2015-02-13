@@ -93,6 +93,36 @@ public class AbeClientTest {
     }
 
     /**
+     * ABE Encryption without Attribute set defined: Simple encryption-decryption. Attribute set obtained from file.
+     */
+    @Test
+    public void encryptionNoAttSetTest() {
+        String message = "Test";
+        ArrayList<String> attSet = null;
+        
+        PlainData data = new AbePlainData(message.getBytes(), attSet);
+
+        try {
+            CipherData cipher = encryption.encrypt(data);
+            System.out.println("[encryptionNoAttSetTest] Original message: " + message);
+            byte[] output = encryption.decrypt(cipher);
+            if (output != null) {
+                System.out.println("[encryptionNoAttSetTest] Decrypted Data: " + new String(output));
+            } else {
+                System.out.println("[encryptionNoAttSetTest] Unable to decrypt. ABE Decryption requierements unsatisfied");
+            }
+        } catch (InvalidKeyException ex) {
+            Logger.getLogger(AbeClientTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException ex) {
+            Logger.getLogger(AbeClientTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (BadPaddingException ex) {
+            Logger.getLogger(AbeClientTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (AttributeNotFoundException ex) {
+            System.out.println("[encryptionNoAttSetTest] Unable to decrypt. " + ex.getMessage());
+        }
+    }
+    
+    /**
      * ABE Encryption test: Policy Not satisfied.
      */
     @Test

@@ -255,14 +255,10 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
      * @return produced ABE metadata
      */
     private AbeCipherData getEncryptedSymKey(AbeEncryption enc, byte[] data) {
-        // FIXME: Hardcoded attribute set (testing purposes)
-        ArrayList<String> attSet = new ArrayList<String>();
-        attSet.add("MarketingA");
-        attSet.add("DesignA");
-        attSet.add("DesignB");
 
-        PlainData plainData = new AbePlainData(data, attSet);
-
+        //FIXME: Attribute set obtained from file (testing purposes)
+        PlainData plainData = new AbePlainData(data, null);
+        
         try {
             AbeCipherData cipher = enc.encrypt(plainData);
             return cipher;
