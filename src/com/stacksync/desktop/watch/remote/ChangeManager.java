@@ -695,7 +695,7 @@ public class ChangeManager {
         CloneFile newestVersion = addToDB(newFileUpdate);
         logger.info("- ChangeManager: Downloading/Updating " + newestVersion.getFile() + "");
 
-        logger.info("[ABE Benchmarking - New File] Downloading/Updating new file " + newestVersion.getFileName() + "");
+        logger.info("[ABE Benchmarking - File Info] Downloading/Updating new File: " + newestVersion.getFileName() + " size: " + newestVersion.getSize());
 
         /* ABE Metadata decryption tasks. Retrieve symmetric key */
         if (newestVersion.getWorkspace().isAbeEncrypted()) {
