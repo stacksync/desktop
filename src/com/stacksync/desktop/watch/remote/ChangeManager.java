@@ -699,9 +699,7 @@ public class ChangeManager {
 
         /* ABE Metadata decryption tasks. Retrieve symmetric key */
         if (newestVersion.getWorkspace().isAbeEncrypted()) {
-            logger.info("[ABE Benchmarking - ABE key decryption] Retrieving symmetric key...");
             byte[] symmetricKey = retrieveSymKey(newestVersion, newFileUpdate);
-            logger.info("[ABE Benchmarking - ABE key decryption] Symmetric key decrypted.");
             newestVersion.setSymmetricKey(symmetricKey);
         }
 
@@ -752,7 +750,10 @@ public class ChangeManager {
     private byte[] retrieveSymKey(CloneFile cf, Update update) {
         AbeEncryption enc = (AbeEncryption) cf.getRoot().getProfile().getEncryption(cf.getWorkspace().getId());
         CipherData cipher = new AbeCipherData(update.getCipherSymKey(), update.getAbeComponents());
-        return enc.decrypt(cipher);
+        logger.info("[ABE Benchmarking - ABE key decryption] Retrieving symmetric key...");
+        byte[] symKey = enc.decrypt(cipher);
+        logger.info("[ABE Benchmarking - ABE key decryption] Symmetric key decrypted.");
+        return symKey;
     }
 
     private void downloadChunks(CloneFile file) throws CouldNotApplyUpdateException {

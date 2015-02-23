@@ -46,7 +46,6 @@ public class AbeEncryption implements Encryption {
     }
 
     private void init() throws AttributeNotFoundException {
-        logger.info("[ABE Benchmarking - ABE Setup] Setting access structure to: " + accessStructure);
         cabe.setupABESystem(0, accessStructure);
         this.bef = new BasicEncryptionFactory();
     }

@@ -161,7 +161,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
             FileChunk chunkInfo = null;
 
             logger.info("[ABE Benchmarking - File Info] New Shared File: " + cf.getName() + " size: " + cf.getSize());
-            
+
             // 1.a Attribute-Based encryption tasks 
             if (cf.getWorkspace().isAbeEncrypted()) {
                 logger.info("[ABE Benchmarking - Symmetric key gen] Generating symmetric key... ");
@@ -171,10 +171,8 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 byte[] key = abenc.generateSymKey();
                 // Initialize BasicEncryption object from generated key (encryption of chunks)
                 enc = abenc.getBasicEncryption(key);
-                logger.info("[ABE Benchmarking - Symmetric key ABE encryption] Encrypting symmetric key... ");
                 // Encrypt key using ABE protocol
                 AbeCipherData abeCipherMeta = getEncryptedSymKey(abenc, key);
-                logger.info("[ABE Benchmarking - Symmetric key ABE encryption] Symmetric key encrypted... ");
                 // Save the produced ABE encryption metadata in CloneFile Object
                 cf.setCipherSymKey(abeCipherMeta.getCipherText());
                 cf.setAbeComponents(abeCipherMeta.getAbeMetaComponents());
@@ -258,9 +256,11 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
 
         //FIXME: Attribute set obtained from file (testing purposes)
         PlainData plainData = new AbePlainData(data, null);
-        
+
         try {
+            logger.info("[ABE Benchmarking - Symmetric key ABE encryption] Encrypting symmetric key... ");
             AbeCipherData cipher = enc.encrypt(plainData);
+            logger.info("[ABE Benchmarking - Symmetric key ABE encryption] Symmetric key encrypted... ");
             return cipher;
         } catch (InvalidKeyException ex) {
             java.util.logging.Logger.getLogger(NewIndexSharedRequest.class.getName()).log(Level.SEVERE, null, ex);
