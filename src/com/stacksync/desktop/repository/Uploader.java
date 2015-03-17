@@ -169,7 +169,7 @@ public class Uploader {
                         if(!workingFile.isFolder()){
                             processRequest(workingFile);
                         } else{
-                            logger.info("Exception folder doens't have chunks!!!");
+                            logger.info("Exception folder doesn't have chunks!!!");
                         }
                     } catch (StorageException ex) {
                         logger.error("Could not process the file: ", ex);

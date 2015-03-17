@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.connection.plugins.AbstractTransferManager;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.StorageConnectException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.repository.files.RemoteFile;

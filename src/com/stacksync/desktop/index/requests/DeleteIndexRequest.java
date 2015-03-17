@@ -21,9 +21,16 @@ import java.io.File;
 import java.util.List;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
+import com.stacksync.desktop.connection.plugins.TransferManager;
+import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
+import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.exceptions.RemoteFileNotFoundException;
+import com.stacksync.desktop.exceptions.StorageException;
+import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
 import com.stacksync.desktop.index.Indexer;
+import com.stacksync.desktop.repository.files.RemoteFile;
 import com.stacksync.desktop.util.FileUtil;
 
 /**
@@ -106,6 +113,7 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         } else {
 
             // Updated changes
+            removeChunks(deletedVersion);
             deletedVersion.setVersion(deletedVersion.getVersion()+1);
             if (deleteParent != null) {
                 deletedVersion.setParent(deleteParent);
@@ -131,5 +139,20 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
             }
         }
 
+    }
+
+    private void removeChunks(CloneFile deletedVersion) {
+        TransferManager transfer = root.getProfile().getRepository().getConnection().createTransferManager();
+        List<CloneChunk> chunks = deletedVersion.getChunks();
+        CloneWorkspace workspace = deletedVersion.getWorkspace();
+        for (CloneChunk chunk : chunks) {
+            try {
+                transfer.delete(new RemoteFile(chunk.getFileName()), workspace);
+            } catch (RemoteFileNotFoundException ex) {
+                logger.warn("Cannot delete chunk: "+chunk.getFileName(), ex);
+            } catch (StorageException ex) {
+                logger.warn("Cannot delete chunk: "+chunk.getFileName(), ex);
+            }
+        }
     }
 }

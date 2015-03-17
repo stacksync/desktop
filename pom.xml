@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.stacksync</groupId>
             <artifactId>stacksync-commons</artifactId>
-            <version>1.4.1</version>
+            <version>1.4.3</version>
         </dependency>
         <dependency>
             <groupId>objectmq</groupId>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>java-cloudfiles</groupId>
             <artifactId>java-cloudfiles</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
         </dependency>
         <!-- SFTP -->
         <dependency>

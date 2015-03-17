@@ -348,9 +348,23 @@ public class SwiftTransferManager extends AbstractTransferManager {
             throw new StorageException(ex);
         }
     }
+    
+    @Override
+    public void delete(RemoteFile remoteFile, CloneWorkspace workspace) throws StorageException {
+        connect();
+
+        try {
+            client.deleteSharedObject(workspace.getSwiftStorageURL(), workspace.getSwiftContainer(), remoteFile.getName());
+        } catch (Exception ex) {
+            logger.error(ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            throw new StorageException(ex);
+        }
+    }
 
     @Override
     public Map<String, RemoteFile> list(String namePrefix, CloneWorkspace workspace) throws StorageException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 }
