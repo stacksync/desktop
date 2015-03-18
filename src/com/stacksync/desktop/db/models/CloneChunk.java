@@ -32,35 +32,42 @@ import com.stacksync.desktop.db.PersistentObject;
  * @author Philipp C. Heckel
  */
 @Entity
-@IdClass(value = CloneChunkPk.class)
 public class CloneChunk extends PersistentObject implements Serializable {
     private static final long serialVersionUID = 3232299912L;
     
     public enum CacheStatus { REMOTE, CACHED };
     
     @Id
+    @Column(name="name")
+    private String name;
+    
     @Column(name="checksum")
     private String checksum;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private CacheStatus status;
-
+    
     public CloneChunk() { 
         this.status = CacheStatus.CACHED;
     }
 
     public CloneChunk(String checksum, CacheStatus status) {
+        this(checksum, status, null);
+    }
+    
+    public CloneChunk(String checksum, CacheStatus status, String name) {
         this.checksum = checksum;
         this.status = status;
+        this.name = name;
     }
 
     public String getChecksum() {
         return checksum;
     }
 
-    public String getFileName() {
-        return String.format("chk-%s", getChecksum());
+    public String getName() {
+        return this.name;
     }
     
     public void setCacheStatus(CacheStatus status) {
@@ -70,7 +77,7 @@ public class CloneChunk extends PersistentObject implements Serializable {
     public CacheStatus getCacheStatus(){
         return status;
     }
-
+    
     @Override
     public int hashCode() {
         return checksum.hashCode();

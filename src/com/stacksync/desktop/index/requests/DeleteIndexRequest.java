@@ -147,11 +147,11 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         CloneWorkspace workspace = deletedVersion.getWorkspace();
         for (CloneChunk chunk : chunks) {
             try {
-                transfer.delete(new RemoteFile(chunk.getFileName()), workspace);
+                transfer.delete(new RemoteFile(chunk.getName()), workspace);
             } catch (RemoteFileNotFoundException ex) {
-                logger.warn("Cannot delete chunk: "+chunk.getFileName(), ex);
+                logger.warn("Cannot delete chunk: "+chunk.getName(), ex);
             } catch (StorageException ex) {
-                logger.warn("Cannot delete chunk: "+chunk.getFileName(), ex);
+                logger.warn("Cannot delete chunk: "+chunk.getName(), ex);
             }
         }
     }

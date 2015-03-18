@@ -702,7 +702,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         
         List<String> chunksList = new ArrayList<String>();        
         for(CloneChunk chunk: getChunks()){
-            chunksList.add(chunk.getChecksum());
+            chunksList.add(chunk.getName());
         }
         
         object.setChunks(chunksList);        

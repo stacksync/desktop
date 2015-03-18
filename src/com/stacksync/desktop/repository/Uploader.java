@@ -219,6 +219,12 @@ public class Uploader {
                     RemoteLogs.getInstance().sendLog(ex);
                 }
             }*/
+            
+            CloneFile oldVersion = file.getLastSyncedVersion();
+            List<CloneChunk> oldChunks = null;
+            if (oldVersion != null) {
+                oldChunks = oldVersion.getChunks();
+            }
 
             int numChunk = 0;
             for (CloneChunk chunk: file.getChunks()) {
@@ -228,7 +234,7 @@ public class Uploader {
                     tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "Uploading " + (queue.size() + 1) +  " files...");
                 }
                 
-                String fileRemoteName = chunk.getFileName();
+                String fileRemoteName = chunk.getName();
                 RemoteFile rFile = getRemoteFile(fileRemoteName);
                 if (rFile != null) {
                     File localFile = config.getCache().getCacheChunk(chunk);
@@ -237,19 +243,25 @@ public class Uploader {
                     long remoteSize = rFile.getSize();
 
                     if (localSize == remoteSize) {
-                        logger.info("UploadManager: Chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
+                        logger.info("UploadManager: Chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getName()+ " already uploaded");              
+                        continue;
+                    }
+                }
+                
+                if (oldChunks != null) {
+                    if (oldChunks.contains(chunk)){
                         continue;
                     }
                 }
 
                 // Upload it!
                 try {
-                    logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
+                    logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getName() + " ...");
                     
                     CloneWorkspace workspace = file.getWorkspace();
                     transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
                 } catch (StorageException ex) {
-                    logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
+                    logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getName() + " FAILED!!", ex);
                     throw ex;
                 } catch (StorageQuotaExcedeedException ex) {
                     logger.error("UploaderManager: Quota excedeed.", ex);
@@ -259,6 +271,15 @@ public class Uploader {
                 numChunk++;
             }
             logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
+            
+            // Remove chunks from previous version
+            if (oldChunks != null) {
+                List<CloneChunk> newChunks = file.getChunks();
+                oldChunks.removeAll(newChunks);
+                for(CloneChunk chunk : oldChunks) {
+                    transfer.delete(new RemoteFile(chunk.getName()), oldVersion.getWorkspace());
+                }
+            }
 
             /**
              * Test this code:

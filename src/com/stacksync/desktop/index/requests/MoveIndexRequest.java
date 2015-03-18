@@ -169,7 +169,8 @@ public class MoveIndexRequest extends IndexRequest {
                 int order = Integer.parseInt(Long.toString(chunkInfo.getNumber()));
                 
                 // create chunk in DB (or retrieve it)
-                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED);                         
+                String chunkName = "chk-"+chunkInfo.getChecksum()+"-"+cf.getId();
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED, chunkName);                         
                 
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
