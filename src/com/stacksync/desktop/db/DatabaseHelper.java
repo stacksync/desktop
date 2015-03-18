@@ -398,13 +398,13 @@ public class DatabaseHelper {
         CloneChunk chunk;
 
         String queryStr = "select c from CloneChunk c where "
-                + "     c.checksum = :checksum";
+                + "     c.name = :name";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("checksum", checksum);
+        query.setParameter("name", name);
 
         try {
             chunk = (CloneChunk) query.getSingleResult();
