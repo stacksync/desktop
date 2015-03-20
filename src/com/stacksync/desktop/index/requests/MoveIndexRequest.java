@@ -24,11 +24,12 @@ import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneChunk.CacheStatus;
-import com.stacksync.desktop.db.models.CloneFile;
-import com.stacksync.desktop.db.models.CloneFile.Status;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion.Status;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
+import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
@@ -42,7 +43,7 @@ public class MoveIndexRequest extends IndexRequest {
     
     private final Logger logger = Logger.getLogger(MoveIndexRequest.class.getName());
     
-    private CloneFile dbFromFile;
+    private CloneItem dbFromFile;
     
     private Folder fromRoot;
     private File fromFile;
@@ -61,7 +62,7 @@ public class MoveIndexRequest extends IndexRequest {
         
     }
     
-    public MoveIndexRequest(CloneFile dbFromFile, Folder toRoot, File toFile) {
+    public MoveIndexRequest(CloneItem dbFromFile, Folder toRoot, File toFile) {
         this(dbFromFile.getRoot(), dbFromFile.getFile(), toRoot, toFile);
         this.dbFromFile = dbFromFile;
     }
@@ -108,10 +109,10 @@ public class MoveIndexRequest extends IndexRequest {
 
         // Parent 
         String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
-        CloneFile cToParentFolder = db.getFolder(toRoot, new File(absToParentFolder));
+        CloneItem cToParentFolder = db.getFolder(toRoot, new File(absToParentFolder));
         
         // Check if the movement is between different workspaces
-        CloneFile fromFileParent = dbFromFile.getParent();
+        CloneItem fromFileParent = dbFromFile.getParent();
         CloneWorkspace fromWorkspace = (fromFileParent == null) ? dbFromFile.getWorkspace() : fromFileParent.getWorkspace();
         CloneWorkspace toWorkspace = (cToParentFolder == null) ? db.getDefaultWorkspace() : cToParentFolder.getWorkspace();
         if (isWorkspaceChanged(fromWorkspace, toWorkspace)) {
@@ -124,39 +125,40 @@ public class MoveIndexRequest extends IndexRequest {
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
 
         // File found in DB.
-        CloneFile dbToFile = (CloneFile) dbFromFile.clone();
+        CloneItemVersion latestVersion = dbFromFile.getLatestVersion();
+        CloneItemVersion newVersion = (CloneItemVersion) latestVersion.clone();
 
         // Updated changes
-        dbToFile.setRoot(toRoot);
-        dbToFile.setLastModified(new Date(toFile.lastModified()));
-        dbToFile.setName(toFile.getName());
-        dbToFile.setSize((toFile.isDirectory()) ? 0 : toFile.length());
-        dbToFile.setVersion(dbToFile.getVersion()+1);
-        dbToFile.setStatus(Status.RENAMED);
-        dbToFile.setSyncStatus(CloneFile.SyncStatus.LOCAL);
+        dbFromFile.setRoot(toRoot);
+        newVersion.setLastModified(new Date(toFile.lastModified()));
+        dbFromFile.setName(toFile.getName());
+        newVersion.setSize((toFile.isDirectory()) ? 0 : toFile.length());
+        newVersion.setVersion(latestVersion.getVersion()+1);
+        newVersion.setStatus(Status.RENAMED);
+        newVersion.setSyncStatus(CloneItemVersion.SyncStatus.LOCAL);
 
-        dbToFile.setParent(cToParentFolder);
-        dbToFile.setMimetype(FileUtil.getMimeType(dbToFile.getFile()));
-        dbToFile.generatePath();
-        dbToFile.merge();
+        dbFromFile.setParent(cToParentFolder);
+        dbFromFile.generatePath();
+        dbFromFile.setLatestVersionNumber(newVersion.getVersion());
+        dbFromFile.merge();
 	    
         // Notify file manager
-        this.desktop.touch(dbToFile.getFile());
-        this.desktop.touch(dbToFile.getAbsolutePath(), CloneFile.SyncStatus.SYNCING);
+        this.desktop.touch(dbFromFile.getFile());
+        this.desktop.touch(dbFromFile.getAbsolutePath(), CloneItemVersion.SyncStatus.SYNCING);
 	    
-        if (!dbToFile.isFolder()) {
-            processFile(dbToFile);
+        if (!dbFromFile.isFolder()) {
+            processFile(newVersion);
         } else {
-            processFolder(dbToFile);
+            processFolder(newVersion);
         }  
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
     
-    private void processFile(CloneFile cf) {
+    private void processFile(CloneItemVersion itemVersion) {
         try {
-            File file = cf.getFile();
-            Folder root = cf.getRoot();
+            File file = dbFromFile.getFile();
+            Folder root = dbFromFile.getRoot();
             
             // 1. Chunk it!
             FileChunk chunkInfo = null;
@@ -171,21 +173,21 @@ public class MoveIndexRequest extends IndexRequest {
                 // create chunk in DB (or retrieve it)
                 CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED);                         
                 
-                // write encrypted chunk (if it does not exist)
+                // write chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
                 if (!chunkCacheFile.exists()) {
-                    byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(cf.getWorkspace().getId()));                    
+                    byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(dbFromFile.getWorkspace().getId()));                    
                     FileUtil.writeFile(packed, chunkCacheFile);                   
                 }
                 
-                if(cf.getChunks().isEmpty() || chunkInfo.getNumber() > cf.getChunks().size()){
-                    cf.addChunk(chunk);
+                if(itemVersion.getChunks().isEmpty() || chunkInfo.getNumber() > itemVersion.getChunks().size()){
+                    itemVersion.addChunk(chunk);
                 }
 
-                CloneChunk chunkOriginal = cf.getChunks().get(order);
+                CloneChunk chunkOriginal = itemVersion.getChunks().get(order);
                 if(chunkInfo.getChecksum().compareTo(chunkOriginal.getChecksum()) != 0){
-                    cf.getChunks().set(order, chunk);
+                    itemVersion.getChunks().set(order, chunk);
                 }                
             }
             
@@ -193,44 +195,44 @@ public class MoveIndexRequest extends IndexRequest {
             // 2. Add the rest to the DB, and persist it
             if (chunkInfo != null) {
                 // The last chunk holds the file checksum
-                cf.setChecksum(chunkInfo.getFileChecksum()); 
+                itemVersion.setChecksum(chunkInfo.getFileChecksum()); 
             }
             chunks.closeStream();            
-            cf.merge();
+            itemVersion.merge();
             
             // 3. CHECKS SECTION
             // 3a. Check if file name contains specials Windows characters (:"\{...)
-            if (FileUtil.checkIllegalName(cf.getName())
-                    || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
+            if (FileUtil.checkIllegalName(dbFromFile.getName())
+                    || FileUtil.checkIllegalName(dbFromFile.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
-                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
-                cf.merge();
+                itemVersion.setSyncStatus(CloneItemVersion.SyncStatus.UNSYNC);
+                itemVersion.merge();
                 return;
             }
             
             // 3b. TODO Check storage free space
             
             // 4. If previous version was UNSYNC
-            if (dbFromFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC){
+            /*if (dbFromFile.getSyncStatus() == CloneItemVersion.SyncStatus.UNSYNC){
                 
                 // Search for the last synced version to create the next version
-                CloneFile lastSyncedVersion = cf.getLastSyncedVersion();
+                CloneItem lastSyncedVersion = itemVersion.getLastSyncedVersion();
                 if (lastSyncedVersion == null) {
-                    cf.setVersion(1);
-                    cf.setStatus(Status.NEW);
+                    itemVersion.setVersion(1);
+                    itemVersion.setStatus(Status.NEW);
                 } else {
-                    cf.setVersion(lastSyncedVersion.getVersion()+1);
+                    itemVersion.setVersion(lastSyncedVersion.getVersion()+1);
                 }
                 
-                cf.merge();
+                itemVersion.merge();
                 
                 // Clean unsynced versions from DB
-                cf.deleteHigherVersion();
-            }
+                itemVersion.deleteHigherVersion();
+            }*/
             
             // 5. Upload it
             logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
-            root.getProfile().getUploader().queue(cf);
+            root.getProfile().getUploader().queue(itemVersion);
 
         } catch (Exception ex) {
             logger.error("Could not index new file. IGNORING.", ex);
@@ -238,34 +240,34 @@ public class MoveIndexRequest extends IndexRequest {
         }
     }
     
-    private void processFolder(CloneFile cf) {
+    private void processFolder(CloneItemVersion itemVersion) {
         
         // 4. If previous version was UNSYNC
-        if (dbFromFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC){
+        /*if (dbFromFile.getSyncStatus() == CloneItem.SyncStatus.UNSYNC){
 
             // Search for the last synced version to create the next version
-            CloneFile lastSyncedVersion = cf.getLastSyncedVersion();
+            CloneItem lastSyncedVersion = itemVersion.getLastSyncedVersion();
             if (lastSyncedVersion == null) {
-                cf.setVersion(1);
-                cf.setStatus(Status.NEW);
+                itemVersion.setVersion(1);
+                itemVersion.setStatus(Status.NEW);
             } else {
-                cf.setVersion(lastSyncedVersion.getVersion()+1);
+                itemVersion.setVersion(lastSyncedVersion.getVersion()+1);
             }
 
-            cf.merge();
+            itemVersion.merge();
 
             // Clean unsynced versions from DB
-            cf.deleteHigherVersion();
-        }
+            itemVersion.deleteHigherVersion();
+        }*/
         
         
         String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
         
         // Update children (if directory) -- RECURSIVELY !!
         logger.info("Indexer: Updating CHILDREN of "+toFile+" ...");   
-        List<CloneFile> children = db.getChildren(dbFromFile);
+        List<CloneItem> children = db.getNotDeletedChildren(dbFromFile);
 
-        for (CloneFile child : children) {
+        for (CloneItem child : children) {
             File childFromFile = child.getFile();
             File childToFile = new File(absToParentFolder+File.separator+toFile.getName()+File.separator+child.getName());
             logger.info("Indexer: Updating children of moved file "+childFromFile.getAbsolutePath()+" TO "+childToFile.getAbsolutePath()+"");
@@ -274,16 +276,16 @@ public class MoveIndexRequest extends IndexRequest {
             new MoveIndexRequest(fromRoot, childFromFile, toRoot, childToFile).process();
         }
         
-        if (FileUtil.checkIllegalName(cf.getName())
-                || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
+        if (FileUtil.checkIllegalName(dbFromFile.getName())
+                || FileUtil.checkIllegalName(dbFromFile.getPath().replace("/", ""))){
             logger.info("This folder contains illegal characters.");
-            cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
-            cf.merge();
+            itemVersion.setSyncStatus(CloneItemVersion.SyncStatus.UNSYNC);
+            itemVersion.merge();
             return;
         }
         
-        cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
-        cf.merge();
+        itemVersion.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
+        itemVersion.merge();
         
     }
     

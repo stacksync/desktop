@@ -4,7 +4,8 @@ import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.db.models.CloneChunk;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.logging.RemoteLogs;
@@ -20,9 +21,9 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
     
     private File file;
     private long checksum;
-    private CloneFile previousVersion;
+    private CloneItem previousVersion;
 
-    public NewIndexSharedRequest(Folder root, File file, CloneFile previousVersion, long checksum) {
+    public NewIndexSharedRequest(Folder root, File file, CloneItem previousVersion, long checksum) {
         super(root);
   
         this.file = file;        
@@ -35,9 +36,10 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         logger.info("Indexer: Indexing new share file "+file+" ...");
         
         // Find file in DB
-        CloneFile dbFile = db.getFileOrFolder(root, file);
+        CloneItem dbFile = db.getFileOrFolder(root, file);
         if(dbFile != null){
-            if(dbFile.getChecksum() == checksum){
+            CloneItemVersion oldVersion = dbFile.getLatestVersion();
+            if(oldVersion.getChecksum() == checksum){
                 logger.warn("Indexer: Error already Indexed this version. Ignoring.");
                 return;
             }
@@ -51,83 +53,80 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
         
         // Create DB entry
-        CloneFile newVersion = (previousVersion == null) ? addNewVersion() : addChangedVersion();
+        CloneItem newItem = (previousVersion == null) ? addNewVersion() : addChangedVersion();
 
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
-        CloneFile parentCF = db.getFolder(root, parentFile);
-        newVersion.setParent(parentCF);
+        CloneItem parentCF = db.getFolder(root, parentFile);
+        newItem.setParent(parentCF);
         
         CloneWorkspace workspace = parentCF.getWorkspace();
-        newVersion.setWorkspace(workspace);
+        newItem.setWorkspace(workspace);
+        newItem.setFolder(file.isDirectory());
         
-        // IMPORTANT Since a shared folder is created without using watcher+indexer
-        // it should always exist a parent.
-        // This will check if the file is inside a folder that isn't created.
-        /*if (newVersion.getParent() == null && !newVersion.getPath().equals("/")) {
-            Indexer.getInstance().queueNewIndex(root, file, null, checksum);
-            return;
-        }*/
-        
-        newVersion.setFolder(file.isDirectory());
+        CloneItemVersion newVersion = newItem.getLatestVersion();
         newVersion.setSize(file.length());
-        
         newVersion.setLastModified(new Date(file.lastModified()));
-        newVersion.setSyncStatus(CloneFile.SyncStatus.LOCAL);
-        newVersion.merge();
+        newVersion.setSyncStatus(CloneItemVersion.SyncStatus.LOCAL);
         
-        if (newVersion.isFolder())
-            processFolder(newVersion);
+        newItem.merge();
+        
+        if (newItem.isFolder())
+            processFolder(newItem, newVersion);
         else {
-            processFile(newVersion);
+            processFile(newItem, newVersion);
         }
         
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
     }
 
-    private CloneFile addNewVersion() {
-        CloneFile newVersion = new CloneFile(root, file);
+    private CloneItem addNewVersion() {
+        CloneItem newItem = new CloneItem(root, file);  
+        CloneItemVersion newVersion = new CloneItemVersion(file);
+        newVersion.setStatus(CloneItemVersion.Status.NEW);
+        newItem.addVersion(newVersion);
         
-        newVersion.setVersion(1);
-        newVersion.setStatus(CloneFile.Status.NEW);
-        
-        return newVersion;
+        return newItem;
     }
     
-    private CloneFile addChangedVersion() {        
-        CloneFile newVersion = (CloneFile) previousVersion.clone();
+    private CloneItem addChangedVersion() {        
         
-        if (newVersion.getSyncStatus() == CloneFile.SyncStatus.UNSYNC
-                && previousVersion.getStatus() != CloneFile.Status.RENAMED) {
-            if (previousVersion.getVersion() == 1) {
-                previousVersion.remove();
-                newVersion = this.addNewVersion();
+        CloneItemVersion oldVersion = previousVersion.getLatestVersion();
+
+        if (oldVersion.getSyncStatus() == CloneItemVersion.SyncStatus.UNSYNC && oldVersion.getStatus() != CloneItemVersion.Status.RENAMED) {
+            if (oldVersion.getVersion() == 1) {
+                oldVersion.setServerUploadedAck(false);
+                oldVersion.setServerUploadedTime(null);
+                oldVersion.setChecksum(0);
+                oldVersion.setChunks(new ArrayList<CloneChunk>());
             } else {
-                newVersion.setStatus(CloneFile.Status.CHANGED);
-                newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
-                newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
-                previousVersion.remove();
+                oldVersion.setStatus(CloneItemVersion.Status.CHANGED);
+                oldVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
+                previousVersion.setMimetype(FileUtil.getMimeType(file));
             }
         } else {
-            newVersion.setVersion(previousVersion.getVersion()+1);
-            newVersion.setStatus(CloneFile.Status.CHANGED);
+            CloneItemVersion newVersion = (CloneItemVersion) oldVersion.clone();
+            newVersion.setVersion(oldVersion.getVersion()+1);
+            newVersion.setStatus(CloneItemVersion.Status.CHANGED);
             newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
-            newVersion.setMimetype(FileUtil.getMimeType(newVersion.getFile()));
+            previousVersion.setMimetype(FileUtil.getMimeType(previousVersion.getFile()));
+            previousVersion.setLatestVersionNumber(newVersion.getVersion());
+            previousVersion.addVersion(newVersion);
         }
 
-        return newVersion;
+        return previousVersion;
     }
     
-    private void processFolder(CloneFile cf) {        
+    private void processFolder(CloneItem item, CloneItemVersion version) {        
         // Add rest of the DB stuff 
-        cf.setChecksum(0);
+        version.setChecksum(0);
         
-        if (FileUtil.checkIllegalName(cf.getName())
-                || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
-            cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+        if (FileUtil.checkIllegalName(item.getName())
+                || FileUtil.checkIllegalName(item.getPath().replace("/", ""))){
+            version.setSyncStatus(CloneItemVersion.SyncStatus.UNSYNC);
         } else {
-            cf.setSyncStatus(CloneFile.SyncStatus.UPTODATE);
+            version.setSyncStatus(CloneItemVersion.SyncStatus.UPTODATE);
         }
-        cf.merge();
+        item.merge();
         
         // Not necessary yet. Shared folders don't contain files.
         // Analyze file tree (if directory) -- RECURSIVELY!!
@@ -144,7 +143,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         }*/
     }
     
-    private void processFile(CloneFile cf) {
+    private void processFile(CloneItem item, CloneItemVersion version) {
         try {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
@@ -160,7 +159,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
-                byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(cf.getWorkspace().getId()));
+                byte[] packed = FileUtil.pack(chunkInfo.getContents(), root.getProfile().getEncryption(item.getWorkspace().getId()));
                 if (!chunkCacheFile.exists()) {
                     FileUtil.writeFile(packed, chunkCacheFile);
                 } else{
@@ -169,31 +168,31 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                     }
                 }
                 
-                cf.addChunk(chunk);
+                version.addChunk(chunk);
             }      
             
             logger.info("Indexer: saving chunks...");
-            cf.merge();
+            item.merge();
             logger.info("Indexer: chunks saved...");
             
             // 2. Add the rest to the DB, and persist it
             if (chunkInfo != null) { // The last chunk holds the file checksum                
-                cf.setChecksum(chunkInfo.getFileChecksum()); 
+                version.setChecksum(chunkInfo.getFileChecksum()); 
             } else {
-                cf.setChecksum(checksum);
+                version.setChecksum(checksum);
             }
-            cf.merge();
+            version.merge();
             chunks.closeStream();
             
             // 3. Upload it
-            if (FileUtil.checkIllegalName(cf.getName())
-                    || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
+            if (FileUtil.checkIllegalName(item.getName())
+                    || FileUtil.checkIllegalName(item.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
-                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
-                cf.merge();
+                version.setSyncStatus(CloneItemVersion.SyncStatus.UNSYNC);
+                version.merge();
             } else {
                 logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
-                root.getProfile().getUploader().queue(cf);
+                root.getProfile().getUploader().queue(version);
             }
             
         } catch (Exception ex) {

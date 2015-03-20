@@ -2,7 +2,7 @@ package com.stacksync.desktop.index.requests;
 
 import java.io.File;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.sharing.WorkspaceController;
@@ -11,7 +11,7 @@ public class RenameIndexWorkspaceRequest extends IndexRequest {
     
     private final Logger logger = Logger.getLogger(RenameIndexWorkspaceRequest.class.getName());
     
-    private CloneFile dbFromFile;
+    private CloneItem dbFromFile;
     private File fromFile;
     private File toFile;
 
@@ -22,7 +22,7 @@ public class RenameIndexWorkspaceRequest extends IndexRequest {
         
     }
     
-    public RenameIndexWorkspaceRequest(CloneFile dbFromFile, File toFile) {
+    public RenameIndexWorkspaceRequest(CloneItem dbFromFile, File toFile) {
         this(dbFromFile.getFile(), toFile);
         this.dbFromFile = dbFromFile;
     }

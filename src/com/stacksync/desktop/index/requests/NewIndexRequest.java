@@ -168,6 +168,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             newVersion.setStatus(Status.CHANGED);
             newVersion.setChunks(new ArrayList<CloneChunk>()); // otherwise we would append!
             indexedItem.setMimetype(FileUtil.getMimeType(indexedItem.getFile()));
+            indexedItem.setLatestVersionNumber(newVersion.getVersion());
             indexedItem.addVersion(newVersion);
         }
 

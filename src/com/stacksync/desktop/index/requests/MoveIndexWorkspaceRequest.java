@@ -3,7 +3,7 @@ package com.stacksync.desktop.index.requests;
 import java.io.File;
 import org.apache.log4j.Logger;
 import com.stacksync.desktop.config.Folder;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.sharing.WorkspaceController;
@@ -13,7 +13,7 @@ public class MoveIndexWorkspaceRequest extends IndexRequest {
     
     private final Logger logger = Logger.getLogger(MoveIndexWorkspaceRequest.class.getName());
     
-    private CloneFile dbFromFile;
+    private CloneItem dbFromFile;
     private File fromFile;
     private Folder toRoot;
     private File toFile;    
@@ -28,7 +28,7 @@ public class MoveIndexWorkspaceRequest extends IndexRequest {
         
     }
     
-    public MoveIndexWorkspaceRequest(CloneFile dbFromFile, Folder toRoot, File toFile) {
+    public MoveIndexWorkspaceRequest(CloneItem dbFromFile, Folder toRoot, File toFile) {
         this(dbFromFile.getRoot(), dbFromFile.getFile(), toRoot, toFile);
         this.dbFromFile = dbFromFile;
     }
@@ -44,7 +44,7 @@ public class MoveIndexWorkspaceRequest extends IndexRequest {
 
         // Parent 
         String absToParentFolder = FileUtil.getAbsoluteParentDirectory(toFile);
-        CloneFile cToParentFolder = db.getFolder(toRoot, new File(absToParentFolder));
+        CloneItem cToParentFolder = db.getFolder(toRoot, new File(absToParentFolder));
                 
         this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
         
