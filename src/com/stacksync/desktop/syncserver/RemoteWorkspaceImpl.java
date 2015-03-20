@@ -10,6 +10,7 @@ import com.stacksync.commons.notifications.CommitNotification;
 import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.CommitInfo;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.gui.server.Desktop;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -35,7 +36,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
 
     @Override
     public void notifyCommit(CommitNotification cr) {
-        List<CommitInfo> listObjects = cr.getObjects();
+        List<CommitInfo> listObjects = cr.getItems();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
         Hashtable<Long, Long> temporalsId = new Hashtable<Long, Long>();
@@ -44,6 +45,8 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         String deviceName = fullReqId.split("-")[0];
         List<Update> ul = new ArrayList<Update>();
         TempIdManager tempIdManager = new TempIdManager();
+        
+        updateQuota(cr.getLimitQuota(), cr.getUsedQuota());
 
         for (CommitInfo obj : listObjects) {
             
@@ -148,6 +151,12 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
             List<CloneFile> files = db.getFileVersions(tempId);
             tempIdManager.changeTempIdFromUncommitedItems(files, tempIds.get(tempId));
         }
+    }
+
+    private void updateQuota(long limitQuota, long usedQuota) {
+        Account account = this.config.getProfile().getAccount();
+        account.setQuota(limitQuota);
+        account.setQuotaUsed(usedQuota);
     }
 
 }

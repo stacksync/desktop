@@ -168,8 +168,6 @@ public class Uploader {
                     try {
                         if(!workingFile.isFolder()){
                             processRequest(workingFile);
-                        } else{
-                            logger.info("Exception folder doesn't have chunks!!!");
                         }
                     } catch (StorageException ex) {
                         logger.error("Could not process the file: ", ex);
@@ -208,17 +206,6 @@ public class Uploader {
             file.merge();
 
             touch(file, SyncStatus.SYNCING);
-
-            // TODO IMPORTANT What about the DB to check the cunks!!!??
-            // Get file list (to check if chunks already exist)
-            /*if (cacheLastUpdate == null || fileList == null || System.currentTimeMillis()-cacheLastUpdate.getTime() > CACHE_FILE_LIST) {                
-                try {
-                    fileList = transfer.list();
-                } catch (StorageException ex) {
-                    logger.error("UploadManager: List FAILED!!", ex);
-                    RemoteLogs.getInstance().sendLog(ex);
-                }
-            }*/
             
             CloneFile oldVersion = file.getLastSyncedVersion();
             List<CloneChunk> oldChunks = null;
@@ -228,7 +215,6 @@ public class Uploader {
 
             int numChunk = 0;
             for (CloneChunk chunk: file.getChunks()) {
-                // Chunk has been uploaded before
 
                 if(numChunk % 10 == 0){
                     tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "Uploading " + (queue.size() + 1) +  " files...");
@@ -248,10 +234,9 @@ public class Uploader {
                     }
                 }
                 
-                if (oldChunks != null) {
-                    if (oldChunks.contains(chunk)){
-                        continue;
-                    }
+                // Chunk has been uploaded before
+                if (oldChunks != null && oldChunks.contains(chunk)) {
+                    continue;
                 }
 
                 // Upload it!
@@ -280,15 +265,6 @@ public class Uploader {
                     transfer.delete(new RemoteFile(chunk.getName()), oldVersion.getWorkspace());
                 }
             }
-
-            /**
-             * Test this code:
-            file.setSyncStatus(SyncStatus.UPTODATE);
-            file.merge();
-             * Is it necessary to get again the file from the DB???
-             */
-            
-            file = db.getFileOrFolder(file.getId(), file.getVersion());
             
             // Update DB sync status
             file.setSyncStatus(SyncStatus.UPTODATE);

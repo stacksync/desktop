@@ -30,6 +30,7 @@ import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
@@ -250,7 +251,16 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             cf.merge();
             chunks.closeStream();
             
-            // 3. Upload it
+            // 3a. Check storage free space
+            Account account = this.config.getProfile().getAccount();
+            Long availableQuota = account.getQuota() - account.getQuotaUsed();
+            if (availableQuota < cf.getSize()) {
+                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+                cf.merge();
+                return;
+            }
+            
+            // 3b. Upload it
             if (FileUtil.checkIllegalName(cf.getName())
                     || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
