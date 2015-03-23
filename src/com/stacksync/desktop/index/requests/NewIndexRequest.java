@@ -17,6 +17,7 @@
  */
 package com.stacksync.desktop.index.requests;
 
+import com.stacksync.desktop.Constants;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -257,6 +258,8 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             if (availableQuota < cf.getSize()) {
                 cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
                 cf.merge();
+                File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
+                tray.notify(Constants.APPLICATION_NAME, "Quota exceeded", imageFile);
                 return;
             }
             

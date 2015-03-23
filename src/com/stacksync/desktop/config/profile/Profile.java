@@ -1,6 +1,7 @@
 package com.stacksync.desktop.config.profile;
 
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
+import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.ConfigNode;
@@ -124,6 +125,9 @@ public class Profile implements Configurable {
 
             setFactory();
             server.updateDevice(getAccountId());
+            AccountInfo accountInfo = server.getAccountInfo(account.getEmail());
+            account.setQuota(accountInfo.getQuotaLimit());
+            account.setQuotaUsed(accountInfo.getQuotaUsed());
 
             // Start threads 1/2
             uploader.start();
