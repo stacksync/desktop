@@ -2,7 +2,7 @@ package com.stacksync.desktop.syncserver;
 
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.watch.remote.ChangeManager;
@@ -10,11 +10,12 @@ import com.stacksync.commons.notifications.CommitNotification;
 import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.CommitInfo;
+import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.gui.server.Desktop;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
@@ -38,7 +39,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         List<CommitInfo> listObjects = cr.getObjects();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
-        Hashtable<Long, Long> temporalsId = new Hashtable<Long, Long>();
+        HashMap<Long, Long> temporalsId = new HashMap<Long, Long>();
         
         String fullReqId = cr.getRequestId();
         String deviceName = fullReqId.split("-")[0];
@@ -89,12 +90,15 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         long fileId = commit.getMetadata().getId();
         ItemMetadata itemMetadata = commit.getMetadata();
             
-        CloneFile existingVersion;
+        CloneItemVersion existingVersion = null;
         Long tempId = itemMetadata.getTempId();
         if (tempId != null) {
             existingVersion = changeTempId(itemMetadata, tempIdManager);
         } else {
-            existingVersion = db.getFileOrFolder(fileId, version);
+            CloneItem item = db.getFileOrFolder(fileId);
+            if (item != null) {
+                existingVersion = item.getVersion(version);
+            }
         }
 
         if (existingVersion != null) {
@@ -103,7 +107,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
             logger.info("Exception: existing version is null");
         }
         
-        this.desktop.touch(existingVersion.getAbsolutePath(), CloneFile.SyncStatus.UPTODATE);
+        this.desktop.touch(existingVersion.getAbsolutePath(), CloneItem.SyncStatus.UPTODATE);
     }
 
     private Update doActionNotCommited(CommitInfo commit) {
@@ -111,15 +115,15 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         ItemMetadata itemMetadata = commit.getMetadata();
         
         Update update = Update.parse(itemMetadata, workspace);
-        CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
+        CloneItem existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
         if (existingVersion == null) {
             update.setConflicted(true);
-            this.desktop.touch(existingVersion.getAbsolutePath(), CloneFile.SyncStatus.UNSYNC);
+            this.desktop.touch(existingVersion.getAbsolutePath(), CloneItem.SyncStatus.UNSYNC);
             return update;
         } else {
             markAsUpdated(existingVersion);
         }
-        this.desktop.touch(existingVersion.getAbsolutePath(), CloneFile.SyncStatus.UNSYNC);
+        this.desktop.touch(existingVersion.getAbsolutePath(), CloneItem.SyncStatus.UNSYNC);
         return null;
     }
     
@@ -127,26 +131,29 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         return config.getDeviceName().compareTo(deviceName) == 0;
     }
     
-    private CloneFile changeTempId(ItemMetadata itemMetadata, TempIdManager tempIdManager) {
+    private CloneItemVersion changeTempId(ItemMetadata itemMetadata, TempIdManager tempIdManager) {
         
-        CloneFile localFile = db.getFileOrFolder(itemMetadata.getTempId(), itemMetadata.getVersion());
+        CloneItem localFile = db.getFileOrFolder(itemMetadata.getTempId());
+        CloneItemVersion localFileVersion;
+        if (localFile != null) {
+            localFileVersion = localFile.getVersion(itemMetadata.getVersion());
+        }
         
-        return tempIdManager.changeTempId(localFile, itemMetadata.getId());
+        return tempIdManager.changeTempId(localFileVersion, itemMetadata.getId());
         
     }
     
-    private void markAsUpdated(CloneFile cf) {
-        cf.setServerUploadedAck(true);
-        cf.merge();
+    private void markAsUpdated(CloneItemVersion version) {
+        version.setServerUploadedAck(true);
+        version.merge();
     }
 
-    private void changeTempIdFromUncommitedItems(Hashtable<Long, Long> tempIds, TempIdManager tempIdManager) {
+    private void changeTempIdFromUncommitedItems(HashMap<Long, Long> tempIds, TempIdManager tempIdManager) {
         
-        Enumeration<Long> temps = tempIds.keys();
-        while (temps.hasMoreElements()) {
-            Long tempId = temps.nextElement();
-            List<CloneFile> files = db.getFileVersions(tempId);
-            tempIdManager.changeTempIdFromUncommitedItems(files, tempIds.get(tempId));
+        Set<Long> temps = tempIds.keySet();
+        for (Long tempId : temps) {
+            CloneItem item = db.getFileOrFolder(tempId);
+            tempIdManager.changeTempIdFromUncommitedItems(item, tempIds.get(tempId));
         }
     }
 

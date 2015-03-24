@@ -286,6 +286,15 @@ public class CloneItem extends PersistentObject implements Serializable, Cloneab
         }
         return lastSynced;
     }
+    
+    public CloneItemVersion getVersion(long versionNum) {
+        for (CloneItemVersion version : versions) {
+            if (version.getVersion() == versionNum) {
+                return version;
+            } 
+        }
+        return null;
+    }
 
     @Override
     public int hashCode() {

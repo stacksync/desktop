@@ -21,13 +21,14 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.CouldNotApplyUpdateException;
 import com.stacksync.desktop.exceptions.StorageException;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.commons.models.ItemMetadata;
+import com.stacksync.desktop.db.models.CloneItemVersion;
 import java.io.IOException;
 import java.util.*;
 import org.apache.log4j.Logger;
@@ -163,19 +164,20 @@ public class RemoteWatcher {
         try {
             logger.info("Commit new changes.");
             
-            Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
+            Map<String, List<CloneItemVersion>> updatedFiles = db.getHistoryUptoDate();
 
             // This hashmap contains a list of files changed in each workspace.
             HashMap<CloneWorkspace, List<ItemMetadata>> workspaces = new HashMap<CloneWorkspace, List<ItemMetadata>>();
             
-            for(List<CloneFile> w: updatedFiles.values()){
-                for(CloneFile c: w){
+            for(List<CloneItemVersion> w: updatedFiles.values()){
+                for(CloneItemVersion itemVersion: w){
                     
-                    c.setServerUploadedTime(lastUpdateFileDate);
-                    c.merge(); 
+                    itemVersion.setServerUploadedTime(lastUpdateFileDate);
+                    itemVersion.merge(); 
                     
-                    CloneWorkspace workspace = c.getWorkspace();
-                    ItemMetadata obj = c.mapToItemMetadata();
+                    CloneItem item = itemVersion.getItem();
+                    CloneWorkspace workspace = item.getWorkspace();
+                    ItemMetadata obj = itemVersion.mapToItemMetadata();
                     
                     List<ItemMetadata> itemsToCommit;
                     if (workspaces.containsKey(workspace)) {
@@ -207,15 +209,16 @@ public class RemoteWatcher {
 
     private void commitWorkspacesUpdates() {
         
-        List<CloneFile> workspaces = db.getWorkspacesUpdates();
+        List<CloneItem> workspaces = db.getWorkspacesUpdates();
         
         String accountId = profile.getAccountId();
         
-        for (CloneFile workspaceFile : workspaces) {
+        for (CloneItem workspaceFile : workspaces) {
             // Do the query to the DB. workspaceFile could have and old workspace instance
             // if you do -> CloneWorkspace w = workspaceFile.getWorkspace();
             CloneWorkspace w = db.getWorkspace(workspaceFile.getWorkspace().getId());
-            switch(workspaceFile.getStatus()) {
+            CloneItemVersion workspaceVersion = workspaceFile.getLatestVersion();
+            switch(workspaceVersion.getStatus()) {
                 case RENAMED:
                     this.server.updateWorkspace(accountId, w.getId(), w.getName(), w.getParentId());
                     break;
@@ -225,7 +228,7 @@ public class RemoteWatcher {
         
     }
     
-    public void restoreVersion(CloneFile restoringVersion) throws CouldNotApplyUpdateException {
+    public void restoreVersion(CloneItem restoringVersion) throws CouldNotApplyUpdateException {
         changeManager.restoreVersion(restoringVersion);
     }
 }

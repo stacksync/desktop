@@ -7,7 +7,8 @@ import com.stacksync.commons.notifications.UpdateWorkspaceNotification;
 import com.stacksync.commons.omq.RemoteClient;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneItem;
+import com.stacksync.desktop.db.models.CloneItemVersion;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.sharing.PasswordDialog;
 import com.stacksync.desktop.sharing.WorkspaceController;
@@ -54,7 +55,7 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         if (isMyWorkspace(cloneWorkspace))  {
             cloneWorkspace.merge();
         
-            CloneFile sharedFolder = db.getFileOrFolder(spn.getItemId());
+            CloneItem sharedFolder = db.getFileOrFolder(spn.getItemId());
             WorkspaceController.getInstance().changeFolderWorkspace(cloneWorkspace, sharedFolder);
         }
         
@@ -84,9 +85,10 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         String deviceName = fullReqId.split("-")[0];
         
         if (isMyCommit(deviceName)) {
-            CloneFile rootCF = db.getWorkspaceRoot(uwn.getWorkspaceId().toString());
-            rootCF.setServerUploadedAck(true);
-            rootCF.merge();
+            CloneItem rootCF = db.getWorkspaceRoot(uwn.getWorkspaceId().toString());
+            CloneItemVersion latestVersion = rootCF.getLatestVersion();
+            latestVersion.setServerUploadedAck(true);
+            latestVersion.merge();
             return;
         }
         
@@ -96,7 +98,7 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         remote.setName(uwn.getFolderName());
         remote.setParentId(uwn.getParentItemId());
         if (remote.getParentId() != null) {
-            CloneFile parentCF = db.getFileOrFolder(remote.getParentId());
+            CloneItem parentCF = db.getFileOrFolder(remote.getParentId());
             remote.setPathWorkspace(parentCF.getFile().getAbsolutePath()+ File.separator + uwn.getFolderName());
         } else {
             remote.setPathWorkspace("/"+uwn.getFolderName());
