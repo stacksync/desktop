@@ -46,7 +46,10 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         List<Update> ul = new ArrayList<Update>();
         TempIdManager tempIdManager = new TempIdManager();
         
-        updateQuota(cr.getLimitQuota(), cr.getUsedQuota());
+        Account account = this.config.getProfile().getAccount();
+        if (account.getId().toString().equals(this.workspace.getOwner())) {
+            updateQuota(account, cr.getLimitQuota(), cr.getUsedQuota());
+        }
 
         for (CommitInfo obj : listObjects) {
             
@@ -153,8 +156,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         }
     }
 
-    private void updateQuota(long limitQuota, long usedQuota) {
-        Account account = this.config.getProfile().getAccount();
+    private void updateQuota(Account account, long limitQuota, long usedQuota) {
         account.setQuota(limitQuota);
         account.setQuotaUsed(usedQuota);
     }
