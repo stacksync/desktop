@@ -32,7 +32,7 @@ service (OpenStack Swift). An overview of the architecture
 with the main components and their interaction is shown in the following image.
 
 <p align="center">
-  <img width="500" src="https://raw.github.com/stacksync/desktop/master/res/stacksync-architecture.png">
+  <img width="500" src="https://raw.github.com/stacksync/desktop/master/resources/res/stacksync-architecture.png">
 </p>
 
 The StackSync client and the SyncService interact through the communication
@@ -59,7 +59,7 @@ Some of the main features of the client are:
 * **Desktop integration**: We are using [Liferay nativity library](https://github.com/liferay/liferay-nativity).
 
 <p align="center">
-  <img width="500" src="https://raw.github.com/stacksync/desktop/master/res/win_integration.png">
+  <img width="500" src="https://raw.github.com/stacksync/desktop/master/resources/res/win_integration.png">
 </p>
 * **Push notifications**: ObjectMQ provides push notification to desktop clients.
 * **Data deduplication**: We deduplicate data across a single user in order to optimize bandwidth and storage.
