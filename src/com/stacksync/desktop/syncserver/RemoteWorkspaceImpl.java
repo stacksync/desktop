@@ -134,11 +134,8 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     }
     
     private CloneFile changeTempId(ItemMetadata itemMetadata, TempIdManager tempIdManager) {
-        
         CloneFile localFile = db.getFileOrFolder(itemMetadata.getTempId(), itemMetadata.getVersion());
-        
         return tempIdManager.changeTempId(localFile, itemMetadata.getId());
-        
     }
     
     private void markAsUpdated(CloneFile cf) {
@@ -147,7 +144,6 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     }
 
     private void changeTempIdFromUncommitedItems(Hashtable<Long, Long> tempIds, TempIdManager tempIdManager) {
-        
         Enumeration<Long> temps = tempIds.keys();
         while (temps.hasMoreElements()) {
             Long tempId = temps.nextElement();
