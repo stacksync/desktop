@@ -215,7 +215,6 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
 
-            //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
             while (chunks.hasMoreElements()) {
                 chunkInfo = chunks.nextElement();                
@@ -263,17 +262,19 @@ public class NewIndexRequest extends SingleRootIndexRequest {
                 return;
             }
             
-            // 3b. Upload it
+            // 3b. Check name
             if (FileUtil.checkIllegalName(cf.getName())
                     || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
                 cf.setSyncStatus(SyncStatus.UNSYNC);
                 cf.merge();
-            } else {
-                logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
-                root.getProfile().getUploader().queue(cf);
+                return;
             }
             
+            // 3c. Upload file
+            logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
+            root.getProfile().getUploader().queue(cf);
+
         } catch (Exception ex) {
             logger.error("Could not index new file "+file+". IGNORING.", ex);
             RemoteLogs.getInstance().sendLog(ex);

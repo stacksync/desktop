@@ -13,9 +13,9 @@ import com.stacksync.commons.models.CommitInfo;
 import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.gui.server.Desktop;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
@@ -39,7 +39,7 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         List<CommitInfo> listObjects = cr.getItems();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
-        Hashtable<Long, Long> temporalsId = new Hashtable<Long, Long>();
+        HashMap<Long, Long> temporalsId = new HashMap<Long, Long>();
         
         String fullReqId = cr.getRequestId();
         String deviceName = fullReqId.split("-")[0];
@@ -143,10 +143,9 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         cf.merge();
     }
 
-    private void changeTempIdFromUncommitedItems(Hashtable<Long, Long> tempIds, TempIdManager tempIdManager) {
-        Enumeration<Long> temps = tempIds.keys();
-        while (temps.hasMoreElements()) {
-            Long tempId = temps.nextElement();
+    private void changeTempIdFromUncommitedItems(HashMap<Long, Long> tempIds, TempIdManager tempIdManager) {
+        Set<Long> temps = tempIds.keySet();
+        for (Long tempId : temps) {
             List<CloneFile> files = db.getFileVersions(tempId);
             tempIdManager.changeTempIdFromUncommitedItems(files, tempIds.get(tempId));
         }
