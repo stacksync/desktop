@@ -17,7 +17,6 @@
  */
 package com.stacksync.desktop.util;
 
-import com.oogly.mime.identifier.magic.MagicMimeTypeIdentifier;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Encryption;
@@ -33,6 +32,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -41,7 +41,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -50,7 +49,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.swing.JFileChooser;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -58,7 +56,6 @@ import org.apache.log4j.Logger;
  * @author Philipp C. Heckel <philipp.heckel@gmail.com>
  */
 public class FileUtil {
-    private static final MagicMimeTypeIdentifier mimeTypesMap = new MagicMimeTypeIdentifier();
     private static final Logger logger = Logger.getLogger(FileUtil.class.getName());    
     private static final Environment env = Environment.getInstance();
     
@@ -587,33 +584,18 @@ public class FileUtil {
     
     
     public static String getMimeType(File file){
-        FileInputStream fis = null;
+        
+        String mimetype = null;
         try {
-            String mimetype = null;
-            
-            fis = new FileInputStream(file);
-            byte[] bytes = IOUtils.toByteArray(fis);
-            
-            if(mimeTypesMap != null){
-                try {            
-                    mimetype = mimeTypesMap.identify(bytes);        
-                } catch (Exception ex){ }        
-            }
-            
-            if(mimetype == null){
-                mimetype = "unknown";
-            }
-            
-            return mimetype;
+            mimetype = Files.probeContentType(file.toPath());
         } catch (IOException ex) {
-            return "unknown";
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException ex) { }
-            }
+            
         }
+        
+        if (mimetype == null) {
+            mimetype = "unknown";
+        }
+        return mimetype;
     }
     
     public static String getPropertyFromManifest(String manifestPath, String property){

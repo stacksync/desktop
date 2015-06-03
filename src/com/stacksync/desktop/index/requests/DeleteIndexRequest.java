@@ -28,7 +28,7 @@ import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.exceptions.RemoteFileNotFoundException;
 import com.stacksync.desktop.exceptions.StorageException;
-import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
+import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.repository.files.RemoteFile;
 import com.stacksync.desktop.util.FileUtil;
@@ -82,6 +82,8 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
             logger.warn("Indexer: File not found in DB ("+file.getAbsolutePath()+"). IGNORING.");
             return;
         }
+        
+        this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPDATING);
         
         // File found in DB.
         CloneFile deletedVersion = (CloneFile) dbFile.clone();
@@ -138,6 +140,8 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
                 Indexer.getInstance().queueDeleted(root, child, deletedVersion);
             }
         }
+        
+        this.tray.setStatusIcon(this.processName, Tray.StatusIcon.UPTODATE);
 
     }
 
@@ -145,9 +149,12 @@ public class DeleteIndexRequest extends SingleRootIndexRequest {
         TransferManager transfer = root.getProfile().getRepository().getConnection().createTransferManager();
         List<CloneChunk> chunks = deletedVersion.getChunks();
         CloneWorkspace workspace = deletedVersion.getWorkspace();
+        int i = 0;
         for (CloneChunk chunk : chunks) {
+            i++;
             try {
                 transfer.delete(new RemoteFile(chunk.getName()), workspace);
+                if (i%10==0) logger.info("Removed "+i+" chunks from storage");
             } catch (RemoteFileNotFoundException ex) {
                 logger.warn("Cannot delete chunk: "+chunk.getName(), ex);
             } catch (StorageException ex) {
