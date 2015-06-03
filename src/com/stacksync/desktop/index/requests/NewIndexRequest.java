@@ -75,6 +75,14 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         CloneWorkspace defaultWorkspace = db.getDefaultWorkspace();
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
         CloneFile parentCF = db.getFolder(root, parentFile);
+        if (parentCF != null) {
+            while (!parentCF.getServerUploadedAck()) {
+                parentCF = db.getFolder(root, parentFile);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) { }
+            }
+        }
         // If parent is null means the file is in the root folder (stacksync_folder).
         if (parentCF != null && !parentCF.getWorkspace().getId().equals(defaultWorkspace.getId())) {
             // File inside a shared workspace
@@ -206,6 +214,8 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             
             // Do it!
             logger.info("Indexer: Parent: "+file+" / CHILD "+child+" ...");
+            //NewIndexRequest childRequest = new NewIndexRequest(root, child, null, -1);
+            //childRequest.process();
             Indexer.getInstance().queueNewIndex(root, child, null, -1);
         }
     }
