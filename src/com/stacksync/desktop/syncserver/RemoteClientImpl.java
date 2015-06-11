@@ -3,6 +3,7 @@ package com.stacksync.desktop.syncserver;
 import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.Workspace;
 import com.stacksync.commons.notifications.ShareProposalNotification;
+import com.stacksync.commons.notifications.UnshareNotification;
 import com.stacksync.commons.notifications.UpdateWorkspaceNotification;
 import com.stacksync.commons.omq.RemoteClient;
 import com.stacksync.desktop.config.Config;
@@ -104,6 +105,11 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         
         WorkspaceController.getInstance().applyChangesInWorkspace(local, remote, true);
         
+    }
+    
+    @Override
+    public void notifyUnshare(UnshareNotification notification) {
+        // TODO
     }
     
     private String getPassword(String folderName) {

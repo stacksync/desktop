@@ -1,5 +1,6 @@
 PACKAGE_NAME=stacksync
 DIST_DIR=../../target
+RESOURCE_DIR=../../resources
 VERSION=$(shell cat ../../version.properties | grep 'VERSION' | cut -d '=' -f 2)
 VERSION_GIT=$(shell cat ../../version.properties | grep 'VERSION_GIT' | cut -d '=' -f 2)
 INSTALLED_SIZE=$(shell du -sx $(DIST_DIR) | cut -f1)
@@ -23,9 +24,9 @@ package: clean
 	# Copy bin
 	cp utils/stacksync $(PACKAGE_NAME)/usr/bin/
 	# Copy the Dist folder
-	cp -r $(DIST_DIR)/bin/ $(PACKAGE_NAME)/usr/lib/stacksync/
-	cp -r $(DIST_DIR)/conf/ $(PACKAGE_NAME)/usr/lib/stacksync/
-	cp -r $(DIST_DIR)/res/ $(PACKAGE_NAME)/usr/lib/stacksync/
+	cp -r $(RESOURCE_DIR)/bin/ $(PACKAGE_NAME)/usr/lib/stacksync/
+	cp -r $(RESOURCE_DIR)/conf/ $(PACKAGE_NAME)/usr/lib/stacksync/
+	cp -r $(RESOURCE_DIR)/res/ $(PACKAGE_NAME)/usr/lib/stacksync/
 	cp $(DIST_DIR)/desktop-client-$(VERSION_GIT)-jar-with-dependencies.jar $(PACKAGE_NAME)/usr/lib/stacksync/Stacksync.jar
 	#cp $(DIST_DIR)/UpdaterClient.jar $(PACKAGE_NAME)/usr/lib/stacksync/
 	# Copy nautilus extension library

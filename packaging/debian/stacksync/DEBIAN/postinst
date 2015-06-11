@@ -1,9 +1,0 @@
-#!/bin/sh
-# postinst script for stacksync
-
-USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-AUTOSTART_PATH=$USER_HOME/.config/autostart
-
-cp /usr/share/applications/stacksync.desktop $AUTOSTART_PATH
-chown $SUDO_USER:$SUDO_USER $AUTOSTART_PATH/stacksync.desktop
-chown root:root /usr/share/applications/stacksync.desktop

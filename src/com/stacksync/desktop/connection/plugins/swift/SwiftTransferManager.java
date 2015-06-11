@@ -71,10 +71,12 @@ public class SwiftTransferManager extends AbstractTransferManager {
     public void connect() throws StorageConnectException {
         
         if (client.isLoggedin()) {
+            logger.debug("Client already logged.");
             return;
         }
         
         try {
+            logger.debug("Keystone logging.");
             client.loginKeystone();
         } catch (UnknownHostException ex) {
             logger.error(ex);
@@ -295,6 +297,7 @@ public class SwiftTransferManager extends AbstractTransferManager {
         try {
             String storageURL = workspace.getSwiftStorageURL();
             String container = workspace.getSwiftContainer();
+            logger.debug("Downloading chunk " + remoteFile.getName());
             is = client.getSharedObjectAsStream(storageURL, container, remoteFile.getName());
 
             // Save to temp file
@@ -302,7 +305,7 @@ public class SwiftTransferManager extends AbstractTransferManager {
             FileUtil.writeFile(is, tempFile);
 
             FileUtil.copy(tempFile, localFile);
-
+            logger.debug("Chunk " + remoteFile.getName() + " downloaded.");
         } catch (Exception ex) {
             logger.error(ex);
             RemoteLogs.getInstance().sendLog(ex);
@@ -328,18 +331,13 @@ public class SwiftTransferManager extends AbstractTransferManager {
             throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException {
         
         connect();
-
-        // Check if exists
-        /*Collection<RemoteFile> obj = list(remoteFile.getName()).values();
-
-        if (obj != null && !obj.isEmpty()) {
-            return;
-        }*/
         
         try {
             // Upload
+            logger.debug("Uploading into container " + workspace.getSwiftContainer() + " chunk " + remoteFile.getName());
             client.storeSharedObjectAs(workspace.getSwiftStorageURL(), workspace.getSwiftContainer(), localFile,
                     "application/x-Stacksync", remoteFile.getName());
+            logger.debug("Chunk " + remoteFile.getName() + " uploaded.");
         } catch (OverQuotaException ex) {
             logger.error("Quota limit exceeded. Could not upload file "+localFile.getName(), ex);
             throw new StorageQuotaExcedeedException(ex);
@@ -348,9 +346,23 @@ public class SwiftTransferManager extends AbstractTransferManager {
             throw new StorageException(ex);
         }
     }
+    
+    @Override
+    public void delete(RemoteFile remoteFile, CloneWorkspace workspace) throws StorageException {
+        connect();
+
+        try {
+            client.deleteSharedObject(workspace.getSwiftStorageURL(), workspace.getSwiftContainer(), remoteFile.getName());
+        } catch (Exception ex) {
+            logger.error(ex);
+            RemoteLogs.getInstance().sendLog(ex);
+            throw new StorageException(ex);
+        }
+    }
 
     @Override
     public Map<String, RemoteFile> list(String namePrefix, CloneWorkspace workspace) throws StorageException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 }

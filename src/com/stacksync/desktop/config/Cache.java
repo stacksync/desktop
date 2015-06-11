@@ -77,7 +77,7 @@ public class Cache implements Configurable {
     public File getCacheChunk(CloneChunk chunk) {
         return new File(String.format(CHUNK_FORMAT,
             folder.getAbsoluteFile(),
-            chunk.getFileName())
+            chunk.getName())
         );
     }
 

@@ -148,6 +148,9 @@ public interface TransferManager {
     
     public void upload(File localFile, RemoteFile remoteFile, CloneWorkspace workspace)
             throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException;
+    
+    public void delete(RemoteFile remoteFile, CloneWorkspace workspace)
+            throws LocalFileNotFoundException, StorageException;
       
     public Map<String, RemoteFile> list(String namePrefix, CloneWorkspace workspace)
             throws StorageException;

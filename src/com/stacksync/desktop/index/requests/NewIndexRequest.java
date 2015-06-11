@@ -17,6 +17,7 @@
  */
 package com.stacksync.desktop.index.requests;
 
+import com.stacksync.desktop.Constants;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +31,7 @@ import com.stacksync.desktop.db.models.CloneFile.SyncStatus;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
@@ -73,6 +75,14 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         CloneWorkspace defaultWorkspace = db.getDefaultWorkspace();
         File parentFile = FileUtil.getCanonicalFile(file.getParentFile());
         CloneFile parentCF = db.getFolder(root, parentFile);
+        if (parentCF != null) {
+            while (!parentCF.getServerUploadedAck()) {
+                parentCF = db.getFolder(root, parentFile);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) { }
+            }
+        }
         // If parent is null means the file is in the root folder (stacksync_folder).
         if (parentCF != null && !parentCF.getWorkspace().getId().equals(defaultWorkspace.getId())) {
             // File inside a shared workspace
@@ -92,6 +102,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         
         // This will check if the file is inside a folder that isn't created.
         if (parentCF == null && !newVersion.getPath().equals("/")) {
+            logger.warn(newVersion.getFileName() + " is inside a unsync folder!!");
             Indexer.getInstance().queueNewIndex(root, file, previousVersion, checksum);
             return;
         }
@@ -204,6 +215,8 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             
             // Do it!
             logger.info("Indexer: Parent: "+file+" / CHILD "+child+" ...");
+            //NewIndexRequest childRequest = new NewIndexRequest(root, child, null, -1);
+            //childRequest.process();
             Indexer.getInstance().queueNewIndex(root, child, null, -1);
         }
     }
@@ -213,13 +226,13 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
 
-            //ChunkEnumeration chunks = chunker.createChunks(file, root.getProfile().getRepository().getChunkSize());
             ChunkEnumeration chunks = chunker.createChunks(file);
             while (chunks.hasMoreElements()) {
                 chunkInfo = chunks.nextElement();                
 
                 // create chunk in DB (or retrieve it)
-                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED);
+                String chunkName = "chk-"+chunkInfo.getChecksum()+"-"+cf.getId();
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED, chunkName);
                 
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
@@ -249,17 +262,30 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             cf.merge();
             chunks.closeStream();
             
-            // 3. Upload it
+            // 3a. Check storage free space
+            Account account = this.config.getProfile().getAccount();
+            Long availableQuota = account.getQuota() - account.getQuotaUsed();
+            if (availableQuota < cf.getSize()) {
+                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+                cf.merge();
+                File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
+                tray.notify(Constants.APPLICATION_NAME, "Quota exceeded", imageFile);
+                return;
+            }
+            
+            // 3b. Check name
             if (FileUtil.checkIllegalName(cf.getName())
                     || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");
                 cf.setSyncStatus(SyncStatus.UNSYNC);
                 cf.merge();
-            } else {
-                logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
-                root.getProfile().getUploader().queue(cf);
+                return;
             }
             
+            // 3c. Upload file
+            logger.info("Indexer: Added to DB. Now Q file "+file+" at uploader ...");
+            root.getProfile().getUploader().queue(cf);
+
         } catch (Exception ex) {
             logger.error("Could not index new file "+file+". IGNORING.", ex);
             RemoteLogs.getInstance().sendLog(ex);

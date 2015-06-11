@@ -10,11 +10,12 @@ import com.stacksync.commons.notifications.CommitNotification;
 import com.stacksync.commons.omq.RemoteWorkspace;
 import com.stacksync.commons.models.ItemMetadata;
 import com.stacksync.commons.models.CommitInfo;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.gui.server.Desktop;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
@@ -35,15 +36,20 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
 
     @Override
     public void notifyCommit(CommitNotification cr) {
-        List<CommitInfo> listObjects = cr.getObjects();
+        List<CommitInfo> listObjects = cr.getItems();
         logger.info(" [x] Received in queue(" + workspace.getId() + ") '" + listObjects + "'");
 
-        Hashtable<Long, Long> temporalsId = new Hashtable<Long, Long>();
+        HashMap<Long, Long> temporalsId = new HashMap<Long, Long>();
         
         String fullReqId = cr.getRequestId();
         String deviceName = fullReqId.split("-")[0];
         List<Update> ul = new ArrayList<Update>();
         TempIdManager tempIdManager = new TempIdManager();
+        
+        Account account = this.config.getProfile().getAccount();
+        if (account.getId().toString().equals(this.workspace.getOwner())) {
+            updateQuota(account, cr.getLimitQuota(), cr.getUsedQuota());
+        }
 
         for (CommitInfo obj : listObjects) {
             
@@ -128,11 +134,8 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     }
     
     private CloneFile changeTempId(ItemMetadata itemMetadata, TempIdManager tempIdManager) {
-        
         CloneFile localFile = db.getFileOrFolder(itemMetadata.getTempId(), itemMetadata.getVersion());
-        
         return tempIdManager.changeTempId(localFile, itemMetadata.getId());
-        
     }
     
     private void markAsUpdated(CloneFile cf) {
@@ -140,14 +143,17 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
         cf.merge();
     }
 
-    private void changeTempIdFromUncommitedItems(Hashtable<Long, Long> tempIds, TempIdManager tempIdManager) {
-        
-        Enumeration<Long> temps = tempIds.keys();
-        while (temps.hasMoreElements()) {
-            Long tempId = temps.nextElement();
+    private void changeTempIdFromUncommitedItems(HashMap<Long, Long> tempIds, TempIdManager tempIdManager) {
+        Set<Long> temps = tempIds.keySet();
+        for (Long tempId : temps) {
             List<CloneFile> files = db.getFileVersions(tempId);
             tempIdManager.changeTempIdFromUncommitedItems(files, tempIds.get(tempId));
         }
+    }
+
+    private void updateQuota(Account account, long limitQuota, long usedQuota) {
+        account.setQuota(limitQuota);
+        account.setQuotaUsed(usedQuota);
     }
 
 }

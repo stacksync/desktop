@@ -741,7 +741,7 @@ public class ChangeManager {
             try {
                 logger.info("- Downloading chunk (" + chunkNum + "/" + file.getChunks().size() + ") " + chunk + " ...");
 
-                String fileName = chunk.getFileName();
+                String fileName = chunk.getName();
                 CloneWorkspace workspace = file.getWorkspace();
                 transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);     
 

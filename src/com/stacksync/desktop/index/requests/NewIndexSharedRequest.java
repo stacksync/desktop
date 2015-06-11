@@ -3,6 +3,7 @@ package com.stacksync.desktop.index.requests;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.config.Folder;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.db.models.CloneChunk;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
@@ -155,7 +156,8 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 chunkInfo = chunks.nextElement();                
 
                 // create chunk in DB (or retrieve it)
-                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CloneChunk.CacheStatus.CACHED);
+                String chunkName = "chk-"+chunkInfo.getChecksum()+"-"+cf.getId();
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CloneChunk.CacheStatus.CACHED, chunkName);
                 
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
@@ -185,7 +187,16 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
             cf.merge();
             chunks.closeStream();
             
-            // 3. Upload it
+            // 3a. Check storage free space
+            Account account = this.config.getProfile().getAccount();
+            Long availableQuota = account.getQuota() - account.getQuotaUsed();
+            if (availableQuota < cf.getSize()) {
+                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+                cf.merge();
+                return;
+            }
+            
+            // 3b. Upload it
             if (FileUtil.checkIllegalName(cf.getName())
                     || FileUtil.checkIllegalName(cf.getPath().replace("/", ""))){
                 logger.info("This filename contains illegal characters.");

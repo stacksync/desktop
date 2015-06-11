@@ -29,6 +29,7 @@ import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
@@ -169,7 +170,8 @@ public class MoveIndexRequest extends IndexRequest {
                 int order = Integer.parseInt(Long.toString(chunkInfo.getNumber()));
                 
                 // create chunk in DB (or retrieve it)
-                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED);                         
+                String chunkName = "chk-"+chunkInfo.getChecksum()+"-"+cf.getId();
+                CloneChunk chunk = db.getChunk(chunkInfo.getChecksum(), CacheStatus.CACHED, chunkName);                         
                 
                 // write encrypted chunk (if it does not exist)
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
@@ -208,7 +210,14 @@ public class MoveIndexRequest extends IndexRequest {
                 return;
             }
             
-            // 3b. TODO Check storage free space
+            // 3b. Check storage free space
+            Account account = this.config.getProfile().getAccount();
+            Long availableQuota = account.getQuota() - account.getQuotaUsed();
+            if (availableQuota < cf.getSize()) {
+                cf.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
+                cf.merge();
+                return;
+            }
             
             // 4. If previous version was UNSYNC
             if (dbFromFile.getSyncStatus() == CloneFile.SyncStatus.UNSYNC){

@@ -17,14 +17,12 @@
  */
 package com.stacksync.desktop.repository;
 
+import com.stacksync.desktop.Constants;
 import java.io.File;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.connection.plugins.TransferManager;
@@ -39,6 +37,7 @@ import com.stacksync.desktop.gui.server.Desktop;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.files.RemoteFile;
+import java.util.ArrayList;
 
 /**
  * Represents the remote storage. Processes upload and download requests
@@ -48,20 +47,17 @@ import com.stacksync.desktop.repository.files.RemoteFile;
  */
 public class Uploader {
 
-    private final int CACHE_FILE_LIST = 60000;
+    private static final int MAX_RETRIES = 3;
     private final Config config = Config.getInstance();
     private final Logger logger = Logger.getLogger(Uploader.class.getName());
     private final Tray tray = Tray.getInstance();
     private final Desktop desktop = Desktop.getInstance();
     private final DatabaseHelper db = DatabaseHelper.getInstance();
-    private final Environment env = Environment.getInstance();
     
     private Profile profile;
     private TransferManager transfer;
     private BlockingQueue<CloneFile> queue;
     private Thread worker;
-    private Map<String, RemoteFile> fileList;
-    private Date cacheLastUpdate;
     private CloneFile workingFile;
 
     public Uploader(Profile profile) {
@@ -168,23 +164,11 @@ public class Uploader {
                     try {
                         if(!workingFile.isFolder()){
                             processRequest(workingFile);
-                        } else{
-                            logger.info("Exception folder doens't have chunks!!!");
                         }
-                    } catch (StorageException ex) {
-                        logger.error("Could not process the file: ", ex);
-                        RemoteLogs.getInstance().sendLog(ex);
-                        
-                        workingFile.setSyncStatus(CloneFile.SyncStatus.SYNCING);
+                    } catch (Exception ex) {
+                        workingFile.setSyncStatus(CloneFile.SyncStatus.UNSYNC);
                         workingFile.merge();
-                        queue(workingFile);
-                    } catch (NullPointerException ex1){
-                        logger.info("Could not process the file ->", ex1);
-                    } catch (StorageQuotaExcedeedException ex) {
-                        logger.info("Stop syncing file due to over quota.");
-                        
-                        workingFile.setSyncStatus(SyncStatus.UNSYNC);
-                        workingFile.merge();
+                        logger.error(ex);
                     }
                     
                     workingFile = null;
@@ -193,12 +177,10 @@ public class Uploader {
                         tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "");
                     }
                 }
-            } catch (InterruptedException iex) {
-                logger.error("Exception ", iex);
-            }
+            } catch (InterruptedException iex) { }
         }
 
-        private void processRequest(CloneFile file) throws StorageException, StorageQuotaExcedeedException {            
+        private void processRequest(CloneFile file) throws Exception {            
             logger.info("UploadManager: Uploading file " + file.getFileName() + " ...");           
 
             // Update DB sync status                
@@ -208,66 +190,46 @@ public class Uploader {
             file.merge();
 
             touch(file, SyncStatus.SYNCING);
-
-            // TODO IMPORTANT What about the DB to check the cunks!!!??
-            // Get file list (to check if chunks already exist)
-            /*if (cacheLastUpdate == null || fileList == null || System.currentTimeMillis()-cacheLastUpdate.getTime() > CACHE_FILE_LIST) {                
-                try {
-                    fileList = transfer.list();
-                } catch (StorageException ex) {
-                    logger.error("UploadManager: List FAILED!!", ex);
-                    RemoteLogs.getInstance().sendLog(ex);
-                }
-            }*/
+            
+            CloneFile oldVersion = file.getLastSyncedVersion();
+            List<CloneChunk> oldChunks = null;
+            if (oldVersion != null) {
+                oldChunks = oldVersion.getChunks();
+            }
 
             int numChunk = 0;
+            List<CloneChunk> uploadedChunks = new ArrayList<CloneChunk>();
             for (CloneChunk chunk: file.getChunks()) {
-                // Chunk has been uploaded before
 
                 if(numChunk % 10 == 0){
                     tray.setStatusText(this.getClass().getDeclaringClass().getSimpleName(), "Uploading " + (queue.size() + 1) +  " files...");
                 }
                 
-                String fileRemoteName = chunk.getFileName();
-                RemoteFile rFile = getRemoteFile(fileRemoteName);
-                if (rFile != null) {
-                    File localFile = config.getCache().getCacheChunk(chunk);
-
-                    long localSize = localFile.length();
-                    long remoteSize = rFile.getSize();
-
-                    if (localSize == remoteSize) {
-                        logger.info("UploadManager: Chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " already uploaded");              
-                        continue;
-                    }
+                // Chunk has been uploaded before
+                if (oldChunks != null && oldChunks.contains(chunk)) {
+                    continue;
                 }
 
                 // Upload it!
                 try {
-                    logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getFileName() + " ...");
-                    
-                    CloneWorkspace workspace = file.getWorkspace();
-                    transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
-                } catch (StorageException ex) {
-                    logger.error("UploadManager: Uploading chunk ("+ numChunk +File.separator+file.getChunks().size()+") "+chunk.getFileName() + " FAILED!!", ex);
-                    throw ex;
-                } catch (StorageQuotaExcedeedException ex) {
-                    logger.error("UploaderManager: Quota excedeed.", ex);
+                    logger.info("UploadManager: Uploading chunk (" + numChunk + File.separator + file.getChunks().size() + ") " + chunk.getName() + " ...");
+                    uploadChunk(file, chunk);
+                    uploadedChunks.add(chunk);
+                } catch (Exception ex){
+                    removeChunks(uploadedChunks, file.getWorkspace());
                     throw ex;
                 }
                 
                 numChunk++;
             }
             logger.info("UploadManager: File " + file.getAbsolutePath() + " uploaded");
-
-            /**
-             * Test this code:
-            file.setSyncStatus(SyncStatus.UPTODATE);
-            file.merge();
-             * Is it necessary to get again the file from the DB???
-             */
             
-            file = db.getFileOrFolder(file.getId(), file.getVersion());
+            // Remove chunks from previous version
+            if (oldChunks != null && oldVersion != null) {
+                List<CloneChunk> newChunks = file.getChunks();
+                oldChunks.removeAll(newChunks);
+                removeChunks(oldChunks, oldVersion.getWorkspace());
+            }
             
             // Update DB sync status
             file.setSyncStatus(SyncStatus.UPTODATE);
@@ -275,19 +237,40 @@ public class Uploader {
 
             touch(file, SyncStatus.UPTODATE);
         }
-
-        private RemoteFile getRemoteFile(String fileRemoteName){
+        
+        private void uploadChunk(CloneFile file, CloneChunk chunk ) throws StorageException, StorageQuotaExcedeedException {
             
-            RemoteFile rFile = null;
-            if(fileList != null){
-                if (fileList.containsKey(fileRemoteName)) {
-                    rFile = fileList.get(fileRemoteName);                                                       
-                } else if (fileList.containsKey(fileRemoteName.substring(1))) {
-                    rFile = fileList.get(fileRemoteName.substring(1));                                                                         
+            String fileRemoteName = chunk.getName();
+            int retry = 0;
+            boolean completed = false;
+            
+            while (!completed && retry < MAX_RETRIES) {
+                
+                try {
+                    CloneWorkspace workspace = file.getWorkspace();
+                    transfer.upload(config.getCache().getCacheChunk(chunk), new RemoteFile(fileRemoteName), workspace);
+                    completed = true;
+                } catch (StorageException ex) {
+                    logger.warn("UploadManager: Uploading chunk "+chunk.getName() + " FAILED!!", ex);
+                    if (++retry == MAX_RETRIES){
+                        logger.error("Storage Exception after 3 retries: ", ex);
+                        throw ex;
+                    }
+                } catch (StorageQuotaExcedeedException ex) {
+                    logger.warn("UploaderManager: Quota excedeed.", ex);
+                    if (++retry == MAX_RETRIES) { 
+                        File imageFile = new File(config.getResDir() + File.separator + "logo48.png");
+                        tray.notify(Constants.APPLICATION_NAME, "Quota exceeded", imageFile);
+                        throw ex;
+                    }
                 }
             }
-
-            return rFile;
+        }
+        
+        private void removeChunks(List<CloneChunk> chunks, CloneWorkspace workspace) throws StorageException {
+            for(CloneChunk chunk : chunks) {
+                transfer.delete(new RemoteFile(chunk.getName()), workspace);
+            }
         }
 
         private void touch(CloneFile file, SyncStatus syncStatus) {

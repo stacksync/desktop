@@ -79,6 +79,11 @@ public abstract class AbstractTransferManager implements TransferManager {
     public void upload(File localFile, RemoteFile remoteFile, CloneWorkspace workspace) throws LocalFileNotFoundException, StorageException, StorageQuotaExcedeedException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    @Override
+    public void delete(RemoteFile remoteFile, CloneWorkspace workspace) throws LocalFileNotFoundException, StorageException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
     @Override
     public Map<String, RemoteFile> list(String namePrefix, CloneWorkspace workspace) throws StorageException {

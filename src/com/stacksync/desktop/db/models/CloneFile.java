@@ -45,21 +45,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     
     private static final long serialVersionUID = 12314234L;
 
-    /**
-     * <ul> <li>UNKNOWN <li>NEW: New file <lI>CHANGED: The file contents have
-     * changed. At least one chunk differs. <li>RENAMED: The file path or name
-     * has changed. <li>MERGED: The file history has been merged to a different
-     * file. </ul>
-     */
     public enum Status { UNKNOWN, NEW, CHANGED, RENAMED, DELETED };
 
-    /**
-     * LOCAL: The file entry hasn't been propagated to the server yet IN_UPDATE:
-     * The file entry should be included in the update-file, but not (yet) in
-     * the base file IN_BASE: The file entry should be included in the base-file
-     * (= complete DB dump)
-     */
-    public enum SyncStatus { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC };
+    public enum SyncStatus { UNKNOWN, LOCAL, SYNCING, UPTODATE, CONFLICT, REMOTE, UNSYNC, NO_QUOTA };
     
     /**
      * versionId of the root file; identifies the history of a file
@@ -702,7 +690,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         
         List<String> chunksList = new ArrayList<String>();        
         for(CloneChunk chunk: getChunks()){
-            chunksList.add(chunk.getChecksum());
+            chunksList.add(chunk.getName());
         }
         
         object.setChunks(chunksList);        

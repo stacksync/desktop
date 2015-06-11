@@ -1,8 +1,0 @@
-#!/bin/sh
-# postrm script for stacksync
-
-USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-AUTOSTART_PATH=$USER_HOME/.config/autostart
-
-rm $AUTOSTART_PATH/stacksync.desktop
-rm -rf $USER_HOME/.stacksync

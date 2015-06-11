@@ -347,7 +347,8 @@ public class DatabaseHelper {
         if (!update.getChunks().isEmpty()) {
             for(int i=0; i<update.getChunks().size(); i++){
                 String chunkId = update.getChunks().get(i);
-                CloneChunk chunk = getChunk(chunkId, CacheStatus.REMOTE);
+                String hash = chunkId.split("-")[1];
+                CloneChunk chunk = getChunk(hash, CacheStatus.REMOTE, chunkId);
                                                 
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
                 if(chunkCacheFile.exists() && chunkCacheFile.length() > 0){
@@ -393,24 +394,24 @@ public class DatabaseHelper {
         }      
     }
 
-    public synchronized CloneChunk getChunk(String checksum, CacheStatus status) {
+    public synchronized CloneChunk getChunk(String checksum, CacheStatus status, String name) {
         CloneChunk chunk;
 
         String queryStr = "select c from CloneChunk c where "
-                + "     c.checksum = :checksum";
+                + "     c.name = :name";
 
         Query query = config.getDatabase().getEntityManager().createQuery(queryStr, CloneChunk.class);
         query.setHint("javax.persistence.cache.storeMode", "REFRESH");
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
-        query.setParameter("checksum", checksum);
+        query.setParameter("name", name);
 
         try {
             chunk = (CloneChunk) query.getSingleResult();
             logger.info("Found chunk in DB: " + chunk);
         } catch (NoResultException e) {
             logger.info("New chunk: " + checksum);
-            chunk = new CloneChunk(checksum, status);
+            chunk = new CloneChunk(checksum, status, name);
         }
 
         return chunk;
