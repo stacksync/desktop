@@ -102,6 +102,7 @@ public class NewIndexRequest extends SingleRootIndexRequest {
         
         // This will check if the file is inside a folder that isn't created.
         if (parentCF == null && !newVersion.getPath().equals("/")) {
+            logger.warn(newVersion.getFileName() + " is inside a unsync folder!!");
             Indexer.getInstance().queueNewIndex(root, file, previousVersion, checksum);
             return;
         }
