@@ -44,6 +44,7 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.Chunker;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.exceptions.StorageQuotaExcedeedException;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
@@ -59,6 +60,7 @@ public class ChangeManager {
     
     private final Logger logger = Logger.getLogger(ChangeManager.class.getName());
     private final Chunker chunker = new Chunker();
+    private static final int MAX_RETRIES = 3;
     
     private final Config config =  Config.getInstance();
     private final DatabaseHelper db = DatabaseHelper.getInstance();
@@ -743,7 +745,7 @@ public class ChangeManager {
 
                 String fileName = chunk.getName();
                 CloneWorkspace workspace = file.getWorkspace();
-                transfer.download(new RemoteFile(fileName), chunkCacheFile, workspace);     
+                downloadChunk(new RemoteFile(fileName), chunkCacheFile, workspace);
 
                 // Change DB state of chunk
                 chunk.setCacheStatus(CacheStatus.CACHED);
@@ -756,6 +758,25 @@ public class ChangeManager {
         }
 
         logger.info("- File " + file.getRelativePath() + " downloaded; Assembling ...");
+    }
+    
+    private void downloadChunk(RemoteFile remoteFile, File chunkCacheFile, CloneWorkspace workspace) throws StorageException {
+        int retry = 0;
+        boolean completed = false;
+
+        while (!completed && retry < MAX_RETRIES) {
+
+            try {
+                transfer.download(remoteFile, chunkCacheFile, workspace);
+                completed = true;
+            } catch (StorageException ex) {
+                logger.warn("ERROR Download chunk "+ remoteFile.getName() + " FAILED!!", ex);
+                if (++retry == MAX_RETRIES){
+                    logger.error("Storage Exception after 3 retries: ", ex);
+                    throw ex;
+                }
+            }
+        }
     }
 
 
