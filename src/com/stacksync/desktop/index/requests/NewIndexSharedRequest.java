@@ -1,6 +1,7 @@
 package com.stacksync.desktop.index.requests;
 
 import com.ast.cloudABE.exceptions.AttributeNotFoundException;
+import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.config.Folder;
@@ -14,6 +15,7 @@ import com.stacksync.desktop.encryption.AbePlainData;
 import com.stacksync.desktop.encryption.CipherData;
 import com.stacksync.desktop.encryption.Encryption;
 import com.stacksync.desktop.encryption.PlainData;
+import com.stacksync.desktop.gui.sharing.AttributesSelector;
 import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
@@ -22,6 +24,7 @@ import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
+import javax.swing.tree.TreePath;
 import org.apache.log4j.Logger;
 
 public class NewIndexSharedRequest extends SingleRootIndexRequest {
@@ -153,9 +156,74 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
          }*/
     }
 
+        private TreePath[] openPermissions(String resourcesPath){
+         /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+   
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(AttributesSelector.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(AttributesSelector.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(AttributesSelector.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(AttributesSelector.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+        
+        /* Create and display the dialog */
+
+        AttributesSelector dialog = new AttributesSelector(new javax.swing.JFrame(), true, resourcesPath);
+        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                System.exit(0);
+            }
+        });
+
+        dialog.setVisible(true);
+
+        /*
+        if(dialog.getSelecteds()!=null){
+            for(TreePath path:dialog.getSelecteds()){
+                System.out.println(path);
+            }
+        }*/
+
+        return dialog.getSelecteds();
+
+    }
+        
     private void processFile(CloneFile cf) {
         Encryption enc;
 
+        String path = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
+        
+        /*FIXME! correct path*/
+        System.out.println(config.getResDir());
+        System.out.println(config.getConfDir());
+
+        
+        TreePath attributes[] = openPermissions(path);
+        ArrayList attrs = new ArrayList();
+
+        if (attributes != null) {
+            for (TreePath attribute : attributes) {
+                attrs.add(attribute.getLastPathComponent().toString());
+            }
+        }
+            
         try {
             // 1. Chunk it!
             FileChunk chunkInfo = null;
@@ -172,7 +240,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 // Initialize BasicEncryption object from generated key (encryption of chunks)
                 enc = abenc.getBasicEncryption(key);
                 // Encrypt key using ABE protocol
-                AbeCipherData abeCipherMeta = getEncryptedSymKey(abenc, key);
+                AbeCipherData abeCipherMeta = getEncryptedSymKey(abenc, key, attrs);
                 // Save the produced ABE encryption metadata in CloneFile Object
                 cf.setCipherSymKey(abeCipherMeta.getCipherText());
                 cf.setAbeComponents(abeCipherMeta.getAbeMetaComponents());
@@ -252,10 +320,10 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
      * @param data
      * @return produced ABE metadata
      */
-    private AbeCipherData getEncryptedSymKey(AbeEncryption enc, byte[] data) {
+    private AbeCipherData getEncryptedSymKey(AbeEncryption enc, byte[] data, ArrayList<String> attributes) {
 
         //FIXME: Attribute set obtained from file (testing purposes)
-        PlainData plainData = new AbePlainData(data, null);
+        PlainData plainData = new AbePlainData(data, attributes);
 
         try {
             logger.info("[ABE Benchmarking - Symmetric key ABE encryption] Encrypting symmetric key... ");

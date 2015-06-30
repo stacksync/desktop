@@ -31,9 +31,11 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.chunker.FileChunk;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.gui.sharing.AttributesSelector;
 import com.stacksync.desktop.index.Indexer;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -208,9 +210,10 @@ public class NewIndexRequest extends SingleRootIndexRequest {
             Indexer.getInstance().queueNewIndex(root, child, null, -1);
         }
     }
-
+                
     private void processFile(CloneFile cf) {
         try {
+            
             // 1. Chunk it!
             FileChunk chunkInfo = null;
 

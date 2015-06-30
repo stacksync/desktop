@@ -1,5 +1,6 @@
 package com.stacksync.desktop.syncserver;
 
+import com.stacksync.commons.models.abe.KPABESecretKey;
 import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
 import com.stacksync.commons.exceptions.DeviceNotValidException;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
@@ -25,6 +26,7 @@ import com.stacksync.desktop.repository.Update;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import omq.common.broker.Broker;
@@ -125,6 +127,17 @@ public class Server {
         logger.info("Sending share proposal.");
         
         ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emails, folderId, encrypted, abeEncrypted);
+        request.setRequestId(getRequestId());
+        syncServer.createShareProposal(request);
+    }
+    
+    public void createShareProposal(String accountId, HashMap<String,KPABESecretKey> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted)
+            throws ShareProposalNotCreatedException, UserNotFoundException {
+        
+        logger.info("Sending share proposal.");
+        
+        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emailsKeys, folderId, encrypted, abeEncrypted);
+        
         request.setRequestId(getRequestId());
         syncServer.createShareProposal(request);
     }

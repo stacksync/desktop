@@ -17,7 +17,7 @@
  */
 package com.stacksync.desktop.db.models;
 
-import com.stacksync.commons.models.ABEItemMetadata;
+import com.stacksync.commons.models.abe.ABEItemMetadata;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -402,11 +402,11 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.abeComponents = abeComponents;
     }
     
-    public ArrayList<com.stacksync.commons.models.ABEMetaComponent> getCommonAbeComponents() {
-        ArrayList<com.stacksync.commons.models.ABEMetaComponent> components = 
-                new ArrayList<com.stacksync.commons.models.ABEMetaComponent>();
+    public ArrayList<com.stacksync.commons.models.abe.ABEMetaComponent> getCommonAbeComponents() {
+        ArrayList<com.stacksync.commons.models.abe.ABEMetaComponent> components = 
+                new ArrayList<com.stacksync.commons.models.abe.ABEMetaComponent>();
         for(ABEMetaComponent meta : getAbeComponents()) {
-            components.add(new com.stacksync.commons.models.ABEMetaComponent(
+            components.add(new com.stacksync.commons.models.abe.ABEMetaComponent(
                     meta.getId(), meta.getAttribute(), meta.getEncryptedPKComponent(), meta.getVersion()));
         }
         return components;

@@ -28,7 +28,7 @@ public class AbeEncryption implements Encryption {
             this.cabe = new CloudABEClientAdapter(abeResourcesPath);
             this.accessStructure = null;
             this.random = new SecureRandom();
-            init();
+            loadInit();
         } catch (Exception e) {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
         }
@@ -47,6 +47,11 @@ public class AbeEncryption implements Encryption {
 
     private void init() throws AttributeNotFoundException {
         cabe.setupABESystem(0, accessStructure);
+        this.bef = new BasicEncryptionFactory();
+    }
+    
+    private void loadInit() throws AttributeNotFoundException {
+        cabe.loadABESystem(0);
         this.bef = new BasicEncryptionFactory();
     }
 

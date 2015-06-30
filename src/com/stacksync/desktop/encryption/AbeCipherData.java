@@ -6,7 +6,7 @@
 package com.stacksync.desktop.encryption;
 
 import com.ast.cloudABE.kpabe.CipherText;
-import com.stacksync.commons.models.ABEMetaComponent;
+import com.stacksync.commons.models.abe.ABEMetaComponent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

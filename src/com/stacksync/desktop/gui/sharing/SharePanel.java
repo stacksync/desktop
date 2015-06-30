@@ -16,6 +16,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -31,12 +32,18 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
     private JFrame frame;
     private File folderSelected;
     
+    public String lock = "";
+    
+    private List<String> emails;
     /**
      * Creates new form SharePanel
      */
     public SharePanel(JFrame frame) {
         
         super();
+        
+        emails = new ArrayList<String>();
+        
         this.resourceBundle = config.getResourceBundle();
         this.frame = frame;
         initComponents();
@@ -203,9 +210,9 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
         Profile profile = config.getProfile();
         Server server = profile.getServer();
         
-        List<String> emails;
+        List<String> emailsList;
         try {
-            emails = getEmails();
+            emailsList = parseEmails();
         } catch (IOException ex) {
             ErrorMessage.showMessage(this, "Error", "Verify email accounts.");
             return;
@@ -216,7 +223,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
             return;
         }
         
-        try {
+        //try {
             boolean encrypted = false;
             boolean abeEncrypted = false;
             if (this.encryptCheckBox.isSelected()) {
@@ -234,27 +241,42 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
                 return;
             }
             
-            CloneFile folder = db.getFileOrFolder(this.folderSelected);
-            server.createShareProposal(profile.getAccountId(), emails, folder.getId(), encrypted, abeEncrypted);
+            /*CloneFile folder = db.getFileOrFolder(this.folderSelected);
+            server.createShareProposal(profile.getAccountId(), emailsList, folder.getId(), encrypted, abeEncrypted);*/
             this.frame.setVisible(false);
-        } catch (ShareProposalNotCreatedException ex) {
+        /*} catch (ShareProposalNotCreatedException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
         } catch (UserNotFoundException ex) {
             ErrorMessage.showMessage(this, "Error", "An error ocurred, please try again later.");
+        }*/
+            
+        synchronized(lock){
+            this.lock.notify();
         }
+        
     }//GEN-LAST:event_shareButtonActionPerformed
 
-    private List<String> getEmails() throws IOException {
+    public boolean isAbeEncrypted() {
+        return this.enableABE.isSelected();
+    }
+    
+    public List<String> getEmails(){
+        return emails;
+    }
+    
+    private List<String> parseEmails() throws IOException {
         
         String emailsStr = this.emailField.getText();
         emailsStr = emailsStr.replaceAll("\\s", "");    // Remove whitespaces
-        List<String> emails = Arrays.asList(emailsStr.split(","));   // Split it
+        List<String> emailsList = Arrays.asList(emailsStr.split(","));   // Split it
         
-        for (String email : emails) {
+        for (String email : emailsList) {
             // Check if email is correct
             if (!isCorrect(email)) {
                 throw new IOException("Incorrect mail.");
             }
+            
+            emails.add(email);
         }
         
         // All mails are correct! =)
@@ -389,5 +411,9 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
         }
 
         return check;
+    }
+
+    public File getFolderSelected() {
+        return this.folderSelected;
     }
 }
