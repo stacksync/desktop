@@ -11,6 +11,7 @@ import com.stacksync.desktop.config.Repository;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.encryption.AbeEncryption;
+import com.stacksync.desktop.encryption.AbeInvitedEncryption;
 import com.stacksync.desktop.encryption.Encryption;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.exceptions.InitializationException;
@@ -260,7 +261,7 @@ public class Profile implements Configurable {
             if (workspace.isEncrypted()) {
                 generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
             } else if (workspace.isAbeEncrypted()) {
-                generateAndSaveAbeEncryption(workspace.getId());
+                generateAndSaveAbeEncryption(workspace);
             }
         }else{
             
@@ -274,7 +275,7 @@ public class Profile implements Configurable {
                 workspace.setPassword(password);
                 generateAndSaveEncryption(workspace.getId(), password);
             } else if (workspace.isAbeEncrypted()) {
-                generateAndSaveAbeEncryption(workspace.getId());
+                generateAndSaveAbeEncryption(workspace);
             }
             
             // new workspace, let's create the workspace folder
@@ -296,13 +297,29 @@ public class Profile implements Configurable {
         }
     }
     
-    private void generateAndSaveAbeEncryption(String id) throws InitializationException {
+    private void generateAndSaveAbeEncryption(CloneWorkspace workspace) throws InitializationException {
         try {
-            AbeEncryption encryption = new AbeEncryption(env.getAppConfDir().getPath() + "/abe/");
-            this.workspaceEncryption.put(id, encryption);
+            if (isMyWorkspace(workspace)) {
+                AbeEncryption encryption = new AbeEncryption(env.getAppConfDir().getPath() + "/abe/");
+                this.workspaceEncryption.put(workspace.getId(), encryption);
+            } else {
+                AbeInvitedEncryption encryption = new AbeInvitedEncryption(env.getAppConfDir().getPath() + "/abe/");
+                this.workspaceEncryption.put(workspace.getId(), encryption);
+            }   
         } catch (ConfigException ex) {
             throw new InitializationException(ex);
         }
+    }
+    
+    private boolean isMyWorkspace(CloneWorkspace workspace) {
+        
+        boolean myWorkspace = false;
+        String me = DatabaseHelper.getInstance().getDefaultWorkspace().getOwner();
+        if (workspace.getOwner().equals(me)) {
+            myWorkspace = true;
+        }
+        
+        return myWorkspace;
     }
     
     private void bindWorkspace(CloneWorkspace workspace, ChangeManager changeManager) throws InitializationException{

@@ -1,18 +1,27 @@
 package com.stacksync.desktop.syncserver;
 
+import com.ast.cloudABE.GUI.UIUtils;
+import com.ast.cloudABE.cloudABEClient.CloudInvitedABEClientAdapter;
+import com.ast.cloudABE.kpabe.SystemKey;
 import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.Workspace;
+import com.stacksync.commons.models.abe.AccessTree;
+import com.stacksync.commons.models.abe.KPABESecretKey;
 import com.stacksync.commons.notifications.ShareProposalNotification;
 import com.stacksync.commons.notifications.UpdateWorkspaceNotification;
 import com.stacksync.commons.omq.RemoteClient;
+import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
+import com.stacksync.desktop.config.profile.Account;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.sharing.PasswordDialog;
 import com.stacksync.desktop.sharing.WorkspaceController;
+import com.stacksync.desktop.util.AccessTreeConverter;
 import java.awt.Frame;
 import java.io.File;
+import java.util.logging.Level;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
@@ -40,6 +49,34 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
          // Save new workspace in DB
         CloneWorkspace cloneWorkspace = new CloneWorkspace(newWorkspace);
         
+        if (cloneWorkspace.isAbeEncrypted()){
+            
+            Account myAccount = config.getProfile().getAccount();
+            KPABESecretKey secretKeyCommons = spn.getABEKeys().get(myAccount.getEmail());
+            
+            if(secretKeyCommons != null){
+                SystemKey publicKey = null;
+            
+                AccessTree accessTree = secretKeyCommons.getAccess_tree();
+
+                com.ast.cloudABE.accessTree.AccessTree adaptedTree = new com.ast.cloudABE.accessTree.AccessTree(AccessTreeConverter.transformTreeFromCommonsToABEClient(accessTree));
+                com.ast.cloudABE.kpabe.KPABESecretKey secretKey = new com.ast.cloudABE.kpabe.KPABESecretKey(secretKeyCommons.getLeaf_keys(),adaptedTree);
+
+                String RESOURCES_PATH = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
+                
+                try {
+                    CloudInvitedABEClientAdapter abeClient = new CloudInvitedABEClientAdapter(RESOURCES_PATH);
+                    abeClient.setupABESystem(0, secretKey.getAccess_tree().toString(), publicKey, secretKey);
+                } catch (Exception ex) {
+                    java.util.logging.Logger.getLogger(RemoteClientImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                /* It is the data owner! Not considered case by the moment. We considered that data owner is exclusive for an specific device. 
+                   Multidevice support should be considered */
+            }
+
+        }
+                
         // If encrypted get the password
         /*String password = null;
         if (spn.isEncrypted()) {
