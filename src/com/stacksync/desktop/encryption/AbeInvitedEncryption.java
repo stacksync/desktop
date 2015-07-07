@@ -1,7 +1,5 @@
 package com.stacksync.desktop.encryption;
 
-import com.ast.cloudABE.cloudABEClient.CloudABEClient;
-import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
 import com.ast.cloudABE.cloudABEClient.CloudInvitedABEClientAdapter;
 import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.ast.cloudABE.kpabe.CipherText;
