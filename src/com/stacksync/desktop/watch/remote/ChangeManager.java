@@ -45,19 +45,15 @@ import com.stacksync.desktop.chunker.Chunker;
 import com.stacksync.desktop.chunker.ChunkEnumeration;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.encryption.AbeCipherData;
-import com.stacksync.desktop.encryption.AbeEncryption;
-import com.stacksync.desktop.encryption.BasicEncryption;
+import com.stacksync.desktop.encryption.AbeInvitedEncryption;
 import com.stacksync.desktop.encryption.CipherData;
 import com.stacksync.desktop.encryption.Encryption;
-import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.repository.files.RemoteFile;
 import com.stacksync.desktop.util.FileUtil;
-import java.security.InvalidKeyException;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 
 /**
  *
@@ -259,7 +255,7 @@ public class ChangeManager {
                                     // TODO Inifinite loop??
                                     logger.error("Unable to download/assemble winning file!", ex);
                                     //RemoteLogs.getInstance().sendLog(ex);
-                                    queue.add(update);
+                                    //queue.add(update);
                                 }
                             }
                         }
@@ -748,10 +744,15 @@ public class ChangeManager {
      * @return decrypted symmetric key
      */
     private byte[] retrieveSymKey(CloneFile cf, Update update) {
-        AbeEncryption enc = (AbeEncryption) cf.getRoot().getProfile().getEncryption(cf.getWorkspace().getId());
+        Encryption enc = (Encryption) cf.getRoot().getProfile().getEncryption(cf.getWorkspace().getId());
         CipherData cipher = new AbeCipherData(update.getCipherSymKey(), update.getAbeComponents());
         logger.info("[ABE Benchmarking - ABE key decryption] Retrieving symmetric key...");
-        byte[] symKey = enc.decrypt(cipher);
+        byte[] symKey = null;
+        try {
+            symKey = enc.decrypt(cipher);
+        } catch (Exception ex) {
+            logger.error(ex);
+        } 
         logger.info("[ABE Benchmarking - ABE key decryption] Symmetric key decrypted.");
         return symKey;
     }
@@ -804,7 +805,7 @@ public class ChangeManager {
             logger.info("[ABE Benchmarking - Unpacking] Unpacking chunks...");
 
             if (cf.getWorkspace().isAbeEncrypted()) {
-                AbeEncryption abenc = (AbeEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
+                AbeInvitedEncryption abenc = (AbeInvitedEncryption) cf.getProfile().getEncryption(cf.getWorkspace().getId());
                 enc = abenc.getBasicEncryption(cf.getSymmetricKey());
             } else {
                 enc = cf.getProfile().getEncryption(cf.getWorkspace().getId());

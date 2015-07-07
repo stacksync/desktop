@@ -332,14 +332,16 @@ public class FileUtil {
             logger.info("[ABE Benchmarking - Unpacking] Data decrypted successfully.");
         }
         logger.info("[ABE Benchmarking - Unpacking] Uncompressing chunk...");
-        return FileUtil.gunzip(packed);
+        //return FileUtil.gunzip(packed);
+        return packed;
     }
 
     public static byte[] pack(byte[] raw, Encryption enc)
             throws IOException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, AttributeNotFoundException {
 
         logger.info("[ABE Benchmarking - Packing] Compressing chunk...");
-        byte[] gzipped = FileUtil.gzip(raw);
+        //byte[] gzipped = FileUtil.gzip(raw);
+        byte[] gzipped = raw;
         logger.info("[ABE Benchmarking - Packing] Chunk compressed.");
         if (enc != null) {
             logger.info("[ABE Benchmarking - Packing] Encrypting raw data...");

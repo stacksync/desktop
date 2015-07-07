@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 
 /**
  *
- * @author javigd
+ * @author ruizmarc
  */
 public class AbeInvitedEncryption implements Encryption {
 

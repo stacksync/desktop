@@ -21,7 +21,6 @@ import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import org.apache.log4j.Logger;
@@ -84,17 +83,14 @@ public class TrayEventListenerImpl implements TrayEventListener {
                         logger.error(ex);
                     }
                 }
-
                 
-                File configFile = Environment.getInstance().getDefaultUserConfigDir();
-                
-                String RESOURCES_PATH = "./resources/conf/abe/";
+                String resourcePath = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
                 CloudABEClient cabe = null;
                 try {
-                    cabe = new CloudABEClientAdapter(RESOURCES_PATH);
+                    cabe = new CloudABEClientAdapter(resourcePath);
                     cabe.loadABESystem(0);
                 } catch (Exception ex) {
-                    java.util.logging.Logger.getLogger(TrayEventListenerImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.error(ex);
                 }
                 
                 HashMap<String,KPABESecretKey> emailsKeys = null;
@@ -107,8 +103,6 @@ public class TrayEventListenerImpl implements TrayEventListener {
                         System.out.println("Setting permissions for: " + email);
                         try {
                             
-                            String resourcePath = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
-                            
                             String attSet = UIUtils.getAccessStructure(resourcePath, "(MarketingA & ResearchA)", email);
                             
                             com.ast.cloudABE.userManagement.User invitedUser = cabe.newABEUserInvited(attSet);
@@ -116,13 +110,13 @@ public class TrayEventListenerImpl implements TrayEventListener {
 
                             AccessTree adaptedTree = new AccessTree(AccessTreeConverter.transformTreeFromABEClientToCommons(accessTree));
                             KPABESecretKey secretKey = new KPABESecretKey(invitedUser.getSecretKey().getLeaf_keys(),adaptedTree);
-                            
+            
                             emailsKeys.put(email,secretKey);
                             
                             System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
                             
                         }catch (Exception ex) {
-                            java.util.logging.Logger.getLogger(TrayEventListenerImpl.class.getName()).log(Level.SEVERE, null, ex);
+                            logger.error(ex);
                         }
                          
                         

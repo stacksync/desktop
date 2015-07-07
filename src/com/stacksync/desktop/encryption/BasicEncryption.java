@@ -31,6 +31,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.spec.SecretKeySpec;
 import com.stacksync.desktop.exceptions.ConfigException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,6 +57,7 @@ public class BasicEncryption implements Encryption {
     private Cipher cipher;
 
     public BasicEncryption(String password) throws ConfigException {
+        
         this.password = password;
         try {
             this.bytePass = password.getBytes("UTF-8");
@@ -131,6 +133,9 @@ public class BasicEncryption implements Encryption {
 
     @Override
     public synchronized CipherData encrypt(PlainData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        
+        System.out.println("Symetric key:" + new BigInteger(key));
+        
         if(cipherStr.toLowerCase().compareTo("none") != 0){
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
             return new BasicCipherData(cipher.doFinal(data.getData()));            
@@ -141,6 +146,9 @@ public class BasicEncryption implements Encryption {
 
     @Override
     public synchronized byte[] decrypt(CipherData data) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        
+        System.out.println("Symetric key:" + new BigInteger(key));
+        
         if(cipherStr.toLowerCase().compareTo("none") != 0){            
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
             return cipher.doFinal(data.getCipherText());        

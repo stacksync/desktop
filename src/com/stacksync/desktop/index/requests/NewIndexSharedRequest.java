@@ -12,7 +12,6 @@ import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.encryption.AbeCipherData;
 import com.stacksync.desktop.encryption.AbeEncryption;
 import com.stacksync.desktop.encryption.AbePlainData;
-import com.stacksync.desktop.encryption.CipherData;
 import com.stacksync.desktop.encryption.Encryption;
 import com.stacksync.desktop.encryption.PlainData;
 import com.stacksync.desktop.gui.sharing.AttributesSelector;

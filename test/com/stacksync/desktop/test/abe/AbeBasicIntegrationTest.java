@@ -5,23 +5,16 @@
  */
 package com.stacksync.desktop.test.abe;
 
-import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.stacksync.desktop.encryption.AbeEncryption;
 import com.stacksync.desktop.encryption.AbePlainData;
-import com.stacksync.desktop.encryption.BasicCipherData;
 import com.stacksync.desktop.encryption.BasicPlainData;
 import com.stacksync.desktop.encryption.CipherData;
 import com.stacksync.desktop.encryption.Encryption;
 import com.stacksync.desktop.encryption.PlainData;
-import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.util.FileUtil;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
