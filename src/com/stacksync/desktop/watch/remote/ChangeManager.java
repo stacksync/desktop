@@ -315,7 +315,7 @@ public class ChangeManager {
             // TODO Inifinite loop??
             logger.error("Warning: could not download/assemble " + newFileUpdate, ex);
             //RemoteLogs.getInstance().sendLog(ex);            
-            queue.add(newFileUpdate);
+            //queue.add(newFileUpdate);
             if (lastMatchingVersion != null) {
                 this.desktop.touch(lastMatchingVersion.getAbsolutePath(), SyncStatus.UNSYNC);
             }
