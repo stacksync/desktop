@@ -19,6 +19,7 @@ import com.stacksync.desktop.gui.tray.Tray;
 import com.stacksync.desktop.logging.RemoteLogs;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -208,12 +209,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         Encryption enc;
 
         String path = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
-        
-        /*FIXME! correct path*/
-        System.out.println(config.getResDir());
-        System.out.println(config.getConfDir());
 
-        
         TreePath attributes[] = openPermissions(path);
         ArrayList attrs = new ArrayList();
 
@@ -241,6 +237,9 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 // Encrypt key using ABE protocol
                 AbeCipherData abeCipherMeta = getEncryptedSymKey(abenc, key, attrs);
                 // Save the produced ABE encryption metadata in CloneFile Object
+                
+                System.out.println("Encrypted key" + new BigInteger(abeCipherMeta.getCipherText()));
+                
                 cf.setCipherSymKey(abeCipherMeta.getCipherText());
                 cf.setAbeComponents(abeCipherMeta.getAbeMetaComponents());
             } else {
@@ -261,13 +260,9 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
                 byte[] packed = FileUtil.pack(chunkInfo.getContents(), enc);
-                if (!chunkCacheFile.exists()) {
-                    FileUtil.writeFile(packed, chunkCacheFile);
-                } else {
-                    if (chunkCacheFile.length() != packed.length) {
-                        FileUtil.writeFile(packed, chunkCacheFile);
-                    }
-                }
+                
+                // Write always the new chunk to avoid encryption problems!
+                FileUtil.writeFile(packed, chunkCacheFile);
 
                 cf.addChunk(chunk);
             }

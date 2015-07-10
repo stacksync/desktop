@@ -61,6 +61,8 @@ public class Server {
         for (SyncMetadata item : items) {
             Update update = Update.parse(item, workspace);
             updates.add(update);
+            System.out.println(item);
+            System.out.println(update);
         }
 
         return updates;

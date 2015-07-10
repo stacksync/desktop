@@ -24,6 +24,7 @@ import com.stacksync.commons.models.SyncMetadata;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneFile.Status;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -197,7 +198,47 @@ public class Update {
     
     @Override
     public String toString() {
-        return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + "]";
+        
+        String update = "mimeType: " + mimeType +
+        "\nfileId: "+fileId+
+        "\nversion: "+version+
+        "\nparentFileId: "+parentFileId+
+        "\nparentFileVersion: "+parentFileVersion+
+
+        "\nstatus: "+status+
+        "\nmodifiedAt: "+modifiedAt+
+        "\nchecksum: "+checksum+
+        "\nfileSize: "+fileSize+
+        "\nfolder: "+folder+
+        "\nname: "+name+
+        //"\nworkspace"+workspace+
+
+        "\nserverUploaded: "+serverUploaded+      
+        "\nserverUploadedAck: "+serverUploadedAck+
+        "\nserverUploadedTime: "+ serverUploadedTime+
+        "\nconflicted: "+conflicted;
+
+        /* ABE Encryption Fields */
+
+        if(abeComponents!=null){
+            update+="\nABEComponents";
+                for(ABEMetaComponent component:abeComponents){
+                    update+="\n\t"+component.toString();
+                }
+        }
+
+
+        if(cipherSymKey!=null){
+            update+="\nCipher symKey" + new BigInteger(cipherSymKey); 
+        }
+
+        update+="\nChunks";
+        for(String chunk:chunks){
+                update+="\n\t"+chunk;
+        }
+    
+        return update;
+        //return "Update[fileId=" + getFileId() + ", version=" + getVersion() + ", status=" + getStatus() + "]";
     }
     
     public void setServerUploaded(boolean serverUploaded){

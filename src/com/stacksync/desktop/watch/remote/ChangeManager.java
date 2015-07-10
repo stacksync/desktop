@@ -765,11 +765,6 @@ public class ChangeManager {
         for (CloneChunk chunk : file.getChunks()) {
             File chunkCacheFile = config.getCache().getCacheChunk(chunk);
 
-            if (chunk.getCacheStatus() == CacheStatus.CACHED && chunkCacheFile.exists()) {
-                logger.info("- Chunk " + chunk + " found in local cache.");
-                continue;
-            }
-
             try {
                 logger.info("- Downloading chunk (" + chunkNum + "/" + file.getChunks().size() + ") " + chunk + " ...");
                 logger.info("[ABE Benchmarking - Download] Downloading chunk " + chunkNum + "...");
