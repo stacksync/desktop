@@ -4,6 +4,7 @@ import com.ast.cloudABE.cloudABEClient.CloudABEClient;
 import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
 import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.ast.cloudABE.kpabe.CipherText;
+import com.ast.cloudABE.kpabe.SystemKey;
 import com.stacksync.desktop.exceptions.ConfigException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
@@ -44,12 +45,26 @@ public class AbeEncryption implements Encryption {
             throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
         }
     }
-
+    
+    public AbeEncryption(String abeResourcesPath, SystemKey publicKey, SystemKey masterKey, byte[] groupGenerator) throws ConfigException {
+        try {
+            this.cabe = new CloudABEClientAdapter(abeResourcesPath);
+            this.random = new SecureRandom();
+            init(publicKey, masterKey, groupGenerator);
+        } catch (Exception e) {
+            throw new ConfigException(e.getMessage() + "\n ABE Encryption: wrong initializing parameters");
+        }
+    }
+        
     private void init() throws AttributeNotFoundException {
         cabe.setupABESystem(0, accessStructure);
         this.bef = new BasicEncryptionFactory();
     }
     
+    private void init(SystemKey publicKey, SystemKey masterKey, byte[] groupGenerator) throws AttributeNotFoundException{
+        cabe.setupABESystem(0, publicKey, masterKey, groupGenerator);
+        this.bef = new BasicEncryptionFactory();
+    }
     private void loadInit() throws AttributeNotFoundException {
         cabe.loadABESystem(0);
         this.bef = new BasicEncryptionFactory();

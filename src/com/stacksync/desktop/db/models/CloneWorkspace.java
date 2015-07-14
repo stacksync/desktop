@@ -56,7 +56,25 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     
     @Column(name="is_default")
     private boolean defaultWorkspace;
+            
+    @Column(name="master_key")
+    private byte[] masterKey;
+
+    @Column(name="public_key")
+    private byte[] publicKey;
     
+    @Column(name="secret_key")
+    private byte[] secretKey;
+        
+    @Column(name="access_structure")
+    private String accessStructure;
+    
+    @Column(name="group_generator")
+    private byte[] groupGenerator;
+    
+    @Column(name="is_approved")
+    private boolean isApproved;
+        
     @OneToMany
     private List<CloneFile> files;
     
@@ -80,7 +98,7 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.pathWorkspace = generatePath();
         this.encrypted = true;
         this.abeEncrypted = false;
-        
+
         if (!defaultWorkspace) {
             this.encrypted = r.isEncrypted();
             this.abeEncrypted = r.isAbeEncrypted();
@@ -206,10 +224,58 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.abeEncrypted = abeEncrypted;
     }
 
+    public byte[] getMasterKey() {
+        return masterKey;
+    }
+
+    public void setMasterKey(byte[] masterKey) {
+        this.masterKey = masterKey;
+    }
+
+    public byte[] getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(byte[] publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public byte[] getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(byte[] privateKey) {
+        this.secretKey = privateKey;
+    }
+
+    public String getAccessStructure() {
+        return accessStructure;
+    }
+
+    public void setAccessStructure(String accessStructure) {
+        this.accessStructure = accessStructure;
+    }
+
+    public boolean getIsApproved() {
+        return isApproved;
+    }
+
+    public void setIsApproved(boolean isApproved) {
+        this.isApproved = isApproved;
+    }
+    
     public boolean isDefaultWorkspace() {
         return defaultWorkspace;
     }
 
+    public byte[] getGroupGenerator() {
+        return groupGenerator;
+    }
+
+    public void setGroupGenerator(byte[] groupGenerator) {
+        this.groupGenerator = groupGenerator;
+    }
+    
     public void setDefaultWorkspace(boolean defaultWorkspace) {
         this.defaultWorkspace = defaultWorkspace;
     }
@@ -254,6 +320,12 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         workspace.setEncrypted(isEncrypted());
         workspace.setAbeEncrypted(isAbeEncrypted());
         workspace.setDefaultWorkspace(isDefaultWorkspace());
+        workspace.setPublicKey(getPublicKey());
+        workspace.setMasterKey(getMasterKey());
+        workspace.setAccessStructure(getAccessStructure());
+        workspace.setIsApproved(getIsApproved());
+        workspace.setSecretKey(getSecretKey());
+        workspace.setGroupGenerator(getGroupGenerator());
         return workspace;
     }
 

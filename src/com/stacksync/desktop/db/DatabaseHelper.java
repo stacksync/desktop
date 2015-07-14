@@ -656,9 +656,11 @@ public class DatabaseHelper {
         query.setHint("eclipselink.cache-usage", "DoNotCheckCache");        
         
         query.setParameter("id", id);
-        CloneWorkspace workspace = (CloneWorkspace)query.getSingleResult();
-        
-        return workspace;
+        try{
+            return (CloneWorkspace)query.getSingleResult();
+        } catch (NoResultException ex){
+            return null;
+        }
     }
 
     public List<CloneFile> getWorkspaceFiles(String id) {

@@ -1,11 +1,16 @@
 package com.stacksync.desktop.gui.tray;
 
 import com.ast.cloudABE.GUI.UIUtils;
+import com.ast.cloudABE.cloudABEClient.CABEConstants;
 import com.ast.cloudABE.cloudABEClient.CloudABEClient;
 import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
+import com.ast.cloudABE.kpabe.KPABE;
+import com.ast.cloudABE.kpabe.KPABE.SystemSetup;
+import com.google.gson.Gson;
 import com.stacksync.commons.models.abe.KPABESecretKey;
 import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
+import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.abe.AccessTree;
 import com.stacksync.desktop.ApplicationController;
 import com.stacksync.desktop.Constants;
@@ -14,6 +19,7 @@ import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
+import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.gui.sharing.SharePanel;
 import com.stacksync.desktop.syncserver.Server;
@@ -84,18 +90,50 @@ public class TrayEventListenerImpl implements TrayEventListener {
                     }
                 }
                 
-                String resourcePath = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
-                CloudABEClient cabe = null;
-                try {
-                    cabe = new CloudABEClientAdapter(resourcePath);
-                    cabe.loadABESystem(0);
-                } catch (Exception ex) {
-                    logger.error(ex);
-                }
-                
                 HashMap<String,KPABESecretKey> emailsKeys = null;
                 
+                Config config = Config.getInstance();
+                Profile profile = config.getProfile();
+                Server server = profile.getServer();
+
+                DatabaseHelper db = DatabaseHelper.getInstance();
+                CloneFile sharedFolder = db.getFileOrFolder(panel.getFolderSelected());
+                
                 if (panel.isAbeEncrypted()) {
+
+                    String RESOURCES_PATH = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
+                    
+                    CloudABEClientAdapter abeClient = null;
+                             
+                    try {
+                        abeClient = new CloudABEClientAdapter(RESOURCES_PATH);
+                        abeClient.setupABESystem(0);
+                    } catch (Exception ex) {
+                        logger.error(ex);
+                        break;
+                    }
+                    
+                    CloneWorkspace newWorkspace = new CloneWorkspace();
+                    newWorkspace.setId(sharedFolder.getId().toString());
+                    newWorkspace.setName(sharedFolder.getName());
+                    newWorkspace.setLocalLastUpdate(0);
+                    newWorkspace.setRemoteRevision(0);
+                    newWorkspace.setEncrypted(false);
+                    newWorkspace.setAbeEncrypted(true);
+                    newWorkspace.setDefaultWorkspace(false);
+                    newWorkspace.setOwner(profile.getAccountId());
+                    newWorkspace.getPathWorkspace();
+                    newWorkspace.setIsApproved(false);
+                    newWorkspace.setGroupGenerator(abeClient.getGroupGenerator());
+                    
+                    Gson gson = new Gson();
+                    String publicKey = gson.toJson(abeClient.getPublicKey());
+                    String masterKey = gson.toJson(abeClient.getMasterKey());
+                    
+                    newWorkspace.setMasterKey(masterKey.getBytes());
+                    newWorkspace.setPublicKey(publicKey.getBytes());
+                    
+                    newWorkspace.merge();
                     
                     emailsKeys = new HashMap<String,KPABESecretKey>();
                           
@@ -103,9 +141,9 @@ public class TrayEventListenerImpl implements TrayEventListener {
                         System.out.println("Setting permissions for: " + email);
                         try {
                             
-                            String attSet = UIUtils.getAccessStructure(resourcePath, "(MarketingA & ResearchA)", email);
+                            String attSet = UIUtils.getAccessStructure(RESOURCES_PATH, null, email);
                             
-                            com.ast.cloudABE.userManagement.User invitedUser = cabe.newABEUserInvited(attSet);
+                            com.ast.cloudABE.userManagement.User invitedUser = abeClient.newABEUserInvited(attSet);
                             com.ast.cloudABE.accessTree.AccessTree accessTree = invitedUser.getSecretKey().getAccess_tree();
 
                             AccessTree adaptedTree = new AccessTree(AccessTreeConverter.transformTreeFromABEClientToCommons(accessTree));
@@ -122,13 +160,6 @@ public class TrayEventListenerImpl implements TrayEventListener {
                         
                     }
                 }
-
-                Config config = Config.getInstance();
-                Profile profile = config.getProfile();
-                Server server = profile.getServer();
-
-                DatabaseHelper db = DatabaseHelper.getInstance();
-                CloneFile sharedFolder = db.getFileOrFolder(panel.getFolderSelected());
                 
                 if(panel.isAbeEncrypted()){
                         try {

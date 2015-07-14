@@ -1,5 +1,13 @@
 package com.stacksync.desktop.config.profile;
 
+import com.ast.cloudABE.accessTree.AccessTree;
+import com.ast.cloudABE.cloudABEClient.CABEConstants;
+import com.ast.cloudABE.cloudABEClient.CloudInvitedABEClientAdapter;
+import com.ast.cloudABE.kpabe.KPABE;
+import com.ast.cloudABE.kpabe.KPABESecretKey;
+import com.ast.cloudABE.kpabe.SystemKey;
+import com.ast.cloudABE.util.AccessTreeIDsAdjuster;
+import com.google.gson.Gson;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.desktop.Environment;
 import com.stacksync.desktop.config.Config;
@@ -261,7 +269,7 @@ public class Profile implements Configurable {
             if (workspace.isEncrypted()) {
                 generateAndSaveEncryption(workspace.getId(), workspace.getPassword());
             } else if (workspace.isAbeEncrypted()) {
-                generateAndSaveAbeEncryption(workspace);
+                generateAndSaveAbeEncryption(localWorkspaces.get(workspace.getId()));
             }
         }else{
             
@@ -299,11 +307,34 @@ public class Profile implements Configurable {
     
     private void generateAndSaveAbeEncryption(CloneWorkspace workspace) throws InitializationException {
         try {
+            
+            Gson gson = new Gson(); 
+            SystemKey publicKey = gson.fromJson(new String(workspace.getPublicKey()), SystemKey.class);
+            
             if (isMyWorkspace(workspace)) {
-                AbeEncryption encryption = new AbeEncryption(env.getAppConfDir().getPath() + "/abe/");
+               
+                SystemKey masterKey = gson.fromJson(new String(workspace.getMasterKey()), SystemKey.class); 
+                byte[] groupGenerator = workspace.getGroupGenerator();
+                
+                AbeEncryption encryption = new AbeEncryption(env.getAppConfDir().getPath() + "/abe/",
+                publicKey, masterKey, groupGenerator);
+                
                 this.workspaceEncryption.put(workspace.getId(), encryption);
+                
             } else {
-                AbeInvitedEncryption encryption = new AbeInvitedEncryption(env.getAppConfDir().getPath() + "/abe/");
+                
+                String RESOURCES_PATH = env.getAppConfDir().getPath() + "/abe/";
+                        
+                ArrayList<String> attributeUniverse = CloudInvitedABEClientAdapter.getAttUniverseFromXML(RESOURCES_PATH + CABEConstants.XML_PATH);
+                AccessTree accessTree = KPABE.setAccessTree(workspace.getAccessStructure());
+                accessTree = new AccessTree(AccessTreeIDsAdjuster.adjustAccessTreeIDs(accessTree, attributeUniverse));
+                
+                KPABESecretKey lightSecretKey = gson.fromJson(new String(workspace.getSecretKey()),  KPABESecretKey.class); 
+                KPABESecretKey secretKey = new KPABESecretKey(lightSecretKey.getLeaf_keys(),accessTree);
+                
+                AbeInvitedEncryption encryption = new AbeInvitedEncryption(env.getAppConfDir().getPath() + "/abe/",
+                workspace.getAccessStructure(), publicKey, secretKey);
+                
                 this.workspaceEncryption.put(workspace.getId(), encryption);
             }   
         } catch (ConfigException ex) {
