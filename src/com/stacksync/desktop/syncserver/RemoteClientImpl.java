@@ -49,8 +49,8 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
             if (cloneWorkspace.isAbeEncrypted()) {
 
                 Account myAccount = config.getProfile().getAccount();
-                byte[] secretKeyBytes = spn.getABEKeys().get(myAccount.getEmail()).get("secret_key");
-                byte[] accessStructBytes = spn.getABEKeys().get(myAccount.getEmail()).get("access_struct");
+                byte[] secretKeyBytes = spn.getABEKey().get("secret_key");
+                byte[] accessStructBytes = spn.getABEKey().get("access_struct");
 
                 if (secretKeyBytes != null) {
  
