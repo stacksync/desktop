@@ -325,12 +325,17 @@ public class Profile implements Configurable {
                 
                 String RESOURCES_PATH = env.getAppConfDir().getPath() + "/abe/";
                         
+                // 1. Load attributes
                 ArrayList<String> attributeUniverse = CloudInvitedABEClientAdapter.getAttUniverseFromXML(RESOURCES_PATH + CABEConstants.XML_PATH);
+                // 2. Create AccessTree class from the access structure string (i.e. Attr1 & Attr2)
                 AccessTree accessTree = KPABE.setAccessTree(workspace.getAccessStructure());
+                // 3. Adjust the IDs of the tree with the ones used in the attribute universe.
                 accessTree = new AccessTree(AccessTreeIDsAdjuster.adjustAccessTreeIDs(accessTree, attributeUniverse));
                 
-                KPABESecretKey lightSecretKey = gson.fromJson(new String(workspace.getSecretKey()),  KPABESecretKey.class); 
-                KPABESecretKey secretKey = new KPABESecretKey(lightSecretKey.getLeaf_keys(),accessTree);
+                // First we create the secretKey from the workspace instance, but it lacks the access tree.
+                KPABESecretKey secretKey = gson.fromJson(new String(workspace.getSecretKey()),  KPABESecretKey.class); 
+                // Here we set the access tree for the secret key and we get the final SK necessary to the ABEEncryption.
+                secretKey = new KPABESecretKey(secretKey.getLeaf_keys(),accessTree);
                 
                 AbeInvitedEncryption encryption = new AbeInvitedEncryption(env.getAppConfDir().getPath() + "/abe/",
                 workspace.getAccessStructure(), publicKey, secretKey);

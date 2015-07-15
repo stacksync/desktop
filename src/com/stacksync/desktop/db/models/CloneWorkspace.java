@@ -1,5 +1,8 @@
 package com.stacksync.desktop.db.models;
 
+import com.ast.cloudABE.kpabe.KPABESecretKey;
+import com.google.gson.Gson;
+import com.stacksync.commons.models.ABEWorkspace;
 import com.stacksync.commons.models.Workspace;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.PersistentObject;
@@ -96,13 +99,45 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         this.swiftStorageURL = r.getSwiftUrl();
         this.owner = r.getOwner().getId().toString();
         this.pathWorkspace = generatePath();
-        this.encrypted = true;
+        this.encrypted = r.isEncrypted();
         this.abeEncrypted = false;
 
         if (!defaultWorkspace) {
             this.encrypted = r.isEncrypted();
             this.abeEncrypted = r.isAbeEncrypted();
         }
+    }
+    
+    public CloneWorkspace(ABEWorkspace r){
+        this.id = r.getId().toString();
+        this.name = r.getName();
+        
+        this.parentId = null;
+        if (r.getParentItem() != null && r.getParentItem().getId() != null) {
+            this.parentId = r.getParentItem().getId();
+        }
+        
+        this.defaultWorkspace = !r.isShared();
+        this.localLastUpdate = r.getLatestRevision();
+        this.remoteLastUpdate = r.getLatestRevision();
+        this.swiftContainer = r.getSwiftContainer();
+        this.swiftStorageURL = r.getSwiftUrl();
+        this.owner = r.getOwner().getId().toString();
+        this.pathWorkspace = generatePath();
+        this.encrypted = false;
+        this.abeEncrypted = true;
+
+        if (!defaultWorkspace) {
+            this.encrypted = r.isEncrypted();
+            this.abeEncrypted = r.isAbeEncrypted();
+        }
+        
+        if(((ABEWorkspace)r).getAccess_struct()!=null)
+            this.accessStructure = new String(((ABEWorkspace)r).getAccess_struct()); 
+        
+        this.publicKey = r.getPublicKey();
+        this.secretKey = r.getSecretKey();
+        
     }
 
     public String getId() {

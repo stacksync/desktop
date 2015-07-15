@@ -1,11 +1,8 @@
 package com.stacksync.desktop.syncserver;
 
-import com.ast.cloudABE.kpabe.SystemKey;
 import com.google.gson.Gson;
 import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.Workspace;
-import com.stacksync.commons.models.abe.AccessTree;
-import com.stacksync.commons.models.abe.KPABESecretKey;
 import com.stacksync.commons.notifications.ShareProposalNotification;
 import com.stacksync.commons.notifications.UpdateWorkspaceNotification;
 import com.stacksync.commons.omq.RemoteClient;
@@ -52,23 +49,16 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
             if (cloneWorkspace.isAbeEncrypted()) {
 
                 Account myAccount = config.getProfile().getAccount();
-                KPABESecretKey secretKeyCommons = spn.getABEKeys().get(myAccount.getEmail());
+                byte[] secretKeyBytes = spn.getABEKeys().get(myAccount.getEmail()).get("secret_key");
+                byte[] accessStructBytes = spn.getABEKeys().get(myAccount.getEmail()).get("access_struct");
 
-                if (secretKeyCommons != null) {
-                    SystemKey publicKey = null;
-
-                    AccessTree accessTree = secretKeyCommons.getAccess_tree();
-
-                    // Avoid storing the access tree (redundant info, can be further generated from access structure)
-                    com.ast.cloudABE.kpabe.KPABESecretKey skLight = new com.ast.cloudABE.kpabe.KPABESecretKey(secretKeyCommons.getLeaf_keys(), null);
-
-                    Gson gson = new Gson();
-                    String secretKeyjson = gson.toJson(skLight);
-                    String publicKeyjson = gson.toJson(publicKey);
-                    
-                    cloneWorkspace.setSecretKey(secretKeyjson.getBytes());
-                    cloneWorkspace.setAccessStructure(accessTree.toString());
-                    cloneWorkspace.setPublicKey(publicKeyjson.getBytes());
+                if (secretKeyBytes != null) {
+ 
+                    String accessStruct = new String(accessStructBytes); 
+                     
+                    cloneWorkspace.setSecretKey(secretKeyBytes);
+                    cloneWorkspace.setAccessStructure(accessStruct);
+                    cloneWorkspace.setPublicKey(spn.getPublicKey());
                     cloneWorkspace.setIsApproved(true);
                     
                 } else {

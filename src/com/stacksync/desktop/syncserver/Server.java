@@ -1,12 +1,15 @@
 package com.stacksync.desktop.syncserver;
 
-import com.stacksync.commons.models.abe.KPABESecretKey;
+import com.ast.cloudABE.accessTree.AccessTree;
+import com.ast.cloudABE.kpabe.KPABESecretKey;
+import com.google.gson.Gson;
 import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
 import com.stacksync.commons.exceptions.DeviceNotValidException;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
 import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.commons.exceptions.WorkspaceNotUpdatedException;
+import com.stacksync.commons.models.ABEWorkspace;
 import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.commons.models.SyncMetadata;
 import com.stacksync.commons.models.Workspace;
@@ -74,8 +77,16 @@ public class Server {
         GetWorkspacesRequest request = new GetWorkspacesRequest(UUID.fromString(accountId));
         List<Workspace> remoteWorkspaces = syncServer.getWorkspaces(request);
 
+
         for (Workspace rWorkspace : remoteWorkspaces) {
-            CloneWorkspace workspace = new CloneWorkspace(rWorkspace);
+            CloneWorkspace workspace;
+            if(rWorkspace.isAbeEncrypted()){
+                
+                workspace = new CloneWorkspace((ABEWorkspace)rWorkspace);
+ 
+            } else {
+                workspace = new CloneWorkspace(rWorkspace);
+            }
             workspaces.add(workspace);
         }
 
@@ -133,12 +144,12 @@ public class Server {
         syncServer.createShareProposal(request);
     }
     
-    public void createShareProposal(String accountId, HashMap<String,KPABESecretKey> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted)
+    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted)
             throws ShareProposalNotCreatedException, UserNotFoundException {
         
         logger.info("Sending share proposal.");
         
-        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), emailsKeys, folderId, encrypted, abeEncrypted);
+        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), publickey, emailsKeys, folderId, encrypted, abeEncrypted);
         
         request.setRequestId(getRequestId());
         syncServer.createShareProposal(request);

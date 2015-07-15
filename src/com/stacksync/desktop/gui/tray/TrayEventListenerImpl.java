@@ -1,17 +1,13 @@
 package com.stacksync.desktop.gui.tray;
 
 import com.ast.cloudABE.GUI.UIUtils;
-import com.ast.cloudABE.cloudABEClient.CABEConstants;
-import com.ast.cloudABE.cloudABEClient.CloudABEClient;
+import com.ast.cloudABE.accessTree.AccessTree;
 import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
-import com.ast.cloudABE.kpabe.KPABE;
-import com.ast.cloudABE.kpabe.KPABE.SystemSetup;
+import com.ast.cloudABE.kpabe.KPABESecretKey;
+import com.ast.cloudABE.userManagement.User;
 import com.google.gson.Gson;
-import com.stacksync.commons.models.abe.KPABESecretKey;
 import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
 import com.stacksync.commons.exceptions.UserNotFoundException;
-import com.stacksync.commons.models.User;
-import com.stacksync.commons.models.abe.AccessTree;
 import com.stacksync.desktop.ApplicationController;
 import com.stacksync.desktop.Constants;
 import com.stacksync.desktop.Environment;
@@ -30,7 +26,6 @@ import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import org.apache.log4j.Logger;
-import com.stacksync.desktop.util.AccessTreeConverter;
 
 /**
  *
@@ -90,7 +85,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                     }
                 }
                 
-                HashMap<String,KPABESecretKey> emailsKeys = null;
+                HashMap<String,HashMap<String,byte[]>> emailsKeys = null;
                 
                 Config config = Config.getInstance();
                 Profile profile = config.getProfile();
@@ -99,6 +94,8 @@ public class TrayEventListenerImpl implements TrayEventListener {
                 DatabaseHelper db = DatabaseHelper.getInstance();
                 CloneFile sharedFolder = db.getFileOrFolder(panel.getFolderSelected());
                 
+                String publicKey = null;
+                        
                 if (panel.isAbeEncrypted()) {
 
                     String RESOURCES_PATH = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
@@ -127,7 +124,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                     newWorkspace.setGroupGenerator(abeClient.getGroupGenerator());
                     
                     Gson gson = new Gson();
-                    String publicKey = gson.toJson(abeClient.getPublicKey());
+                    publicKey = gson.toJson(abeClient.getPublicKey());
                     String masterKey = gson.toJson(abeClient.getMasterKey());
                     
                     newWorkspace.setMasterKey(masterKey.getBytes());
@@ -135,7 +132,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                     
                     newWorkspace.merge();
                     
-                    emailsKeys = new HashMap<String,KPABESecretKey>();
+                    emailsKeys = new HashMap<String,HashMap<String,byte[]>>();
                           
                     for (String email : panel.getEmails()) {
                         System.out.println("Setting permissions for: " + email);
@@ -143,13 +140,19 @@ public class TrayEventListenerImpl implements TrayEventListener {
                             
                             String attSet = UIUtils.getAccessStructure(RESOURCES_PATH, null, email);
                             
-                            com.ast.cloudABE.userManagement.User invitedUser = abeClient.newABEUserInvited(attSet);
-                            com.ast.cloudABE.accessTree.AccessTree accessTree = invitedUser.getSecretKey().getAccess_tree();
+                            User invitedUser = abeClient.newABEUserInvited(attSet);
+                            AccessTree accessTree= invitedUser.getSecretKey().getAccess_tree();
 
-                            AccessTree adaptedTree = new AccessTree(AccessTreeConverter.transformTreeFromABEClientToCommons(accessTree));
-                            KPABESecretKey secretKey = new KPABESecretKey(invitedUser.getSecretKey().getLeaf_keys(),adaptedTree);
+                            KPABESecretKey secretKeyLight = new KPABESecretKey(invitedUser.getSecretKey().getLeaf_keys(),null);
             
-                            emailsKeys.put(email,secretKey);
+                            String secretKeyjson = gson.toJson(secretKeyLight);
+                            
+                            HashMap<String,byte[]> secretKeyStruct = new HashMap<String,byte[]>();
+                            
+                            secretKeyStruct.put("secret_key", secretKeyjson.getBytes());
+                            secretKeyStruct.put("access_struct", accessTree.toString().getBytes());
+                            
+                            emailsKeys.put(email,secretKeyStruct);
                             
                             System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
                             
@@ -165,7 +168,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                         try {
                             /*FIXME! Be careful, emails and keys are sent in plain text without encryption, 
                                     key distribution problem should be solved in order to guarantee security and privacy */
-                            server.createShareProposal(profile.getAccountId(), emailsKeys, sharedFolder.getId(), false, panel.isAbeEncrypted());
+                            server.createShareProposal(profile.getAccountId(), publicKey.getBytes(), emailsKeys, sharedFolder.getId(), false, panel.isAbeEncrypted());
                         } catch (ShareProposalNotCreatedException ex) {
                             ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
                         } catch (UserNotFoundException ex) {

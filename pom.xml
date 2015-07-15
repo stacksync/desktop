@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.stacksync</groupId>
             <artifactId>stacksync-commons</artifactId>
-            <version>1.4.3-abe</version>
+            <version>1.4.4-abe</version>
         </dependency>
         <dependency>
             <groupId>objectmq</groupId>
@@ -147,7 +147,7 @@
         <dependency>
             <groupId>com.ast.ABEClient</groupId>
             <artifactId>abeClient</artifactId>
-            <version>0.0.3</version>
+            <version>0.0.4</version>
         </dependency>
     </dependencies>
     
