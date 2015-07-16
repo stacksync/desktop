@@ -20,14 +20,14 @@
     </rabbitMQ>
 
     
-    <database>
+<!--    <database>
         <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/stacksync"/>
         <property name="javax.persistence.jdbc.password" value="stacksync"/>
         <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
         <property name="javax.persistence.jdbc.user" value="stacksync"/>
-        <!--<property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>-->
+        <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
         <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>        
-    </database>
+    </database>-->
     
     
     <cache>
