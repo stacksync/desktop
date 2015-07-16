@@ -30,7 +30,9 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         CloneWorkspace tempWorkspace = db.getWorkspace(spn.getItemId().toString());
         CloneWorkspace cloneWorkspace;
         
-        if (tempWorkspace == null) { // I'm not the owner
+        boolean alreadyExists = db.getWorkspace(spn.getWorkspaceId().toString())!=null;
+        
+        if (tempWorkspace == null && !alreadyExists) { // I'm not the owner
             
             Workspace newWorkspace = new Workspace(spn.getWorkspaceId());
             newWorkspace.setSwiftContainer(spn.getSwiftContainer());
@@ -69,14 +71,18 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
             
         } else { // I'm the owner :D
             
-            cloneWorkspace = tempWorkspace.clone();
-            if (tempWorkspace.isAbeEncrypted()){
+            if(!alreadyExists && tempWorkspace!=null){ //I'm the owner but the workspace wasn't aproved before by the server
+                cloneWorkspace = tempWorkspace.clone();
                 cloneWorkspace.setId(spn.getWorkspaceId().toString());
                 cloneWorkspace.setSwiftContainer(spn.getSwiftContainer());
                 cloneWorkspace.setSwiftStorageURL(spn.getSwiftURL());
                 cloneWorkspace.setIsApproved(true);
-            }   
-            tempWorkspace.remove();
+                tempWorkspace.remove();
+            } else {
+                cloneWorkspace = db.getWorkspace(spn.getWorkspaceId().toString());
+            }
+           
+            
         }
         
         // If encrypted get the password
@@ -90,17 +96,19 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
          }
          }
          cloneWorkspace.setPassword(password);*/
-        if (isMyWorkspace(cloneWorkspace)) {
+        if (isMyWorkspace(cloneWorkspace) && db.getWorkspace(spn.getWorkspaceId().toString())==null) { //Check if workspace is bounded
             cloneWorkspace.merge();
 
             CloneFile sharedFolder = db.getFileOrFolder(spn.getItemId());
             WorkspaceController.getInstance().changeFolderWorkspace(cloneWorkspace, sharedFolder);
         }
 
-        try {
-            config.getProfile().addNewWorkspace(cloneWorkspace);
-        } catch (Exception e) {
-            logger.error("Error trying to listen new workspace: " + e);
+        if (!alreadyExists) {
+            try {
+                config.getProfile().addNewWorkspace(cloneWorkspace);
+            } catch (Exception e) {
+                logger.error("Error trying to listen new workspace: " + e);
+            }
         }
 
     }

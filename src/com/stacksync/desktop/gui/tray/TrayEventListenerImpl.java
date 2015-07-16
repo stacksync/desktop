@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import org.apache.log4j.Logger;
@@ -113,12 +114,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
 
                         CloudABEClientAdapter abeClient = null;
 
-                        try {
-                            abeClient = new CloudABEClientAdapter(RESOURCES_PATH);
-                        } catch (Exception ex) {
-                            logger.error(ex);
-                            break;
-                        }
+                        abeClient = new CloudABEClientAdapter(RESOURCES_PATH);
 
                         for (CloneWorkspace workspace : workspaces.values()) {
 
@@ -131,6 +127,8 @@ public class TrayEventListenerImpl implements TrayEventListener {
                                     SystemKey masterKey = gson.fromJson(new String(workspace.getMasterKey()), SystemKey.class);
                                     SystemKey publicKey = gson.fromJson(new String(workspace.getPublicKey()), SystemKey.class);
 
+                                    publicKeyjson = new String(workspace.getPublicKey());
+                                    
                                     try {
                                         abeClient.setupABESystem(0, publicKey, masterKey, workspace.getGroupGenerator());
                                     } catch (AttributeNotFoundException ex) {
@@ -146,11 +144,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
 
                         if (!alreadyShared && !invited) { // If not shared and i'm not invited, I will be the owner
 
-                            try {
-                                abeClient.setupABESystem(0);
-                            } catch (AttributeNotFoundException ex) {
-                                logger.error(ex);
-                            }
+                            abeClient.setupABESystem(0);
 
                             CloneWorkspace newWorkspace = new CloneWorkspace();
                             newWorkspace.setId(sharedFolder.getId().toString());
@@ -179,29 +173,24 @@ public class TrayEventListenerImpl implements TrayEventListener {
 
                             for (String email : panel.getEmails()) {
                                 System.out.println("Setting permissions for: " + email);
-                                try {
 
-                                    String attSet = UIUtils.getAccessStructure(RESOURCES_PATH, null, email);
+                                String attSet = UIUtils.getAccessStructure(RESOURCES_PATH, null, email);
 
-                                    User invitedUser = abeClient.newABEUserInvited(attSet);
-                                    AccessTree accessTree = invitedUser.getSecretKey().getAccess_tree();
+                                User invitedUser = abeClient.newABEUserInvited(attSet);
+                                AccessTree accessTree = invitedUser.getSecretKey().getAccess_tree();
 
-                                    KPABESecretKey secretKeyLight = new KPABESecretKey(invitedUser.getSecretKey().getLeaf_keys(), null);
+                                KPABESecretKey secretKeyLight = new KPABESecretKey(invitedUser.getSecretKey().getLeaf_keys(), null);
 
-                                    String secretKeyjson = gson.toJson(secretKeyLight);
+                                String secretKeyjson = gson.toJson(secretKeyLight);
 
-                                    HashMap<String, byte[]> secretKeyStruct = new HashMap<String, byte[]>();
+                                HashMap<String, byte[]> secretKeyStruct = new HashMap<String, byte[]>();
 
-                                    secretKeyStruct.put("secret_key", secretKeyjson.getBytes());
-                                    secretKeyStruct.put("access_struct", accessTree.toString().getBytes());
+                                secretKeyStruct.put("secret_key", secretKeyjson.getBytes());
+                                secretKeyStruct.put("access_struct", accessTree.toString().getBytes());
 
-                                    emailsKeys.put(email, secretKeyStruct);
+                                emailsKeys.put(email, secretKeyStruct);
 
-                                    System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
-
-                                } catch (Exception ex) {
-                                    logger.error(ex);
-                                }
+                                System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
                             }
 
                             /*FIXME! Be careful, emails and keys are sent in plain text without encryption, 
@@ -218,7 +207,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
 
                 } catch (ShareProposalNotCreatedException ex) {
                     ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
-                } catch (UserNotFoundException ex) {
+                } catch (Exception ex) {
                     ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.");
                 }
 
