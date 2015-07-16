@@ -3,7 +3,9 @@ package com.stacksync.desktop.gui.tray;
 import com.ast.cloudABE.GUI.UIUtils;
 import com.ast.cloudABE.accessTree.AccessTree;
 import com.ast.cloudABE.cloudABEClient.CloudABEClientAdapter;
+import com.ast.cloudABE.exceptions.AttributeNotFoundException;
 import com.ast.cloudABE.kpabe.KPABESecretKey;
+import com.ast.cloudABE.kpabe.SystemKey;
 import com.ast.cloudABE.userManagement.User;
 import com.google.gson.Gson;
 import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
@@ -22,6 +24,7 @@ import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.desktop.util.FileUtil;
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -30,10 +33,11 @@ import org.apache.log4j.Logger;
 /**
  *
  * @author cotes
+ * @author ruizmarc
  */
 public class TrayEventListenerImpl implements TrayEventListener {
 
-    private ApplicationController controller;
+    private final ApplicationController controller;
     private final Logger logger = Logger.getLogger(TrayEventListenerImpl.class.getName());
 
     public TrayEventListenerImpl(ApplicationController controller) {
@@ -68,7 +72,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                 break;
             case SHARE:
                 //Show share panel
-                
+
                 JFrame frame = createSharingFrame();
 
                 SharePanel panel = new SharePanel(frame);
@@ -84,109 +88,142 @@ public class TrayEventListenerImpl implements TrayEventListener {
                         logger.error(ex);
                     }
                 }
-                
-                HashMap<String,HashMap<String,byte[]>> emailsKeys = null;
-                
+
+                HashMap<String, HashMap<String, byte[]>> emailsKeys = null;
+
                 Config config = Config.getInstance();
                 Profile profile = config.getProfile();
                 Server server = profile.getServer();
 
                 DatabaseHelper db = DatabaseHelper.getInstance();
                 CloneFile sharedFolder = db.getFileOrFolder(panel.getFolderSelected());
-                
-                String publicKey = null;
-                        
-                if (panel.isAbeEncrypted()) {
 
-                    String RESOURCES_PATH = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
-                    
-                    CloudABEClientAdapter abeClient = null;
-                             
-                    try {
-                        abeClient = new CloudABEClientAdapter(RESOURCES_PATH);
-                        abeClient.setupABESystem(0);
-                    } catch (Exception ex) {
-                        logger.error(ex);
-                        break;
-                    }
-                    
-                    CloneWorkspace newWorkspace = new CloneWorkspace();
-                    newWorkspace.setId(sharedFolder.getId().toString());
-                    newWorkspace.setName(sharedFolder.getName());
-                    newWorkspace.setLocalLastUpdate(0);
-                    newWorkspace.setRemoteRevision(0);
-                    newWorkspace.setEncrypted(false);
-                    newWorkspace.setAbeEncrypted(true);
-                    newWorkspace.setDefaultWorkspace(false);
-                    newWorkspace.setOwner(profile.getAccountId());
-                    newWorkspace.getPathWorkspace();
-                    newWorkspace.setIsApproved(false);
-                    newWorkspace.setGroupGenerator(abeClient.getGroupGenerator());
-                    
-                    Gson gson = new Gson();
-                    publicKey = gson.toJson(abeClient.getPublicKey());
-                    String masterKey = gson.toJson(abeClient.getMasterKey());
-                    
-                    newWorkspace.setMasterKey(masterKey.getBytes());
-                    newWorkspace.setPublicKey(publicKey.getBytes());
-                    
-                    newWorkspace.merge();
-                    
-                    emailsKeys = new HashMap<String,HashMap<String,byte[]>>();
-                          
-                    for (String email : panel.getEmails()) {
-                        System.out.println("Setting permissions for: " + email);
+                Map<String, CloneWorkspace> workspaces = db.getWorkspaces();
+
+                String publicKeyjson = null;
+
+                boolean alreadyShared = false;
+                boolean invited = false;
+
+                try {
+                    if (panel.isAbeEncrypted()) {
+
+                        Gson gson = new Gson();
+                        String RESOURCES_PATH = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath() + "/conf/abe/";
+
+                        CloudABEClientAdapter abeClient = null;
+
                         try {
-                            
-                            String attSet = UIUtils.getAccessStructure(RESOURCES_PATH, null, email);
-                            
-                            User invitedUser = abeClient.newABEUserInvited(attSet);
-                            AccessTree accessTree= invitedUser.getSecretKey().getAccess_tree();
-
-                            KPABESecretKey secretKeyLight = new KPABESecretKey(invitedUser.getSecretKey().getLeaf_keys(),null);
-            
-                            String secretKeyjson = gson.toJson(secretKeyLight);
-                            
-                            HashMap<String,byte[]> secretKeyStruct = new HashMap<String,byte[]>();
-                            
-                            secretKeyStruct.put("secret_key", secretKeyjson.getBytes());
-                            secretKeyStruct.put("access_struct", accessTree.toString().getBytes());
-                            
-                            emailsKeys.put(email,secretKeyStruct);
-                            
-                            System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
-                            
-                        }catch (Exception ex) {
+                            abeClient = new CloudABEClientAdapter(RESOURCES_PATH);
+                        } catch (Exception ex) {
                             logger.error(ex);
+                            break;
                         }
-                         
-                        
-                    }
-                }
-                
-                if(panel.isAbeEncrypted()){
-                        try {
+
+                        for (CloneWorkspace workspace : workspaces.values()) {
+
+                            if (workspace.getPathWorkspace().equals("/" + sharedFolder.getRelativePath()) && workspace.isAbeEncrypted()) { //If a workspace already exists in the shared folder
+
+                                if (workspace.getMasterKey() != null) { //If i'm the owner, reuse master key
+
+                                    alreadyShared = true;
+
+                                    SystemKey masterKey = gson.fromJson(new String(workspace.getMasterKey()), SystemKey.class);
+                                    SystemKey publicKey = gson.fromJson(new String(workspace.getPublicKey()), SystemKey.class);
+
+                                    try {
+                                        abeClient.setupABESystem(0, publicKey, masterKey, workspace.getGroupGenerator());
+                                    } catch (AttributeNotFoundException ex) {
+                                        logger.error(ex);
+                                    }
+
+                                } else { //If the workspace is already shared with me but, i'm not the owner
+                                    invited = true;
+                                }
+                                break;
+                            }
+                        }
+
+                        if (!alreadyShared && !invited) { // If not shared and i'm not invited, I will be the owner
+
+                            try {
+                                abeClient.setupABESystem(0);
+                            } catch (AttributeNotFoundException ex) {
+                                logger.error(ex);
+                            }
+
+                            CloneWorkspace newWorkspace = new CloneWorkspace();
+                            newWorkspace.setId(sharedFolder.getId().toString());
+                            newWorkspace.setName(sharedFolder.getName());
+                            newWorkspace.setLocalLastUpdate(0);
+                            newWorkspace.setRemoteRevision(0);
+                            newWorkspace.setEncrypted(false);
+                            newWorkspace.setAbeEncrypted(true);
+                            newWorkspace.setDefaultWorkspace(false);
+                            newWorkspace.setOwner(profile.getAccountId());
+                            newWorkspace.getPathWorkspace();
+                            newWorkspace.setIsApproved(false);
+                            newWorkspace.setGroupGenerator(abeClient.getGroupGenerator());
+
+                            publicKeyjson = gson.toJson(abeClient.getPublicKey());
+                            String masterKey = gson.toJson(abeClient.getMasterKey());
+
+                            newWorkspace.setMasterKey(masterKey.getBytes());
+                            newWorkspace.setPublicKey(publicKeyjson.getBytes());
+
+                            newWorkspace.merge();
+                        }
+
+                        if (!invited) {
+                            emailsKeys = new HashMap<String, HashMap<String, byte[]>>();
+
+                            for (String email : panel.getEmails()) {
+                                System.out.println("Setting permissions for: " + email);
+                                try {
+
+                                    String attSet = UIUtils.getAccessStructure(RESOURCES_PATH, null, email);
+
+                                    User invitedUser = abeClient.newABEUserInvited(attSet);
+                                    AccessTree accessTree = invitedUser.getSecretKey().getAccess_tree();
+
+                                    KPABESecretKey secretKeyLight = new KPABESecretKey(invitedUser.getSecretKey().getLeaf_keys(), null);
+
+                                    String secretKeyjson = gson.toJson(secretKeyLight);
+
+                                    HashMap<String, byte[]> secretKeyStruct = new HashMap<String, byte[]>();
+
+                                    secretKeyStruct.put("secret_key", secretKeyjson.getBytes());
+                                    secretKeyStruct.put("access_struct", accessTree.toString().getBytes());
+
+                                    emailsKeys.put(email, secretKeyStruct);
+
+                                    System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
+
+                                } catch (Exception ex) {
+                                    logger.error(ex);
+                                }
+                            }
+
                             /*FIXME! Be careful, emails and keys are sent in plain text without encryption, 
-                                    key distribution problem should be solved in order to guarantee security and privacy */
-                            server.createShareProposal(profile.getAccountId(), publicKey.getBytes(), emailsKeys, sharedFolder.getId(), false, panel.isAbeEncrypted());
-                        } catch (ShareProposalNotCreatedException ex) {
-                            ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
-                        } catch (UserNotFoundException ex) {
-                            ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.");
+                             key distribution problem should be solved in order to guarantee security and privacy */
+                            server.createShareProposal(profile.getAccountId(), publicKeyjson.getBytes(), emailsKeys, sharedFolder.getId(), false, panel.isAbeEncrypted());
+
+                        } else {
+                            ErrorMessage.showMessage(panel, "Error", "You don't have permission to invited new users.");
+                            break;
                         }
-                }else {
-                    {
-                        try {
-                            server.createShareProposal(profile.getAccountId(), panel.getEmails(), sharedFolder.getId(), false, panel.isAbeEncrypted());
-                        } catch (ShareProposalNotCreatedException ex) {
-                            ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
-                        } catch (UserNotFoundException ex) {
-                            ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.");
-                        }
+                    } else {
+                        server.createShareProposal(profile.getAccountId(), panel.getEmails(), sharedFolder.getId(), false, panel.isAbeEncrypted());
                     }
+
+                } catch (ShareProposalNotCreatedException ex) {
+                    ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.\nVerify email accounts.");
+                } catch (UserNotFoundException ex) {
+                    ErrorMessage.showMessage(panel, "Error", "An error ocurred, please try again later.");
                 }
 
                 break;
+
             case QUIT:
                 this.controller.doShutdownTray();
                 break;

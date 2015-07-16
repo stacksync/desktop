@@ -1,8 +1,5 @@
 package com.stacksync.desktop.syncserver;
 
-import com.ast.cloudABE.accessTree.AccessTree;
-import com.ast.cloudABE.kpabe.KPABESecretKey;
-import com.google.gson.Gson;
 import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
 import com.stacksync.commons.exceptions.DeviceNotValidException;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;

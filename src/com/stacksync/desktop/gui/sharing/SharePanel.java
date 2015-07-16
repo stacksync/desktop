@@ -32,7 +32,7 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
     private JFrame frame;
     private File folderSelected;
     
-    public String lock = "";
+    public final String lock = "";
     
     private List<String> emails;
     /**
