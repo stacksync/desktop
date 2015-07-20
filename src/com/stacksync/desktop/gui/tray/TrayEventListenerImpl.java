@@ -19,6 +19,7 @@ import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.gui.error.ErrorMessage;
+import com.stacksync.desktop.gui.sharing.AttributesSelector;
 import com.stacksync.desktop.gui.sharing.SharePanel;
 import com.stacksync.desktop.syncserver.Server;
 import com.stacksync.desktop.util.FileUtil;
@@ -74,6 +75,22 @@ public class TrayEventListenerImpl implements TrayEventListener {
             case SHARE:
                 //Show share panel
 
+                try {
+                    for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                        if ("Nimbus".equals(info.getName())) {
+                            javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                            break;
+                        }
+                    }
+                } catch (ClassNotFoundException ex) {
+                    logger.error(ex);
+                } catch (InstantiationException ex) {
+                    logger.error(ex);
+                } catch (IllegalAccessException ex) {
+                    logger.error(ex);
+                } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+                    logger.error(ex);
+                }
                 JFrame frame = createSharingFrame();
 
                 SharePanel panel = new SharePanel(frame);
@@ -128,7 +145,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                                     SystemKey publicKey = gson.fromJson(new String(workspace.getPublicKey()), SystemKey.class);
 
                                     publicKeyjson = new String(workspace.getPublicKey());
-                                    
+
                                     try {
                                         abeClient.setupABESystem(0, publicKey, masterKey, workspace.getGroupGenerator());
                                     } catch (AttributeNotFoundException ex) {
