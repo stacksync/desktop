@@ -8,6 +8,7 @@ Welcome to StackSync!
 - [Introduction](#introduction)
 - [Architecture](#architecture)
 - [Desktop](#desktop-client)
+- [Attribute-based Encryption] (#attribute-based-encryption)
 - [Requirements](#requirements)
 - [Build, installation and execution](#build-installation-and-execution)
   - [Linux](#linux)
@@ -32,7 +33,7 @@ service (OpenStack Swift). An overview of the architecture
 with the main components and their interaction is shown in the following image.
 
 <p align="center">
-  <img width="500" src="https://raw.github.com/stacksync/desktop/master/res/stacksync-architecture.png">
+  <img width="500" src="https://raw.github.com/stacksync/desktop/master/resources/res/stacksync-architecture.png">
 </p>
 
 The StackSync client and the SyncService interact through the communication
@@ -59,10 +60,22 @@ Some of the main features of the client are:
 * **Desktop integration**: We are using [Liferay nativity library](https://github.com/liferay/liferay-nativity).
 
 <p align="center">
-  <img width="500" src="https://raw.github.com/stacksync/desktop/master/res/win_integration.png">
+  <img width="500" src="https://raw.github.com/stacksync/desktop/master/resources/res/win_integration.png">
 </p>
 * **Push notifications**: ObjectMQ provides push notification to desktop clients.
 * **Data deduplication**: We deduplicate data across a single user in order to optimize bandwidth and storage.
+
+# Attribute-based Encryption
+In the context of a scalable Personal Cloud like that of StackSync, our approach for privacy-aware data sharing involves the design of a cryptographic component ready to be adapted to an existing architecture and able to work efficiently as an extension to our software. Data privacy in the Personal Cloud can easily get compromised, because clients typically delegate tasks such as protection and honest use of the files to remote storage servers that are out of their control. But, what if their information is sensitive enough not to take the risk of trusting a third party?
+
+For this aim, we will implement the KP-ABE protocol into StackSync. KP-ABE is a public key cryptography specially designed for data-sharing environments. By using its encryption technique, any data encrypted gets associated with a set of attributes. On the other hand, each user is provided with an access structure composed of a logical definition of attributes. The secret key of any user reflects the access structure in such a way that a user will be able to access certain content if and only if the data attributes satisfy his access structure. 
+
+In KP-ABE, each user must hold an access structure defining its privileges, which is a Boolean expression over attributes. This logical expression is often represented as a logical tree, where the leafs are attributes and the interior nodes are threshold gates. For instance, the data owner could choose to assign Alice an access structure. The data owner can define her access privileges as ("C" AND ("A" OR "B")), where "A", "B" and "C" are attributes (e.g. Accounting, Budgeting, Computing). The data owner would then generate and distribute to Alice her new secret key (USK) next implicitly those three attributes. The corresponding access tree would be represented as shown in the following image. Similarly, the data owner can also define an access structure to Bob as ("A" AND ("B" OR "C")) and provide him with his USK accordingly. From now on, Alice and Bob should be able to decrypt files according to their access policy. 
+<p align="center">
+  <img width="500" src="https://raw.github.com/stacksync/desktop/master/resources/res/abe_example.png">
+</p>
+
+On the other hand, KP-ABE encrypted files must specify a set of attributes in order to define in which context will be shared. For instance, the data owner can encrypt and upload a file with the attributes "A" and "B", as we can see in the image. After Alice and Bob download the file, Alice cannot see the underlying plaintext, while Bob is able to correctly decrypt it. The KP-ABE construction ensures that only users with the proper access structure will be able to decrypt data encrypted under a certain set of attributes. In this case, Bob satisfies the condition ("A" AND "B"), where "A" and "B" are the attributes used in the encryption of the downloaded file. Alice will nevertheless not be able to decrypt the content since her access structure requires files to be encrypted under the attribute "C", in addition to "A" or "B". 
 
 # Requirements
 * Java 1.7
