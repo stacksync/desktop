@@ -41,7 +41,8 @@ public class TrayEvent implements Serializable {
         WEBSITE2,
         PAUSE_SYNC,
         RESUME_SYNC,
-        SHARE
+        SHARE,
+        UNSHARE
     };
     
     private EventType type;

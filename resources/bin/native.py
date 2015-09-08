@@ -321,6 +321,11 @@ def do_update_menu(request):
 	
 	menu.append(menu_item_share)
 
+        menu_item_unshare = gtk.MenuItem("Unshare folder")
+	menu_item_unshare.connect("activate", menu_item_clicked, "UNSHARE")
+	
+	menu.append(menu_item_unshare)
+
 	if sync_activated:
 		'''Pause sync'''
 		menu_item_pause = gtk.MenuItem("Pause Syncing")

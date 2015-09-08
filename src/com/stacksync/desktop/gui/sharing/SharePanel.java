@@ -1,13 +1,10 @@
 package com.stacksync.desktop.gui.sharing;
 
-import com.stacksync.commons.exceptions.ShareProposalNotCreatedException;
-import com.stacksync.commons.exceptions.UserNotFoundException;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.encryption.BasicEncryption;
 import com.stacksync.desktop.config.Folder;
 import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
-import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.gui.error.ErrorMessage;
 import com.stacksync.desktop.syncserver.Server;
@@ -296,6 +293,9 @@ public class SharePanel extends javax.swing.JPanel implements DocumentListener, 
     
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         this.frame.setVisible(false);
+        synchronized(lock){
+            this.lock.notify();
+        }
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed

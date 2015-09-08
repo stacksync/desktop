@@ -9,6 +9,8 @@ import com.stacksync.commons.exceptions.WorkspaceNotUpdatedException;
 import com.stacksync.commons.models.ABEWorkspace;
 import com.stacksync.commons.models.AccountInfo;
 import com.stacksync.commons.models.SyncMetadata;
+import com.stacksync.commons.models.User;
+import com.stacksync.commons.models.UserWorkspace;
 import com.stacksync.commons.models.Workspace;
 import com.stacksync.commons.omq.ISyncService;
 import com.stacksync.commons.requests.CommitRequest;
@@ -172,6 +174,19 @@ public class Server {
             GetAccountRequest request = new GetAccountRequest(email);
             info = syncServer.getAccountInfo(request);
             return info;
+        } catch (UserNotFoundException ex) {
+            logger.error("User not found: "+ex);
+            return null;
+        }
+        
+    }
+    
+    public List<UserWorkspace> getWorkspaceMembers(String userId, String workspaceId) throws UserNotFoundException {
+        
+        User user = new User(UUID.fromString(userId));
+        Workspace workspace = new Workspace(UUID.fromString(workspaceId));
+        try {
+            return syncServer.getWorkspaceMembers(user, workspace);
         } catch (UserNotFoundException ex) {
             logger.error("User not found: "+ex);
             return null;

@@ -7,11 +7,18 @@ import com.stacksync.commons.models.Workspace;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.PersistentObject;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -81,6 +88,12 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
     @OneToMany
     private List<CloneFile> files;
     
+    @ElementCollection
+    @JoinTable(name="attributes_version", joinColumns=@JoinColumn(name="id"))
+    @MapKeyColumn (name="name")
+    @Column(name="version")
+    Map<String, Long> attributesVersion = new HashMap<String, Long>(); // maps from attribute name to value
+
     public CloneWorkspace(){}
     
     public CloneWorkspace(Workspace r){
@@ -339,6 +352,14 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         return this.files;
     }
     
+    public Map<String, Long> getAttributesVesion() {
+        return attributesVersion;
+    }
+
+    public void setAttributesVersion(Map<String, Long> attributes) {
+        this.attributesVersion = attributes;
+    }
+    
     @Override
     public CloneWorkspace clone() {
         CloneWorkspace workspace = new CloneWorkspace();
@@ -361,6 +382,15 @@ public class CloneWorkspace extends PersistentObject implements Serializable {
         workspace.setIsApproved(getIsApproved());
         workspace.setSecretKey(getSecretKey());
         workspace.setGroupGenerator(getGroupGenerator());
+        
+        HashMap<String,Long> newAttributesVersion = new HashMap<String,Long>();
+        
+        for(String attribute:getAttributesVesion().keySet()){
+            newAttributesVersion.put(attribute, getAttributesVesion().get(attribute));
+        }
+        
+        workspace.setAttributesVersion(newAttributesVersion);
+        
         return workspace;
     }
 
