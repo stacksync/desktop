@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import omq.common.broker.Broker;
 import org.apache.log4j.Logger;
@@ -38,8 +39,8 @@ public class Server {
 
     private final Logger logger = Logger.getLogger(Server.class.getName());
     private final Config config = Config.getInstance();
-    private ISyncService syncServer;
-    private Broker broker;
+    private final ISyncService syncServer;
+    private final Broker broker;
 
     public ISyncService getSyncServer() {
         return syncServer;
@@ -143,12 +144,12 @@ public class Server {
         syncServer.createShareProposal(request);
     }
     
-    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted)
+    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted, Map<String, Long> attributeVersion)
             throws ShareProposalNotCreatedException, UserNotFoundException {
         
         logger.info("Sending share proposal.");
         
-        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), publickey, emailsKeys, folderId, encrypted, abeEncrypted);
+        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), publickey, emailsKeys, folderId, encrypted, abeEncrypted, attributeVersion);
         
         request.setRequestId(getRequestId());
         syncServer.createShareProposal(request);

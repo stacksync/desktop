@@ -164,23 +164,26 @@ public class TrayEventListenerImpl implements TrayEventListener {
                     }
                 }
 
+                CloneWorkspace workspace = null;
+                
                 if (!alreadyShared && !invited) { // If not shared and i'm not invited, I will be the owner
 
                     abeClient.setupABESystem(0);
                     publicKeyjson = gson.toJson(abeClient.getPublicKey());
                     String masterKey = gson.toJson(abeClient.getMasterKey());
 
-                    createSharedCloneWorkspace(abeClient, sharedFolder, masterKey, publicKeyjson, profile.getAccountId());
+                    workspace = createSharedCloneWorkspace(abeClient, sharedFolder, masterKey, publicKeyjson, profile.getAccountId());
                 }
 
                 if (!invited) {
 
-                    inviteUsers(panel.getEmails(), abeClient, server, profile, publicKeyjson, panel.isAbeEncrypted(), sharedFolder.getId(), RESOURCES_PATH, gson);
+                    inviteABEUsers(panel.getEmails(), abeClient, server, profile, publicKeyjson, panel.isAbeEncrypted(), sharedFolder.getId(), workspace.getAttributesVesion(), RESOURCES_PATH, gson);
 
                 } else {
                     ErrorMessage.showMessage(panel, "Error", "You don't have permission to invited new users.");
                     return;
                 }
+                
             } else {
                 server.createShareProposal(profile.getAccountId(), panel.getEmails(), sharedFolder.getId(), false, panel.isAbeEncrypted());
             }
@@ -261,7 +264,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
         return newWorkspace;
     }
 
-    private void inviteUsers(List<String> emails, CloudABEClientAdapter abeClient, Server server, Profile profile, String publicKeyjson, boolean isAbeEncrypted, Long sharedFolderId, String RESOURCES_PATH, Gson gson) throws AttributeNotFoundException, ShareProposalNotCreatedException, UserNotFoundException {
+    private void inviteABEUsers(List<String> emails, CloudABEClientAdapter abeClient, Server server, Profile profile, String publicKeyjson, boolean isAbeEncrypted, Long sharedFolderId,  Map<String, Long> attributeVersion, String RESOURCES_PATH, Gson gson) throws AttributeNotFoundException, ShareProposalNotCreatedException, UserNotFoundException {
 
         HashMap<String, HashMap<String, byte[]>> emailsKeys = new HashMap<String, HashMap<String, byte[]>>();
 
@@ -289,7 +292,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
 
         /*FIXME! Be careful, emails and keys are sent in plain text without encryption, 
          key distribution problem should be solved in order to guarantee security and privacy */
-        server.createShareProposal(profile.getAccountId(), publicKeyjson.getBytes(), emailsKeys, sharedFolderId, false, isAbeEncrypted);
+        server.createShareProposal(profile.getAccountId(), publicKeyjson.getBytes(), emailsKeys, sharedFolderId, false, isAbeEncrypted, attributeVersion);
 
     }
 
@@ -373,7 +376,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
                             }
                         }
 
-                                //TODO - Very important!!
+                        //TODO - Very important!!
                         //workspace.setPublicKey(abeOwner.getPublicKey());
                         //workspace.setMasterKey(abeOwner.getMasterKey());
                     } catch (Exception ex) {
