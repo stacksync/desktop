@@ -155,7 +155,7 @@ public class Server {
         syncServer.createShareProposal(request);
     }
         
-    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted, Map<String, Integer> attributeUniverse)
+    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted, Map<Integer, String> attributeUniverse)
             throws ShareProposalNotCreatedException, UserNotFoundException {
         
         logger.info("Sending share proposal.");

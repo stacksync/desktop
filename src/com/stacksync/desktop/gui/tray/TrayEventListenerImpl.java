@@ -290,10 +290,10 @@ public class TrayEventListenerImpl implements TrayEventListener {
             System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
         }
 
-        HashMap<String, Integer> attributeUniverse = new HashMap<String, Integer>();
+        HashMap<Integer,String> attributeUniverse = new HashMap<Integer, String>();
         
         for(int i=0; i<abeClient.getAttributeUniverse().size(); i++){
-            attributeUniverse.put(abeClient.getAttributeUniverse().get(i), i+1);
+            attributeUniverse.put(i+1,abeClient.getAttributeUniverse().get(i));
         }
         
         /*FIXME! Be careful, emails and keys are sent in plain text without encryption, 
