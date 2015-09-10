@@ -177,7 +177,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
 
                 if (!invited) {
 
-                    inviteABEUsers(panel.getEmails(), abeClient, server, profile, publicKeyjson, panel.isAbeEncrypted(), sharedFolder.getId(), workspace.getAttributesVesion(), RESOURCES_PATH, gson);
+                    inviteABEUsers(panel.getEmails(), abeClient, server, profile, publicKeyjson, sharedFolder.getId(), RESOURCES_PATH, gson);
 
                 } else {
                     ErrorMessage.showMessage(panel, "Error", "You don't have permission to invited new users.");
@@ -264,7 +264,7 @@ public class TrayEventListenerImpl implements TrayEventListener {
         return newWorkspace;
     }
 
-    private void inviteABEUsers(List<String> emails, CloudABEClientAdapter abeClient, Server server, Profile profile, String publicKeyjson, boolean isAbeEncrypted, Long sharedFolderId,  Map<String, Long> attributeVersion, String RESOURCES_PATH, Gson gson) throws AttributeNotFoundException, ShareProposalNotCreatedException, UserNotFoundException {
+    private void inviteABEUsers(List<String> emails, CloudABEClientAdapter abeClient, Server server, Profile profile, String publicKeyjson, Long sharedFolderId, String RESOURCES_PATH, Gson gson) throws AttributeNotFoundException, ShareProposalNotCreatedException, UserNotFoundException {
 
         HashMap<String, HashMap<String, byte[]>> emailsKeys = new HashMap<String, HashMap<String, byte[]>>();
 
@@ -290,9 +290,15 @@ public class TrayEventListenerImpl implements TrayEventListener {
             System.out.println("[" + email + "] Setting up access logical expression to: " + attSet);
         }
 
+        HashMap<String, Integer> attributeUniverse = new HashMap<String, Integer>();
+        
+        for(int i=0; i<abeClient.getAttributeUniverse().size(); i++){
+            attributeUniverse.put(abeClient.getAttributeUniverse().get(i), i+1);
+        }
+        
         /*FIXME! Be careful, emails and keys are sent in plain text without encryption, 
          key distribution problem should be solved in order to guarantee security and privacy */
-        server.createShareProposal(profile.getAccountId(), publicKeyjson.getBytes(), emailsKeys, sharedFolderId, false, isAbeEncrypted, attributeVersion);
+        server.createShareProposal(profile.getAccountId(), publicKeyjson.getBytes(), emailsKeys, sharedFolderId, false, true, attributeUniverse);
 
     }
 

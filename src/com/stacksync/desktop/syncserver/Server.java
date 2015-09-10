@@ -144,12 +144,23 @@ public class Server {
         syncServer.createShareProposal(request);
     }
     
-    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted, Map<String, Long> attributeVersion)
+    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted)
             throws ShareProposalNotCreatedException, UserNotFoundException {
         
         logger.info("Sending share proposal.");
         
-        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), publickey, emailsKeys, folderId, encrypted, abeEncrypted, attributeVersion);
+        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), publickey, emailsKeys, folderId, encrypted, abeEncrypted);
+        
+        request.setRequestId(getRequestId());
+        syncServer.createShareProposal(request);
+    }
+        
+    public void createShareProposal(String accountId, byte[] publickey, HashMap<String,HashMap<String,byte[]>> emailsKeys, Long folderId, boolean encrypted, boolean abeEncrypted, Map<String, Integer> attributeUniverse)
+            throws ShareProposalNotCreatedException, UserNotFoundException {
+        
+        logger.info("Sending share proposal.");
+        
+        ShareProposalRequest request = new ShareProposalRequest(UUID.fromString(accountId), publickey, emailsKeys, folderId, encrypted, abeEncrypted, attributeUniverse);
         
         request.setRequestId(getRequestId());
         syncServer.createShareProposal(request);
