@@ -382,9 +382,19 @@ public class TrayEventListenerImpl implements TrayEventListener {
                             }
                         }
 
-                        //TODO - Very important!!
-                        //workspace.setPublicKey(abeOwner.getPublicKey());
-                        //workspace.setMasterKey(abeOwner.getMasterKey());
+                        serverUnshare.createRevokeProposal(profileUnshare.getAccountId(), workspace.getId(), revokeMessages);
+                        
+                        /*
+                        * Update local workspace with the new public and master keys
+                        * Commented by the moment in order to work without causing problems with keys in database
+                        *
+                        Gson gson = new Gson();
+                        
+                        workspace.setPublicKey(gson.toJson(abeOwner.getPublicKey()).getBytes());
+                        workspace.setMasterKey(gson.toJson(abeOwner.getMasterKey()).getBytes());
+                        workspace.merge();
+                        */
+                        
                     } catch (Exception ex) {
                         java.util.logging.Logger.getLogger(TrayEventListenerImpl.class.getName()).log(Level.SEVERE, null, ex);
                     }

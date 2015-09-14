@@ -1,5 +1,6 @@
 package com.stacksync.desktop.syncserver;
 
+import com.ast.cloudABE.kpabe.RevokeMessage;
 import com.stacksync.commons.exceptions.DeviceNotUpdatedException;
 import com.stacksync.commons.exceptions.DeviceNotValidException;
 import com.stacksync.commons.exceptions.NoWorkspacesFoundException;
@@ -18,6 +19,7 @@ import com.stacksync.commons.requests.GetAccountRequest;
 import com.stacksync.commons.requests.GetChangesRequest;
 import com.stacksync.commons.requests.GetWorkspacesRequest;
 import com.stacksync.commons.requests.ShareProposalRequest;
+import com.stacksync.commons.requests.RevokeProposalRequest;
 import com.stacksync.commons.requests.UpdateDeviceRequest;
 import com.stacksync.commons.requests.UpdateWorkspaceRequest;
 import com.stacksync.desktop.Environment;
@@ -205,4 +207,15 @@ public class Server {
         }
         
     }
+    
+    public void createRevokeProposal(String accountId, String workspaceId, List<RevokeMessage> revokeMessages)
+         throws UserNotFoundException {
+        
+        logger.info("Sending unshare proposal.");
+
+        RevokeProposalRequest request = new RevokeProposalRequest(UUID.fromString(accountId), UUID.fromString(workspaceId), revokeMessages);
+        
+        syncServer.createRevokeProposal(request);
+        
+    }   
 }
