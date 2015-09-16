@@ -3,6 +3,7 @@ package com.stacksync.desktop.syncserver;
 import com.google.gson.Gson;
 import com.stacksync.commons.models.User;
 import com.stacksync.commons.models.Workspace;
+import com.stacksync.commons.notifications.RevokeNotification;
 import com.stacksync.commons.notifications.ShareProposalNotification;
 import com.stacksync.commons.notifications.UpdateWorkspaceNotification;
 import com.stacksync.commons.omq.RemoteClient;
@@ -163,5 +164,16 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
 
     private boolean isMyCommit(String deviceName) {
         return config.getDeviceName().compareTo(deviceName) == 0;
+    }
+
+    @Override
+    public void notifyRevokation(RevokeNotification notification) {
+        CloneWorkspace workspace = db.getWorkspace(notification.getWorkspaceId().toString());
+        
+        workspace.setPublicKey(notification.getPublicKey());
+        workspace.setSecretKey(notification.getSecretKey());
+        
+        workspace.merge();
+        
     }
 }
