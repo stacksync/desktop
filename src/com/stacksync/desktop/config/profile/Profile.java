@@ -305,7 +305,7 @@ public class Profile implements Configurable {
         }
     }
     
-    private void generateAndSaveAbeEncryption(CloneWorkspace workspace) throws InitializationException {
+    public void generateAndSaveAbeEncryption(CloneWorkspace workspace) throws InitializationException {
         try {
             
             Gson gson = new Gson(); 

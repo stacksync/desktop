@@ -9,13 +9,16 @@ import com.stacksync.commons.notifications.UpdateWorkspaceNotification;
 import com.stacksync.commons.omq.RemoteClient;
 import com.stacksync.desktop.config.Config;
 import com.stacksync.desktop.config.profile.Account;
+import com.stacksync.desktop.config.profile.Profile;
 import com.stacksync.desktop.db.DatabaseHelper;
 import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
+import com.stacksync.desktop.exceptions.InitializationException;
 import com.stacksync.desktop.gui.sharing.PasswordDialog;
 import com.stacksync.desktop.sharing.WorkspaceController;
 import java.awt.Frame;
 import java.io.File;
+import java.util.logging.Level;
 import omq.server.RemoteObject;
 import org.apache.log4j.Logger;
 
@@ -172,6 +175,14 @@ public class RemoteClientImpl extends RemoteObject implements RemoteClient {
         
         workspace.setPublicKey(notification.getPublicKey());
         workspace.setSecretKey(notification.getSecretKey());
+        
+        Profile profile = config.getProfile();
+        
+        try {
+            profile.generateAndSaveAbeEncryption(workspace);
+        } catch (InitializationException ex) {
+            java.util.logging.Logger.getLogger(RemoteClientImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         workspace.merge();
         
