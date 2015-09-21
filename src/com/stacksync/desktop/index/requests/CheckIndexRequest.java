@@ -96,10 +96,10 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
             return;                
         }        
         
-        if(dbFile.isRejected()) return;
-        
         // Matching DB entry found; Now check filesize and time
         if (dbFile != null) {
+            
+            if(dbFile.isRejected()) return;
             
             if(dbFile.getChecksum() == 0 && dbFile.getSyncStatus() == SyncStatus.LOCAL){
                 logger.debug("File " + dbFile.getFile().toString() + " is indexing now. Nothing to do!");    
