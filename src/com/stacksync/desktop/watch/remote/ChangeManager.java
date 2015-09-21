@@ -829,12 +829,14 @@ public class ChangeManager {
             logger.info("[ABE - Decrypting] File cannot be decrypted, setting as rejected.");
             cf.setRejected(true);
             cf.merge();
+            return;
             
         } catch (ConfigException e) {
             
             logger.info("[ABE - Decrypting] Attribute not found for decrypting, setting as rejected.");
             cf.setRejected(true);
             cf.merge();
+            return;
             
         }catch (Exception e) {
             throw new CouldNotApplyUpdateException(e);

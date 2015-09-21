@@ -96,7 +96,7 @@ public class Uploader {
                         && file.getChecksum() == file2.getChecksum()
                         && file.getId() == file2.getId()
                         && file.getVersion() == file2.getVersion()
-                        && file.getSize() == file2.getSize() || file.isRejected()) {
+                        && file.getSize() == file2.getSize()) {
 
                     found = true;
                     break;
