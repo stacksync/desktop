@@ -96,6 +96,8 @@ public class CheckIndexRequest extends SingleRootIndexRequest {
             return;                
         }        
         
+        if(dbFile.isRejected()) return;
+        
         // Matching DB entry found; Now check filesize and time
         if (dbFile != null) {
             
