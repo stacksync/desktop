@@ -48,6 +48,7 @@ import com.stacksync.desktop.encryption.AbeCipherData;
 import com.stacksync.desktop.encryption.AbeInvitedEncryption;
 import com.stacksync.desktop.encryption.CipherData;
 import com.stacksync.desktop.encryption.Encryption;
+import com.stacksync.desktop.exceptions.ConfigException;
 import com.stacksync.desktop.repository.Update;
 import com.stacksync.desktop.repository.Uploader;
 import com.stacksync.desktop.repository.files.RemoteFile;
@@ -829,8 +830,13 @@ public class ChangeManager {
             cf.setRejected(true);
             cf.merge();
             
+        } catch (ConfigException e) {
             
-        } catch (Exception e) {
+            logger.info("[ABE - Decrypting] Attribute not found for decrypting, setting as rejected.");
+            cf.setRejected(true);
+            cf.merge();
+            
+        }catch (Exception e) {
             throw new CouldNotApplyUpdateException(e);
         } finally {
             try {
