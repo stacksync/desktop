@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import javax.swing.tree.TreePath;
 import org.apache.log4j.Logger;
@@ -211,7 +212,7 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
         String path = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath()+"/conf/abe/";
 
         TreePath attributes[] = openPermissions(path);
-        ArrayList attrs = new ArrayList();
+        ArrayList<String> attrs = new ArrayList<String>();
 
         if (attributes != null) {
             for (TreePath attribute : attributes) {
@@ -241,7 +242,14 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
                 System.out.println("Encrypted key" + new BigInteger(abeCipherMeta.getCipherText()));
                 
                 cf.setCipherSymKey(abeCipherMeta.getCipherText());
-                cf.setAbeComponents(abeCipherMeta.getAbeMetaComponents());
+                
+                ArrayList<ABEMetaComponent> metaComponents = abeCipherMeta.getAbeMetaComponents();
+                for(ABEMetaComponent component:metaComponents){
+                    component.setVersion(cf.getWorkspace().getAttributesVesion().get(component.getAttribute()));
+                }
+                
+                cf.setAbeComponents(metaComponents);
+                
             } else {
                 // 1.b Get encryption 
                 enc = root.getProfile().getEncryption(cf.getWorkspace().getId());
@@ -285,7 +293,6 @@ public class NewIndexSharedRequest extends SingleRootIndexRequest {
             if (cf.getWorkspace().isAbeEncrypted()) {
                 for (ABEMetaComponent meta : cf.getAbeComponents()) {
                     meta.setFile(cf);
-                    meta.setVersion(0L);
                     meta.persist();
                 }
             }
