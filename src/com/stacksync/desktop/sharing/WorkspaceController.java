@@ -7,6 +7,7 @@ import com.stacksync.desktop.db.models.CloneFile;
 import com.stacksync.desktop.db.models.CloneWorkspace;
 import com.stacksync.desktop.repository.Update;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -114,9 +115,81 @@ public class WorkspaceController {
             changed = true;
         }
         
+        if (remote.isAbeEncrypted() && workspaceEncryptionHasChanged(local,remote)) {
+            logger.info("New encryption. Updating...");
+            changeWorkspaceEncryption(local, remote, uploaded);
+            changed = true;
+        }
+        
         return changed;
     }
     
+        public void changeWorkspaceParent(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
+        
+        CloneFile workspaceRootFolder = db.getWorkspaceRoot(local.getId());
+        
+        String dir = workspaceRootFolder.getAbsolutePath();
+        File folder = new File(dir);
+        File newFolder;
+        CloneFile workspaceParentFolder;
+        
+        if (remote.getParentId() == null) {
+            // Move shared folder to the root
+            workspaceParentFolder = null;
+            newFolder = new File(workspaceRootFolder.getRoot().getLocalFile().getAbsoluteFile()+File.separator+remote.getName());
+        } else {
+            // Move shared folder to another folder
+            workspaceParentFolder = db.getFileOrFolder(remote.getParentId());
+            newFolder = new File(workspaceParentFolder.getFile().getAbsolutePath()+File.separator + remote.getName());
+        }
+        
+        // Updtae workspace DB
+        logger.info("Changing name and path in local CloneWorkspace.");
+        local.setPathWorkspace(remote.getPathWorkspace());
+        local.setName(remote.getName());
+        local.setParentId(remote.getParentId());
+        local.merge();
+        
+        updateWorkspaceParent(workspaceRootFolder, workspaceParentFolder, uploaded);
+        updateWorkspaceFiles(workspaceRootFolder);
+        
+        if (uploaded)
+            folder.renameTo(newFolder);
+    }
+        
+    private boolean workspaceEncryptionHasChanged(CloneWorkspace local, CloneWorkspace remote) {
+        
+        byte[] localPublicKey = local.getPublicKey();
+        byte[] localSecretKey = local.getSecretKey();
+        
+        byte[] newPublicKey = remote.getPublicKey();
+        byte[] newSecretKey = remote.getSecretKey();
+        
+        return !(Arrays.equals(newPublicKey, localPublicKey) && Arrays.equals(newSecretKey, localSecretKey));
+        
+    }
+        
+    public void changeABEWorkspaceEncryption(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
+        
+        CloneFile workspaceRootFolder = db.getWorkspaceRoot(local.getId());
+        
+        String dir = workspaceRootFolder.getAbsolutePath();
+        File folder = new File(dir);
+        File newFolder = new File(folder.getParentFile()+File.separator+remote.getName());
+        
+        // Updtae workspace DB
+        logger.info("Changing name and path in local CloneWorkspace.");
+        local.setPathWorkspace(remote.getPathWorkspace());
+        local.setName(remote.getName());
+        local.merge();
+        
+        updateWorkspaceName(workspaceRootFolder, remote.getName(), uploaded);
+        updateWorkspaceFiles(workspaceRootFolder);
+        
+        if (uploaded)
+            folder.renameTo(newFolder);
+    }
+     
     private boolean workspaceIsRenamed(CloneWorkspace local, CloneWorkspace remote) {
         return !local.getName().equals(remote.getName());
     }
@@ -187,37 +260,14 @@ public class WorkspaceController {
         }
     }
 
-    public void changeWorkspaceParent(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
-        
-        CloneFile workspaceRootFolder = db.getWorkspaceRoot(local.getId());
-        
-        String dir = workspaceRootFolder.getAbsolutePath();
-        File folder = new File(dir);
-        File newFolder;
-        CloneFile workspaceParentFolder;
-        
-        if (remote.getParentId() == null) {
-            // Move shared folder to the root
-            workspaceParentFolder = null;
-            newFolder = new File(workspaceRootFolder.getRoot().getLocalFile().getAbsoluteFile()+File.separator+remote.getName());
-        } else {
-            // Move shared folder to another folder
-            workspaceParentFolder = db.getFileOrFolder(remote.getParentId());
-            newFolder = new File(workspaceParentFolder.getFile().getAbsolutePath()+File.separator + remote.getName());
-        }
-        
+    public void changeWorkspaceEncryption(CloneWorkspace local, CloneWorkspace remote, boolean uploaded) {
+
         // Updtae workspace DB
-        logger.info("Changing name and path in local CloneWorkspace.");
-        local.setPathWorkspace(remote.getPathWorkspace());
-        local.setName(remote.getName());
-        local.setParentId(remote.getParentId());
+        logger.info("Changing encryption in local CloneWorkspace.");
+        local.setPublicKey(remote.getPublicKey());
+        local.setSecretKey(remote.getSecretKey());
         local.merge();
-        
-        updateWorkspaceParent(workspaceRootFolder, workspaceParentFolder, uploaded);
-        updateWorkspaceFiles(workspaceRootFolder);
-        
-        if (uploaded)
-            folder.renameTo(newFolder);
+
     }
     
     private void updateWorkspaceParent(CloneFile workspaceRootFolder, CloneFile parent, boolean uploaded) {
