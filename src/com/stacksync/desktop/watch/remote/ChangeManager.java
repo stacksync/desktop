@@ -823,7 +823,13 @@ public class ChangeManager {
 
             fos.close();
         } catch (BadPaddingException e) {
-            logger.error("Exception: ", e);
+            //logger.error("Exception: ", e);
+            
+            logger.info("[ABE - Decrypting] File cannot be decrypted, setting as rejected.");
+            cf.setRejected(true);
+            cf.merge();
+            
+            
         } catch (Exception e) {
             throw new CouldNotApplyUpdateException(e);
         } finally {

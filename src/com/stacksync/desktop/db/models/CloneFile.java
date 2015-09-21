@@ -152,6 +152,9 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     @Column(name = "is_workspace_root", nullable = false)
     private boolean workspaceRoot;
 
+    @Column(name = "is_rejected", nullable = false)
+    private boolean rejected;
+    
     public CloneFile() {
         this.id = new Random().nextLong();
         this.version = 1;
@@ -168,6 +171,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.serverUploadedTime = null;
         this.usingTempId = true;
         this.workspaceRoot = false; // By default
+        this.rejected = false;
     }
 
     public CloneFile(Folder root, File file) {
@@ -188,6 +192,7 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
         this.mimetype = FileUtil.getMimeType(file);
         this.workspaceRoot = false; // By default
 
+        this.rejected = false;
     }
 
     public Folder getRoot() {
@@ -401,6 +406,15 @@ public class CloneFile extends PersistentObject implements Serializable, Cloneab
     public void setAbeComponents(List<ABEMetaComponent> abeComponents) {
         this.abeComponents = abeComponents;
     }
+
+    public boolean isRejected() {
+        return rejected;
+    }
+
+    public void setRejected(boolean rejected) {
+        this.rejected = rejected;
+    }
+    
     
     public ArrayList<com.stacksync.commons.models.abe.ABEMetaComponent> getCommonAbeComponents() {
         ArrayList<com.stacksync.commons.models.abe.ABEMetaComponent> components = 
