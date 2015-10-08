@@ -665,8 +665,12 @@ public class ChangeManager {
         }
 
         ///// F. Move temp file to new file
-        tempNewFile.setLastModified(newestVersion.getLastModified().getTime());
-        tempNewFile.renameTo(newestVersion.getFile());
+        if (!newestVersion.isRejected()) {
+            tempNewFile.setLastModified(newestVersion.getLastModified().getTime());
+            tempNewFile.renameTo(newestVersion.getFile());
+            
+        }
+        
         FileUtil.deleteRecursively(tempNewFile);
     }
 

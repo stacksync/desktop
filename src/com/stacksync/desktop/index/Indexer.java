@@ -109,7 +109,7 @@ public class Indexer {
             List<CloneFile> dbFiles = db.getFiles(folder);
             
             for (CloneFile dbFile: dbFiles) {
-                if (!dbFile.getFile().exists() && dbFile.getSyncStatus() != CloneFile.SyncStatus.REMOTE) {
+                if (!dbFile.isRejected() && !dbFile.getFile().exists() && dbFile.getSyncStatus() != CloneFile.SyncStatus.REMOTE) {
                     logger.info("File "+dbFile.getFile()+" does NOT exist anymore. Marking as deleted.");                    
                     queueDeleted(folder, dbFile.getFile());
                     //new DeleteIndexRequest(folder, dbFile).process();
