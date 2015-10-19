@@ -99,7 +99,7 @@ Section "Installation Files" ;No components page, name is not important
   File /r "..\..\resources\bin"
   File /r "..\..\resources\conf"
   File /r "dlls"
-  File /oname=Stacksync.jar ..\..\target\desktop-client-2.0-jar-with-dependencies.jar
+  File /oname=Stacksync.jar ..\..\target\desktop-client-2.0.1-jar-with-dependencies.jar
 
   ;Store installation folder
   WriteRegStr HKCU "Software\StackSync" "" $INSTDIR
