@@ -144,7 +144,7 @@ public class RemoteWatcher {
                 transfer.disconnect();
             } catch (StorageException ex) {
                 logger.error("Can't disconnect the remote storage", ex);
-                RemoteLogs.getInstance().sendLog(ex);
+                //RemoteLogs.getInstance().sendLog(ex);
                 /* Fressen! */
             }
         }
@@ -161,7 +161,6 @@ public class RemoteWatcher {
         }
 
         try {
-            logger.info("Commit new changes.");
             
             Map<String, List<CloneFile>> updatedFiles = db.getHistoryUptoDate();
 
@@ -184,8 +183,23 @@ public class RemoteWatcher {
                         itemsToCommit = new ArrayList<ItemMetadata>();
                     }
                     
-                    itemsToCommit.add(obj);
-                    workspaces.put(workspace, itemsToCommit);
+                    boolean correctVersion = true;
+                    if (obj.getId() == null && obj.getVersion() != 1 && obj.getTempId() != null){
+                        correctVersion = false;
+                        
+                        // Check if version 1 is also in the list
+                        // otherwise we don't commit it because it's an error
+                        for (ItemMetadata item : itemsToCommit) {
+                            if (obj.getTempId().equals(item.getTempId()) && item.getVersion() == 1) {
+                                correctVersion = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (correctVersion) {
+                        itemsToCommit.add(obj);
+                        workspaces.put(workspace, itemsToCommit);
+                    }
                 }
             }
             
@@ -194,8 +208,11 @@ public class RemoteWatcher {
             // Commit all files modified in each workspace
             for (CloneWorkspace workspace : workspaces.keySet()) {
                 List<ItemMetadata> commitItems = workspaces.get(workspace);
+                logger.info("Commit new changes to workspace " + workspace.getId());
                 server.commit(accountId, workspace, commitItems);
             }
+            
+            
             
             commitWorkspacesUpdates();
             
