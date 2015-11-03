@@ -308,7 +308,7 @@ public class SwiftTransferManager extends AbstractTransferManager {
             logger.debug("Chunk " + remoteFile.getName() + " downloaded.");
         } catch (Exception ex) {
             logger.error(ex);
-            RemoteLogs.getInstance().sendLog(ex);
+            //RemoteLogs.getInstance().sendLog(ex);
             throw new StorageException("Unable to download file '" + remoteFile.getName(), ex);
         } finally {
             try {

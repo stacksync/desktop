@@ -69,9 +69,11 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
                     ul.add(update);
                 }
                 
-                Long tempId = obj.getMetadata().getTempId();
-                if (tempId != null) {
-                    temporalsId.put(tempId, obj.getMetadata().getId());
+                if (committed){ 
+                    Long tempId = obj.getMetadata().getTempId();
+                    if (tempId != null) {
+                        temporalsId.put(tempId, obj.getMetadata().getId());
+                    }
                 }
             
             } catch (NullPointerException ex) {
@@ -115,6 +117,10 @@ public class RemoteWorkspaceImpl extends RemoteObject implements RemoteWorkspace
     private Update doActionNotCommited(CommitInfo commit) {
        
         ItemMetadata itemMetadata = commit.getMetadata();
+        
+        if (itemMetadata == null) {
+            return null;
+        }
         
         Update update = Update.parse(itemMetadata, workspace);
         CloneFile existingVersion = db.getFileOrFolder(update.getFileId(), update.getVersion());
