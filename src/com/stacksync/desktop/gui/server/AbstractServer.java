@@ -73,7 +73,9 @@ public abstract class AbstractServer implements Runnable {
             this.workersThreads = new ArrayList<Thread>();
             
             try {
-                serverSocket.close();
+                if (serverSocket != null) {
+                    serverSocket.close();
+                }
             } catch (IOException ex) {
                 
             }

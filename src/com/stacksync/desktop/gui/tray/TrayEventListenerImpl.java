@@ -129,63 +129,60 @@ public class TrayEventListenerImpl implements TrayEventListener {
         boolean invited = false;
 
         try {
-            if (panel.isAbeEncrypted()) {
-
-                Gson gson = new Gson();
-                String RESOURCES_PATH = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath() + "/conf/abe/";
-
-                CloudABEClientAdapter abeClient = null;
-
-                abeClient = new CloudABEClientAdapter(RESOURCES_PATH);
-
-                for (CloneWorkspace workspace : workspaces.values()) {
-
-                    if (workspace.getPathWorkspace().equals("/" + sharedFolder.getRelativePath()) && workspace.isAbeEncrypted()) { //If a workspace already exists in the shared folder
-
-                        if (workspace.getMasterKey() != null) { //If i'm the owner, reuse master key
-
-                            alreadyShared = true;
-
-                            SystemKey masterKey = gson.fromJson(new String(workspace.getMasterKey()), SystemKey.class);
-                            SystemKey publicKey = gson.fromJson(new String(workspace.getPublicKey()), SystemKey.class);
-
-                            publicKeyjson = new String(workspace.getPublicKey());
-
-                            try {
-                                abeClient.setupABESystem(0, publicKey, masterKey, workspace.getGroupGenerator());
-                            } catch (AttributeNotFoundException ex) {
-                                logger.error(ex);
-                            }
-
-                        } else { //If the workspace is already shared with me but, i'm not the owner
-                            invited = true;
-                        }
-                        break;
-                    }
-                }
-
-                CloneWorkspace workspace = null;
-                
-                if (!alreadyShared && !invited) { // If not shared and i'm not invited, I will be the owner
-
-                    abeClient.setupABESystem(0);
-                    publicKeyjson = gson.toJson(abeClient.getPublicKey());
-                    String masterKey = gson.toJson(abeClient.getMasterKey());
-
-                    workspace = createSharedCloneWorkspace(abeClient, sharedFolder, masterKey, publicKeyjson, profile.getAccountId());
-                }
-
-                if (!invited) {
-
-                    inviteABEUsers(panel.getEmails(), abeClient, server, profile, publicKeyjson, sharedFolder.getId(), RESOURCES_PATH, gson);
-
-                } else {
-                    ErrorMessage.showMessage(panel, "Error", "You don't have permission to invited new users.");
-                    return;
-                }
-                
-            } else {
+            if (!panel.isAbeEncrypted()) {
                 server.createShareProposal(profile.getAccountId(), panel.getEmails(), sharedFolder.getId(), false, panel.isAbeEncrypted());
+                return;
+            }
+
+            Gson gson = new Gson();
+            String RESOURCES_PATH = Environment.getInstance().getDefaultUserConfigDir().getAbsolutePath() + "/conf/abe/";
+
+            CloudABEClientAdapter abeClient = new CloudABEClientAdapter(RESOURCES_PATH);
+
+            for (CloneWorkspace workspace : workspaces.values()) {
+
+                if (workspace.getPathWorkspace().equals("/" + sharedFolder.getRelativePath()) && workspace.isAbeEncrypted()) { //If a workspace already exists in the shared folder
+
+                    if (workspace.getMasterKey() != null) { //If i'm the owner, reuse master key
+
+                        alreadyShared = true;
+
+                        SystemKey masterKey = gson.fromJson(new String(workspace.getMasterKey()), SystemKey.class);
+                        SystemKey publicKey = gson.fromJson(new String(workspace.getPublicKey()), SystemKey.class);
+
+                        publicKeyjson = new String(workspace.getPublicKey());
+
+                        try {
+                            abeClient.setupABESystem(0, publicKey, masterKey, workspace.getGroupGenerator());
+                        } catch (AttributeNotFoundException ex) {
+                            logger.error(ex);
+                        }
+
+                    } else { //If the workspace is already shared with me but, i'm not the owner
+                        invited = true;
+                    }
+                    break;
+                }
+            }
+
+            CloneWorkspace workspace = null;
+
+            if (!alreadyShared && !invited) { // If not shared and i'm not invited, I will be the owner
+
+                abeClient.setupABESystem(0);
+                publicKeyjson = gson.toJson(abeClient.getPublicKey());
+                String masterKey = gson.toJson(abeClient.getMasterKey());
+
+                workspace = createSharedCloneWorkspace(abeClient, sharedFolder, masterKey, publicKeyjson, profile.getAccountId());
+            }
+
+            if (!invited) {
+
+                inviteABEUsers(panel.getEmails(), abeClient, server, profile, publicKeyjson, sharedFolder.getId(), RESOURCES_PATH, gson);
+
+            } else {
+                ErrorMessage.showMessage(panel, "Error", "You don't have permission to invited new users.");
+                return;
             }
 
         } catch (ShareProposalNotCreatedException ex) {

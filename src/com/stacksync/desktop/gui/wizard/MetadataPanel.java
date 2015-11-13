@@ -33,6 +33,21 @@ public class MetadataPanel extends SettingsPanel {
         rabbitConnection = config.getBrokerProps();
         
         hideFields();
+        
+        this.setupDefaultInfo();
+    }
+    
+    private void setupDefaultInfo() {
+        txtMachineName.setText(env.getDeviceName());
+        rabbitConnection.setHost("iostack.urv.cat");
+        rabbitConnection.setPort(5672);
+                
+        rabbitConnection.setEnableSsl(false);
+                
+        String username = "guest";
+        String password = "guest";
+        rabbitConnection.setUsername(username);                    
+        rabbitConnection.setPassword(password);
     }
     
     private void hideFields() {

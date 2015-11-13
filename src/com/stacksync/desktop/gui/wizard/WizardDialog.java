@@ -96,7 +96,7 @@ public class WizardDialog extends JDialog {
         panelStackSyncTest = new StackSyncTestPanel(profile);
         
         if(Config.getInstance().isExtendedMode()){
-            panels = new SettingsPanel[] {panelMetadataServer,
+            panels = new SettingsPanel[] {//panelMetadataServer,
                                           panelStackSyncServer,
                                           //panelProfileBasics,
                                           panelStackSyncTest,
@@ -105,7 +105,7 @@ public class WizardDialog extends JDialog {
             };
 
         } else{
-            panels = new SettingsPanel[] {panelMetadataServer,
+            panels = new SettingsPanel[] {//panelMetadataServer,
                                           panelStackSyncServer,
                                           //panelProfileBasic,
                                           panelStackSyncTest,
