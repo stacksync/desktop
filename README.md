@@ -1,7 +1,10 @@
+# DISCONTINUED
+
+StackSync development and maintenance has been discontinued. Thank you to all collaborators that participated in this amazing project.
+
+
 Welcome to StackSync!
 =====================
-
-> **NOTE:** This is BETA quality code!
 
 **Table of Contents**
 
